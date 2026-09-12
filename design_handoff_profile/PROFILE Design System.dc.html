@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-press:#003A8C;--accent-soft:#EDF3FE;--on-accent:#FFFFFF;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--coral:#C93B22;--coral-soft:#FFF0ED;
+--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--info:#0369A1;--info-soft:#E8F4FD;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.12);--focus:#0057D9;
+--cta:var(--accent);--cta-hover:var(--accent-hover);--cta-press:var(--accent-press);--cta-soft:var(--accent-soft);
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-press:#3B7BEE;--accent-soft:rgba(76,141,255,.14);--on-accent:#05122B;
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--coral:#FF8B78;--coral-soft:rgba(255,111,89,.13);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--info:#56C2F5;--info-soft:rgba(14,165,233,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+[data-accent=orange]{--cta:#E8590C;--cta-hover:#D24F06;--cta-press:#B84503;--cta-soft:#FFF1E7;}
+[data-theme=dark][data-accent=orange]{--cta:#FF8A3D;--cta-hover:#FFA063;--cta-press:#F2762A;--cta-soft:rgba(255,138,61,.14);}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;transition:background-color .28s cubic-bezier(.22,.61,.36,1),color .28s cubic-bezier(.22,.61,.36,1);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@keyframes ds-spin{to{transform:rotate(360deg)}}
+@keyframes ds-shimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 96px">
+
+<header style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;padding:44px 0 22px;border-bottom:1px solid var(--border)">
+<div style="min-width:0">
+<div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:12px">Foundation · v0.1 · Master Prompt §3</div>
+<h1 style="margin:0;font:700 clamp(28px,4vw,42px)/1.08 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">PROFILE Design System</h1>
+<p style="margin:12px 0 0;max-width:62ch;font:400 15px/1.65 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Tokens, typography, and the component set the product is assembled from. Light and dark are two tuned themes over one token layer, not an inversion. Every value here comes from the Master Prompt; where it was silent, the decision is labelled.</p>
+</div>
+<div style="display:flex;gap:8px;align-items:center;flex:none">
+<button type="button" onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 13px Inter,sans-serif;cursor:pointer;transition:background-color .2s,border-color .2s" style-hover="background:var(--surface-active);border-color:var(--accent)">
+<span style="width:14px;height:14px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+</div>
+</header>
+
+<nav aria-label="Sections" style="display:flex;flex-wrap:wrap;gap:6px;padding:20px 0 0">
+<a href="#colour" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Colour</a>
+<a href="#type" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Typography</a>
+<a href="#geometry" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Space &amp; elevation</a>
+<a href="#motion" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Motion</a>
+<a href="#components" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Components</a>
+<a href="#trust" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Trust &amp; AI</a>
+<a href="#states" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Feedback states</a>
+<a href="#a11y" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);font:500 12px Inter,sans-serif;color:var(--text-1);text-decoration:none">Accessibility</a>
+</nav>
+
+<section id="colour" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">01</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Colour</h2></div>
+<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Two layers. Brand hexes are fixed by §3.1 and never change. Semantic tokens are what components reference — they resolve to different hexes per theme so contrast holds in both.</p>
+
+<h3 style="margin:0 0 12px;font:600 13px/1 Inter,sans-serif;letter-spacing:.02em;color:var(--text-0)">Brand palette — fixed</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-bottom:14px">
+<sc-for list="{{ brand }}" as="c" hint-placeholder-count="7">
+<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card)">
+<div style="height:64px;background:{{ c.hex }}"></div>
+<div style="padding:10px 12px 12px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ c.name }}</div>
+<div style="font:500 11px 'JetBrains Mono',monospace;color:var(--text-2);margin-top:3px">{{ c.hex }}</div>
+<div style="font:400 11px/1.45 Inter,sans-serif;color:var(--text-1);margin-top:6px">{{ c.role }}</div>
+<div style="font:500 10px 'JetBrains Mono',monospace;color:var(--text-2);margin-top:6px">≤ {{ c.ratio }} of a screen</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:14px;padding:16px 18px;border:1px solid var(--gold);border-radius:12px;background:var(--gold-soft);margin-bottom:32px">
+<div style="flex:none;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--gold);padding-top:2px">OPEN<br>PRODUCT<br>DECISION</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-0);max-width:76ch">The build brief asks for a restrained orange accent. Every role orange would take is already assigned: primary action and active state to Royal Blue, verification and progress to Trust Cyan, achievement to Gold, celebration to Warm Coral, caution to Amber. A seventh hue either reads as Amber at small sizes or displaces Trust Cyan, which §3.1 chose deliberately over Gold.
+<div style="margin-top:10px">Recommendation: keep §3.1 intact. Toggle the exploration below to see orange carrying every primary action, then decide.
+<button type="button" onClick="{{ toggleAccent }}" style="margin-left:8px;height:28px;padding:0 12px;border-radius:7px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ accentLabel }}</button></div>
+</div>
+</div>
+
+<h3 style="margin:0 0 4px;font:600 13px/1 Inter,sans-serif;color:var(--text-0)">Semantic tokens — what components reference</h3>
+<p style="margin:0 0 14px;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);max-width:66ch">Both columns are live. Note the deliberate divergences: Trust Cyan darkens to #0E7490 for text in light mode, and the primary blue lifts to #4C8DFF in dark — the raw brand hexes fail 4.5:1 in those places.</p>
+<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card);margin-bottom:16px">
+<div style="display:grid;grid-template-columns:minmax(150px,1.4fr) 1fr 1fr minmax(120px,1.6fr);background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<div style="padding:9px 14px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">TOKEN</div>
+<div style="padding:9px 10px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">LIGHT</div>
+<div style="padding:9px 10px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">DARK</div>
+<div style="padding:9px 14px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">USED FOR</div>
+</div>
+<sc-for list="{{ semantic }}" as="t" hint-placeholder-count="12">
+<div style="display:grid;grid-template-columns:minmax(150px,1.4fr) 1fr 1fr minmax(120px,1.6fr);border-bottom:1px solid var(--border);align-items:center">
+<div style="padding:8px 14px;font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">{{ t.name }}</div>
+<div style="padding:8px 10px;display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:4px;border:1px solid var(--border-strong);background:{{ t.light }}"></span><span style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-1)">{{ t.lightLabel }}</span></div>
+<div style="padding:8px 10px;display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:4px;border:1px solid var(--border-strong);background:{{ t.dark }}"></span><span style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-1)">{{ t.darkLabel }}</span></div>
+<div style="padding:8px 14px;font:400 11.5px/1.45 Inter,sans-serif;color:var(--text-1)">{{ t.use }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Surface ladder</div>
+<div style="border-radius:10px;background:var(--bg);border:1px solid var(--border);padding:12px">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:8px">surface.base</div>
+<div style="border-radius:8px;background:var(--surface);border:1px solid var(--border);padding:12px;box-shadow:var(--shadow-card)">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:8px">surface.card</div>
+<div style="border-radius:8px;background:var(--surface-2);border:1px solid var(--border-strong);padding:12px;box-shadow:var(--shadow-elev)">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:8px">surface.elevated</div>
+<div style="border-radius:6px;background:var(--surface-active);padding:9px 10px;font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-1)">surface.active</div>
+</div></div></div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:10px">Dark mode separates depth by surface value, light mode by shadow. Never stack more than three levels.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Do / Don't</div>
+<div style="display:flex;flex-direction:column;gap:9px;font:400 12.5px/1.55 Inter,sans-serif;color:var(--text-1)">
+<div style="display:flex;gap:8px"><span style="color:var(--success);font-weight:600">Do</span><span>Name the semantic token. <span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">surface.card</span>, never <span style="font:500 11.5px 'JetBrains Mono',monospace">#FFFFFF</span>.</span></div>
+<div style="display:flex;gap:8px"><span style="color:var(--success);font-weight:600">Do</span><span>Pair every status colour with a word or glyph.</span></div>
+<div style="display:flex;gap:8px"><span style="color:var(--danger);font-weight:600">Don't</span><span>Use Trust Cyan for success, or Gold for warning — each has exactly one job.</span></div>
+<div style="display:flex;gap:8px"><span style="color:var(--danger);font-weight:600">Don't</span><span>Tint body text with alpha to soften it; use <span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">text.secondary</span>.</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="type" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">02</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Typography</h2></div>
+<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Inter for the interface, IBM Plex Sans for dense data tables, JetBrains Mono for anything a person might need to read character by character. All sizes are fluid via clamp; nothing below 12px ships.</p>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:16px">
+<sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="9">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
+<div style="min-width:0;font:{{ t.font }};color:var(--text-0);letter-spacing:{{ t.ls }}">{{ t.sample }}</div>
+<div style="flex:none;display:flex;gap:16px;font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)"><span>{{ t.name }}</span><span>{{ t.size }}</span><span>{{ t.lh }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Numerals are tabular, always</div>
+<div style="font:500 20px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums;letter-spacing:-.01em">812 · 774 · 690 · 98.4%</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:8px">Trust Scores, counts and percentages sit in columns and change in place. Proportional figures make them jitter.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Identifiers are mono</div>
+<div style="font:400 14px 'JetBrains Mono',monospace;color:var(--text-0)">PID-8F3A-22C1-9K</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:8px">Trust IDs, verification hashes and API keys — selectable, with a copy affordance, never truncated without a tooltip holding the full value.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Built for translation</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">Copy is authored assuming +35% length in German and Yoruba, and half the length in Japanese. No fixed-height text containers, no truncation at one line for a label, and <span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">dir=rtl</span> mirrors layout, not glyphs.</div>
+</div>
+</div>
+</section>
+
+<section id="geometry" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">03</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Space, geometry, elevation</h2></div>
+<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">A 4px base grid. Everything spatial is a multiple of it, so components nest without arbitrary values.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Spacing scale</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ spacing }}" as="s" hint-placeholder-count="8">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:34px;font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">{{ s.label }}</span><span style="height:10px;border-radius:2px;background:var(--accent);width:{{ s.w }}"></span></div>
+</sc-for>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Radius</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<div style="width:58px;height:44px;border:1px solid var(--border-strong);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">8 btn</div>
+<div style="width:58px;height:44px;border:1px solid var(--border-strong);border-radius:12px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">12 card</div>
+<div style="width:58px;height:44px;border:1px solid var(--border-strong);border-radius:16px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">16 modal</div>
+<div style="width:58px;height:44px;border:1px solid var(--border-strong);border-radius:20px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">20 chip</div>
+</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:12px">Avatars are the only full circles. Nested radii step down by 4, never match.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Z-index ladder</div>
+<div style="display:flex;flex-direction:column;gap:4px;font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-1)">
+<div style="display:flex;justify-content:space-between"><span>tooltip</span><span style="color:var(--text-2)">500</span></div>
+<div style="display:flex;justify-content:space-between"><span>toast</span><span style="color:var(--text-2)">400</span></div>
+<div style="display:flex;justify-content:space-between"><span>modal</span><span style="color:var(--text-2)">300</span></div>
+<div style="display:flex;justify-content:space-between"><span>drawer</span><span style="color:var(--text-2)">200</span></div>
+<div style="display:flex;justify-content:space-between"><span>sticky</span><span style="color:var(--text-2)">100</span></div>
+<div style="display:flex;justify-content:space-between"><span>card</span><span style="color:var(--text-2)">10</span></div>
+</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:12px">Six rungs, no values between them. A new layer means a new named rung, reviewed.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Breakpoints</div>
+<div style="display:flex;flex-direction:column;gap:7px;font:400 11.5px Inter,sans-serif;color:var(--text-1)">
+<div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border)"><span>Mobile</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">320–767</span></div>
+<div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border)"><span>Tablet</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">768–1023</span></div>
+<div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border)"><span>Laptop</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">1024–1439</span></div>
+<div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border)"><span>Desktop</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">1440–1919</span></div>
+<div style="display:flex;justify-content:space-between"><span>Ultra-wide</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">1920+</span></div>
+</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:12px">Layout changes at these widths; type scales continuously between them.</div>
+</div>
+</div>
+</section>
+
+<section id="motion" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">04</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Motion</h2></div>
+<p style="margin:0 0 22px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Three durations, one easing curve, one exception. Motion confirms a change happened; it never announces itself.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Durations</div>
+<div style="display:flex;flex-direction:column;gap:8px;font:400 12px/1.5 Inter,sans-serif;color:var(--text-1)">
+<div><span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">120ms</span> — hover, focus, colour</div>
+<div><span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">200ms</span> — dropdowns, toasts, tabs</div>
+<div><span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">320ms</span> — modals, drawers, route change</div>
+<div style="padding-top:8px;border-top:1px solid var(--border)"><span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">cubic-bezier(.22,.61,.36,1)</span></div>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">The logo replaces every spinner</div>
+<div style="display:flex;align-items:center;gap:12px">
+<span style="width:30px;height:30px;border-radius:50%;border:2.5px solid var(--trust-soft);border-top-color:var(--trust);animation:ds-spin 1.4s linear infinite;display:inline-block"></span>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1)">Standing in for <span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">&lt;ProfileLogoAnimated&gt;</span> (§3.11) — one shared component with loading, idle, error, warning and success states.</div>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Rules</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">Transform and opacity only. No infinite animation outside a genuine pending state. Failure never rests as a static end state — it settles into a pulse next to a retry. Everything is gated on <span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-0)">prefers-reduced-motion</span>, which this page honours.</div>
+</div>
+</div>
+</section>
+
+<section id="components" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">05</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Components</h2></div>
+<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Every component below is shown in the states it must ship with. A state that is not applicable is stated as such; nothing is left undefined.</p>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px;margin-bottom:16px">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+<h3 style="margin:0;font:600 16px Inter,sans-serif;color:var(--text-0)">Button</h3>
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1)">Primary · Secondary · Tertiary · Danger — one primary per view</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,110px),1fr));gap:14px;margin-bottom:18px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">DEFAULT</div><button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer;transition:background-color .12s" style-hover="background:var(--cta-hover)" style-active="background:var(--cta-press)">Record work</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">HOVER</div><button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--cta-hover);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer">Record work</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">FOCUS</div><button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer;outline:2px solid var(--focus);outline-offset:2px">Record work</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">PRESSED</div><button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--cta-press);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer;transform:translateY(1px)">Record work</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">LOADING</div><button type="button" disabled="{{ true }}" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 13.5px Inter,sans-serif;display:flex;align-items:center;gap:8px;cursor:wait"><span style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:ds-spin 1s linear infinite;display:inline-block"></span>Saving</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">SUCCESS</div><button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--success);color:#fff;font:600 13.5px Inter,sans-serif;display:flex;align-items:center;gap:7px;cursor:default">✓ Recorded</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">ERROR</div><button type="button" style="height:40px;padding:0 16px;border:1px solid var(--danger);border-radius:8px;background:var(--danger-soft);color:var(--danger);font:600 13.5px Inter,sans-serif;display:flex;align-items:center;gap:7px;cursor:pointer">↻ Retry</button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">DISABLED</div><button type="button" disabled="{{ true }}" style="height:40px;padding:0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-sunken);color:var(--text-3);font:600 13.5px Inter,sans-serif;cursor:not-allowed">Record work</button></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:16px;border-top:1px solid var(--border)">
+<button type="button" style="height:40px;padding:0 16px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13.5px Inter,sans-serif;cursor:pointer" style-hover="background:var(--surface-active);border-color:var(--accent)">Secondary</button>
+<button type="button" style="height:40px;padding:0 12px;border:none;border-radius:8px;background:transparent;color:var(--accent);font:600 13.5px Inter,sans-serif;cursor:pointer" style-hover="background:var(--accent-soft)">Tertiary</button>
+<button type="button" style="height:40px;padding:0 16px;border:none;border-radius:8px;background:var(--danger);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer">Revoke access</button>
+<button type="button" aria-label="More options" style="width:40px;height:40px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 15px Inter,sans-serif;cursor:pointer">⋯</button>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1);max-width:44ch">Minimum target 44×44 on touch — the 40px control keeps its hit area through padding, not visual height.</div>
+</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">
+<div><span style="font:600 11px 'JetBrains Mono',monospace;color:var(--text-0);letter-spacing:.05em">A11Y</span><br>Real <span style="font-family:'JetBrains Mono',monospace">&lt;button&gt;</span>. Loading sets <span style="font-family:'JetBrains Mono',monospace">aria-busy</span> and keeps the label. Icon-only requires <span style="font-family:'JetBrains Mono',monospace">aria-label</span>.</div>
+<div><span style="font:600 11px 'JetBrains Mono',monospace;color:var(--text-0);letter-spacing:.05em">MOBILE</span><br>Full-width in sheets and forms; inline elsewhere. Destructive actions never sit adjacent to a primary.</div>
+<div><span style="font:600 11px 'JetBrains Mono',monospace;color:var(--text-0);letter-spacing:.05em">DON'T</span><br>No two primaries competing in one view. No disabled button without adjacent text explaining what unlocks it.</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-bottom:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Input</h3>
+<div style="display:flex;flex-direction:column;gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Institution</span><input type="text" placeholder="Start typing…" style="height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:400 13.5px Inter,sans-serif;outline:none;transition:border-color .12s,box-shadow .12s" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"><span style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">Helper text sits under the field, not in the placeholder.</span></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Credential reference</span><span style="display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border:1px solid var(--success);border-radius:8px;background:var(--surface)"><span style="color:var(--success)">✓</span><span style="font:400 13.5px 'JetBrains Mono',monospace;color:var(--text-0)">CRD-77120-A</span></span><span style="font:400 11.5px Inter,sans-serif;color:var(--success)">Matched to Lagos State Polytechnic.</span></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Work email</span><input type="text" value="amara@" style="height:42px;padding:0 12px;border:1px solid var(--danger);border-radius:8px;background:var(--danger-soft);color:var(--text-0);font:400 13.5px Inter,sans-serif;outline:none"><span style="font:400 11.5px Inter,sans-serif;color:var(--danger)">! Add the domain — we verify employment against it.</span></label>
+<label style="display:flex;flex-direction:column;gap:6px;opacity:.6"><span style="font:500 12px Inter,sans-serif;color:var(--text-1)">Employer (locked)</span><input type="text" value="Verified — contact support to change" disabled="{{ true }}" style="height:42px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-sunken);color:var(--text-2);font:400 13.5px Inter,sans-serif;cursor:not-allowed"></label>
+</div>
+<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)"><span style="font:600 11px 'JetBrains Mono',monospace;color:var(--text-0);letter-spacing:.05em">A11Y</span> — every field has a visible persistent label. Errors are text plus icon, announced via <span style="font-family:'JetBrains Mono',monospace">aria-live="polite"</span>, and validation fires on blur, never per keystroke.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Search field</h3>
+<div style="display:flex;align-items:center;gap:9px;height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface)" style-focus="border-color:var(--accent)">
+<span style="width:15px;height:15px;border-radius:50%;border:2px solid var(--text-2);flex:none"></span>
+<input type="text" value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search people, jobs, organisations, skills, credentials…" style="flex:1;min-width:0;border:none;background:transparent;color:var(--text-0);font:400 13.5px Inter,sans-serif;outline:none">
+<span style="flex:none;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);border:1px solid var(--border-strong);border-radius:4px;padding:2px 5px">⌘K</span>
+</div>
+<div style="margin-top:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);box-shadow:var(--shadow-elev);overflow:hidden">
+<div style="padding:8px 12px 4px;font:500 10px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.07em">{{ resultHeading }}</div>
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:{{ r.bg }}">
+<span style="width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:600 10.5px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ r.initials }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 12.5px Inter,sans-serif;color:var(--text-0)">{{ r.name }}</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-1)">{{ r.meta }}</span></span>
+<span style="flex:none;font:500 11px 'JetBrains Mono',monospace;color:var(--text-1);font-variant-numeric:tabular-nums">{{ r.score }}</span>
+</div>
+</sc-for>
+<div style="padding:8px 12px;border-top:1px solid var(--border);font:400 11px 'JetBrains Mono',monospace;color:var(--text-2)">↑↓ move · ↵ open · ⇥ scope</div>
+</div>
+<div style="margin-top:12px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Ranked by Trust Score, then verification status. Never by followers, likes or views (§17.1). Type in the field above to see the empty and no-result states.</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-bottom:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Tabs</h3>
+<div role="tablist" style="display:flex;gap:18px;border-bottom:1px solid var(--border);margin-bottom:14px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+<button type="button" role="tab" onClick="{{ t.onSelect }}" style="border:none;background:transparent;padding:0 0 10px;margin-bottom:-1px;cursor:pointer;font:{{ t.font }};color:{{ t.color }};border-bottom:2px solid {{ t.underline }}">{{ t.label }}</button>
+</sc-for>
+</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);min-height:52px">{{ tabBody }}</div>
+<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Arrow keys move between tabs, Tab moves into the panel. Selected state is weight plus rule, not colour alone. Overflowing sets scroll horizontally rather than wrapping to two rows.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Toggle, checkbox, slider</h3>
+<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:400 13px Inter,sans-serif;color:var(--text-0)">Toggle — on</span><button type="button" onClick="{{ onToggleA }}" style="width:38px;height:22px;border-radius:20px;position:relative;cursor:pointer;border:none;flex:none;background:var(--success)"><span style="position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;left:18px"></span></button></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:400 13px Inter,sans-serif;color:var(--text-0)">Toggle — off</span><button type="button" style="width:38px;height:22px;border-radius:20px;position:relative;cursor:pointer;border:none;flex:none;background:var(--border-strong)"><span style="position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;left:2px"></span></button></div>
+<label style="display:flex;align-items:center;gap:8px;font:400 13px Inter,sans-serif;color:var(--text-0)"><input type="checkbox" checked="{{ checkA }}" onChange="{{ onCheckA }}"> Checkbox with label</label>
+<div><div style="font:400 13px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">Range / slider</div><input type="range" min="0" max="100" value="{{ sliderVal }}" onChange="{{ onSlider }}" style="width:100%"></div>
+</div>
+<div style="padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Toggle state is colour plus knob position, never colour alone. Checkbox always pairs with a clickable text label — never a bare box. Slider shows its current value as text alongside, not just position.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Select &amp; textarea</h3>
+<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Select</span><select value="{{ selectVal }}" onChange="{{ onSelect }}" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none"><option>Public</option><option>Connections only</option><option>Private</option></select></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Textarea</span><textarea value="{{ textareaVal }}" onChange="{{ onTextarea }}" rows="3" placeholder="Multi-line input, e.g. a dispute note or evidence description" style="padding:11px 13px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13px/1.6 Inter,sans-serif;outline:none;resize:vertical"></textarea></label>
+</div>
+<div style="padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Native <span style="font-family:'JetBrains Mono',monospace">select</span> and <span style="font-family:'JetBrains Mono',monospace">textarea</span> — no custom dropdown reimplementation, so screen readers and keyboard nav get platform behaviour for free.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Badges, chips, avatars</h3>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--trust-soft);color:var(--trust);border:1px solid var(--trust);font:600 11.5px Inter,sans-serif">✓ Verified</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--surface-sunken);color:var(--text-1);border:1px dashed var(--border-strong);font:600 11.5px Inter,sans-serif">◷ Pending</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--warning-soft);color:var(--warning);border:1px solid var(--warning);font:600 11.5px Inter,sans-serif">⚠ Expires in 14d</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);font:600 11.5px Inter,sans-serif">✕ Revoked</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold);font:600 11.5px Inter,sans-serif">★ Distinction</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+<span style="padding:4px 11px;border-radius:20px;background:var(--accent);color:#fff;font:500 12px Inter,sans-serif">All</span>
+<span style="padding:4px 11px;border-radius:20px;border:1px solid var(--border-strong);color:var(--text-1);font:500 12px Inter,sans-serif">People</span>
+<span style="padding:4px 11px;border-radius:20px;border:1px solid var(--border-strong);color:var(--text-1);font:500 12px Inter,sans-serif">Credentials 12</span>
+<span style="padding:4px 11px;border-radius:20px;border:1px dashed var(--border-strong);color:var(--text-2);font:500 12px Inter,sans-serif">Disabled</span>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+<span style="width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:600 15px Inter,sans-serif">AO</span>
+<span style="width:36px;height:36px;border-radius:50%;background:var(--trust);color:#04222B;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">KM</span>
+<span style="position:relative;display:inline-flex"><span style="width:36px;height:36px;border-radius:50%;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">JT</span><span style="position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;background:var(--trust);border:2px solid var(--surface);color:#04222B;font:700 8px Inter,sans-serif;display:flex;align-items:center;justify-content:center">✓</span></span>
+<span style="width:36px;height:36px;border-radius:50%;background:var(--surface-sunken);border:1px dashed var(--border-strong);color:var(--text-2);display:flex;align-items:center;justify-content:center;font:600 12px Inter,sans-serif">?</span>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Initials on a brand-token background, never a silhouette (§3.6a). Verification tick overlays the avatar only when the identity itself is verified — a verified credential does not verify a person.</div>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px;margin-bottom:16px">
+<h3 style="margin:0 0 6px;font:600 16px Inter,sans-serif;color:var(--text-0)">Activity record card</h3>
+<p style="margin:0 0 16px;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);max-width:70ch">The product's atomic unit. Structured evidence, not a post: what happened, the evidence attached, the skills claimed, and where it is in verification. No like or share affordance exists anywhere on it.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--surface-2)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+<span style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">AO</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:600 13px Inter,sans-serif;color:var(--text-0)">Amara Okafor</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">Solar installation · 12 Aug 2026</span></span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:var(--trust-soft);color:var(--trust);border:1px solid var(--trust);font:600 11px Inter,sans-serif;flex:none">✓ Verified</span>
+</div>
+<div style="font:400 13px/1.6 Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Commissioned a 45kW rooftop array for Ikeja General Hospital, cutting diesel dependency on the paediatric wing.</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+<span style="padding:2px 9px;border-radius:20px;border:1px solid var(--border-strong);font:500 11px Inter,sans-serif;color:var(--text-1)">Solar PV</span>
+<span style="padding:2px 9px;border-radius:20px;border:1px solid var(--border-strong);font:500 11px Inter,sans-serif;color:var(--text-1)">Load calculation</span>
+<span style="padding:2px 9px;border-radius:20px;border:1px solid var(--border-strong);font:500 11px Inter,sans-serif;color:var(--text-1)">Site survey</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;padding-top:12px;border-top:1px solid var(--border);font:400 11.5px Inter,sans-serif;color:var(--text-1)">
+<span>3 evidence files</span><span>Verified by Ikeja General</span><span style="color:var(--accent)">On CV</span>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--surface-2)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+<span style="width:36px;height:36px;border-radius:50%;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">JT</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:600 13px Inter,sans-serif;color:var(--text-0)">Joseph Tembo</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">Draft · not yet submitted</span></span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:var(--surface-sunken);color:var(--text-1);border:1px dashed var(--border-strong);font:600 11px Inter,sans-serif;flex:none">◷ Pending</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-bottom:12px">
+<span style="height:11px;border-radius:3px;background:linear-gradient(90deg,var(--surface-sunken) 25%,var(--surface-active) 50%,var(--surface-sunken) 75%);background-size:320px 100%;animation:ds-shimmer 1.4s linear infinite;display:block"></span>
+<span style="height:11px;width:72%;border-radius:3px;background:linear-gradient(90deg,var(--surface-sunken) 25%,var(--surface-active) 50%,var(--surface-sunken) 75%);background-size:320px 100%;animation:ds-shimmer 1.4s linear infinite;display:block"></span>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);padding-top:12px;border-top:1px solid var(--border)">Skeleton state — same geometry as the loaded card, so nothing shifts when content arrives.</div>
+</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-bottom:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Table</h3>
+<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1.6fr 1fr .8fr;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<div style="padding:8px 12px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">CREDENTIAL</div>
+<div style="padding:8px 12px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em">STATUS</div>
+<div style="padding:8px 12px;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em;text-align:right">ISSUED</div>
+</div>
+<sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:1.6fr 1fr .8fr;border-bottom:1px solid var(--border);align-items:center;background:{{ r.bg }}">
+<div style="padding:9px 12px;font:400 12.5px Inter,sans-serif;color:var(--text-0)">{{ r.name }}</div>
+<div style="padding:9px 12px;font:500 11.5px Inter,sans-serif;color:{{ r.color }}">{{ r.status }}</div>
+<div style="padding:9px 12px;font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums">{{ r.date }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:12px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Real <span style="font-family:'JetBrains Mono',monospace">&lt;table&gt;</span> semantics with scoped headers. Below 768px each row becomes a stacked card with labels inline — tables never scroll sideways on a phone.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Overlays</h3>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+<button type="button" onClick="{{ openModal }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Open modal</button>
+<button type="button" onClick="{{ openDrawer }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Open drawer</button>
+<button type="button" onClick="{{ fireToast }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Fire toast</button>
+</div>
+<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-sunken);position:relative">
+<span style="display:inline-block;padding:5px 9px;border-radius:6px;background:var(--text-0);color:var(--bg);font:500 11.5px Inter,sans-serif">Tooltip — 12 verified records</span>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-top:10px">Tooltips carry supporting detail only. Anything a user must read to act belongs in the layout, not behind a hover.</div>
+</div>
+<div style="margin-top:12px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Focus is trapped while open, Escape closes, focus returns to the trigger. On mobile a modal becomes a bottom sheet and a drawer becomes full-screen.</div>
+</div>
+</div>
+</section>
+
+<section id="trust" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">06</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Trust and AI surfaces</h2></div>
+<p style="margin:0 0 22px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">The two component families unique to PROFILE. Both carry a hard rule the product cannot ship without.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">Trust Score</h3>
+<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+<div style="position:relative;width:104px;height:104px;flex:none">
+<div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--trust) 0turn {{ ringTurn }},var(--surface-sunken) {{ ringTurn }} 1turn)"></div>
+<div style="position:absolute;inset:11px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center">
+<span style="font:600 26px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums;letter-spacing:-.02em">812</span>
+<span style="font:500 10px Inter,sans-serif;color:var(--success)">+14</span>
+</div>
+</div>
+<div style="flex:1;min-width:170px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Established tier</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:10px">Up 14 since your last visit — the hospital commissioning record cleared verification.</div>
+<button type="button" style="height:34px;padding:0 12px;border:1px solid var(--trust);border-radius:8px;background:var(--trust-soft);color:var(--trust);font:600 12px Inter,sans-serif;cursor:pointer">How this is calculated</button>
+</div>
+</div>
+<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">The explainer is part of the component, not a page elsewhere. A score renders without it only in a loading state — never in production (Constraint 3).</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px Inter,sans-serif;color:var(--text-0)">AI surface</h3>
+<div style="border-left:3px solid var(--trust);border-radius:0 10px 10px 0;background:var(--trust-soft);padding:14px 16px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust)">AI-ASSISTED DRAFT</span><span style="font:400 10.5px Inter,sans-serif;color:var(--text-1)">· from 3 verified records</span></div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-0)">Your solar commissioning work at Ikeja General maps closely to the Renewable Systems Lead role at Aurora Power. Two of their four requirements are already verified on your profile.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+<button type="button" style="height:32px;padding:0 12px;border:none;border-radius:7px;background:var(--cta);color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">Use as draft</button>
+<button type="button" style="height:32px;padding:0 12px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Show sources</button>
+</div>
+</div>
+<div style="margin-top:14px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">One treatment across the product: cyan left edge, explicit label, source count. No glow, no gradients, no chat bubbles. AI never asserts an unverified achievement, and every generated claim traces to a record the user can open.</div>
+</div>
+</div>
+</section>
+
+<section id="states" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">07</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Feedback states</h2></div>
+<p style="margin:0 0 22px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Empty, loading and error are designed surfaces, not fallbacks. Each says what is missing, why it matters, and what to do next.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px;margin-bottom:16px">
+<div style="border:1px dashed var(--border-strong);border-radius:12px;background:var(--surface);padding:22px 20px;text-align:center">
+<div style="width:40px;height:40px;border-radius:10px;border:2px solid var(--border-strong);margin:0 auto 12px"></div>
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">No verified records yet</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Verification is what turns your work into something a recruiter can rely on. Start with one piece of finished work.</div>
+<button type="button" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer">Record your first activity</button>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:20px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="width:20px;height:20px;border-radius:50%;border:2px solid var(--trust-soft);border-top-color:var(--trust);animation:ds-spin 1s linear infinite;display:inline-block"></span><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">Loading</span></div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<span style="height:11px;border-radius:3px;background:linear-gradient(90deg,var(--surface-sunken) 25%,var(--surface-active) 50%,var(--surface-sunken) 75%);background-size:320px 100%;animation:ds-shimmer 1.4s linear infinite;display:block"></span>
+<span style="height:11px;width:80%;border-radius:3px;background:linear-gradient(90deg,var(--surface-sunken) 25%,var(--surface-active) 50%,var(--surface-sunken) 75%);background-size:320px 100%;animation:ds-shimmer 1.4s linear infinite;display:block"></span>
+<span style="height:11px;width:60%;border-radius:3px;background:linear-gradient(90deg,var(--surface-sunken) 25%,var(--surface-active) 50%,var(--surface-sunken) 75%);background-size:320px 100%;animation:ds-shimmer 1.4s linear infinite;display:block"></span>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-top:12px">Skeletons mirror the real layout. Blank screens are never acceptable (§34).</div>
+</div>
+<div style="border:1px solid var(--danger);border-radius:12px;background:var(--danger-soft);padding:20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--danger);margin-bottom:6px">! Upload failed — nothing was lost</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Your draft is saved locally. The connection dropped partway through the third file. Retrying resumes from where it stopped.</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" style="height:34px;padding:0 12px;border:none;border-radius:8px;background:var(--danger);color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">↻ Retry upload</button><button type="button" style="height:34px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Keep as draft</button></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+<div style="display:flex;gap:10px;padding:12px 14px;border:1px solid var(--success);border-radius:10px;background:var(--success-soft)"><span style="color:var(--success);font-weight:700">✓</span><span style="font:400 12.5px/1.55 Inter,sans-serif;color:var(--text-0)"><strong style="font-weight:600">Verified.</strong> Ikeja General confirmed your commissioning record.</span></div>
+<div style="display:flex;gap:10px;padding:12px 14px;border:1px solid var(--warning);border-radius:10px;background:var(--warning-soft)"><span style="color:var(--warning);font-weight:700">⚠</span><span style="font:400 12.5px/1.55 Inter,sans-serif;color:var(--text-0)"><strong style="font-weight:600">Expiring.</strong> Your electrical licence lapses in 14 days. Renewal takes about 5 minutes.</span></div>
+<div style="display:flex;gap:10px;padding:12px 14px;border:1px solid var(--info);border-radius:10px;background:var(--info-soft)"><span style="color:var(--info);font-weight:700">i</span><span style="font:400 12.5px/1.55 Inter,sans-serif;color:var(--text-0)"><strong style="font-weight:600">Offline.</strong> Records you create now sync when the connection returns.</span></div>
+</div>
+</section>
+
+<section id="a11y" style="padding:56px 0 0;scroll-margin-top:20px">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">08</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Accessibility floor</h2></div>
+<p style="margin:0 0 22px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">WCAG 2.2 AA across the whole product (§2.4). These are gates, not aspirations — a component failing any of them does not ship.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Contrast</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">4.5:1 for body text, 3:1 for text above 24px and for UI boundaries. Brand hexes are overridden per theme where they fail — Trust Cyan is #00E5FF on dark and #0E7490 on light for exactly this reason.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Focus</div>
+<div style="display:flex;gap:10px;margin-bottom:10px"><span style="display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:8px;background:var(--surface-sunken);color:var(--text-0);font:600 12px Inter,sans-serif;outline:2px solid var(--focus);outline-offset:2px">Focused</span></div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">A 2px ring at 2px offset, on <span style="font-family:'JetBrains Mono',monospace">:focus-visible</span> only. Never removed, never replaced by colour change alone.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Status is never colour alone</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">Every state carries a glyph and a word. A verified badge reads "✓ Verified" to a screen reader and to someone who cannot distinguish cyan from green.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface)">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Keyboard and touch</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">Every interactive element reachable by keyboard in visual order, skip link on every page, 44×44 minimum touch target, and no interaction that requires hover to discover.</div>
+</div>
+</div>
+</section>
+
+<sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeOverlays }}" style="position:fixed;inset:0;background:rgba(6,14,28,.55);backdrop-filter:blur(2px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px">
+<div role="dialog" aria-modal="true" style="width:min(440px,100%);border-radius:16px;background:var(--surface-2);border:1px solid var(--border);box-shadow:var(--shadow-elev);padding:24px">
+<div style="font:600 17px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Submit for verification?</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:18px">Ikeja General Hospital will see this record and the three evidence files attached to it. They cannot see the rest of your profile. You can withdraw the request any time before they respond.</div>
+<div style="display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap">
+<button type="button" onClick="{{ closeOverlays }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Cancel</button>
+<button type="button" onClick="{{ closeOverlays }}" style="height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Send request</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeOverlays }}" style="position:fixed;inset:0;background:rgba(6,14,28,.55);z-index:200;display:flex;justify-content:flex-end">
+<div style="width:min(360px,100%);height:100%;background:var(--surface-2);border-left:1px solid var(--border);box-shadow:var(--shadow-elev);padding:24px;overflow:auto">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span style="font:600 15px Inter,sans-serif;color:var(--text-0)">Filters</span><button type="button" onClick="{{ closeOverlays }}" aria-label="Close" style="width:32px;height:32px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);cursor:pointer">✕</button></div>
+<div style="font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em;margin-bottom:8px">TRUST TIER</div>
+<div style="display:flex;flex-direction:column;gap:7px;font:400 13px Inter,sans-serif;color:var(--text-0);margin-bottom:18px"><span>☑ Master</span><span>☑ Established</span><span>☐ Emerging</span></div>
+<div style="font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);letter-spacing:.06em;margin-bottom:8px">PATHWAY</div>
+<div style="display:flex;flex-direction:column;gap:7px;font:400 13px Inter,sans-serif;color:var(--text-0)"><span>☑ Academic</span><span>☑ Competency</span></div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-top:8px">Ranked equally — always (§17.2).</div>
+<button type="button" onClick="{{ closeOverlays }}" style="width:100%;height:42px;margin-top:22px;border:none;border-radius:8px;background:var(--cta);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer">Show 142 results</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:400;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:var(--surface-2);border:1px solid var(--success);box-shadow:var(--shadow-elev);max-width:calc(100vw - 32px)">
+<span style="color:var(--success);font-weight:700">✓</span><span style="font:400 13px Inter,sans-serif;color:var(--text-0)">Verification request sent to Ikeja General.</span><button type="button" onClick="{{ closeOverlays }}" style="border:none;background:transparent;color:var(--accent);font:600 12.5px Inter,sans-serif;cursor:pointer">Undo</button>
+</div>
+</sc-if>
+
+<footer style="margin-top:64px;padding-top:22px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font:400 12px Inter,sans-serif;color:var(--text-1)">
+<span>PROFILE Design System — foundation only. App shell, Home, Trust Center and Career Engine build on these tokens.</span>
+<span style="font-family:'JetBrains Mono',monospace;color:var(--text-2)">Verified Work. Trusted Identity.</span>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentExploration&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, accent: "brand", tab: 0, query: "", modalOpen: false, drawerOpen: false, toastOpen: false, checkA: true, sliderVal: 60, selectVal: "Public", textareaVal: "" };
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const initial = saved || this.props.defaultTheme ||
+      (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.applyTheme(initial);
+    this.setState({ theme: initial });
+  }
+
+  applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+
+  applyAccent(a) {
+    const v = a === "orange" ? "orange" : "brand";
+    document.documentElement.setAttribute("data-accent", v);
+    document.body.setAttribute("data-accent", v);
+  }
+
+  renderVals() {
+    const dark = this.state.theme === "dark";
+    const orange = this.state.accent === "orange";
+    const onToggleA = () => {};
+    const checkA = this.state.checkA, onCheckA = () => this.setState(s => ({ checkA: !s.checkA }));
+    const sliderVal = this.state.sliderVal, onSlider = e => this.setState({ sliderVal: Number(e.target.value) });
+    const selectVal = this.state.selectVal, onSelect = e => this.setState({ selectVal: e.target.value });
+    const textareaVal = this.state.textareaVal, onTextarea = e => this.setState({ textareaVal: e.target.value });
+    const q = this.state.query.trim().toLowerCase();
+
+    const people = [
+      { initials: "AO", name: "Amara Okafor", meta: "Solar engineer · Lagos · 4 verified records", score: "812" },
+      { initials: "KM", name: "Kwame Mensah", meta: "Electrical contractor · Accra · 6 verified records", score: "774" },
+      { initials: "JT", name: "Joseph Tembo", meta: "Renewables technician · Lusaka · 2 verified records", score: "690" }
+    ];
+    let results = people, resultHeading = "TOP RESULTS · RANKED BY TRUST";
+    if (q) {
+      results = people.filter(p => (p.name + p.meta).toLowerCase().includes(q));
+      resultHeading = results.length ? "MATCHES · RANKED BY TRUST" : "NO RESULTS";
+      if (!results.length) results = [{ initials: "—", name: "Nothing matched \u201c" + this.state.query.trim() + "\u201d", meta: "Try removing the verification filter, or search all indexes", score: "" }];
+    }
+
+    const tabLabels = ["Overview", "Evidence", "Verification", "Privacy"];
+    const tabBodies = [
+      "Panels keep their scroll position when the user returns to a tab. The selected tab is reflected in the URL so a view is shareable.",
+      "Evidence lists lazily load below the fold and show a skeleton of the same height as the loaded row.",
+      "Verification states are: pending, verified, needs correction, rejected, expired, revoked, disputed. Every one has designed copy explaining what happens next.",
+      "Privacy controls state who can see this record in plain language, with the legal detail one link away."
+    ];
+
+    const tabs = tabLabels.map((label, i) => ({
+      label,
+      onSelect: () => this.setState({ tab: i }),
+      font: i === this.state.tab ? "600 13px Inter,sans-serif" : "400 13px Inter,sans-serif",
+      color: i === this.state.tab ? "var(--text-0)" : "var(--text-1)",
+      underline: i === this.state.tab ? "var(--accent)" : "transparent"
+    }));
+
+    return {
+      onToggleA, checkA, onCheckA, sliderVal, onSlider, selectVal, onSelect, textareaVal, onTextarea,
+      themeLabel: dark ? "Dark" : "Light",
+      accentLabel: orange ? "Revert to Royal Blue" : "Preview orange CTA",
+      toggleTheme: () => {
+        const next = this.state.theme === "dark" ? "light" : "dark";
+        this.applyTheme(next);
+        this.setState({ theme: next });
+      },
+      toggleAccent: () => {
+        const next = this.state.accent === "orange" ? "brand" : "orange";
+        this.applyAccent(next);
+        this.setState({ accent: next });
+      },
+      ringTurn: "0.812turn",
+      query: this.state.query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      results: results.map((r, i) => ({ ...r, bg: i === 0 && !!q === false ? "var(--surface-active)" : "transparent" })),
+      resultHeading,
+      tabs, tabBody: tabBodies[this.state.tab],
+      modalOpen: this.state.modalOpen,
+      drawerOpen: this.state.drawerOpen,
+      toastOpen: this.state.toastOpen,
+      openModal: () => this.setState({ modalOpen: true }),
+      openDrawer: () => this.setState({ drawerOpen: true }),
+      fireToast: () => { this.setState({ toastOpen: true }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toastOpen: false }), 4000); },
+      closeOverlays: () => this.setState({ modalOpen: false, drawerOpen: false, toastOpen: false }),
+      brand: [
+        { name: "Royal Blue", hex: "#0057D9", role: "Primary action, links, active navigation", ratio: "30%" },
+        { name: "Deep Blue", hex: "#003A8C", role: "Headers, enterprise and PROFILE OS surfaces", ratio: "15%" },
+        { name: "Trust Cyan", hex: "#00E5FF", role: "Trust Score, verification, Trust Center", ratio: "7%" },
+        { name: "Gold", hex: "#F4B400", role: "Achievement and premium only", ratio: "3%" },
+        { name: "Warm Coral", hex: "#FF6F59", role: "First login and milestone moments only", ratio: "1%" },
+        { name: "Graphite", hex: "#1E293B", role: "Text and icons", ratio: "15%" },
+        { name: "Near-black", hex: "#0A0E1A", role: "High-contrast mode and print", ratio: "—" }
+      ],
+      semantic: [
+        { name: "surface.base", light: "#F8FAFC", lightLabel: "#F8FAFC", dark: "#060E1C", darkLabel: "#060E1C", use: "App background" },
+        { name: "surface.card", light: "#FFFFFF", lightLabel: "#FFFFFF", dark: "#0C1829", darkLabel: "#0C1829", use: "Cards, panels" },
+        { name: "surface.elevated", light: "#FFFFFF", lightLabel: "#FFF + shadow", dark: "#0F1F35", darkLabel: "#0F1F35", use: "Modals, dropdowns" },
+        { name: "surface.active", light: "#EEF3FB", lightLabel: "#EEF3FB", dark: "#142440", darkLabel: "#142440", use: "Selected rows, hover" },
+        { name: "border.default", light: "#E5E7EB", lightLabel: "#E5E7EB", dark: "rgba(255,255,255,.07)", darkLabel: "white 7%", use: "Dividers, card edges" },
+        { name: "text.primary", light: "#1E293B", lightLabel: "#1E293B", dark: "rgba(255,255,255,.90)", darkLabel: "white 90%", use: "Body and headings" },
+        { name: "text.secondary", light: "#5B6B80", lightLabel: "#5B6B80", dark: "rgba(255,255,255,.65)", darkLabel: "white 65%", use: "Supporting copy" },
+        { name: "accent.primary", light: "#0057D9", lightLabel: "#0057D9", dark: "#4C8DFF", darkLabel: "#4C8DFF", use: "CTA, links, active nav" },
+        { name: "accent.trust", light: "#0E7490", lightLabel: "#0E7490", dark: "#00E5FF", darkLabel: "#00E5FF", use: "Trust and verification" },
+        { name: "status.success", light: "#04763C", lightLabel: "#04763C", dark: "#3DDC7F", darkLabel: "#3DDC7F", use: "Verified, completed" },
+        { name: "status.warning", light: "#8A5200", lightLabel: "#8A5200", dark: "#FBBF24", darkLabel: "#FBBF24", use: "Expiring, needs attention" },
+        { name: "status.danger", light: "#C2181D", lightLabel: "#C2181D", dark: "#FF7A7A", darkLabel: "#FF7A7A", use: "Rejected, revoked, errors" }
+      ],
+      typeScale: [
+        { name: "display", sample: "Built on Proof", font: "700 40px/1.05 Inter,sans-serif", ls: "-.03em", size: "2.5–4.5rem", lh: "1.05" },
+        { name: "h1", sample: "Trust Center", font: "600 32px/1.15 Inter,sans-serif", ls: "-.02em", size: "2.25–3.5rem", lh: "1.15" },
+        { name: "h2", sample: "Verification requests", font: "600 24px/1.25 Inter,sans-serif", ls: "-.015em", size: "1.875–2.5rem", lh: "1.25" },
+        { name: "h3", sample: "Evidence attached", font: "600 18px/1.3 Inter,sans-serif", ls: "-.01em", size: "1.25–1.5rem", lh: "1.3" },
+        { name: "body-lg", sample: "Lead paragraph, used once per page.", font: "400 16px/1.6 Inter,sans-serif", ls: "0", size: "1–1.125rem", lh: "1.6" },
+        { name: "body", sample: "Default reading size across the interface.", font: "400 14px/1.65 Inter,sans-serif", ls: "0", size: "0.875–1rem", lh: "1.65" },
+        { name: "data", sample: "812 · 98.4% · 14 records", font: "500 14px/1.4 'IBM Plex Sans',sans-serif", ls: "0", size: "0.875rem", lh: "1.4" },
+        { name: "caption", sample: "Verified 12 August 2026 by Ikeja General", font: "400 12px/1.5 Inter,sans-serif", ls: "0", size: "0.75–0.875rem", lh: "1.5" },
+        { name: "overline", sample: "VERIFICATION STATUS", font: "500 11px/1 'JetBrains Mono',monospace", ls: ".1em", size: "0.6875rem", lh: "1" }
+      ],
+      spacing: [
+        { label: "4", w: "4px" }, { label: "8", w: "8px" }, { label: "12", w: "12px" },
+        { label: "16", w: "16px" }, { label: "24", w: "24px" }, { label: "32", w: "32px" },
+        { label: "48", w: "48px" }, { label: "64", w: "64px" }
+      ],
+      tableRows: [
+        { name: "BSc Electrical Engineering", status: "✓ Verified", color: "var(--success)", date: "2019-07-12", bg: "transparent" },
+        { name: "COREN Licence", status: "⚠ Expires 14d", color: "var(--warning)", date: "2024-03-01", bg: "var(--surface-sunken)" },
+        { name: "Solar PV Level 3", status: "◷ Pending", color: "var(--text-1)", date: "2026-08-28", bg: "transparent" },
+        { name: "Site Safety Card", status: "✕ Revoked", color: "var(--danger)", date: "2022-11-04", bg: "var(--surface-sunken)" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

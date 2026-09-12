@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--surface-active:#142440;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1120px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 70px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 8px">
+<div><div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Career Engine</div><h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">PROFILE Advisor &amp; Creator Hub</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div role="tablist" style="display:flex;gap:20px;border-bottom:1px solid var(--border);margin-bottom:22px">
+<button type="button" onClick="{{ selectAdvisor }}" style="border:none;background:transparent;padding:0 0 12px;margin-bottom:-1px;cursor:pointer;font:{{ advFont }};color:{{ advColor }};border-bottom:2px solid {{ advUnder }}">Advisor</button>
+<button type="button" onClick="{{ selectHub }}" style="border:none;background:transparent;padding:0 0 12px;margin-bottom:-1px;cursor:pointer;font:{{ hubFont }};color:{{ hubColor }};border-bottom:2px solid {{ hubUnder }}">Creator Hub</button>
+</div>
+
+<sc-if value="{{ showAdvisor }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:18px">
+<div style="flex:1 1 400px;min-width:0;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ chat }}" as="m" hint-placeholder-count="4">
+<div style="display:flex;justify-content:{{ m.justify }}">
+<div style="max-width:80%;border-radius:12px;padding:12px 14px;background:{{ m.bg }};border:1px solid {{ m.edge }}">
+<sc-if value="{{ m.isAdvisor }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--trust);margin-bottom:5px">ADVISOR</div></sc-if>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-0)">{{ m.text }}</div>
+</div>
+</div>
+</sc-for>
+<div style="display:flex;gap:8px;margin-top:6px">
+<input type="text" placeholder="Ask about your profile, a role, or what's missing" style="flex:1;min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13.5px Inter,sans-serif;outline:none">
+<button type="button" style="height:44px;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Ask</button>
+</div>
+</div>
+<div style="flex:1 1 250px;min-width:230px;display:flex;flex-direction:column;gap:12px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">What Advisor can do</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Explain a Trust Score, find the gap between your records and a role, suggest what to record next. It never asserts a credential, fabricates an achievement, or guarantees an outcome.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Every answer traces to a record</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Answers cite the specific verified records they draw from — shown, not hidden behind the reply.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showHub }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:0 0 20px;max-width:64ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-1)">CV and portfolio templates you can publish for others to use, with your name attached and earnings tracked. Draft until you publish — never live by accident.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;margin-bottom:24px">
+<sc-for list="{{ creatorItems }}" as="c" hint-placeholder-count="3">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);padding:16px 17px">
+<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px"><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">{{ c.name }}</span><span style="padding:2px 8px;border-radius:20px;background:{{ c.statusBg }};color:{{ c.statusInk }};font:600 10.5px Inter,sans-serif">{{ c.status }}</span></div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:10px">{{ c.body }}</div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ c.stat }}</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:9px;flex-wrap:wrap"><button type="button" style="height:42px;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Start a new template</button><a href="PROFILE Creator Earnings.dc.html" style="height:42px;display:flex;align-items:center;padding:0 15px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;text-decoration:none">View earnings &amp; analytics</a><a href="PROFILE Creator Marketplace.dc.html" style="height:42px;display:flex;align-items:center;padding:0 15px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;text-decoration:none">Browse marketplace</a></div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: "advisor" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const advisor = this.state.tab === "advisor";
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      showAdvisor: advisor, showHub: !advisor,
+      selectAdvisor: () => this.setState({ tab: "advisor" }), selectHub: () => this.setState({ tab: "hub" }),
+      advFont: advisor ? "600 13.5px Inter,sans-serif" : "400 13.5px Inter,sans-serif", advColor: advisor ? "var(--text-0)" : "var(--text-1)", advUnder: advisor ? "var(--accent)" : "transparent",
+      hubFont: !advisor ? "600 13.5px Inter,sans-serif" : "400 13.5px Inter,sans-serif", hubColor: !advisor ? "var(--text-0)" : "var(--text-1)", hubUnder: !advisor ? "var(--accent)" : "transparent",
+      chat: [
+        { justify: "flex-start", bg: "var(--trust-soft)", edge: "var(--trust)", isAdvisor: true, text: "Your Trust Score is 812. Two verification requests currently in progress would add roughly 22 points if confirmed. Want the breakdown?" },
+        { justify: "flex-end", bg: "var(--surface-sunken)", edge: "var(--border)", isAdvisor: false, text: "What's the biggest gap for Renewable Systems Lead roles?" },
+        { justify: "flex-start", bg: "var(--trust-soft)", edge: "var(--trust)", isAdvisor: true, text: "A load-calculation credential. Two of your commissioning records already touch it, but nothing formal is recorded yet — that's the single highest-value addition." },
+        { justify: "flex-end", bg: "var(--surface-sunken)", edge: "var(--border)", isAdvisor: false, text: "Can you show me where that comes from?" }
+      ],
+      creatorItems: [
+        { name: "Technical Engineer CV — dense", status: "Published", statusBg: "var(--success-soft)", statusInk: "var(--success)", body: "A one-page ATS-safe layout tuned for engineering roles.", stat: "412 uses · ₦18,600 earned" },
+        { name: "Field Evidence Portfolio", status: "Draft", statusBg: "var(--surface-sunken)", statusInk: "var(--text-1)", body: "Site-photo-led case study layout for commissioning work.", stat: "Not yet published" },
+        { name: "Consulting One-Pager", status: "In review", statusBg: "var(--gold-soft)", statusInk: "var(--gold)", body: "Services + client results, built from the freelance template.", stat: "Submitted 2 days ago" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

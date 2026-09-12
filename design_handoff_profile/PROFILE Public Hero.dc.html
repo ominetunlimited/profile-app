@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-press:#003A8C;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--coral:#C93B22;--coral-soft:#FFF0ED;
+--success:#04763C;--success-soft:#E8F8EE;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-press:#3B7BEE;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--coral:#FF8B78;--coral-soft:rgba(255,111,89,.13);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .28s cubic-bezier(.22,.61,.36,1)}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@keyframes h-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="min-height:100%;position:relative">
+
+<div aria-hidden="true" style="position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1">
+<div style="position:absolute;top:11%;left:5%;width:72px;height:52px;border:2px solid var(--text-2);border-radius:8px;opacity:.07"><div style="position:absolute;top:-10px;left:22px;width:28px;height:11px;border:2px solid var(--text-2);border-bottom:none;border-radius:4px 4px 0 0"></div><div style="position:absolute;top:18px;left:0;right:0;height:2px;background:var(--text-2)"></div></div>
+<div style="position:absolute;top:6%;right:6%;width:66px;height:66px;border:2px solid var(--text-2);border-radius:50%;opacity:.06"></div>
+<div style="position:absolute;top:7.6%;right:8.4%;width:40px;height:40px;border:2px solid var(--text-2);border-radius:50%;opacity:.06"></div>
+<div style="position:absolute;top:9%;right:10.6%;width:18px;height:18px;border:2px solid var(--text-2);border-radius:50%;opacity:.06"></div>
+<div style="position:absolute;top:32%;left:8%;display:flex;flex-direction:column;gap:5px;opacity:.06;transform:rotate(-7deg)"><div style="width:56px;height:36px;border:2px solid var(--text-2);border-radius:5px"></div><div style="width:56px;height:36px;border:2px solid var(--text-2);border-radius:5px;margin-top:-28px;margin-left:7px"></div></div>
+<div style="position:absolute;top:46%;right:7%;width:62px;height:76px;border:2px solid var(--text-2);border-radius:5px;opacity:.06"><div style="position:absolute;top:13px;left:9px;right:9px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:23px;left:9px;right:16px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:33px;left:9px;right:9px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:43px;left:9px;right:22px;height:2px;background:var(--text-2)"></div></div>
+<div style="position:absolute;top:66%;left:4%;width:0;height:0;border-left:24px solid transparent;border-right:24px solid transparent;border-bottom:40px solid var(--text-2);opacity:.05;transform:rotate(10deg)"></div>
+<div style="position:absolute;top:78%;right:14%;width:38px;height:38px;background:var(--text-2);opacity:.04;transform:rotate(45deg);border-radius:4px"></div>
+<div style="position:absolute;bottom:6%;left:10%;width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:34px solid var(--text-2);opacity:.05"></div>
+<div style="position:absolute;bottom:8%;right:4%;width:58px;height:42px;border:2px solid var(--text-2);border-radius:8px;opacity:.06"><div style="position:absolute;top:-9px;left:17px;width:24px;height:9px;border:2px solid var(--text-2);border-bottom:none;border-radius:4px 4px 0 0"></div></div>
+</div>
+
+<header style="position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(6px)">
+<div style="max-width:1360px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px clamp(16px,3vw,32px)">
+<a href="#" aria-label="PROFILE home" style="display:flex;align-items:center;gap:9px;flex:none;order:1">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:28px;width:auto;aspect-ratio:1352/1736">
+<span style="font:700 15px Inter,sans-serif;letter-spacing:-.01em;color:var(--text-0)">PROFILE</span>
+</a>
+<div style="display:flex;align-items:center;gap:8px;flex:none;order:2;margin-left:auto">
+<button type="button" onClick="{{ toggleTheme }}" style="flex:none;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+<a href="PROFILE Sign In.dc.html" style="flex:none;height:34px;display:flex;align-items:center;padding:0 13px;border-radius:8px;font:600 13px Inter,sans-serif;color:var(--text-0)">Sign In</a>
+<a href="PROFILE Account Creation.dc.html" style="flex:none;height:34px;display:flex;align-items:center;padding:0 15px;border-radius:8px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif">Open Your PROFILE</a>
+</div>
+<nav aria-label="Primary" style="display:flex;flex-wrap:wrap;gap:4px;flex:1 1 100%;min-width:0;order:3;position:relative">
+<a href="PROFILE About & Solutions.dc.html#about" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">About</a>
+<span style="position:relative">
+<button type="button" onClick="{{ toggleSolutions }}" style="height:100%;padding:9px 11px;border:none;background:transparent;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px">Solutions <span style="font-size:9px;transform:{{ solutionsArrow }}">▾</span></button>
+<sc-if value="{{ solutionsOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:calc(100% + 8px);left:-4px;width:560px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);box-shadow:var(--shadow-elev);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:4px;z-index:50">
+<sc-for list="{{ solutionLinks }}" as="s" hint-placeholder-count="8">
+<a href="#" style="display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:9px">
+<span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ s.title }}</span>
+<span style="font:400 11px Inter,sans-serif;color:var(--text-1)">{{ s.sub }}</span>
+</a>
+</sc-for>
+</div>
+</sc-if>
+</span>
+<a href="PROFILE Trust Centre.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Trust</a>
+<a href="#opportunities" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Opportunities</a>
+<a href="PROFILE CV Templates.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Career</a>
+<a href="PROFILE Blog & News.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Blog</a>
+<a href="#" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Help</a>
+</nav>
+</div>
+</header>
+
+<section style="position:relative;overflow:hidden;padding:clamp(48px,9vw,96px) clamp(16px,3vw,32px) clamp(56px,8vw,88px)">
+<div style="position:absolute;inset:0;background:radial-gradient(circle at 22% 18%,var(--accent-soft),transparent 55%),radial-gradient(circle at 82% 8%,var(--trust-soft),transparent 50%);pointer-events:none"></div>
+<div style="max-width:900px;margin:0 auto;position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px">
+<span style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font:500 11.5px Inter,sans-serif;color:var(--text-1)">Built on Proof</span>
+<h1 style="margin:0;font:800 clamp(34px,6.4vw,64px)/1.05 Inter,sans-serif;letter-spacing:-.03em;color:var(--text-0);text-wrap:balance">Where work becomes credibility.</h1>
+<p style="margin:0;max-width:62ch;font:400 clamp(15px,1.6vw,18px)/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Build your professional identity, turn your work into evidence, verify what matters, and let trust — not attention — open the next opportunity.</p>
+<div style="display:flex;flex-wrap:wrap;gap:11px;justify-content:center;margin-top:6px">
+<a href="PROFILE Account Creation.dc.html" style="height:48px;padding:0 22px;display:flex;align-items:center;border-radius:10px;background:var(--accent);color:#fff;font:600 15px Inter,sans-serif;box-shadow:var(--shadow-elev)">Open Your PROFILE</a>
+<a href="#story" style="height:48px;padding:0 20px;display:flex;align-items:center;border-radius:10px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:600 15px Inter,sans-serif">See how it works</a>
+</div>
+
+<div style="width:100%;max-width:760px;margin-top:34px;display:flex;align-items:center;justify-content:center">
+<sc-for list="{{ pathNodes }}" as="n" hint-placeholder-count="6">
+<span style="display:flex;align-items:center;flex:{{ n.grow }}">
+<span style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:none">
+<span style="width:{{ n.size }};height:{{ n.size }};border-radius:50%;background:{{ n.bg }};border:2px solid {{ n.edge }};display:flex;align-items:center;justify-content:center;color:{{ n.ink }};font:700 13px Inter,sans-serif;animation:{{ n.anim }}">{{ n.glyph }}</span>
+<span style="font:600 10.5px Inter,sans-serif;color:var(--text-1);white-space:nowrap">{{ n.label }}</span>
+</span>
+<sc-if value="{{ n.hasLine }}" hint-placeholder-val="{{ false }}"><span style="flex:1;height:2px;background:linear-gradient(90deg,{{ n.edge }},{{ n.nextEdge }});margin:0 6px;align-self:flex-start;margin-top:19px;min-width:14px"></span></sc-if>
+</span>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section id="story" style="padding:clamp(40px,6vw,64px) clamp(16px,3vw,32px);border-top:1px solid var(--border);background:var(--surface-sunken)">
+<div style="max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px">
+<div>
+<div style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:9px">THE PROBLEM</div>
+<h2 style="margin:0 0 10px;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Professional identity has changed.</h2>
+<p style="margin:0;font:400 14px/1.7 Inter,sans-serif;color:var(--text-1)">Credentials sit in one place, work sits in another, and neither is easy for someone else to trust at a glance. Attention got measured. Proof mostly didn't.</p>
+</div>
+<div>
+<div style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:9px">THE ANSWER</div>
+<h2 style="margin:0 0 10px;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">One professional identity, built on proof.</h2>
+<p style="margin:0;font:400 14px/1.7 Inter,sans-serif;color:var(--text-1)">PROFILE turns what you have actually done into evidence, gets it confirmed by the people who were there, and carries that trust into the opportunities that fit.</p>
+</div>
+</div>
+</section>
+
+<section style="padding:clamp(48px,7vw,72px) clamp(16px,3vw,32px)">
+<div style="max-width:1080px;margin:0 auto">
+<div style="text-align:center;margin-bottom:36px"><h2 style="margin:0 0 10px;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">From work to growth, in one loop.</h2><p style="margin:0;max-width:56ch;margin-inline:auto;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Each stage feeds the next. Nothing here is separate software pretending to be one product.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px">
+<sc-for list="{{ loopCards }}" as="c" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 18px">
+<span style="width:36px;height:36px;border-radius:10px;background:{{ c.bg }};color:{{ c.ink }};display:flex;align-items:center;justify-content:center;font:700 14px Inter,sans-serif;margin-bottom:13px">{{ c.glyph }}</span>
+<div style="font:600 14.5px Inter,sans-serif;color:var(--text-0);margin-bottom:7px">{{ c.title }}</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">{{ c.body }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section id="trust" style="padding:clamp(48px,7vw,72px) clamp(16px,3vw,32px);background:var(--surface-sunken);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+<div style="max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:30px;align-items:center">
+<div style="flex:1 1 340px;min-width:0">
+<div style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:9px">TRUST</div>
+<h2 style="margin:0 0 12px;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Credibility should be earned, not assumed.</h2>
+<p style="margin:0 0 16px;max-width:52ch;font:400 14px/1.7 Inter,sans-serif;color:var(--text-1)">Every trust-bearing number on PROFILE opens into a plain-language explanation of how it was calculated. No score is ever just asserted.</p>
+<a href="#" style="font:600 13.5px Inter,sans-serif">Visit the Trust Centre →</a>
+</div>
+<div style="flex:1 1 300px;min-width:260px;border:1px solid var(--trust);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-elev);padding:18px">
+<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
+<div style="position:relative;width:64px;height:64px;flex:none">
+<div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--trust) 0turn .81turn,var(--surface-sunken) .81turn 1turn)"></div>
+<div style="position:absolute;inset:8px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 16px 'JetBrains Mono',monospace;color:var(--text-0)">812</div>
+</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">Illustrative example, not a real Trust Score.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center;font:12px Inter,sans-serif;color:var(--text-0)"><span style="color:var(--trust)">✓</span> Verified evidence</div>
+<div style="display:flex;gap:8px;align-items:center;font:12px Inter,sans-serif;color:var(--text-0)"><span style="color:var(--trust)">✓</span> Strength of verifiers</div>
+<div style="display:flex;gap:8px;align-items:center;font:12px Inter,sans-serif;color:var(--text-0)"><span style="color:var(--trust)">✓</span> Credential standing</div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding:clamp(48px,7vw,72px) clamp(16px,3vw,32px)">
+<div style="max-width:1120px;margin:0 auto">
+<div style="text-align:center;margin-bottom:8px"><div style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent)">BUILT FOR EVERY PROFESSIONAL JOURNEY</div></div>
+<h2 style="margin:0 0 30px;text-align:center;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">PROFILE for...</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px">
+<sc-for list="{{ audienceCards }}" as="a" hint-placeholder-count="6">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:17px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ a.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">{{ a.body }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:16px;text-align:center;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Every account starts as one identity. Organisation, institution and enterprise workspaces are provisioned separately and never opened by self-serve sign-up.</div>
+</div>
+</section>
+
+<section style="padding:clamp(48px,7vw,80px) clamp(16px,3vw,32px);text-align:center;background:var(--text-0)">
+<div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:16px">
+<h2 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--bg)">Your work already tells a story.</h2>
+<p style="margin:0;font:400 15px/1.6 Inter,sans-serif;color:var(--bg);opacity:.75">PROFILE helps turn that story into trusted professional identity.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:6px">
+<a href="PROFILE Account Creation.dc.html" style="height:46px;padding:0 20px;display:flex;align-items:center;border-radius:10px;background:var(--accent);color:#fff;font:600 14.5px Inter,sans-serif">Open Your PROFILE</a>
+<a href="#story" style="height:46px;padding:0 18px;display:flex;align-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.3);color:var(--bg);font:600 14.5px Inter,sans-serif">Explore how PROFILE works</a>
+</div>
+</div>
+</section>
+
+<footer style="padding:44px clamp(16px,3vw,32px) 28px;background:var(--surface-sunken);border-top:1px solid var(--border)">
+<div style="max-width:1200px;margin:0 auto">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:24px;margin-bottom:28px">
+<sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="6">
+<div>
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">{{ col.title }}</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ col.links }}" as="l" hint-placeholder-count="5">
+<a href="{{ l.h }}" style="font:400 12px Inter,sans-serif;color:var(--text-1)">{{ l.l }}</a>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid var(--border)">
+<div style="display:flex;align-items:center;gap:9px">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736">
+<span style="font:400 12px 'JetBrains Mono',monospace;color:var(--text-2)">Verified Work. Trusted Identity.</span>
+</div>
+<div style="display:flex;gap:10px"><a href="PROFILE Sign In.dc.html" style="height:34px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;font:600 12.5px Inter,sans-serif;color:var(--text-0)">Sign In</a><a href="PROFILE Account Creation.dc.html" style="height:34px;display:flex;align-items:center;padding:0 14px;border-radius:8px;background:var(--accent);color:#fff;font:600 12.5px Inter,sans-serif">Open Your PROFILE</a></div>
+</div>
+</div>
+</footer>
+
+<section style="padding:40px clamp(16px,3vw,32px) 72px;border-top:1px solid var(--border)">
+<div style="max-width:1200px;margin:0 auto">
+<h2 style="margin:0 0 14px;font:600 17px Inter,sans-serif;color:var(--text-0)">Mobile — 390px</h2>
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+<div style="flex:none;width:390px;max-width:100%;border:1px solid var(--border-strong);border-radius:22px;background:var(--surface);box-shadow:var(--shadow-elev);overflow:hidden">
+<div style="display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--border)">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736;flex:none">
+<span style="flex:1;font:700 13px Inter,sans-serif;color:var(--text-0)">PROFILE</span>
+<span style="font:400 18px Inter,sans-serif;color:var(--text-1)">☰</span>
+</div>
+<div style="padding:26px 18px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;background:radial-gradient(circle at 30% 10%,var(--accent-soft),transparent 60%)">
+<h3 style="margin:0;font:800 27px/1.1 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Where work becomes credibility.</h3>
+<p style="margin:0;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">Build identity, record evidence, get it verified, grow.</p>
+<a href="PROFILE Account Creation.dc.html" style="width:100%;height:46px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif">Open Your PROFILE</a>
+<a href="#" style="font:600 13px Inter,sans-serif;color:var(--text-0)">See how it works</a>
+</div>
+<div style="padding:16px;border-top:1px solid var(--border)">
+<div style="font:600 11.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">PROFILE for...</div>
+<div style="display:flex;gap:9px;overflow:auto;padding-bottom:4px">
+<div style="flex:none;width:140px;border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--surface)"><div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Professionals</div><div style="font:400 10.5px/1.5 Inter,sans-serif;color:var(--text-1)">Trusted career history.</div></div>
+<div style="flex:none;width:140px;border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--surface)"><div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Students</div><div style="font:400 10.5px/1.5 Inter,sans-serif;color:var(--text-1)">Turn projects into evidence.</div></div>
+</div>
+</div>
+</div>
+
+<div style="flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:12px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Mobile navigation</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">The ☰ opens a full-screen drawer with the same nine sections as desktop, grouped under About / Solutions / Trust / Opportunities / Career / Resources — never a flat list of thirty links.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Real destinations</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Open Your PROFILE → the account creation flow, built alongside this page. Sign In has no page yet in this pass — shown, not wired. Blog, News, About, Solutions subpages follow the same header/footer once scoped.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Prototype data</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">The 812 Trust Score card is explicitly labelled illustrative. No user counts, partner counts or uptime figures appear anywhere on this page — none have been supplied as real.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, solutionsOpen: false };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+  renderVals() {
+    const nodeDefs = [
+      { glyph: "1", label: "Identity", bg: "var(--surface)", edge: "var(--border-strong)", ink: "var(--text-0)", size: "38px" },
+      { glyph: "2", label: "Evidence", bg: "var(--accent-soft)", edge: "var(--accent)", ink: "var(--accent)", size: "38px" },
+      { glyph: "✓", label: "Verification", bg: "var(--trust-soft)", edge: "var(--trust)", ink: "var(--trust)", size: "44px" },
+      { glyph: "★", label: "Trust", bg: "var(--trust)", edge: "var(--trust)", ink: "#04222B", size: "44px" },
+      { glyph: "→", label: "Opportunity", bg: "var(--gold-soft)", edge: "var(--gold)", ink: "var(--gold)", size: "38px" },
+      { glyph: "↑", label: "Growth", bg: "var(--coral-soft)", edge: "var(--coral)", ink: "var(--coral)", size: "38px" }
+    ];
+    const pathNodes = nodeDefs.map((n, i) => ({
+      ...n, grow: i === 0 || i === nodeDefs.length - 1 ? "0" : "1",
+      hasLine: i < nodeDefs.length - 1,
+      nextEdge: i < nodeDefs.length - 1 ? nodeDefs[i + 1].edge : n.edge,
+      anim: n.label === "Trust" ? "h-pulse 2.4s ease-in-out infinite" : "none"
+    }));
+
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      solutionsOpen: this.state.solutionsOpen,
+      solutionsArrow: this.state.solutionsOpen ? "rotate(180deg)" : "none",
+      toggleSolutions: () => this.setState(s => ({ solutionsOpen: !s.solutionsOpen })),
+      pathNodes,
+      solutionLinks: [
+        { title: "Individuals", sub: "Build and control your professional identity." },
+        { title: "Students", sub: "Turn learning and projects into evidence." },
+        { title: "Professionals", sub: "Trusted career history, verified." },
+        { title: "Freelancers", sub: "Show what you can actually deliver." },
+        { title: "Organisations", sub: "Discover and develop verified talent." },
+        { title: "Institutions", sub: "Verify credentials directly." },
+        { title: "Recruitment partners", sub: "Discover verified professional talent." },
+        { title: "Enterprise", sub: "Connect trust infrastructure to your systems." }
+      ],
+      loopCards: [
+        { glyph: "1", bg: "var(--accent-soft)", ink: "var(--accent)", title: "Record the work", body: "Structured evidence — what happened, for whom, with what changed as a result." },
+        { glyph: "2", bg: "var(--trust-soft)", ink: "var(--trust)", title: "Get it verified", body: "The institution or person who was there confirms it directly, in their own words." },
+        { glyph: "3", bg: "var(--gold-soft)", ink: "var(--gold)", title: "Build trust", body: "An explainable score, never a mystery number — every input shown, every cap stated." },
+        { glyph: "4", bg: "var(--coral-soft)", ink: "var(--coral)", title: "Grow from it", body: "Trusted evidence powers your CV, your portfolio, and what opportunities find you." }
+      ],
+      audienceCards: [
+        { title: "Individuals", body: "Build and control a professional identity that's actually yours." },
+        { title: "Students", body: "Turn coursework and early projects into evidence that counts." },
+        { title: "Professionals", body: "A career history other people can verify, not just read." },
+        { title: "Freelancers", body: "Show what you deliver, confirmed by who you delivered it for." },
+        { title: "Organisations", body: "Discover and develop talent through verified, not advertised, evidence." },
+        { title: "Institutions", body: "Confirm credentials and records directly, with a full audit trail." }
+      ],
+      footerCols: [
+        { title: "PROFILE", links: [{l:"About",h:"PROFILE About & Solutions.dc.html#about"}, {l:"Vision"}, {l:"Mission"}, {l:"How it works"}] },
+        { title: "Solutions", links: [{l:"Individuals",h:"PROFILE About & Solutions.dc.html#solutions"}, {l:"Organisations",h:"PROFILE About & Solutions.dc.html#solutions"}, {l:"Institutions"}, {l:"Enterprise"}] },
+        { title: "Explore", links: [{l:"Opportunities"}, {l:"Career",h:"PROFILE CV Templates.dc.html"}, {l:"Community"}, {l:"Blog",h:"PROFILE Blog & News.dc.html"}, {l:"News",h:"PROFILE Blog & News.dc.html"}] },
+        { title: "Trust & security", links: [{l:"Trust Centre",h:"PROFILE Trust Centre.dc.html"}, {l:"Verification",h:"PROFILE Trust Centre.dc.html"}, {l:"Security"}, {l:"Privacy"}] },
+        { title: "Help", links: [{l:"Help Centre"}, {l:"FAQ"}, {l:"Support"}, {l:"Accessibility"}] },
+        { title: "Legal", links: [{l:"Terms"}, {l:"Privacy Policy"}, {l:"Cookie Policy"}, {l:"Data rights"}] }
+      ].map(c => ({ ...c, links: c.links.map(x => ({ l: x.l, h: x.h || "#" })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

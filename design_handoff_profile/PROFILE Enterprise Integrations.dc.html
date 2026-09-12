@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:900px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<div><div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Aurora Power · Enterprise workspace</div><h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Integrations</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<div style="display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 22px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2"><button type="button" onClick="{{ t.onSelect }}" style="padding:8px 13px;border-radius:9px;border:1.5px solid {{ t.edge }};background:{{ t.bg }};color:{{ t.ink }};font:600 12px Inter,sans-serif;cursor:pointer">{{ t.label }}</button></sc-for>
+</div>
+
+<sc-if value="{{ showSso }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px;margin-bottom:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">SAML SSO</span><span style="padding:3px 10px;border-radius:20px;background:var(--success-soft);color:var(--success);font:600 11px Inter,sans-serif">Connected</span></div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Staff sign in through your identity provider. New staff auto-provision with Viewer access by default.</div>
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;font:400 12px Inter,sans-serif;margin-bottom:14px">
+<span style="color:var(--text-2)">Identity provider</span><span style="color:var(--text-0);font-family:'JetBrains Mono',monospace">Okta</span>
+<span style="color:var(--text-2)">Entity ID</span><span style="color:var(--text-0);font-family:'JetBrains Mono',monospace">urn:aurorapower:profile-sso</span>
+<span style="color:var(--text-2)">ACS URL</span><span style="color:var(--text-0);font-family:'JetBrains Mono',monospace">https://profile.app/sso/acs/aurorapower</span>
+</div>
+<button type="button" style="height:36px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-sunken);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Reconfigure</button>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:20px 22px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">SCIM provisioning</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">Not yet configured. Enabling SCIM lets staff accounts be created and deactivated automatically from your identity provider.</div>
+<button type="button" style="margin-top:12px;height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">Set up SCIM</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ showApi }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:16px">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 90px;background:var(--surface-sunken);font:600 10.5px Inter,sans-serif;letter-spacing:.04em"><div style="padding:10px 14px">KEY</div><div style="padding:10px 14px">SCOPE</div><div style="padding:10px 14px">LAST USED</div><div style="padding:10px 14px"></div></div>
+<sc-for list="{{ keys }}" as="k" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 90px;border-top:1px solid var(--border);align-items:center;font:400 12px Inter,sans-serif">
+<div style="padding:10px 14px;font-family:'JetBrains Mono',monospace;color:var(--text-0)">{{ k.masked }}</div>
+<div style="padding:10px 14px;color:var(--text-1)">{{ k.scope }}</div>
+<div style="padding:10px 14px;color:var(--text-2)">{{ k.lastUsed }}</div>
+<div style="padding:10px 14px"><button type="button" style="height:28px;padding:0 10px;border:1px solid var(--danger);border-radius:7px;background:var(--danger-soft);color:var(--danger);font:600 11px Inter,sans-serif;cursor:pointer">Revoke</button></div>
+</div>
+</sc-for>
+</div>
+<button type="button" style="height:38px;padding:0 15px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer;margin-bottom:16px">Generate new key</button>
+<div style="font:400 11.5px/1.7 Inter,sans-serif;color:var(--text-1)">Keys are shown once at creation and never displayed again. Scope each key to the narrowest permission it needs — talent search read-only, verification write, or full workspace access.</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: "sso" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const tabDefs = [{ key: "sso", label: "SSO & provisioning" }, { key: "api", label: "API keys" }];
+    const tabs = tabDefs.map(x => { const on = this.state.tab === x.key; return { label: x.label, onSelect: () => this.setState({ tab: x.key }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" }; });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      tabs, showSso: this.state.tab === "sso", showApi: this.state.tab === "api",
+      keys: [
+        { masked: "pk_live_••••••••7f21", scope: "Talent search (read)", lastUsed: "2h ago" },
+        { masked: "pk_live_••••••••9a04", scope: "Verification (write)", lastUsed: "5d ago" },
+        { masked: "pk_test_••••••••b312", scope: "Full workspace", lastUsed: "Never" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

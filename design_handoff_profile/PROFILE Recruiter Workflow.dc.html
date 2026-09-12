@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 60px">
+<a href="PROFILE Organization Workspace.dc.html" style="display:inline-block;margin:22px 0 10px;font:600 12.5px Inter,sans-serif;color:var(--accent);text-decoration:none">← Aurora Power workspace</a>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Renewable Systems Lead — pipeline</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px">
+<sc-for list="{{ stages }}" as="st" hint-placeholder-count="4">
+<div style="flex:0 0 250px;display:flex;flex-direction:column;gap:9px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);padding:0 2px">{{ st.label }} <span style="color:var(--text-2);font-weight:400">({{ st.count }})</span></div>
+<sc-for list="{{ st.candidates }}" as="c" hint-placeholder-count="2">
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:var(--shadow-card);padding:12px 13px">
+<div style="display:flex;justify-content:space-between;gap:6px;margin-bottom:5px"><span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ c.name }}</span><span style="font:700 11px 'JetBrains Mono',monospace;color:var(--trust)">{{ c.score }}</span></div>
+<div style="font:400 11px Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ c.role }}</div>
+<sc-if value="{{ c.hasInterview }}" hint-placeholder-val="{{ false }}"><div style="font:500 10.5px Inter,sans-serif;color:var(--accent);padding:3px 8px;border-radius:20px;background:var(--accent-soft);display:inline-block">{{ c.interviewTime }}</div></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:26px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:22px 24px">
+<div style="font:600 14px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">Schedule interview — Amara Okafor</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+<sc-for list="{{ slots }}" as="s" hint-placeholder-count="4"><button type="button" onClick="{{ s.onSelect }}" style="padding:10px 14px;border-radius:9px;border:1.5px solid {{ s.edge }};background:{{ s.bg }};color:{{ s.ink }};font:600 12px Inter,sans-serif;cursor:pointer">{{ s.label }}</button></sc-for>
+</div>
+<button type="button" style="height:40px;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Confirm &amp; send invite</button>
+<div style="margin-top:10px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Amara receives this on her own Messages — interview scheduling never bypasses her notice or consent.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, slot: 1 };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const slotDefs = ["Tue 16 Sep · 10:00", "Tue 16 Sep · 14:00", "Wed 17 Sep · 09:30", "Thu 18 Sep · 11:00"];
+    const slots = slotDefs.map((label, i) => { const on = this.state.slot === i; return { label, onSelect: () => this.setState({ slot: i }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border-strong)" }; });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      slots,
+      stages: [
+        { label: "New match", count: 3, candidates: [{ name: "Funmi Adeyemi", role: "Site Engineer", score: "655", hasInterview: false }, { name: "Segun Ade", role: "Electrical Contractor", score: "601", hasInterview: false }] },
+        { label: "Shortlisted", count: 2, candidates: [{ name: "Kwame Mensah", role: "Electrical Contractor", score: "774", hasInterview: false }] },
+        { label: "Interview scheduled", count: 1, candidates: [{ name: "Amara Okafor", role: "Solar & Electrical Engineer", score: "812", hasInterview: true, interviewTime: "Tue 16 Sep · 10:00" }] },
+        { label: "Offer", count: 0, candidates: [] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

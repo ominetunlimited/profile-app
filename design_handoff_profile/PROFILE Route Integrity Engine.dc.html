@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<div><div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Internal · Owner / platform engineering</div><h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Route Integrity Engine</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<p style="margin:0 0 22px;max-width:74ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-1)">Every registered route, checked continuously: does it exist, render, handle its states, and stay reachable from real navigation. No button in the product should point somewhere this table doesn't know about.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-bottom:20px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:var(--shadow-card);padding:12px 14px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:5px">{{ s.label }}</div><div style="font:600 19px 'JetBrains Mono',monospace;color:{{ s.ink }}">{{ s.value }}</div></div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;overflow:hidden">
+<div style="display:grid;grid-template-columns:2fr 1fr 90px 90px 90px 90px;background:var(--surface-sunken);font:600 10.5px Inter,sans-serif;letter-spacing:.04em"><div style="padding:9px 12px">ROUTE</div><div style="padding:9px 12px">MODULE</div><div style="padding:9px 12px">RENDERS</div><div style="padding:9px 12px">AUTH</div><div style="padding:9px 12px">EMPTY/ERR</div><div style="padding:9px 12px">STATUS</div></div>
+<sc-for list="{{ routes }}" as="r" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:2fr 1fr 90px 90px 90px 90px;border-top:1px solid var(--border);background:var(--surface);align-items:center;font:400 12px Inter,sans-serif">
+<div style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--text-0);font-size:11.5px">{{ r.path }}</div>
+<div style="padding:9px 12px;color:var(--text-1)">{{ r.module }}</div>
+<div style="padding:9px 12px;text-align:center">{{ r.renders }}</div>
+<div style="padding:9px 12px;text-align:center">{{ r.auth }}</div>
+<div style="padding:9px 12px;text-align:center">{{ r.states }}</div>
+<div style="padding:9px 12px"><span style="padding:2px 8px;border-radius:20px;background:{{ r.statusBg }};color:{{ r.statusInk }};font:600 10px Inter,sans-serif">{{ r.status }}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:18px;border-left:3px solid var(--danger);border-radius:0 10px 10px 0;background:var(--danger-soft);padding:14px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">1 broken reference found</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">/mission-control/executive-copilots is linked from Mission Control's sidebar but has no registered route. Flagged for the next release gate — nothing links to it in the shipped design.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const routesData = [
+      { path: "/home", module: "Core", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/profile/:id", module: "Core", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/trust-centre", module: "Trust", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/opportunities", module: "Career", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/career/cv/:template", module: "Career", renders: "✓", auth: "✓", states: "⚠", status: "Missing error state", statusBg: "var(--warning-soft)", statusInk: "var(--warning)" },
+      { path: "/org/:id/talent", module: "Organisation", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/institution/:id/schemas", module: "Institution", renders: "✓", auth: "✓", states: "✓", status: "Healthy", statusBg: "var(--success-soft)", statusInk: "var(--success)" },
+      { path: "/mission-control/executive-copilots", module: "Mission Control", renders: "✕", auth: "—", states: "—", status: "Broken reference", statusBg: "var(--danger-soft)", statusInk: "var(--danger)" }
+    ];
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      stats: [
+        { label: "REGISTERED ROUTES", value: "214", ink: "var(--text-0)" }, { label: "HEALTHY", value: "211", ink: "var(--success)" },
+        { label: "NEEDS ATTENTION", value: "2", ink: "var(--warning)" }, { label: "BROKEN", value: "1", ink: "var(--danger)" }
+      ],
+      routes: routesData
+    };
+  }
+}
+</script>
+</body>
+</html>

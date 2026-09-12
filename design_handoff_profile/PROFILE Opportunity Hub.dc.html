@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 70px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 18px">
+<h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Opportunity Hub</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px">
+<div style="flex:0 0 220px;display:flex;flex-direction:column;gap:16px">
+<div>
+<div style="font:600 11.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Type</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<sc-for list="{{ typeFilters }}" as="f" hint-placeholder-count="5"><label style="display:flex;align-items:center;gap:7px;font:400 12.5px Inter,sans-serif;color:var(--text-1)"><input type="checkbox" checked="{{ f.checked }}" onChange="{{ f.onToggle }}"> {{ f.label }}</label></sc-for>
+</div>
+</div>
+<div>
+<div style="font:600 11.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Minimum match</div>
+<input type="range" min="0" max="100" value="{{ minMatch }}" onChange="{{ setMinMatch }}" style="width:100%">
+<div style="font:400 11px Inter,sans-serif;color:var(--text-1)">{{ minMatch }}%+</div>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);border-top:1px solid var(--border);padding-top:12px">Match is computed from your verified evidence against each opportunity's requirements — never from follower counts or profile views.</div>
+</div>
+
+<div style="flex:1;min-width:0">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ filteredOpps }}" as="o" hint-placeholder-count="4">
+<button type="button" onClick="{{ o.onSelect }}" style="text-align:left;border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);padding:16px 18px;cursor:pointer">
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;margin-bottom:5px"><span style="font:700 15px Inter,sans-serif;color:var(--text-0)">{{ o.title }}</span><span style="font:700 14px 'JetBrains Mono',monospace;color:var(--trust)">{{ o.match }}% match</span></div>
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ o.org }} · {{ o.location }} · {{ o.type }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ o.tags }}" as="t" hint-placeholder-count="3"><span style="padding:2px 9px;border-radius:20px;background:var(--surface-sunken);font:500 11px Inter,sans-serif;color:var(--text-1)">{{ t }}</span></sc-for></div>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ backToList }}" style="border:none;background:transparent;color:var(--accent);font:600 12.5px Inter,sans-serif;cursor:pointer;margin-bottom:14px">← Back to opportunities</button>
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:26px 28px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;margin-bottom:6px"><h2 style="margin:0;font:700 22px/1.2 Inter,sans-serif;color:var(--text-0)">{{ active.title }}</h2><span style="font:700 18px 'JetBrains Mono',monospace;color:var(--trust)">{{ active.match }}% match</span></div>
+<div style="font:400 13px Inter,sans-serif;color:var(--text-1);margin-bottom:20px">{{ active.org }} · {{ active.location }} · {{ active.type }}</div>
+
+<div style="margin-bottom:20px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Why this matches</div>
+<sc-for list="{{ active.reasons }}" as="r" hint-placeholder-count="3"><div style="display:flex;gap:8px;padding:6px 0"><span style="color:var(--success);font-weight:700">✓</span><span style="font:400 12.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ r }}</span></div></sc-for>
+</div>
+
+<sc-if value="{{ active.hasGaps }}" hint-placeholder-val="{{ false }}">
+<div style="margin-bottom:20px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">What's missing</div>
+<sc-for list="{{ active.gaps }}" as="g" hint-placeholder-count="1"><div style="display:flex;gap:8px;padding:6px 0"><span style="color:var(--text-2);font-weight:700">–</span><span style="font:400 12.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ g }}</span></div></sc-for>
+</div>
+</sc-if>
+
+<div style="display:flex;gap:9px;flex-wrap:wrap">
+<a href="PROFILE Cover Letter.dc.html" style="height:42px;display:flex;align-items:center;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif">Apply with Cover Letter</a>
+<a href="PROFILE CV Templates.dc.html" style="height:42px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif">Attach my CV</a>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, view: "list", active: 0, minMatch: 0, types: { "Jobs": true, "Freelance": true, "Consulting": true, "Mentorship": true, "Fellowships": true } };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const oppsData = [
+      { title: "Renewable Systems Lead", org: "Aurora Power", location: "Lagos, Nigeria", type: "Jobs", match: 91, tags: ["Solar PV", "Commissioning", "Full-time"],
+        reasons: ["14 verified records in solar and hybrid commissioning.", "Trust Score of 812 exceeds this role's typical threshold.", "GRIDCo maintenance record matches required HV experience."], hasGaps: false, gaps: [] },
+      { title: "Senior Commissioning Engineer", org: "GRIDCo Nigeria", location: "Abuja, Nigeria", type: "Jobs", match: 88, tags: ["HV switchgear", "Full-time"],
+        reasons: ["Direct prior work history with this employer.", "Zero missed outage windows record matches their reliability requirement."], hasGaps: true, gaps: ["A formal load-calculation credential — two records touch it but nothing formal is recorded."] },
+      { title: "Solar Project Engineer", org: "Sunward Energy", location: "Accra, Ghana", type: "Jobs", match: 76, tags: ["Solar PV", "Relocation"],
+        reasons: ["Solar commissioning experience matches the core requirement."], hasGaps: true, gaps: ["Ghana-specific electrical code certification.", "No prior cross-border project history recorded."] },
+      { title: "Rural Electrification Consulting", org: "Independent client", location: "Remote · West Africa", type: "Consulting", match: 82, tags: ["Consulting", "Short-term"],
+        reasons: ["Site survey and load calculation experience directly applicable.", "Client-confirmed freelance track record."], hasGaps: false, gaps: [] },
+      { title: "Mentor — Early-Career Engineers", org: "Solar PV Mentors community", location: "Remote", type: "Mentorship", match: 95, tags: ["Mentorship", "Volunteer"],
+        reasons: ["11 years of field experience matches mentee demand.", "Active in the Solar PV Mentors community."], hasGaps: false, gaps: [] }
+    ];
+    const s = this.state;
+    const typeFilters = Object.keys(s.types).map(k => ({ label: k, checked: s.types[k], onToggle: () => this.setState({ types: { ...s.types, [k]: !s.types[k] } }) }));
+    const filtered = oppsData.filter(o => s.types[o.type] && o.match >= s.minMatch);
+    const opps = filtered.map((o, i) => ({ ...o, onSelect: () => this.setState({ view: "detail", active: oppsData.indexOf(o) }) }));
+    return {
+      themeLabel: s.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = s.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      typeFilters, minMatch: s.minMatch, setMinMatch: e => this.setState({ minMatch: Number(e.target.value) }),
+      showList: s.view === "list", showDetail: s.view === "detail",
+      filteredOpps: opps, active: oppsData[s.active], backToList: () => this.setState({ view: "list" })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--surface-active:#142440;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1280px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 70px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<div><div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Owner only</div><h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Mission Control</h1></div>
+<div style="display:flex;gap:8px"><a href="PROFILE AI Decision Log.dc.html" style="height:36px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;text-decoration:none">AI decision log</a><a href="PROFILE Route Integrity Engine.dc.html" style="height:36px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;text-decoration:none">Route integrity</a><button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button></div>
+</div>
+<p style="margin:0 0 26px;max-width:70ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-1)">A small number of decisions that matter, not a wall of every metric. What happened, why, and what needs a person.</p>
+
+<div style="margin-bottom:28px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Needs a decision</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ decisions }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;border:1px solid {{ d.edge }};border-radius:12px;background:{{ d.bg }};padding:14px 16px">
+<span style="flex:none;font:700 13px Inter,sans-serif;color:{{ d.ink }}">{{ d.glyph }}</span>
+<div style="flex:1;min-width:220px"><div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:3px">{{ d.title }}</div><div style="font:400 12px/1.55 Inter,sans-serif;color:var(--text-1)">{{ d.body }}</div></div>
+<button type="button" style="flex:none;height:34px;padding:0 14px;border:none;border-radius:8px;background:{{ d.ink }};color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">{{ d.cta }}</button>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-bottom:28px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:14px 16px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:6px">{{ k.label }}</div>
+<div style="display:flex;align-items:baseline;gap:7px"><span style="font:600 21px 'JetBrains Mono',monospace;color:var(--text-0)">{{ k.value }}</span><span style="font:500 11px Inter,sans-serif;color:{{ k.deltaInk }}">{{ k.delta }}</span></div>
+<div style="font:400 11px Inter,sans-serif;color:var(--text-1);margin-top:4px">{{ k.note }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 340px;min-width:0;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Trust health</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ trustHealth }}" as="t" hint-placeholder-count="4">
+<div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font:400 12px Inter,sans-serif;color:var(--text-0)">{{ t.label }}</span><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--text-1)">{{ t.value }}</span></div><div style="height:6px;border-radius:3px;background:var(--surface-sunken);overflow:hidden"><div style="height:100%;border-radius:3px;background:{{ t.ink }};width:{{ t.w }}"></div></div></div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1 1 300px;min-width:260px;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Infrastructure &amp; security</div>
+<sc-for list="{{ infra }}" as="i" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font:400 12px Inter,sans-serif;color:var(--text-0)">{{ i.label }}</span><span style="display:flex;align-items:center;gap:6px;font:600 11px Inter,sans-serif;color:{{ i.ink }}">{{ i.glyph }} {{ i.value }}</span></div></sc-for>
+</div>
+</div>
+
+<div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 260px;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">Prototype data</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Every figure above is illustrative sample content for design review — no real user counts, revenue or infrastructure statistics are represented.</div>
+</div>
+<div style="flex:1 1 220px;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Export this view</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:12px">Download the KPIs and trust-health metrics above as a dated audit snapshot.</div>
+<button type="button" onClick="{{ requestSnapshot }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface-sunken);color:var(--text-0);font:600 12.5px Inter,sans-serif;cursor:pointer">{{ snapshotLabel }}</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, snapshotted: false };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      decisions: [
+        { glyph: "⚠", ink: "var(--warning)", bg: "var(--warning-soft)", edge: "var(--warning)", title: "3 government workspace requests need manual domain review", body: ".gov domains aren't in the automated registry — a person has to confirm each one.", cta: "Review queue" },
+        { glyph: "◷", ink: "var(--text-1)", bg: "var(--surface-sunken)", edge: "var(--border)", title: "Verifier response time rising for institution requests", body: "Median time from request to confirmation is up from 3.1 to 4.6 days this month.", cta: "See detail" },
+        { glyph: "!", ink: "var(--danger)", bg: "var(--danger-soft)", edge: "var(--danger)", title: "2 disputed verifications past their review deadline", body: "Both are 3+ days over the 20-working-day outcome commitment.", cta: "Open cases" }
+      ],
+      kpis: [
+        { label: "NEW PERSONAL ACCOUNTS (7D)", value: "1,204", delta: "+6%", deltaInk: "var(--success)", note: "vs. prior week" },
+        { label: "VERIFICATION REQUESTS OPEN", value: "3,880", delta: "+2%", deltaInk: "var(--text-1)", note: "median 3.4 days to resolve" },
+        { label: "WORKSPACE REQUESTS PENDING", value: "14", delta: "", deltaInk: "var(--text-1)", note: "3 need manual domain review" },
+        { label: "ACTIVE DISPUTES", value: "9", delta: "+2", deltaInk: "var(--danger)", note: "2 past deadline" },
+        { label: "COPILOT QUERIES (7D)", value: "48,210", delta: "+11%", deltaInk: "var(--success)", note: "0 flagged for policy review" },
+        { label: "PLATFORM UPTIME (30D)", value: "99.97%", delta: "", deltaInk: "var(--text-1)", note: "1 incident, resolved in 12 min" }
+      ],
+      trustHealth: [
+        { label: "Records verified this week", value: "6,204", w: "82%", ink: "var(--trust)" },
+        { label: "Verifier response rate", value: "91%", w: "91%", ink: "var(--success)" },
+        { label: "Disputes resolved within SLA", value: "78%", w: "78%", ink: "var(--warning)" },
+        { label: "Academic vs competency pathway split", value: "54 / 46", w: "54%", ink: "var(--accent)" }
+      ],
+      snapshotLabel: this.state.snapshotted ? "Snapshot ready — download" : "Generate audit snapshot",
+      requestSnapshot: () => this.setState({ snapshotted: true }),
+      infra: [
+        { label: "API error rate (24h)", value: "0.03%", glyph: "✓", ink: "var(--success)" },
+        { label: "Verification queue backlog", value: "Normal", glyph: "✓", ink: "var(--success)" },
+        { label: "Suspicious login attempts (24h)", value: "212 blocked", glyph: "✓", ink: "var(--success)" },
+        { label: "Data export requests pending", value: "4", glyph: "◷", ink: "var(--text-1)" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

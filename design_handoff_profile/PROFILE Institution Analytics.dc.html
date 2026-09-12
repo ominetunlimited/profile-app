@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 60px">
+<a href="PROFILE Institution Workspace.dc.html" style="display:inline-block;margin:22px 0 10px;font:600 12.5px Inter,sans-serif;color:var(--accent);text-decoration:none">← Lagos State Polytechnic workspace</a>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Verification analytics</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-bottom:22px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:14px 16px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:6px">{{ s.label }}</div>
+<div style="display:flex;align-items:baseline;gap:7px"><span style="font:600 21px 'JetBrains Mono',monospace;color:var(--text-0)">{{ s.value }}</span><span style="font:500 11px Inter,sans-serif;color:{{ s.deltaInk }}">{{ s.delta }}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:20px 22px;margin-bottom:18px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:16px">Verification volume, last 12 months</div>
+<div style="display:flex;align-items:flex-end;gap:6px;height:140px">
+<sc-for list="{{ monthly }}" as="m" hint-placeholder-count="12">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end">
+<div style="width:100%;border-radius:4px 4px 0 0;background:var(--trust);height:{{ m.h }}%"></div>
+<span style="font:400 9.5px Inter,sans-serif;color:var(--text-2)">{{ m.label }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 300px;min-width:0;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Response time distribution</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ responseTimes }}" as="r" hint-placeholder-count="4">
+<div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font:400 12px Inter,sans-serif;color:var(--text-0)">{{ r.label }}</span><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--text-1)">{{ r.value }}</span></div><div style="height:6px;border-radius:3px;background:var(--surface-sunken);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--accent);width:{{ r.w }}"></div></div></div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1 1 260px;min-width:230px;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">By credential type</div>
+<sc-for list="{{ byType }}" as="b" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font:400 12px Inter,sans-serif"><span style="color:var(--text-0)">{{ b.label }}</span><span style="color:var(--text-1);font-family:'JetBrains Mono',monospace">{{ b.count }}</span></div></sc-for>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const months = ["Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+    const heights = [42, 48, 30, 55, 60, 58, 72, 68, 80, 75, 90, 100];
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      stats: [
+        { label: "CONFIRMED THIS MONTH", value: "312", delta: "+18%", deltaInk: "var(--success)" },
+        { label: "AVG. RESPONSE TIME", value: "3.4d", delta: "-0.6d", deltaInk: "var(--success)" },
+        { label: "REJECTION RATE", value: "4.2%", delta: "+0.3pt", deltaInk: "var(--text-1)" },
+        { label: "TOTAL RECORDS CONFIRMED", value: "4,820", delta: "all-time", deltaInk: "var(--text-1)" }
+      ],
+      monthly: months.map((label, i) => ({ label, h: heights[i] })),
+      responseTimes: [
+        { label: "Same day", value: "22%", w: "22%" }, { label: "1–3 days", value: "48%", w: "48%" },
+        { label: "4–7 days", value: "24%", w: "24%" }, { label: "8+ days", value: "6%", w: "6%" }
+      ],
+      byType: [
+        { label: "BEng / HND Degree", count: 4820 }, { label: "Continuing Education Certificate", count: 612 },
+        { label: "Research Placement", count: 88 }, { label: "Disciplinary Record", count: 3 }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

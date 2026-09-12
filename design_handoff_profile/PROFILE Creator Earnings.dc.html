@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1000px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 60px">
+<a href="PROFILE Advisor & Creator Hub.dc.html" style="display:inline-block;margin:22px 0 10px;font:600 12.5px Inter,sans-serif;color:var(--accent);text-decoration:none">← Creator Hub</a>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Earnings &amp; analytics</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px;margin-bottom:24px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:14px 16px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:6px">{{ s.label }}</div>
+<div style="font:600 21px 'JetBrains Mono',monospace;color:var(--text-0)">{{ s.value }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px;margin-bottom:20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">Per-template performance</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ templates }}" as="t" hint-placeholder-count="3">
+<div>
+<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font:500 12.5px Inter,sans-serif;color:var(--text-0)">{{ t.name }}</span><span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-1)">{{ t.uses }} uses · {{ t.earned }}</span></div>
+<div style="height:6px;border-radius:3px;background:var(--surface-sunken);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--accent);width:{{ t.w }}"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">Payout history</span><button type="button" style="height:34px;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-sunken);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Request payout</button></div>
+<sc-for list="{{ payouts }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font:400 12.5px Inter,sans-serif">
+<span style="color:var(--text-0)">{{ p.date }}</span><span style="color:var(--text-1)">{{ p.method }}</span><span style="font:600 12.5px 'JetBrains Mono',monospace;color:var(--success)">{{ p.amount }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      stats: [
+        { label: "TOTAL EARNED", value: "\u20a642,300" }, { label: "THIS MONTH", value: "\u20a65,800" },
+        { label: "TOTAL TEMPLATE USES", value: "916" }, { label: "AVG. RATING", value: "4.8" }
+      ],
+      templates: [
+        { name: "Technical Engineer CV — dense", uses: 412, earned: "\u20a618,600", w: "72%" },
+        { name: "Field Evidence Portfolio", uses: 289, earned: "\u20a613,900", w: "51%" },
+        { name: "Consulting One-Pager", uses: 215, earned: "\u20a69,800", w: "38%" }
+      ],
+      payouts: [
+        { date: "1 Sep 2026", method: "Bank transfer — GTBank ••3241", amount: "+\u20a65,800" },
+        { date: "1 Aug 2026", method: "Bank transfer — GTBank ••3241", amount: "+\u20a67,200" },
+        { date: "1 Jul 2026", method: "Bank transfer — GTBank ••3241", amount: "+\u20a64,100" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

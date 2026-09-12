@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Internationalisation reference</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<p style="margin:0 0 22px;max-width:74ch;font:400 13px/1.6 Inter,sans-serif;color:var(--text-1)">Same Home layout, three languages — chosen to stress-test different constraints: German's longer strings, Arabic's RTL mirroring, and non-Latin script line-height.</p>
+
+<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px">
+<sc-for list="{{ langs }}" as="l" hint-placeholder-count="3"><button type="button" onClick="{{ l.onSelect }}" style="padding:8px 14px;border-radius:9px;border:1.5px solid {{ l.edge }};background:{{ l.bg }};color:{{ l.ink }};font:600 12.5px Inter,sans-serif;cursor:pointer">{{ l.label }}</button></sc-for>
+</div>
+
+<div dir="{{ dir }}" style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:24px 26px;max-width:480px;font-family:{{ fontFam }}">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:16px"><span style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">AO</span><span style="flex:1;min-width:0;height:34px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface-sunken);display:flex;align-items:center;padding:0 11px;font:400 12px/1 inherit;color:var(--text-2)">{{ t.search }}</span></div>
+<div style="border:1px solid var(--trust);border-radius:12px;background:var(--trust-soft);padding:14px 15px;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font:600 13px inherit;color:var(--text-0)">{{ t.trustScore }}</span><span style="font:700 19px 'JetBrains Mono',monospace;color:var(--trust)">812</span></div>
+<div style="font:400 11.5px/1.6 inherit;color:var(--text-1)">{{ t.recordsLine }}</div>
+</div>
+<div style="font:600 12.5px inherit;color:var(--text-0);margin-bottom:9px">{{ t.nextAction }}</div>
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:12px 13px">
+<div style="font:600 12.5px inherit;color:var(--text-0);margin-bottom:4px">{{ t.actionTitle }}</div>
+<div style="font:400 11.5px/1.6 inherit;color:var(--text-1)">{{ t.actionBody }}</div>
+</div>
+</div>
+
+<div style="margin-top:18px;font:400 11.5px/1.7 Inter,sans-serif;color:var(--text-1);max-width:74ch">Layout uses <code style="font-family:'JetBrains Mono',monospace">dir="{{ dir }}"</code> on the card root, not a manual mirrored stylesheet — flex/grid direction, icon-relative positions and text-align follow automatically. No component in this design fixes a pixel width around English text length.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, lang: "en" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const copy = {
+      en: { search: "Search PROFILE", trustScore: "Trust Score", recordsLine: "14 verified records · 2 requests in review", nextAction: "Next best action", actionTitle: "Add your load-calculation credential", actionBody: "Closes your biggest gap for Renewable Systems Lead roles." },
+      de: { search: "PROFILE durchsuchen", trustScore: "Vertrauenswert", recordsLine: "14 verifizierte Nachweise · 2 Anfragen in Prüfung", nextAction: "Nächster wichtiger Schritt", actionTitle: "Fügen Sie Ihre Lastberechnungs-Qualifikation hinzu", actionBody: "Schließt Ihre größte Lücke für Positionen als Leiter für erneuerbare Systeme." },
+      ar: { search: "بحث في بروفايل", trustScore: "درجة الثقة", recordsLine: "١٤ سجلاً موثقاً · طلبان قيد المراجعة", nextAction: "الإجراء التالي الموصى به", actionTitle: "أضف شهادة حساب الأحمال الخاصة بك", actionBody: "يغلق أكبر فجوة لديك لوظائف قائد الأنظمة المتجددة." }
+    };
+    const langDefs = [{ key: "en", label: "English" }, { key: "de", label: "Deutsch" }, { key: "ar", label: "العربية" }];
+    const langs = langDefs.map(l => { const on = this.state.lang === l.key; return { label: l.label, onSelect: () => this.setState({ lang: l.key }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" }; });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      langs, dir: this.state.lang === "ar" ? "rtl" : "ltr",
+      fontFam: this.state.lang === "ar" ? "'Noto Sans Arabic',Inter,sans-serif" : "Inter,sans-serif",
+      t: copy[this.state.lang]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--gold:#8A6200;--gold-soft:#FEF6E0;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+.ph{background:repeating-linear-gradient(45deg,var(--surface-sunken) 0 8px,var(--surface-active,var(--surface-sunken)) 8px 16px);display:flex;align-items:center;justify-content:center;color:var(--text-2);font:400 10.5px 'JetBrains Mono',monospace}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="min-height:100%">
+<header style="border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:10">
+<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px clamp(14px,3vw,28px)">
+<a href="PROFILE Public Hero.dc.html" style="display:flex;align-items:center;gap:8px"><img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:24px;width:auto;aspect-ratio:1352/1736"><span style="font:700 13.5px Inter,sans-serif;color:var(--text-0)">PROFILE</span></a>
+<span style="flex:1"></span>
+<button type="button" onClick="{{ toggleTheme }}" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+</header>
+
+<div style="max-width:1080px;margin:0 auto;padding:0 clamp(14px,3vw,28px) 60px">
+<div role="tablist" style="display:flex;gap:20px;padding:26px 0 0;border-bottom:1px solid var(--border);margin-bottom:26px">
+<button type="button" onClick="{{ selectBlog }}" style="border:none;background:transparent;padding:0 0 12px;margin-bottom:-1px;cursor:pointer;font:{{ blogFont }};color:{{ blogColor }};border-bottom:2px solid {{ blogUnder }}">Blog</button>
+<button type="button" onClick="{{ selectNews }}" style="border:none;background:transparent;padding:0 0 12px;margin-bottom:-1px;cursor:pointer;font:{{ newsFont }};color:{{ newsColor }};border-bottom:2px solid {{ newsUnder }}">News</button>
+</div>
+
+<sc-if value="{{ showBlog }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px">
+<sc-for list="{{ blogCategories }}" as="c" hint-placeholder-count="6"><span style="padding:4px 11px;border-radius:20px;border:1px solid var(--border-strong);font:500 11.5px Inter,sans-serif;color:var(--text-1)">{{ c }}</span></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px">
+<sc-for list="{{ blogPosts }}" as="p" hint-placeholder-count="4">
+<article style="border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div class="ph" style="height:130px">{{ p.imgLabel }}</div>
+<div style="padding:15px 16px">
+<span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--accent)">{{ p.category }}</span>
+<div style="font:700 14.5px/1.35 Inter,sans-serif;color:var(--text-0);margin:6px 0 6px">{{ p.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:9px">{{ p.excerpt }}</div>
+<div style="font:400 11px Inter,sans-serif;color:var(--text-2)">{{ p.date }} · {{ p.readTime }}</div>
+</div>
+</article>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNews }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:0">
+<sc-for list="{{ newsItems }}" as="n" hint-placeholder-count="4">
+<div style="display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border)">
+<span style="flex:none;padding:3px 9px;border-radius:20px;background:var(--gold-soft);color:var(--gold);font:600 10.5px Inter,sans-serif;height:fit-content">{{ n.tag }}</span>
+<div style="flex:1;min-width:0">
+<div style="font:700 14.5px/1.35 Inter,sans-serif;color:var(--text-0);margin-bottom:5px">{{ n.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:5px">{{ n.body }}</div>
+<div style="font:400 11px Inter,sans-serif;color:var(--text-2)">{{ n.date }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: "blog" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const blog = this.state.tab === "blog";
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      showBlog: blog, showNews: !blog,
+      selectBlog: () => this.setState({ tab: "blog" }), selectNews: () => this.setState({ tab: "news" }),
+      blogFont: blog ? "600 13.5px Inter,sans-serif" : "400 13.5px Inter,sans-serif", blogColor: blog ? "var(--text-0)" : "var(--text-1)", blogUnder: blog ? "var(--accent)" : "transparent",
+      newsFont: !blog ? "600 13.5px Inter,sans-serif" : "400 13.5px Inter,sans-serif", newsColor: !blog ? "var(--text-0)" : "var(--text-1)", newsUnder: !blog ? "var(--accent)" : "transparent",
+      blogCategories: ["Career", "Trust", "Verification", "Technology", "Hiring", "Workplace"],
+      blogPosts: [
+        { imgLabel: "// article image", category: "TRUST", title: "How PROFILE's Trust Score actually works", excerpt: "Five capped inputs, no mystery number — a walkthrough of the calculation.", date: "3 Sep 2026", readTime: "6 min" },
+        { imgLabel: "// article image", category: "CAREER", title: "Why verified evidence beats a polished CV", excerpt: "What recruiters actually weigh when a claim is backed by confirmation.", date: "27 Aug 2026", readTime: "5 min" },
+        { imgLabel: "// article image", category: "HIRING", title: "Recruiting without follower counts", excerpt: "Ranking by evidence changes who gets found — and who doesn't.", date: "19 Aug 2026", readTime: "7 min" },
+        { imgLabel: "// article image", category: "VERIFICATION", title: "What happens when a verifier says no", excerpt: "Rejection, correction and dispute — designed as real outcomes, not dead ends.", date: "8 Aug 2026", readTime: "4 min" }
+      ],
+      newsItems: [
+        { tag: "PRODUCT", title: "Trust Passport now supports timed access", body: "Share a passport that expires automatically — no manual revocation required.", date: "5 Sep 2026" },
+        { tag: "PLATFORM", title: "Verification response times published on the Trust Centre", body: "Median time from request to confirmation, by verifier type.", date: "20 Aug 2026" },
+        { tag: "ANNOUNCEMENT", title: "Career Engine adds Cover Letter and Advisor", body: "Evidence-grounded drafting tools, now part of the Career Engine.", date: "12 Aug 2026" },
+        { tag: "PRODUCT", title: "Institution verification queue redesigned", body: "Bulk review tools for institutions confirming high volumes of records.", date: "29 Jul 2026" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

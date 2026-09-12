@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--coral:#C93B22;--coral-soft:#FFF0ED;
+--success:#04763C;--success-soft:#E8F8EE;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+--ink:#111827;--paper:#FFFFFF;--paper-line:#E5E7EB;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--coral:#FF8B78;--coral-soft:rgba(255,111,89,.13);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+.pf-sheet{width:min(880px,100%);margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-elev);overflow:hidden}
+.pf-ph{background:repeating-linear-gradient(45deg,var(--surface-sunken) 0 10px,var(--surface-active) 10px 20px);display:flex;align-items:center;justify-content:center;color:var(--text-2);font:400 11px 'JetBrains Mono',monospace;text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1040px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 80px">
+
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:28px 0 20px">
+<div>
+<div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Career Engine · Portfolio templates</div>
+<h1 style="margin:0;font:700 clamp(22px,3vw,30px)/1.15 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">5 portfolio templates</h1>
+</div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div role="tablist" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{ t.onSelect }}" style="padding:9px 14px;border-radius:9px;border:1.5px solid {{ t.edge }};background:{{ t.bg }};color:{{ t.ink }};font:600 12.5px Inter,sans-serif;cursor:pointer">{{ t.label }}</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isP0 }}" hint-placeholder-val="{{ true }}">
+<div class="pf-sheet">
+<div class="pf-ph" style="height:220px">// hero project photo — commissioning site, 1600×700</div>
+<div style="padding:30px 36px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:8px">VISUAL PORTFOLIO</div>
+<h2 style="margin:0 0 8px;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Amara Okafor — Field &amp; Site Work</h2>
+<p style="margin:0 0 24px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Solar and hybrid commissioning across West Africa, documented as it happened. Every photo below is tied to a verified record.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px">
+<sc-for list="{{ visualProjects }}" as="p" hint-placeholder-count="3">
+<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)">
+<div class="pf-ph" style="height:150px">{{ p.photo }}</div>
+<div style="padding:14px 15px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">{{ p.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ p.body }}</div>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;background:var(--trust-soft);border:1px solid var(--trust);color:var(--trust);font:600 10.5px Inter,sans-serif">✓ Verified</span>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isP1 }}" hint-placeholder-val="{{ false }}">
+<div class="pf-sheet">
+<div style="padding:32px 36px;border-bottom:1px solid var(--border);background:var(--surface-sunken)">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:8px">TECHNICAL PORTFOLIO</div>
+<h2 style="margin:0 0 6px;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Amara Okafor — Electrical &amp; Solar Engineering</h2>
+<p style="margin:0;max-width:64ch;font:400 13px/1.6 Inter,sans-serif;color:var(--text-1)">Specifications, metrics and outcomes for each system delivered. Diagrams and sign-off sheets available per project on request.</p>
+</div>
+<div style="padding:28px 36px">
+<sc-for list="{{ techProjects }}" as="p" hint-placeholder-count="2">
+<div style="display:flex;flex-wrap:wrap;gap:18px;padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--border)">
+<div class="pf-ph" style="flex:0 0 220px;height:150px;border-radius:10px">{{ p.diagram }}</div>
+<div style="flex:1;min-width:220px">
+<div style="font:700 15px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ p.title }}</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:10px">{{ p.body }}</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<sc-for list="{{ p.metrics }}" as="m" hint-placeholder-count="3"><div style="border:1px solid var(--border);border-radius:8px;padding:8px 10px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2)">{{ m.label }}</div><div style="font:600 14px 'JetBrains Mono',monospace;color:var(--text-0)">{{ m.value }}</div></div></sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">Full specification sheets are per-project PDFs, generated from verified evidence — not written free-hand.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isP2 }}" hint-placeholder-val="{{ false }}">
+<div class="pf-sheet">
+<div style="padding:32px 36px;border-bottom:1px solid var(--border)">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--gold);margin-bottom:8px">WRITING &amp; RESEARCH</div>
+<h2 style="margin:0 0 6px;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Amara Okafor — Field Notes &amp; Case Studies</h2>
+<p style="margin:0;max-width:64ch;font:400 13px/1.6 Inter,sans-serif;color:var(--text-1)">Long-form write-ups from real commissioning work, for engineers who want the reasoning, not just the result.</p>
+</div>
+<div style="padding:10px 36px 28px">
+<sc-for list="{{ writingSamples }}" as="w" hint-placeholder-count="3">
+<div style="padding:20px 0;border-bottom:1px solid var(--border)">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:6px">{{ w.date }} · {{ w.readTime }}</div>
+<div style="font:700 16px/1.3 Inter,sans-serif;color:var(--text-0);margin-bottom:8px">{{ w.title }}</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ w.abstract }}</div>
+<a href="#" style="font:600 12.5px Inter,sans-serif">Read the full write-up →</a>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isP3 }}" hint-placeholder-val="{{ false }}">
+<div class="pf-sheet">
+<div style="padding:32px 36px;background:linear-gradient(120deg,#0057D9,#0E7490);color:#fff">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;opacity:.85;margin-bottom:8px">FREELANCE &amp; CONSULTING</div>
+<h2 style="margin:0 0 8px;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em">Amara Okafor — Independent Commissioning Engineer</h2>
+<p style="margin:0 0 16px;max-width:60ch;font:400 13px/1.6 Inter,sans-serif;opacity:.92">Available for solar and hybrid commissioning contracts across West Africa. Typical engagement: 2–8 weeks.</p>
+<a href="#" style="display:inline-flex;height:38px;padding:0 16px;align-items:center;border-radius:9px;background:#fff;color:#0057D9;font:600 13px Inter,sans-serif">Work with me</a>
+</div>
+<div style="padding:26px 36px">
+<div style="font:700 12px Inter,sans-serif;letter-spacing:.06em;color:var(--text-0);margin-bottom:12px">SERVICES</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-bottom:24px">
+<sc-for list="{{ services }}" as="s" hint-placeholder-count="3"><div style="border:1px solid var(--border);border-radius:10px;padding:12px 13px"><div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">{{ s.title }}</div><div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ s.body }}</div></div></sc-for>
+</div>
+<div style="font:700 12px Inter,sans-serif;letter-spacing:.06em;color:var(--text-0);margin-bottom:12px">CLIENT RESULTS</div>
+<sc-for list="{{ testimonials }}" as="t" hint-placeholder-count="2">
+<div style="border-left:3px solid var(--trust);padding:4px 0 4px 16px;margin-bottom:16px">
+<div style="font:400 13px/1.6 Inter,sans-serif;color:var(--text-0);font-style:italic;margin-bottom:6px">"{{ t.quote }}"</div>
+<div style="font:500 11.5px Inter,sans-serif;color:var(--text-1)">{{ t.author }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isP4 }}" hint-placeholder-val="{{ false }}">
+<div class="pf-sheet">
+<div style="padding:32px 36px;border-bottom:1px solid var(--border)">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--text-1);margin-bottom:8px">ACADEMIC PORTFOLIO</div>
+<h2 style="margin:0 0 6px;font:700 22px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Amara Okafor, BSc (Electrical Engineering)</h2>
+<div style="font:400 12.5px Inter,sans-serif;color:var(--text-1)">Lagos State Polytechnic · Renewable Energy Systems</div>
+</div>
+<div style="padding:26px 36px">
+<div style="font:700 12px Inter,sans-serif;letter-spacing:.06em;color:var(--text-0);margin-bottom:10px">RESEARCH &amp; PUBLICATIONS</div>
+<sc-for list="{{ publications }}" as="p" hint-placeholder-count="2">
+<div style="padding:12px 0;border-bottom:1px solid var(--border);font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-0)">{{ p.citation }} <a href="#" style="font-weight:600">View →</a></div>
+</sc-for>
+<div style="font:700 12px Inter,sans-serif;letter-spacing:.06em;color:var(--text-0);margin:20px 0 10px">APPLIED PROJECTS</div>
+<sc-for list="{{ academicProjects }}" as="a" hint-placeholder-count="2">
+<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:3px">{{ a.title }}</div><div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">{{ a.body }}</div></div>
+</sc-for>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1);margin-top:16px">Credential and grant records shown here match the verified entries on the Trust Passport — this page never states a distinction the institution didn't confirm.</div>
+</div>
+</div>
+</sc-if>
+
+<div style="margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Same person, five structures</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">All five use Amara's real record set — the difference is which facts a given audience needs first: a recruiter wants outcomes, a fellow engineer wants specs, a client wants results.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Image placeholders</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Striped placeholders mark where real project photography or diagrams drop in — never generated art standing in for evidence.</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1040},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: 0 };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+
+  renderVals() {
+    const labels = ["Visual / creative", "Technical / engineering", "Writing / research", "Freelance / consulting", "Academic"];
+    const tabs = labels.map((label, i) => {
+      const on = this.state.tab === i;
+      return { label, onSelect: () => this.setState({ tab: i }),
+        bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" };
+    });
+
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      tabs,
+      isP0: this.state.tab === 0, isP1: this.state.tab === 1, isP2: this.state.tab === 2, isP3: this.state.tab === 3, isP4: this.state.tab === 4,
+
+      visualProjects: [
+        { photo: "// site photo — rooftop array, Ikeja General", title: "Ikeja General Hospital", body: "45kW rooftop solar array, paediatric wing." },
+        { photo: "// site photo — substation, GRIDCo", title: "GRIDCo substation programme", body: "14-site HV switchgear maintenance." },
+        { photo: "// site photo — inverter retrofit, Abeokuta", title: "Abeokuta Industrial Park", body: "Hybrid inverter retrofit, 2 production units." }
+      ],
+      techProjects: [
+        { diagram: "// single-line diagram, 45kW array",
+          title: "45kW Rooftop Solar Array — Ikeja General Hospital",
+          body: "Load calculation, string sizing and commissioning for a paediatric-wing critical load.",
+          metrics: [{ label: "CAPACITY", value: "45 kW" }, { label: "DIESEL ↓", value: "61%" }, { label: "PANELS", value: "112" }] },
+        { diagram: "// switchgear layout, GRIDCo programme",
+          title: "HV Switchgear Maintenance — GRIDCo Nigeria",
+          body: "Twelve-week inspection and remediation programme across fourteen substations.",
+          metrics: [{ label: "SITES", value: "14" }, { label: "MISSED WINDOWS", value: "0" }, { label: "DURATION", value: "12 wks" }] }
+      ],
+      writingSamples: [
+        { date: "Mar 2026", readTime: "6 min read", title: "Why load calculation fails on retrofits, not new builds",
+          abstract: "A breakdown of where site surveys underestimate real-world demand, drawn from the Abeokuta retrofit." },
+        { date: "Nov 2025", readTime: "9 min read", title: "Commissioning a hospital microgrid without downtime",
+          abstract: "The sequencing that kept Ikeja General's paediatric wing powered through the entire switchover." },
+        { date: "Jul 2025", readTime: "5 min read", title: "Thermal imaging as a maintenance signal, not just a diagnostic",
+          abstract: "What fourteen substations taught about reading thermal drift before it becomes a fault." }
+      ],
+      services: [
+        { title: "Site survey & load calc", body: "Full electrical load assessment before any design commitment." },
+        { title: "Commissioning", body: "On-site lead through switchover and sign-off." },
+        { title: "Maintenance programmes", body: "Scheduled inspection and remediation at scale." }
+      ],
+      testimonials: [
+        { quote: "Amara's load calculation caught a demand issue our own team missed. Saved the retrofit.", author: "Facilities Director, Abeokuta Industrial Park" },
+        { quote: "Zero missed outage windows across fourteen sites. That doesn't happen by luck.", author: "Programme Manager, GRIDCo Nigeria" }
+      ],
+      publications: [
+        { citation: "Okafor, A. (2025). \u201cLoad Calculation Error Margins in Retrofit Solar Installations.\u201d Lagos State Polytechnic Engineering Review." },
+        { citation: "Okafor, A. & Mensah, K. (2024). \u201cThermal Drift as an Early Fault Indicator in HV Switchgear.\u201d West Africa Power Systems Journal." }
+      ],
+      academicProjects: [
+        { title: "Final-year project: Hybrid microgrid sizing for critical-load facilities", body: "Distinction. Supervised design and simulation of a hospital-scale hybrid system." },
+        { title: "Renewable Energy Systems research placement", body: "Six-month placement contributing field data to a polytechnic solar-viability study." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--surface-active:#142440;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="min-height:100%;display:flex">
+<nav style="flex:0 0 200px;border-right:1px solid var(--border);background:var(--surface-sunken);padding:16px 12px;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;align-items:center;gap:8px;padding:0 8px 14px"><img src="assets/profile-mark.png" alt="" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736"><span style="font:700 12.5px Inter,sans-serif;color:var(--text-0)">Aurora Power</span></div>
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+<button type="button" onClick="{{ n.onSelect }}" style="display:flex;align-items:center;gap:9px;min-height:38px;padding:0 10px;border:none;border-radius:9px;background:{{ n.bg }};cursor:pointer;text-align:left"><span style="width:14px;height:14px;border-radius:4px;border:1.5px solid {{ n.ink }};flex:none"></span><span style="font:{{ n.font }};color:{{ n.ink }}">{{ n.label }}</span></button>
+</sc-for>
+<div style="margin-top:auto;padding-top:12px;border-top:1px dashed var(--border-strong);display:flex;align-items:center;gap:8px;padding-left:8px"><span style="width:26px;height:26px;border-radius:7px;background:var(--accent);color:#fff;font:600 10px Inter,sans-serif;display:flex;align-items:center;justify-content:center">NA</span><span style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">Ngozi Abara · Admin</span></div>
+</nav>
+
+<main style="flex:1;min-width:0;padding:26px clamp(16px,3vw,32px)">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:22px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">{{ sectionTitle }}</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<sc-if value="{{ showOverview }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-bottom:24px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:14px 16px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:6px">{{ s.label }}</div><div style="font:600 22px 'JetBrains Mono',monospace;color:var(--text-0)">{{ s.value }}</div></div>
+</sc-for>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Recent activity</div>
+<sc-for list="{{ activity }}" as="a" hint-placeholder-count="4"><div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font:400 12.5px Inter,sans-serif;color:var(--text-0)"><span style="color:var(--text-2);font:400 11px 'JetBrains Mono',monospace;flex:none">{{ a.time }}</span><span>{{ a.text }}</span></div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showTalent }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0 0 18px;font:400 13px/1.6 Inter,sans-serif;color:var(--text-1)">Ranked by Trust Score and verified evidence — never by followers, likes or views.</p>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ talent }}" as="t" hint-placeholder-count="3">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px">
+<span style="width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ t.initials }}</span>
+<span style="flex:1;min-width:150px"><span style="display:block;font:600 13px Inter,sans-serif;color:var(--text-0)">{{ t.name }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ t.role }} · {{ t.records }} verified records</span></span>
+<span style="font:600 11.5px 'JetBrains Mono',monospace;color:var(--trust)">{{ t.score }}</span>
+<button type="button" style="height:34px;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">View profile</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showRequests }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ requests }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px">
+<span style="flex:1;min-width:180px"><span style="display:block;font:600 13px Inter,sans-serif;color:var(--text-0)">{{ r.record }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ r.person }} · sent {{ r.date }}</span></span>
+<span style="padding:3px 10px;border-radius:20px;background:{{ r.statusBg }};color:{{ r.statusInk }};font:600 11px Inter,sans-serif">{{ r.status }}</span>
+<sc-if value="{{ r.actionable }}" hint-placeholder-val="{{ false }}"><button type="button" style="height:34px;padding:0 13px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">Review</button></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showStaff }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;margin-bottom:14px">
+<input type="text" value="{{ bulkEmails }}" onChange="{{ setBulkEmails }}" placeholder="Paste emails, comma-separated, to invite in bulk" style="flex:1;min-height:40px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13px Inter,sans-serif;outline:none">
+<select value="{{ bulkRole }}" onChange="{{ setBulkRole }}" style="min-height:40px;padding:0 10px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif"><option>Viewer</option><option>Reviewer</option><option>Recruiter</option><option>Admin</option></select>
+<button type="button" onClick="{{ sendInvites }}" style="height:40px;padding:0 15px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer;white-space:nowrap">Send invites</button>
+</div>
+<sc-if value="{{ invitesSent }}" hint-placeholder-val="{{ false }}"><div style="margin-bottom:12px;padding:9px 13px;border:1px solid var(--success);border-radius:9px;background:var(--success-soft);font:500 12px Inter,sans-serif;color:var(--success)">Invites sent — pending acceptance shown below.</div></sc-if>
+<div style="border:1px solid var(--border);border-radius:13px;overflow:hidden">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr;background:var(--surface-sunken);font:600 11px Inter,sans-serif;letter-spacing:.04em"><div style="padding:10px 14px">STAFF</div><div style="padding:10px 14px">ROLE</div><div style="padding:10px 14px">ACCESS</div></div>
+<sc-for list="{{ staff }}" as="s" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:2fr 1fr 1fr;border-top:1px solid var(--border);font:400 12.5px Inter,sans-serif;color:var(--text-0);background:var(--surface)"><div style="padding:10px 14px">{{ s.name }}</div><div style="padding:10px 14px;color:var(--text-1)">{{ s.role }}</div><div style="padding:10px 14px"><span style="padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent);font:600 10.5px Inter,sans-serif">{{ s.access }}</span></div></div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showIntegrations }}" hint-placeholder-val="{{ false }}">
+<a href="PROFILE Enterprise Integrations.dc.html" style="display:inline-flex;height:42px;padding:0 16px;align-items:center;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;text-decoration:none">Open SSO &amp; API key management →</a>
+</sc-if>
+
+<sc-if value="{{ showCompliance }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:20px 22px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Audit trail</div>
+<sc-for list="{{ audit }}" as="a" hint-placeholder-count="4"><div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font:400 12px Inter,sans-serif;color:var(--text-1)"><span style="font:400 11px 'JetBrains Mono',monospace;color:var(--text-2);flex:none">{{ a.time }}</span><span style="color:var(--text-0)">{{ a.text }}</span></div></sc-for>
+</div>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, section: "overview", bulkEmails: "", bulkRole: "Viewer", invitesSent: false };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const sec = this.state.section;
+    const navDefs = [
+      { key: "overview", label: "Overview" }, { key: "talent", label: "Talent search" },
+      { key: "requests", label: "Verification requests" }, { key: "staff", label: "Staff & roles" }, { key: "compliance", label: "Compliance" }, { key: "integrations", label: "Integrations" }
+    ];
+    const nav = navDefs.map(n => {
+      const on = sec === n.key;
+      return { label: n.label, onSelect: () => this.setState({ section: n.key }),
+        bg: on ? "var(--accent-soft)" : "transparent", ink: on ? "var(--accent)" : "var(--text-1)",
+        font: on ? "600 12.5px Inter,sans-serif" : "400 12.5px Inter,sans-serif" };
+    });
+    const titles = { overview: "Overview", talent: "Talent search", requests: "Verification requests", staff: "Staff & roles", compliance: "Compliance", integrations: "Integrations" };
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      nav, sectionTitle: titles[sec],
+      showOverview: sec === "overview", showTalent: sec === "talent", showRequests: sec === "requests", showStaff: sec === "staff", showCompliance: sec === "compliance", showIntegrations: sec === "integrations",
+      stats: [
+        { label: "VERIFIED STAFF RECORDS", value: "142" }, { label: "OPEN VERIFICATION REQUESTS", value: "6" },
+        { label: "TALENT SHORTLISTED", value: "23" }, { label: "STAFF ACCOUNTS", value: "5" }
+      ],
+      activity: [
+        { time: "2h ago", text: "Verified a commissioning record for Amara Okafor." },
+        { time: "1d ago", text: "Kwame Mensah added to Renewable Systems shortlist." },
+        { time: "3d ago", text: "New staff member Tunde Bakare granted Reviewer access." }
+      ],
+      talent: [
+        { initials: "AO", name: "Amara Okafor", role: "Solar & Electrical Engineer", records: 14, score: "812" },
+        { initials: "KM", name: "Kwame Mensah", role: "Electrical Contractor", records: 9, score: "774" },
+        { initials: "JT", name: "Joseph Tembo", role: "Renewables Technician", records: 4, score: "690" }
+      ],
+      requests: [
+        { record: "45kW rooftop array, Ikeja General", person: "Amara Okafor", date: "12 Aug 2026", status: "Awaiting your confirmation", statusBg: "var(--warning-soft)", statusInk: "var(--warning)", actionable: true },
+        { record: "HV switchgear maintenance", person: "Kwame Mensah", date: "9 Aug 2026", status: "Confirmed", statusBg: "var(--success-soft)", statusInk: "var(--success)", actionable: false },
+        { record: "Mini-grid installation", person: "Joseph Tembo", date: "7 Aug 2026", status: "Awaiting your confirmation", statusBg: "var(--warning-soft)", statusInk: "var(--warning)", actionable: true }
+      ],
+      staff: [
+        { name: "Ngozi Abara", role: "Admin", access: "Full access" }, { name: "Tunde Bakare", role: "Reviewer", access: "Verification only" },
+        { name: "Funmi Adeyemi", role: "Recruiter", access: "Talent search only" }, { name: "Segun Ade", role: "Viewer", access: "Read only" }
+      ].concat(this.state.invitesSent ? [{ name: this.state.bulkEmails.split(",")[0]?.trim() || "Invited staff", role: this.state.bulkRole, access: "Pending acceptance" }] : []),
+      bulkEmails: this.state.bulkEmails, setBulkEmails: e => this.setState({ bulkEmails: e.target.value }),
+      bulkRole: this.state.bulkRole, setBulkRole: e => this.setState({ bulkRole: e.target.value }),
+      invitesSent: this.state.invitesSent, sendInvites: () => this.setState({ invitesSent: true, bulkEmails: "" }),
+      audit: [
+        { time: "10 Sep 09:14", text: "Ngozi Abara approved verification for Amara Okafor's commissioning record." },
+        { time: "9 Sep 16:02", text: "Tunde Bakare granted Reviewer access by Ngozi Abara." },
+        { time: "5 Sep 11:40", text: "Workspace domain re-verified (aurorapower.com)." },
+        { time: "2 Sep 08:55", text: "Talent shortlist \u201cRenewable Systems\u201d created." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--surface-active:#142440;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 70px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 18px">
+<div><div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Internal · PROFILE staff only</div><h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Workspace verification review</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<p style="margin:0 0 22px;max-width:70ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-1)">Every organisation, institution and government workspace request lands here before it goes live. A human confirms the domain and the requester's standing — nothing is auto-approved.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px">
+<div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ queue }}" as="q" hint-placeholder-count="4">
+<button type="button" onClick="{{ q.onSelect }}" style="text-align:left;border:1.5px solid {{ q.edge }};background:{{ q.bg }};border-radius:12px;padding:14px 16px;cursor:pointer">
+<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:5px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">{{ q.org }}</span><span style="padding:2px 8px;border-radius:20px;background:{{ q.statusBg }};color:{{ q.statusInk }};font:600 10.5px Inter,sans-serif">{{ q.status }}</span></div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1);margin-bottom:4px">{{ q.type }} · requested by {{ q.requester }}</div>
+<div style="font:400 11px 'JetBrains Mono',monospace;color:var(--text-2)">{{ q.domain }} · {{ q.date }}</div>
+</button>
+</sc-for>
+</div>
+
+<div style="flex:1 1 480px;min-width:280px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:24px 26px">
+<div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:6px"><h2 style="margin:0;font:700 19px Inter,sans-serif;color:var(--text-0)">{{ active.org }}</h2><span style="padding:2px 9px;border-radius:20px;background:{{ active.statusBg }};color:{{ active.statusInk }};font:600 11px Inter,sans-serif">{{ active.status }}</span></div>
+<div style="font:400 12.5px Inter,sans-serif;color:var(--text-1);margin-bottom:18px">{{ active.type }} workspace · requested {{ active.date }}</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-bottom:18px">
+<div style="border:1px solid var(--border);border-radius:9px;padding:10px 12px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:4px">REQUESTER</div><div style="font:400 12px Inter,sans-serif;color:var(--text-0)">{{ active.requester }}</div><div style="font:400 11px Inter,sans-serif;color:var(--text-1)">Personal PROFILE since {{ active.memberSince }}</div></div>
+<div style="border:1px solid var(--border);border-radius:9px;padding:10px 12px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:4px">DOMAIN</div><div style="font:400 12px 'JetBrains Mono',monospace;color:var(--text-0)">{{ active.domain }}</div><div style="font:400 11px Inter,sans-serif;color:{{ active.domainCheckInk }}">{{ active.domainCheck }}</div></div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:10px;padding:14px 15px;margin-bottom:18px;background:var(--surface-sunken)">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Automated checks</div>
+<sc-for list="{{ active.checks }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="font:700 11px Inter,sans-serif;color:{{ c.ink }}">{{ c.glyph }}</span><span style="font:400 12px Inter,sans-serif;color:var(--text-0)">{{ c.label }}</span></div>
+</sc-for>
+</div>
+
+<label style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Reviewer note (shown to requester if rejected)</span><textarea value="{{ note }}" onChange="{{ setNote }}" rows="3" placeholder="Optional unless rejecting" style="padding:10px 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13px/1.6 Inter,sans-serif;outline:none;resize:vertical"></textarea></label>
+
+<div style="display:flex;gap:9px;flex-wrap:wrap">
+<button type="button" onClick="{{ approve }}" style="height:40px;padding:0 16px;border:none;border-radius:9px;background:var(--success);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Approve &amp; provision</button>
+<button type="button" onClick="{{ reject }}" style="height:40px;padding:0 16px;border:1px solid var(--danger);border-radius:9px;background:var(--danger-soft);color:var(--danger);font:600 13px Inter,sans-serif;cursor:pointer">Reject</button>
+<button type="button" style="height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Request more information</button>
+</div>
+<div style="margin-top:14px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Approving provisions the workspace immediately and notifies the requester. Rejecting requires a note — they always get a reason.</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, active: 0, note: "" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const items = [
+      { org: "Lagos State Polytechnic", type: "Institution", requester: "Amara Okafor", domain: "lasp.edu.ng", date: "9 Sep 2026", status: "Pending", statusBg: "var(--surface-sunken)", statusInk: "var(--text-1)", memberSince: "2019", domainCheck: "✓ Resolves, matches .edu registry", domainCheckInk: "var(--success)",
+        checks: [{ glyph: "✓", ink: "var(--success)", label: "Domain is not a free/consumer provider" }, { glyph: "✓", ink: "var(--success)", label: "Requester has an active personal PROFILE" }, { glyph: "◷", ink: "var(--text-1)", label: "MX record ownership — pending manual check" }] },
+      { org: "Federal Ministry of Power", type: "Government", requester: "Chidi Nwosu", domain: "power.gov.ng", date: "8 Sep 2026", status: "Needs manual check", statusBg: "var(--warning-soft)", statusInk: "var(--warning)", memberSince: "2022", domainCheck: "⚠ .gov.ng not in the automated registry", domainCheckInk: "var(--warning)",
+        checks: [{ glyph: "✓", ink: "var(--success)", label: "Domain is not a free/consumer provider" }, { glyph: "✓", ink: "var(--success)", label: "Requester has an active personal PROFILE" }, { glyph: "⚠", ink: "var(--warning)", label: "Government domain — requires manual verification with MDA registry" }] },
+      { org: "Aurora Power", type: "Organisation", requester: "Ngozi Abara", domain: "aurorapower.com", date: "6 Sep 2026", status: "Approved", statusBg: "var(--success-soft)", statusInk: "var(--success)", memberSince: "2024", domainCheck: "✓ Resolves, company registry match", domainCheckInk: "var(--success)",
+        checks: [{ glyph: "✓", ink: "var(--success)", label: "Domain is not a free/consumer provider" }, { glyph: "✓", ink: "var(--success)", label: "Requester has an active personal PROFILE" }, { glyph: "✓", ink: "var(--success)", label: "Company registry match found" }] },
+      { org: "Chongwe Cooperative", type: "Organisation", requester: "Joseph Tembo", domain: "chongwecoop.org", date: "3 Sep 2026", status: "Rejected", statusBg: "var(--danger-soft)", statusInk: "var(--danger)", memberSince: "2023", domainCheck: "✕ Domain registered 4 days ago", domainCheckInk: "var(--danger)",
+        checks: [{ glyph: "✓", ink: "var(--success)", label: "Domain is not a free/consumer provider" }, { glyph: "✓", ink: "var(--success)", label: "Requester has an active personal PROFILE" }, { glyph: "✕", ink: "var(--danger)", label: "Domain age below the 90-day minimum — resubmit after" }] }
+    ];
+    const queue = items.map((q, i) => ({ ...q, onSelect: () => this.setState({ active: i }),
+      bg: this.state.active === i ? "var(--accent-soft)" : "var(--surface)", edge: this.state.active === i ? "var(--accent)" : "var(--border)" }));
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      queue, active: items[this.state.active],
+      note: this.state.note, setNote: e => this.setState({ note: e.target.value }),
+      approve: () => this.forceUpdate(), reject: () => this.forceUpdate()
+    };
+  }
+}
+</script>
+</body>
+</html>

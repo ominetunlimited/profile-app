@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-press:#003A8C;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--coral:#C93B22;--coral-soft:#FFF0ED;
+--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--info:#0369A1;--info-soft:#E8F4FD;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-press:#3B7BEE;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--coral:#FF8B78;--coral-soft:rgba(255,111,89,.13);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--info:#56C2F5;--info-soft:rgba(14,165,233,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .28s cubic-bezier(.22,.61,.36,1)}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@keyframes p-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1420px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 80px">
+
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;padding:32px 0 18px">
+<div>
+<div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px">Phase 5 · Master Prompt §16, §17, §18</div>
+<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">Profile, Trust Passport, verification</h1>
+<p style="margin:10px 0 0;max-width:64ch;font:400 14px/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">A living professional identity where evidence outranks presentation. The passport is the shareable, revocable view of it; verification states are the machinery underneath.</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+<button type="button" onClick="{{ toggleViewer }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">Viewing as: {{ viewerLabel }}</button>
+</div>
+</div>
+
+<section style="border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:26px">
+
+<div style="padding:22px clamp(16px,2.6vw,26px) 0">
+<sc-if value="{{ isOwner }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:9px 13px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-sunken);margin-bottom:18px">
+<span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2)">YOUR VIEW</span>
+<span style="flex:1;min-width:180px;font:400 12px/1.5 Inter,sans-serif;color:var(--text-1)">You see everything, including drafts and rejected items. Switch the viewer control above to see what a recruiter sees.</span>
+<button type="button" style="flex:none;height:32px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Edit profile</button>
+</div>
+</sc-if>
+<sc-if value="{{ isRecruiter }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:9px 13px;border:1px solid var(--info);border-radius:10px;background:var(--info-soft);margin-bottom:18px">
+<span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--info)">RECRUITER VIEW</span>
+<span style="flex:1;min-width:180px;font:400 12px/1.5 Inter,sans-serif;color:var(--text-0)">Drafts, rejected records and private notes are hidden. Amara sees that you viewed this profile.</span>
+</div>
+</sc-if>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<span style="flex:none;width:96px;height:96px;border-radius:50%;background:var(--accent);color:#fff;font:600 34px Inter,sans-serif;display:flex;align-items:center;justify-content:center;position:relative">AO
+<span style="position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:50%;background:var(--trust);border:3px solid var(--surface);color:#04222B;font:700 14px Inter,sans-serif;display:flex;align-items:center;justify-content:center">✓</span>
+</span>
+<div style="flex:1 1 320px;min-width:0">
+<div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:6px">
+<h2 style="margin:0;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Amara Okafor</h2>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--trust-soft);border:1px solid var(--trust);color:var(--trust);font:600 11.5px Inter,sans-serif">✓ Identity verified</span>
+</div>
+<div style="font:400 14px/1.5 Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Solar and electrical engineer · Commissioning lead</div>
+<div style="font:400 12.5px Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Lagos, Nigeria · Open to project and consulting work</div>
+<p style="margin:0 0 16px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Eleven years commissioning solar and hybrid systems for hospitals, schools and light industry across West Africa. Most of my work is documented here with evidence and confirmed by the institutions that commissioned it.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-if value="{{ isRecruiter }}" hint-placeholder-val="{{ false }}">
+<button type="button" style="height:40px;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer">Request introduction</button>
+<button type="button" style="height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13.5px Inter,sans-serif;cursor:pointer">Request Trust Passport</button>
+<button type="button" style="height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13.5px Inter,sans-serif;cursor:pointer">Save to shortlist</button>
+</sc-if>
+<sc-if value="{{ isOwner }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ openPassport }}" style="height:40px;padding:0 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13.5px Inter,sans-serif;cursor:pointer">Share Trust Passport</button>
+<button type="button" style="height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13.5px Inter,sans-serif;cursor:pointer">Record work</button>
+<button type="button" style="height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 13.5px Inter,sans-serif;cursor:pointer">Privacy</button>
+</sc-if>
+</div>
+</div>
+
+<div style="flex:1 1 250px;min-width:230px;display:flex;flex-direction:column;gap:10px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow-card)">
+<div style="position:relative;width:74px;height:74px;flex:none">
+<div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--trust) 0turn .812turn,var(--surface-sunken) .812turn 1turn)"></div>
+<div style="position:absolute;inset:9px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center">
+<span style="font:600 20px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums;letter-spacing:-.02em">812</span>
+<span style="font:500 9px Inter,sans-serif;color:var(--text-1)">of 1000</span>
+</div>
+</div>
+<div style="flex:1;min-width:100px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:3px">Trust Score</div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1);margin-bottom:7px">Established tier</div>
+<button type="button" onClick="{{ toggleExplainer }}" style="height:28px;padding:0 10px;border:1px solid var(--trust);border-radius:7px;background:var(--trust-soft);color:var(--trust);font:600 11px Inter,sans-serif;cursor:pointer">{{ explainerLabel }}</button>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-2);padding:11px 12px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">VERIFIED RECORDS</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">14</div></div>
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-2);padding:11px 12px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">VERIFIERS</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">6</div></div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ explainerOpen }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px;border:1px solid var(--trust);border-radius:13px;background:var(--trust-soft);padding:18px 20px">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;margin-bottom:14px">
+<div style="font:600 14.5px Inter,sans-serif;color:var(--text-0)">How this score is calculated</div>
+<span style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-1)">Recalculated 12 Aug 2026 · 04:12 UTC</span>
+</div>
+<p style="margin:0 0 16px;max-width:70ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-0)">Five inputs, each capped so no single one can carry a score. Nothing here counts followers, likes, views or profile completeness. Only confirmed evidence and the strength of who confirmed it.</p>
+<div style="display:flex;flex-direction:column;gap:11px;margin-bottom:16px">
+<sc-for list="{{ scoreInputs }}" as="s" hint-placeholder-count="5">
+<div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-bottom:5px">
+<span style="font:500 12.5px Inter,sans-serif;color:var(--text-0)">{{ s.label }}</span>
+<span style="font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-1);font-variant-numeric:tabular-nums">{{ s.earned }} / {{ s.cap }}</span>
+</div>
+<div style="height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-bottom:5px"><div style="height:100%;border-radius:3px;background:var(--trust);width:{{ s.w }}"></div></div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1);max-width:72ch">{{ s.note }}</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;padding-top:14px;border-top:1px solid var(--trust);font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">
+<div style="flex:1 1 260px;min-width:0"><strong style="font-weight:600">What would raise it:</strong> a load-calculation credential (+18 est.), or verification of the two pending records (+22 est.). Estimates, not promises.</div>
+<div style="flex:1 1 260px;min-width:0"><strong style="font-weight:600">Disagree with it?</strong> <a href="#">Open a score review</a>. A human reviews the inputs and you get a written response within five working days.</div>
+</div>
+</div>
+</sc-if>
+</div>
+
+<div role="tablist" style="display:flex;gap:18px;padding:20px clamp(16px,2.6vw,26px) 0;border-bottom:1px solid var(--border);overflow:auto;margin-top:4px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button type="button" role="tab" onClick="{{ t.onSelect }}" style="flex:none;border:none;background:transparent;padding:0 0 11px;margin-bottom:-1px;cursor:pointer;white-space:nowrap;font:{{ t.font }};color:{{ t.color }};border-bottom:2px solid {{ t.underline }}">{{ t.label }}</button>
+</sc-for>
+</div>
+
+<div style="padding:20px clamp(16px,2.6vw,26px) 26px">
+
+<sc-if value="{{ showEvidence }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2)">FILTER</span>
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+<button type="button" onClick="{{ f.onSelect }}" style="height:28px;padding:0 11px;border-radius:20px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.ink }};font:{{ f.font }};cursor:pointer">{{ f.label }}</button>
+</sc-for>
+</div>
+
+<sc-for list="{{ records }}" as="r" hint-placeholder-count="4">
+<article style="border:1px solid {{ r.edge }};border-radius:13px;background:var(--surface-2);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="padding:16px 17px">
+<div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:9px">
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:{{ r.statusBg }};border:1px {{ r.statusBorder }} {{ r.statusInk }};color:{{ r.statusInk }};font:600 11px Inter,sans-serif">{{ r.status }}</span>
+<span style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2)">{{ r.date }}</span>
+<span style="flex:1"></span>
+<span style="font:400 11.5px Inter,sans-serif;color:var(--text-2)">{{ r.privacy }}</span>
+</div>
+<h3 style="margin:0 0 6px;font:600 15px/1.35 Inter,sans-serif;color:var(--text-0);letter-spacing:-.01em">{{ r.title }}</h3>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);max-width:68ch;margin-bottom:12px">{{ r.body }}</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin-bottom:12px">
+<div style="border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--surface)"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:4px">CONTRIBUTION</div><div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ r.contribution }}</div></div>
+<div style="border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--surface)"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:4px">OUTCOME</div><div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ r.outcome }}</div></div>
+<div style="border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--surface)"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:4px">EVIDENCE</div><div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ r.evidence }}</div></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+<sc-for list="{{ r.skills }}" as="s" hint-placeholder-count="3">
+<span style="padding:2px 9px;border-radius:20px;border:1px solid var(--border-strong);font:500 11px Inter,sans-serif;color:var(--text-1)">{{ s }}</span>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--border)">
+<span style="flex:1 1 200px;min-width:0;font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ r.source }}</span>
+<a href="#" style="flex:none;font:500 12px Inter,sans-serif">Open record</a>
+</div>
+</div>
+<sc-if value="{{ r.noticePlain }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 17px;background:{{ r.noticeBg }};border-top:1px solid {{ r.noticeInk }}">
+<div style="font:600 12px Inter,sans-serif;color:{{ r.noticeInk }};margin-bottom:4px">{{ r.noticeTitle }}</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-0);max-width:66ch">{{ r.noticeBody }}</div>
+</div>
+</sc-if>
+<sc-if value="{{ r.noticeActionable }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 17px;background:{{ r.noticeBg }};border-top:1px solid {{ r.noticeInk }}">
+<div style="font:600 12px Inter,sans-serif;color:{{ r.noticeInk }};margin-bottom:4px">{{ r.noticeTitle }}</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-0);max-width:66ch;margin-bottom:11px">{{ r.noticeBody }}</div>
+<button type="button" style="height:32px;padding:0 12px;border:none;border-radius:8px;background:{{ r.noticeInk }};color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">{{ r.noticeCta }}</button>
+</div>
+</sc-if>
+</article>
+</sc-for>
+
+<sc-if value="{{ filterEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px dashed var(--border-strong);border-radius:13px;padding:30px 20px;text-align:center">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">No records with that status</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);max-width:44ch;margin:0 auto">Nothing on this profile is currently in that state. Clear the filter to see all fourteen records.</div>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:1 1 260px;min-width:250px;display:flex;flex-direction:column;gap:13px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:15px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Verified by</div>
+<sc-for list="{{ verifiers }}" as="v" hint-placeholder-count="4">
+<div style="display:flex;gap:9px;align-items:center;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+<span style="flex:none;width:28px;height:28px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font:600 10.5px Inter,sans-serif;display:flex;align-items:center;justify-content:center">{{ v.initials }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 12px Inter,sans-serif;color:var(--text-0)">{{ v.name }}</span><span style="display:block;font:400 10.5px Inter,sans-serif;color:var(--text-1)">{{ v.detail }}</span></span>
+</div>
+</sc-for>
+<div style="font:400 11px/1.55 Inter,sans-serif;color:var(--text-1)">Institutions carry more weight than individuals, and a verifier cannot confirm work they commissioned from themselves.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:15px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Skills, by evidence</div>
+<div style="font:400 11px/1.5 Inter,sans-serif;color:var(--text-1);margin-bottom:12px">Ordered by how many verified records support them — never self-rated.</div>
+<sc-for list="{{ skills }}" as="s" hint-placeholder-count="5">
+<div style="margin-bottom:9px">
+<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px"><span style="font:400 11.5px Inter,sans-serif;color:var(--text-0)">{{ s.name }}</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);font-variant-numeric:tabular-nums">{{ s.count }}</span></div>
+<div style="height:5px;border-radius:3px;background:var(--surface-sunken);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--trust);width:{{ s.w }}"></div></div>
+</div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:15px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Credentials</div>
+<sc-for list="{{ credentials }}" as="c" hint-placeholder-count="4">
+<div style="display:flex;gap:9px;align-items:flex-start;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+<span style="flex:none;font:600 11px Inter,sans-serif;color:{{ c.ink }};padding-top:1px">{{ c.glyph }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 12px Inter,sans-serif;color:var(--text-0)">{{ c.name }}</span><span style="display:block;font:400 10.5px/1.45 Inter,sans-serif;color:var(--text-1)">{{ c.detail }}</span></span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showJourney }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+<div style="flex:1 1 420px;min-width:0">
+<h3 style="margin:0 0 6px;font:600 16px Inter,sans-serif;color:var(--text-0)">Professional journey</h3>
+<p style="margin:0 0 18px;max-width:62ch;font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">One timeline, drawn from records rather than typed in. Each entry links to the evidence behind it, so the history cannot drift from what was verified.</p>
+<div style="position:relative;padding-left:22px">
+<div style="position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border-strong)"></div>
+<sc-for list="{{ timeline }}" as="t" hint-placeholder-count="5">
+<div style="position:relative;padding-bottom:20px">
+<span style="position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;background:{{ t.dot }};border:2px solid var(--surface)"></span>
+<div style="font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:4px">{{ t.when }}</div>
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">{{ t.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);max-width:62ch;margin-bottom:5px">{{ t.body }}</div>
+<div style="font:400 11px Inter,sans-serif;color:var(--text-2)">{{ t.proof }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1 1 250px;min-width:240px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Career stage</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Established practitioner, moving toward lead and programme roles. Based on eleven years of verified work, six distinct verifiers and depth in commissioning.</div>
+<div style="border-left:3px solid var(--trust);border-radius:0 10px 10px 0;background:var(--trust-soft);padding:12px 13px">
+<div style="font:600 9.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:6px">COPILOT · FROM 14 VERIFIED RECORDS</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">Your record depth is in commissioning, not design. Lead roles in this field typically ask for both — a design-stage record would close the most common gap.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPassport }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+<div style="flex:1 1 400px;min-width:0">
+<h3 style="margin:0 0 6px;font:600 16px Inter,sans-serif;color:var(--text-0)">Trust Passport</h3>
+<p style="margin:0 0 18px;max-width:62ch;font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">A signed, verifiable summary you share with one party at a time. It states what has been confirmed and by whom, carries an expiry, and can be revoked after you send it.</p>
+
+<div style="border:1px solid var(--trust);border-radius:15px;background:var(--surface-2);box-shadow:var(--shadow-elev);overflow:hidden;max-width:520px">
+<div style="padding:15px 18px;background:var(--trust-soft);border-bottom:1px solid var(--trust);display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:24px;width:auto;aspect-ratio:1352/1736;flex:none">
+<span style="flex:1;min-width:110px;font:600 12.5px Inter,sans-serif;color:var(--text-0)">Trust Passport</span>
+<span style="flex:none;font:500 10.5px 'JetBrains Mono',monospace;color:var(--trust)">PID-8F3A-22C1-9K</span>
+</div>
+<div style="padding:18px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<span style="flex:none;width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;font:600 16px Inter,sans-serif;display:flex;align-items:center;justify-content:center">AO</span>
+<span style="flex:1;min-width:140px"><span style="display:block;font:600 14px Inter,sans-serif;color:var(--text-0)">Amara Okafor</span><span style="display:block;font:400 12px Inter,sans-serif;color:var(--text-1)">Solar and electrical engineer · Lagos</span></span>
+<span style="flex:none;text-align:right"><span style="display:block;font:600 20px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">812</span><span style="display:block;font:400 10px Inter,sans-serif;color:var(--text-1)">Trust Score</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-bottom:16px">
+<sc-for list="{{ passportLines }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface)">
+<span style="flex:none;font:600 12px Inter,sans-serif;color:{{ p.ink }}">{{ p.glyph }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 12px Inter,sans-serif;color:var(--text-0)">{{ p.label }}</span><span style="display:block;font:400 11px/1.5 Inter,sans-serif;color:var(--text-1)">{{ p.detail }}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="padding-top:14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;font:400 11px/1.55 Inter,sans-serif;color:var(--text-1)">
+<div style="flex:1 1 180px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">Issued</strong> 12 Aug 2026 to Aurora Power<br><strong style="font-weight:600;color:var(--text-0)">Expires</strong> 11 Sep 2026 · revocable any time</div>
+<div style="flex:1 1 150px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">Verify independently</strong><br><a href="#">profile.app/v/PID-8F3A-22C1-9K</a></div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+<button type="button" onClick="{{ openPassport }}" style="height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer">Share with someone</button>
+<button type="button" style="height:38px;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12.5px Inter,sans-serif;cursor:pointer">Download PDF</button>
+</div>
+</div>
+
+<div style="flex:1 1 270px;min-width:250px;display:flex;flex-direction:column;gap:13px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:15px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Who currently holds it</div>
+<sc-for list="{{ holders }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--border)">
+<span style="flex:1 1 120px;min-width:0"><span style="display:block;font:500 12px Inter,sans-serif;color:var(--text-0)">{{ h.name }}</span><span style="display:block;font:400 10.5px Inter,sans-serif;color:var(--text-1)">{{ h.detail }}</span></span>
+<button type="button" style="flex:none;height:28px;padding:0 10px;border:1px solid {{ h.ink }};border-radius:7px;background:transparent;color:{{ h.ink }};font:600 11px Inter,sans-serif;cursor:pointer">{{ h.action }}</button>
+</div>
+</sc-for>
+<div style="font:400 11px/1.55 Inter,sans-serif;color:var(--text-1)">Revoking takes effect immediately. The holder sees that access was withdrawn, not why.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:15px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">What a passport never contains</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Date of birth, home address, national ID numbers, document scans, salary history, or anything you have not published. It states that a check passed — never the underlying document.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showStates }}" hint-placeholder-val="{{ false }}">
+<div>
+<h3 style="margin:0 0 6px;font:600 16px Inter,sans-serif;color:var(--text-0)">Verification states</h3>
+<p style="margin:0 0 18px;max-width:66ch;font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">Every state a record can be in, with the copy the user actually sees. Nothing here leaves someone wondering what happens next: each one names who holds it, what is expected, and by when.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface-sunken)">
+<span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);flex:none">FLOW</span>
+<sc-for list="{{ flow }}" as="f" hint-placeholder-count="6">
+<span style="flex:none;display:flex;align-items:center;gap:8px">
+<span style="padding:4px 10px;border-radius:20px;border:1px solid {{ f.ink }};background:{{ f.bg }};color:{{ f.ink }};font:600 11px Inter,sans-serif">{{ f.label }}</span>
+<span style="font:400 12px Inter,sans-serif;color:var(--text-2)">{{ f.arrow }}</span>
+</span>
+</sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px">
+<sc-for list="{{ states }}" as="s" hint-placeholder-count="9">
+<div style="border:1px solid {{ s.ink }};border-radius:13px;background:var(--surface-2);box-shadow:var(--shadow-card);overflow:hidden;display:flex;flex-direction:column">
+<div style="padding:11px 15px;background:{{ s.bg }};border-bottom:1px solid {{ s.ink }};display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span style="font:600 12.5px Inter,sans-serif;color:{{ s.ink }}">{{ s.glyph }} {{ s.name }}</span>
+<span style="flex:1"></span>
+<span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.06em;color:{{ s.ink }}">{{ s.owner }}</span>
+</div>
+<div style="padding:14px 15px;flex:1;display:flex;flex-direction:column">
+<div style="font:600 12.5px/1.5 Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ s.headline }}</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:12px;flex:1">{{ s.body }}</div>
+<div style="font:400 10.5px/1.5 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:11px">{{ s.timing }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<button type="button" style="height:32px;padding:0 12px;border:none;border-radius:8px;background:{{ s.ctaBg }};color:{{ s.ctaInk }};font:600 12px Inter,sans-serif;cursor:pointer">{{ s.cta }}</button>
+<sc-if value="{{ s.hasCta2 }}" hint-placeholder-val="{{ false }}">
+<button type="button" style="height:32px;padding:0 11px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">{{ s.cta2 }}</button>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:16px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:16px 18px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Rules that hold across every state</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">
+<div>A rejected or revoked record is never silently deleted. It stays in the owner's view with the reason, and disappears from public view only.</div>
+<div>The verifier's identity is always shown to the record owner. An anonymous verification does not exist on PROFILE.</div>
+<div>Expiry is announced 30, 14 and 3 days ahead. A lapsed credential greys out rather than vanishing, so a recruiter sees history rather than a gap.</div>
+<div>Every state change is written to an audit trail the owner can read, including who triggered it and when.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPrivacy }}" hint-placeholder-val="{{ false }}">
+<div>
+<h3 style="margin:0 0 6px;font:600 16px Inter,sans-serif;color:var(--text-0)">Who sees what</h3>
+<p style="margin:0 0 18px;max-width:64ch;font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">Stated per audience in plain language, with the legal detail one link away. Nothing on this profile is public by default.</p>
+<div style="border:1px solid var(--border);border-radius:13px;overflow:hidden;background:var(--surface-2);box-shadow:var(--shadow-card)">
+<div style="display:grid;grid-template-columns:minmax(140px,1.6fr) repeat(4,minmax(72px,1fr));background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<div style="padding:10px 14px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2)">DATA</div>
+<div style="padding:10px 8px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);text-align:center">PUBLIC</div>
+<div style="padding:10px 8px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);text-align:center">RECRUITER</div>
+<div style="padding:10px 8px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);text-align:center">PASSPORT</div>
+<div style="padding:10px 8px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);text-align:center">AI</div>
+</div>
+<sc-for list="{{ privacyRows }}" as="p" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:minmax(140px,1.6fr) repeat(4,minmax(72px,1fr));border-bottom:1px solid var(--border);align-items:center;background:{{ p.bg }}">
+<div style="padding:10px 14px;font:400 12px Inter,sans-serif;color:var(--text-0)">{{ p.label }}</div>
+<div style="padding:10px 8px;text-align:center;font:600 12px Inter,sans-serif;color:{{ p.c1ink }}">{{ p.c1 }}</div>
+<div style="padding:10px 8px;text-align:center;font:600 12px Inter,sans-serif;color:{{ p.c2ink }}">{{ p.c2 }}</div>
+<div style="padding:10px 8px;text-align:center;font:600 12px Inter,sans-serif;color:{{ p.c3ink }}">{{ p.c3 }}</div>
+<div style="padding:10px 8px;text-align:center;font:600 12px Inter,sans-serif;color:{{ p.c4ink }}">{{ p.c4 }}</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">
+<div style="flex:1 1 240px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">✓ shown · ◷ on request · ✕ never.</strong> The AI column governs what Copilot may read when generating a CV or answering a recruiter's question. It never reads anything marked ✕, and it never asserts a claim no record supports.</div>
+<div style="flex:1 1 200px;min-width:0"><a href="#">Full privacy statement</a> · <a href="#">Download my data</a> · <a href="#">Delete my account</a></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</section>
+
+<section style="margin-bottom:26px">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:14px">
+<h2 style="margin:0;font:600 18px Inter,sans-serif;color:var(--text-0)">Mobile — 390px</h2>
+<p style="margin:0;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);max-width:58ch">Identity, score and the passport action come first. Evidence follows as a single column; the tab set scrolls rather than wrapping.</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+<div style="flex:none;width:390px;max-width:100%;border:1px solid var(--border-strong);border-radius:22px;background:var(--surface);box-shadow:var(--shadow-elev);overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border)">
+<span style="flex:none;font:400 15px Inter,sans-serif;color:var(--text-1)">←</span>
+<span style="flex:1;min-width:0;font:600 12.5px Inter,sans-serif;color:var(--text-0)">Amara Okafor</span>
+<span style="flex:none;font:400 15px Inter,sans-serif;color:var(--text-1)">⋯</span>
+</div>
+<div style="padding:16px 13px;display:flex;flex-direction:column;gap:13px;background:var(--bg)">
+<div style="display:flex;gap:13px;align-items:center">
+<span style="flex:none;width:60px;height:60px;border-radius:50%;background:var(--accent);color:#fff;font:600 21px Inter,sans-serif;display:flex;align-items:center;justify-content:center;position:relative">AO<span style="position:absolute;right:-2px;bottom:-2px;width:21px;height:21px;border-radius:50%;background:var(--trust);border:2.5px solid var(--bg);color:#04222B;font:700 10px Inter,sans-serif;display:flex;align-items:center;justify-content:center">✓</span></span>
+<span style="flex:1;min-width:0"><span style="display:block;font:700 16px Inter,sans-serif;color:var(--text-0);letter-spacing:-.02em">Amara Okafor</span><span style="display:block;font:400 12px Inter,sans-serif;color:var(--text-1);margin-top:2px">Solar and electrical engineer</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-2);margin-top:2px">Lagos, Nigeria</span></span>
+</div>
+<div style="display:flex;gap:9px">
+<div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 12px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">TRUST SCORE</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">812</div><a href="#" style="display:block;font:500 10.5px Inter,sans-serif;color:var(--trust);margin-top:4px">How it's calculated</a></div>
+<div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 12px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">VERIFIED</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">14</div><div style="font:400 10.5px Inter,sans-serif;color:var(--text-1);margin-top:4px">by 6 verifiers</div></div>
+</div>
+<button type="button" style="min-height:44px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Share Trust Passport</button>
+<div style="display:flex;gap:14px;overflow:auto;border-bottom:1px solid var(--border);padding-bottom:9px">
+<span style="flex:none;font:600 12px Inter,sans-serif;color:var(--text-0);border-bottom:2px solid var(--accent);padding-bottom:9px;margin-bottom:-10px">Evidence</span>
+<span style="flex:none;font:400 12px Inter,sans-serif;color:var(--text-1)">Journey</span>
+<span style="flex:none;font:400 12px Inter,sans-serif;color:var(--text-1)">Passport</span>
+<span style="flex:none;font:400 12px Inter,sans-serif;color:var(--text-1)">Privacy</span>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px"><span style="padding:2px 8px;border-radius:20px;background:var(--trust-soft);border:1px solid var(--trust);color:var(--trust);font:600 10.5px Inter,sans-serif">✓ Verified</span><span style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">12 Aug 2026</span></div>
+<div style="font:600 13px/1.4 Inter,sans-serif;color:var(--text-0);margin-bottom:5px">45kW rooftop array commissioned at Ikeja General Hospital</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:10px">Led the site survey, load calculation and commissioning for the paediatric wing.</div>
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px"><span style="padding:2px 8px;border-radius:20px;border:1px solid var(--border-strong);font:500 10.5px Inter,sans-serif;color:var(--text-1)">Solar PV</span><span style="padding:2px 8px;border-radius:20px;border:1px solid var(--border-strong);font:500 10.5px Inter,sans-serif;color:var(--text-1)">Commissioning</span></div>
+<div style="padding-top:10px;border-top:1px solid var(--border);font:400 11px Inter,sans-serif;color:var(--text-1)">3 evidence files · Verified by Ikeja General</div>
+</div>
+<div style="border:1px solid var(--warning);border-radius:12px;background:var(--surface);padding:13px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px"><span style="padding:2px 8px;border-radius:20px;background:var(--warning-soft);border:1px solid var(--warning);color:var(--warning);font:600 10.5px Inter,sans-serif">⚠ Needs correction</span></div>
+<div style="font:600 13px/1.4 Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Hybrid inverter retrofit, Abeokuta</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:10px">The verifier says the commissioning date is a month out. Correcting it re-submits automatically.</div>
+<button type="button" style="min-height:38px;width:100%;border:none;border-radius:8px;background:var(--warning);color:#fff;font:600 12.5px Inter,sans-serif;cursor:pointer">Fix the date</button>
+</div>
+</div>
+</div>
+
+<div style="flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:12px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Evidence outranks presentation</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">There is no follower count, no connection total, no post count and no engagement figure anywhere on this page. The largest numbers on it are verified records and verifiers — the two things that take work to earn (§17.1).</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Routes</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">How this is calculated → /trust/score · Share Trust Passport → /trust/passport/share · Revoke → /trust/passport/:id/revoke · Open record → /records/:id · Fix the date → /records/:id/correct · Open a score review → /trust/score/review · Verify independently → public /v/:pid, no login.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Prototype data</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">All names, organisations, scores and identifiers here are illustrative sample content for design review, not real platform data.</div>
+</div>
+</div>
+</div>
+</section>
+
+<sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeShare }}" style="position:fixed;inset:0;background:rgba(6,14,28,.55);backdrop-filter:blur(2px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px">
+<div role="dialog" aria-modal="true" style="width:min(460px,100%);max-height:88vh;overflow:auto;border-radius:16px;background:var(--surface-2);border:1px solid var(--border);box-shadow:var(--shadow-elev);padding:24px">
+<div style="font:600 17px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Share your Trust Passport</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:18px">They will see your verified records, credentials and score — and nothing else. You can withdraw access at any time.</div>
+<label style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Share with</span><input type="text" placeholder="Organisation or email address" style="height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:400 13.5px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+<label style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Access expires</span><span style="display:flex;gap:7px;flex-wrap:wrap"><span style="padding:7px 12px;border-radius:8px;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif">30 days</span><span style="padding:7px 12px;border-radius:8px;border:1px solid var(--border-strong);color:var(--text-1);font:500 12px Inter,sans-serif">90 days</span><span style="padding:7px 12px;border-radius:8px;border:1px solid var(--border-strong);color:var(--text-1);font:500 12px Inter,sans-serif">Until revoked</span></span></label>
+<div style="border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:12px 13px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:18px">They will be told who shared it and when. Every time they open it, you see it in your access log.</div>
+<div style="display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap">
+<button type="button" onClick="{{ closeShare }}" style="height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Cancel</button>
+<button type="button" onClick="{{ closeShare }}" style="height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Share passport</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, viewer: "owner", tab: 0, filter: "all", explainerOpen: false, shareOpen: false };
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+
+  renderVals() {
+    const owner = this.state.viewer === "owner";
+    const tabLabels = ["Evidence", "Journey", "Trust Passport", "Verification states", "Who sees what"];
+    const tabs = tabLabels.map((label, i) => ({
+      label, onSelect: () => this.setState({ tab: i }),
+      font: i === this.state.tab ? "600 13px Inter,sans-serif" : "400 13px Inter,sans-serif",
+      color: i === this.state.tab ? "var(--text-0)" : "var(--text-1)",
+      underline: i === this.state.tab ? "var(--accent)" : "transparent"
+    }));
+
+    const allRecords = [
+      { key: "verified", edge: "var(--border)", status: "✓ Verified", statusBg: "var(--trust-soft)", statusBorder: "solid", statusInk: "var(--trust)",
+        date: "12 Aug 2026", privacy: "Public",
+        title: "45kW rooftop array commissioned at Ikeja General Hospital",
+        body: "Site survey, load calculation and commissioning for the paediatric wing, removing its dependence on the diesel generator during scheduled outages.",
+        contribution: "Commissioning lead, team of four", outcome: "Wing runs through outages; diesel use down 61%", evidence: "Sign-off sheet, load report, 2 photos",
+        skills: ["Solar PV", "Load calculation", "Commissioning"],
+        source: "Verified by Ikeja General Hospital · facilities director · 12 Aug 2026",
+        noticeBg: "var(--surface-sunken)", noticeInk: "var(--text-1)", noticeTitle: "", noticeBody: "", noticeCta: "" },
+      { key: "pending", edge: "var(--border)", status: "◷ Pending", statusBg: "var(--surface-sunken)", statusBorder: "dashed", statusInk: "var(--text-1)",
+        date: "28 Jul 2026", privacy: "Visible to you only until verified",
+        title: "Hybrid solar and grid system for Chongwe agricultural cooperative",
+        body: "Specified and installed a 20kW hybrid system serving eleven smallholder farms, including battery sizing for irrigation loads.",
+        contribution: "Sole engineer", outcome: "Eleven farms on scheduled irrigation", evidence: "Commissioning log, 3 photos",
+        skills: ["Hybrid systems", "Battery storage"],
+        source: "With Chongwe Cooperative · engineering lead · day 3 of an expected 5",
+        noticeBg: "var(--surface-sunken)", noticeInk: "var(--text-1)", noticeTitle: "◷ Waiting on the verifier",
+        noticeBody: "No action needed from you. If they have not responded by 2 September we will send a reminder and offer you an alternative verifier.", noticeCta: "" },
+      { key: "correction", edge: "var(--warning)", status: "⚠ Needs correction", statusBg: "var(--warning-soft)", statusBorder: "solid", statusInk: "var(--warning)",
+        date: "14 Jun 2026", privacy: "Hidden while under correction",
+        title: "Hybrid inverter retrofit, Abeokuta light industrial park",
+        body: "Replaced four failing string inverters with a hybrid configuration across two production units.",
+        contribution: "Retrofit engineer", outcome: "Downtime from switchover: 40 minutes", evidence: "Purchase order, commissioning log",
+        skills: ["Inverters", "Retrofit"],
+        source: "Reviewed by Abeokuta Industrial Park · 16 Jun 2026",
+        noticeBg: "var(--warning-soft)", noticeInk: "var(--warning)", noticeTitle: "⚠ The verifier asked for one change",
+        noticeBody: "\u201cCommissioning completed 14 July, not 14 June — our sign-off sheet is dated the 14th of July.\u201d Correcting the date re-submits the record automatically; nothing else is affected.", noticeCta: "Correct the date" },
+      { key: "expired", edge: "var(--border)", status: "◌ Expired", statusBg: "var(--surface-sunken)", statusBorder: "solid", statusInk: "var(--text-1)",
+        date: "3 Mar 2022", privacy: "Public · shown as historic",
+        title: "Site safety card, Lagos State construction register",
+        body: "Held valid from March 2019 to March 2022. Not renewed.",
+        contribution: "Certificate holder", outcome: "—", evidence: "Original certificate on file",
+        skills: ["Site safety"],
+        source: "Was verified by Lagos State construction register · lapsed 3 Mar 2022",
+        noticeBg: "var(--surface-sunken)", noticeInk: "var(--text-1)", noticeTitle: "◌ Kept as history",
+        noticeBody: "Expired items stay on your profile greyed out rather than disappearing, so a recruiter sees a completed period rather than an unexplained gap. It contributes nothing to your score.", noticeCta: "Renew this" },
+      { key: "disputed", edge: "var(--danger)", status: "✕ Rejected · disputed", statusBg: "var(--danger-soft)", statusBorder: "solid", statusInk: "var(--danger)",
+        date: "9 May 2026", privacy: "Visible to you only",
+        title: "Substation protection relay configuration, Ikorodu",
+        body: "Configured protection relays during a scheduled substation upgrade.",
+        contribution: "Contracted engineer", outcome: "Contested", evidence: "Work order, site diary",
+        skills: ["Protection relays"],
+        source: "Rejected by the contracting firm · 11 May 2026 · your dispute is open",
+        noticeBg: "var(--danger-soft)", noticeInk: "var(--danger)", noticeTitle: "✕ Rejected, and you have disputed it",
+        noticeBody: "The verifier said they have no record of your involvement. You submitted a work order and site diary on 14 May. A PROFILE reviewer holds the case and both parties get a written outcome — expected by 19 September.", noticeCta: "View dispute" }
+    ];
+
+    const filterDefs = [
+      { key: "all", label: "All 14" },
+      { key: "verified", label: "✓ Verified" },
+      { key: "pending", label: "◷ Pending" },
+      { key: "correction", label: "⚠ Needs correction" },
+      { key: "disputed", label: "✕ Disputed" }
+    ];
+    const filters = filterDefs.map(f => {
+      const on = this.state.filter === f.key;
+      return {
+        label: f.label, onSelect: () => this.setState({ filter: f.key }),
+        bg: on ? "var(--accent)" : "transparent",
+        ink: on ? "#fff" : "var(--text-1)",
+        border: on ? "var(--accent)" : "var(--border-strong)",
+        font: on ? "600 11.5px Inter,sans-serif" : "500 11.5px Inter,sans-serif"
+      };
+    });
+
+    let records = this.state.filter === "all" ? allRecords : allRecords.filter(r => r.key === this.state.filter);
+    if (!owner) records = records.filter(r => r.key === "verified" || r.key === "expired");
+    records = records.map(r => ({
+      ...r,
+      noticePlain: r.noticeTitle !== "" && r.noticeCta === "",
+      noticeActionable: r.noticeTitle !== "" && r.noticeCta !== ""
+    }));
+
+    const states = [
+      { name: "Draft", glyph: "○", ink: "var(--text-1)", bg: "var(--surface-sunken)", owner: "YOU", headline: "Saved, not submitted", body: "Only you can see this. Submit it whenever the evidence is together — drafts never expire and are never counted against you.", timing: "No deadline", cta: "Continue editing", cta2: "Delete", ctaBg: "var(--accent)", ctaInk: "#fff" },
+      { name: "Submitted", glyph: "↗", ink: "var(--info)", bg: "var(--info-soft)", owner: "PROFILE", headline: "Checking the request before it goes out", body: "We confirm the institution exists, is the right one, and can receive requests. Usually a few minutes.", timing: "Typically under 10 minutes", cta: "Withdraw", cta2: "", ctaBg: "var(--info)", ctaInk: "#fff" },
+      { name: "Pending", glyph: "◷", ink: "var(--text-1)", bg: "var(--surface-sunken)", owner: "VERIFIER", headline: "With the verifier", body: "They can see this record and the files attached to it, and nothing else on your profile. Nothing is needed from you. We reminder at day 7 and offer an alternative verifier at day 14.", timing: "Expected within 5 working days", cta: "Withdraw request", cta2: "Who can see it", ctaBg: "var(--accent)", ctaInk: "#fff" },
+      { name: "Verified", glyph: "✓", ink: "var(--trust)", bg: "var(--trust-soft)", owner: "CONFIRMED", headline: "Confirmed and counted", body: "Now public if you have chosen to publish it, included in your Trust Score, and available to any passport you share. The verifier's name and role are shown alongside it.", timing: "Verified 12 Aug 2026", cta: "Add to CV", cta2: "Share", ctaBg: "var(--trust)", ctaInk: "#04222B" },
+      { name: "Needs correction", glyph: "⚠", ink: "var(--warning)", bg: "var(--warning-soft)", owner: "YOU", headline: "One thing to change", body: "The verifier told us exactly what is wrong, in their words. Correcting it re-submits the record without you starting again, and keeps its original date.", timing: "No deadline, but the request lapses after 30 days", cta: "Make the correction", cta2: "Reply to verifier", ctaBg: "var(--warning)", ctaInk: "#fff" },
+      { name: "Rejected", glyph: "✕", ink: "var(--danger)", bg: "var(--danger-soft)", owner: "YOU", headline: "The verifier did not confirm it", body: "You always get the reason. The record stays in your own view and is removed from public view only. It does not count against your score, and it never becomes invisible to you.", timing: "Rejected 11 May 2026", cta: "Dispute this", cta2: "Try another verifier", ctaBg: "var(--danger)", ctaInk: "#fff" },
+      { name: "Disputed", glyph: "⚖", ink: "var(--info)", bg: "var(--info-soft)", owner: "PROFILE REVIEW", headline: "A human is reviewing it", body: "Both you and the verifier submit evidence. A PROFILE reviewer decides and both parties receive a written outcome. Neither side can edit the record while the case is open.", timing: "Outcome expected within 20 working days", cta: "View the case", cta2: "Add evidence", ctaBg: "var(--info)", ctaInk: "#fff" },
+      { name: "Expiring", glyph: "⚠", ink: "var(--warning)", bg: "var(--warning-soft)", owner: "YOU", headline: "Still valid, but not for long", body: "We tell you at 30, 14 and 3 days. Renewing before the date keeps the record continuous, so your history shows no gap.", timing: "Expires 26 Sep 2026 · 14 days", cta: "Renew now", cta2: "Remind me later", ctaBg: "var(--warning)", ctaInk: "#fff" },
+      { name: "Expired", glyph: "◌", ink: "var(--text-1)", bg: "var(--surface-sunken)", owner: "HISTORIC", headline: "Kept as history, greyed out", body: "Shown on your profile as a completed period rather than deleted, so nobody reads a gap into it. Contributes nothing to your score until renewed.", timing: "Lapsed 3 Mar 2022", cta: "Renew this", cta2: "", ctaBg: "var(--accent)", ctaInk: "#fff" },
+      { name: "Revoked", glyph: "⊘", ink: "var(--danger)", bg: "var(--danger-soft)", owner: "VERIFIER", headline: "The verifier withdrew their confirmation", body: "This is rare and always explained. The record leaves public view and your score is recalculated the same day. You are told who revoked it, when, and on what grounds — and you can dispute it.", timing: "Revoked 2 Feb 2026 · score adjusted the same day", cta: "Dispute this", cta2: "Read the grounds", ctaBg: "var(--danger)", ctaInk: "#fff" }
+    ];
+
+    const flowDefs = [
+      { label: "Draft", ink: "var(--text-1)", bg: "var(--surface)" },
+      { label: "Submitted", ink: "var(--info)", bg: "var(--info-soft)" },
+      { label: "Pending", ink: "var(--text-1)", bg: "var(--surface)" },
+      { label: "Verified", ink: "var(--trust)", bg: "var(--trust-soft)" },
+      { label: "Expiring", ink: "var(--warning)", bg: "var(--warning-soft)" },
+      { label: "Expired", ink: "var(--text-1)", bg: "var(--surface)" }
+    ];
+
+    const privacyDefs = [
+      ["Name and field of work", "✓", "✓", "✓", "✓"],
+      ["Verified records", "✓", "✓", "✓", "✓"],
+      ["Trust Score", "✓", "✓", "✓", "✓"],
+      ["Evidence files", "✕", "◷", "◷", "✓"],
+      ["Pending records", "✕", "✕", "✕", "✓"],
+      ["Rejected and disputed records", "✕", "✕", "✕", "✕"],
+      ["Contact details", "✕", "◷", "✕", "✕"],
+      ["Identity documents", "✕", "✕", "✕", "✕"]
+    ];
+    const inkFor = v => v === "✓" ? "var(--success)" : v === "◷" ? "var(--warning)" : "var(--text-2)";
+
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      viewerLabel: owner ? "You" : "Recruiter",
+      toggleViewer: () => this.setState(s => ({ viewer: s.viewer === "owner" ? "recruiter" : "owner", filter: "all" })),
+      isOwner: owner, isRecruiter: !owner,
+
+      explainerOpen: this.state.explainerOpen,
+      explainerLabel: this.state.explainerOpen ? "Hide the breakdown" : "How this is calculated",
+      toggleExplainer: () => this.setState(s => ({ explainerOpen: !s.explainerOpen })),
+      shareOpen: this.state.shareOpen,
+      openPassport: () => this.setState({ shareOpen: true }),
+      closeShare: () => this.setState({ shareOpen: false }),
+
+      tabs,
+      showEvidence: this.state.tab === 0,
+      showJourney: this.state.tab === 1,
+      showPassport: this.state.tab === 2,
+      showStates: this.state.tab === 3,
+      showPrivacy: this.state.tab === 4,
+
+      filters, records, filterEmpty: records.length === 0,
+
+      scoreInputs: [
+        { label: "Verified evidence", earned: 268, cap: 300, w: "89%", note: "Fourteen records confirmed by an institution or employer. Depth matters more than count — six records in commissioning weigh more than fourteen scattered ones." },
+        { label: "Strength of verifiers", earned: 214, cap: 250, w: "86%", note: "Six distinct verifiers, four of them institutions. A single verifier confirming everything is capped deliberately." },
+        { label: "Credential standing", earned: 156, cap: 200, w: "78%", note: "Two current credentials, one expired. Academic and competency routes count equally (§17.2)." },
+        { label: "Consistency over time", earned: 124, cap: 150, w: "83%", note: "Eleven years with no unexplained gaps and no disputed outcomes against you." },
+        { label: "Identity assurance", earned: 50, cap: 100, w: "50%", note: "Government ID and one employer confirmed. A second independent check would complete this." }
+      ],
+
+      verifiers: [
+        { initials: "IG", name: "Ikeja General Hospital", detail: "Institution · 4 records" },
+        { initials: "LP", name: "Lagos State Polytechnic", detail: "Institution · 2 credentials" },
+        { initials: "GR", name: "GRIDCo Nigeria", detail: "Employer · 3 records" },
+        { initials: "AC", name: "Abeokuta Industrial Park", detail: "Organisation · 2 records" }
+      ],
+      skills: [
+        { name: "Commissioning", count: "9 records", w: "100%" },
+        { name: "Solar PV", count: "7 records", w: "78%" },
+        { name: "Load calculation", count: "5 records", w: "56%" },
+        { name: "Battery storage", count: "3 records", w: "34%" },
+        { name: "Protection relays", count: "2 records", w: "22%" }
+      ],
+      credentials: [
+        { glyph: "✓", ink: "var(--trust)", name: "BSc Electrical Engineering", detail: "Lagos State Polytechnic · verified 2019" },
+        { glyph: "⚠", ink: "var(--warning)", name: "COREN licence", detail: "Current · expires in 14 days" },
+        { glyph: "◷", ink: "var(--text-1)", name: "Solar PV Level 3", detail: "Pending · with the awarding body" },
+        { glyph: "◌", ink: "var(--text-2)", name: "Site safety card", detail: "Expired March 2022" }
+      ],
+
+      timeline: [
+        { when: "2026", title: "Commissioning lead, hospital and institutional projects", body: "Four verified projects this year, all involving load-critical sites.", proof: "4 verified records · 2 verifiers", dot: "var(--trust)" },
+        { when: "2023 — 2025", title: "Senior engineer, GRIDCo Nigeria", body: "Substation and switchgear programmes across Lagos and Ogun states.", proof: "5 verified records · employer confirmed", dot: "var(--trust)" },
+        { when: "2021 — 2023", title: "Independent contractor", body: "Retrofit and hybrid system work for light industry.", proof: "3 verified records · 2 organisations", dot: "var(--trust)" },
+        { when: "2019", title: "BSc Electrical Engineering", body: "Lagos State Polytechnic. Confirmed directly by the institution.", proof: "Credential verified 2019", dot: "var(--accent)" },
+        { when: "2015 — 2019", title: "Technician, then site engineer", body: "Earliest period. Two records verified retrospectively by a former supervisor.", proof: "2 verified records · individual verifier", dot: "var(--border-strong)" }
+      ],
+
+      passportLines: [
+        { glyph: "✓", ink: "var(--trust)", label: "Identity verified", detail: "Government ID and one employer, June 2026" },
+        { glyph: "✓", ink: "var(--trust)", label: "14 verified work records", detail: "Confirmed by 6 verifiers, 4 of them institutions" },
+        { glyph: "✓", ink: "var(--trust)", label: "BSc Electrical Engineering", detail: "Lagos State Polytechnic, confirmed by the institution" },
+        { glyph: "⚠", ink: "var(--warning)", label: "COREN licence — current, expires 26 Sep 2026", detail: "Shown with its expiry rather than as simply valid" },
+        { glyph: "◌", ink: "var(--text-2)", label: "1 credential expired, 1 pending", detail: "Stated openly. A passport never hides an incomplete item." }
+      ],
+      holders: [
+        { name: "Aurora Power", detail: "Shared 12 Aug · opened 3 times · expires 11 Sep", action: "Revoke", ink: "var(--danger)" },
+        { name: "Sunward Energy", detail: "Shared 2 Aug · not yet opened · expires 1 Sep", action: "Revoke", ink: "var(--danger)" },
+        { name: "Ikeja General Hospital", detail: "Access ended 30 Jul", action: "Re-share", ink: "var(--accent)" }
+      ],
+
+      states: states.map(s => ({ ...s, hasCta2: s.cta2 !== "" })),
+      flow: flowDefs.map((f, i) => ({ ...f, arrow: i < flowDefs.length - 1 ? "→" : "" })),
+      privacyRows: privacyDefs.map((r, i) => ({
+        label: r[0], bg: i % 2 ? "var(--surface-sunken)" : "transparent",
+        c1: r[1], c1ink: inkFor(r[1]), c2: r[2], c2ink: inkFor(r[2]),
+        c3: r[3], c3ink: inkFor(r[3]), c4: r[4], c4ink: inkFor(r[4])
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

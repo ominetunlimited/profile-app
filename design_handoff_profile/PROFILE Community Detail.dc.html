@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1080px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 60px">
+<a href="PROFILE Messaging & Communities.dc.html" style="display:inline-block;margin:22px 0 14px;font:600 12.5px Inter,sans-serif">← Communities</a>
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+<div><h1 style="margin:0 0 5px;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">West Africa Renewable Engineers</h1><div style="font:400 12.5px Inter,sans-serif;color:var(--text-1)">1,240 members · Field engineers sharing commissioning practice and site experience.</div></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<div style="display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 22px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3"><button type="button" onClick="{{ t.onSelect }}" style="padding:8px 13px;border-radius:9px;border:1.5px solid {{ t.edge }};background:{{ t.bg }};color:{{ t.ink }};font:600 12px Inter,sans-serif;cursor:pointer">{{ t.label }}</button></sc-for>
+</div>
+
+<sc-if value="{{ showDiscussions }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ discussions }}" as="d" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:15px 17px">
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><span style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ d.initials }}</span><span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ d.author }}</span><span style="font:400 11px Inter,sans-serif;color:var(--text-2)">{{ d.time }}</span></div>
+<div style="font:700 14px/1.4 Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ d.title }}</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ d.body }}</div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-2)">{{ d.replies }} replies</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMembers }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ members }}" as="m" hint-placeholder-count="4">
+<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 14px">
+<span style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ m.initials }}</span>
+<span style="flex:1"><span style="display:block;font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ m.name }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ m.role }}</span></span>
+<span style="font:600 11px 'JetBrains Mono',monospace;color:var(--trust)">{{ m.score }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showAbout }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:20px 22px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Guidelines</div>
+<div style="font:400 12.5px/1.7 Inter,sans-serif;color:var(--text-1)">Evidence over anecdote — cite what you did, not just what you know. No self-promotion without disclosure. Moderated by three verified engineers with 8+ years field experience.</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: "discussions" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const tabDefs = [{ key: "discussions", label: "Discussions" }, { key: "members", label: "Members" }, { key: "about", label: "About" }];
+    const tabs = tabDefs.map(x => { const on = this.state.tab === x.key; return { label: x.label, onSelect: () => this.setState({ tab: x.key }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" }; });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      tabs, showDiscussions: this.state.tab === "discussions", showMembers: this.state.tab === "members", showAbout: this.state.tab === "about",
+      discussions: [
+        { initials: "KM", author: "Kwame Mensah", time: "3h ago", title: "Thermal imaging as a leading indicator — worth the equipment cost?", body: "Ran it across 14 substations this year. Wrote up what it actually caught before failure.", replies: 12 },
+        { initials: "JT", author: "Joseph Tembo", time: "1d ago", title: "Retrofit sizing keeps underestimating real demand", body: "Third project where the site survey missed something the load calc should've caught.", replies: 7 },
+        { initials: "FA", author: "Funmi Adeyemi", time: "3d ago", title: "COREN licence renewal — new documentation requirement?", body: "Anyone else notified about updated continuing-education proof this cycle?", replies: 21 }
+      ],
+      members: [
+        { initials: "AO", name: "Amara Okafor", role: "Solar & Electrical Engineer", score: "812" },
+        { initials: "KM", name: "Kwame Mensah", role: "Electrical Contractor", score: "774" },
+        { initials: "JT", name: "Joseph Tembo", role: "Renewables Technician", score: "690" },
+        { initials: "FA", name: "Funmi Adeyemi", role: "Site Engineer", score: "655" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;
+--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .28s cubic-bezier(.22,.61,.36,1)}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1120px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 80px;position:relative">
+
+<div aria-hidden="true" style="position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1">
+<div style="position:absolute;top:8%;left:4%;width:64px;height:46px;border:2px solid var(--text-2);border-radius:8px;opacity:.07"><div style="position:absolute;top:-9px;left:20px;width:24px;height:10px;border:2px solid var(--text-2);border-bottom:none;border-radius:4px 4px 0 0"></div><div style="position:absolute;top:16px;left:0;right:0;height:2px;background:var(--text-2)"></div></div>
+<div style="position:absolute;top:64%;left:2%;width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:44px solid var(--text-2);opacity:.05;transform:rotate(12deg)"></div>
+<div style="position:absolute;top:14%;right:5%;display:flex;flex-direction:column;gap:5px;opacity:.06;transform:rotate(-8deg)"><div style="width:52px;height:34px;border:2px solid var(--text-2);border-radius:5px"></div><div style="width:52px;height:34px;border:2px solid var(--text-2);border-radius:5px;margin-top:-26px;margin-left:6px"></div></div>
+<div style="position:absolute;top:38%;right:9%;width:58px;height:72px;border:2px solid var(--text-2);border-radius:5px;opacity:.06"><div style="position:absolute;top:12px;left:8px;right:8px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:22px;left:8px;right:14px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:32px;left:8px;right:8px;height:2px;background:var(--text-2)"></div><div style="position:absolute;top:42px;left:8px;right:20px;height:2px;background:var(--text-2)"></div></div>
+<div style="position:absolute;bottom:10%;left:7%;width:60px;height:60px;border:2px solid var(--text-2);border-radius:50%;opacity:.05"></div>
+<div style="position:absolute;bottom:12%;left:9.6%;width:36px;height:36px;border:2px solid var(--text-2);border-radius:50%;opacity:.05"></div>
+<div style="position:absolute;bottom:15%;right:6%;width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:38px solid var(--text-2);opacity:.05"></div>
+<div style="position:absolute;top:80%;right:16%;width:40px;height:40px;background:var(--text-2);opacity:.04;transform:rotate(45deg);border-radius:4px"></div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:22px 0">
+<a href="PROFILE Public Hero.dc.html" style="display:flex;align-items:center;gap:9px">
+<img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:26px;width:auto;aspect-ratio:1352/1736">
+<span style="font:700 14px Inter,sans-serif;color:var(--text-0)">PROFILE</span>
+</a>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:flex;gap:14px;padding:14px 16px;border:1px solid var(--success);border-radius:12px;background:var(--success-soft);margin-bottom:24px">
+<span style="flex:none;font:700 12px Inter,sans-serif;color:var(--success)">✓</span>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-0)"><strong style="font-weight:600">This is the whole upload requirement.</strong> Creating a PROFILE account only ever asks for a profile picture and a cover image — both optional, both skippable. Passports, degrees, certificates and other credential documents belong to verification later, never to sign-up.</div>
+</div>
+
+<section style="border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface-sunken)">
+<span style="flex:1;min-width:140px;font:400 12px Inter,sans-serif;color:var(--text-1)">Step {{ stepNum }} of 5 · {{ stepName }}</span>
+<span style="flex:none;display:flex;align-items:center;gap:9px">
+<span style="width:120px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;display:block"><span style="display:block;height:100%;border-radius:3px;background:var(--accent);width:{{ progressPct }};transition:width .3s cubic-bezier(.22,.61,.36,1)"></span></span>
+</span>
+</div>
+
+<div style="padding:clamp(22px,4vw,40px)">
+
+<sc-if value="{{ isStep0 }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:640px;margin:0 auto">
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">What best describes you right now?</h1>
+<p style="margin:0 0 22px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">This shapes what PROFILE shows you first. Nothing here is permanent.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:11px;margin-bottom:14px">
+<sc-for list="{{ contexts }}" as="c" hint-placeholder-count="7">
+<button type="button" onClick="{{ c.onSelect }}" style="text-align:left;border:1.5px solid {{ c.edge }};background:{{ c.bg }};border-radius:12px;padding:15px 16px;cursor:pointer">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">{{ c.title }}</div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ c.body }}</div>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ needsVerificationPath }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;padding:13px 15px;border:1px solid var(--warning);border-radius:11px;background:var(--warning-soft);margin-bottom:20px">
+<span style="flex:none;font:700 12px Inter,sans-serif;color:var(--warning)">◷</span>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-0)">You'll need to sign in with your personal PROFILE account first — an organisation, institution or government workspace is opened by a person, not created from nothing. It also needs an email on your organisation's own domain, not a personal address. No date of birth is asked here; that check already happened on your personal account.</div>
+</div>
+</sc-if>
+<sc-if value="{{ noVerificationPath }}" hint-placeholder-val="{{ true }}">
+<div style="border-top:1px solid var(--border);padding-top:14px;font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:20px">&nbsp;</div>
+</sc-if>
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ ctaBg }};color:{{ ctaInk }};font:600 14px Inter,sans-serif;cursor:{{ ctaCursor }}">Continue</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrgIdentity }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:460px;margin:0 auto">
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Set up the workspace</h1>
+<p style="margin:0 0 20px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">Organisation, institution and government workspaces are opened by a person, not created from nothing — you need a personal PROFILE account first.</p>
+
+<div style="display:flex;gap:12px;align-items:center;padding:13px 15px;border:1px solid var(--success);border-radius:11px;background:var(--success-soft);margin-bottom:18px">
+<span style="flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;display:flex;align-items:center;justify-content:center">AO</span>
+<div style="flex:1;min-width:0"><div style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">Signed in as Amara Okafor</div><div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">amara.okafor@email.com · this workspace's admin</div></div>
+<a href="PROFILE Sign In.dc.html" style="flex:none;font:600 12px Inter,sans-serif">Not you?</a>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Organisation name</span><input type="text" value="{{ fOrgName }}" onChange="{{ setOrgName }}" placeholder="e.g. Lagos State Polytechnic" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Official email</span><input type="text" value="{{ fOfficialEmail }}" onChange="{{ setOfficialEmail }}" placeholder="you@yourorganisation.gov" style="min-height:44px;padding:0 12px;border:1px solid {{ officialEmailEdge }};border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<sc-if value="{{ officialEmailBad }}" hint-placeholder-val="{{ false }}"><span style="font:400 11.5px Inter,sans-serif;color:var(--warning)">Needs an email on your organisation's own domain — not a personal Gmail, Yahoo or similar address.</span></sc-if>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Country</span>
+<select value="{{ fCountry }}" onChange="{{ setCountry }}" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none">
+<option value="">Select country</option>
+<sc-for list="{{ countries }}" as="co" hint-placeholder-count="15"><option value="{{ co.name }}">{{ co.name }}</option></sc-for>
+</select>
+</label>
+</div>
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-sunken);padding:13px 15px;margin-bottom:20px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">No date of birth, no personal password here — this workspace inherits your existing PROFILE identity. A PROFILE team member confirms the domain before the workspace goes live.</div>
+<div style="display:flex;gap:10px">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ orgCtaBg }};color:{{ orgCtaInk }};font:600 14px Inter,sans-serif;cursor:{{ orgCtaCursor }}">Submit for review</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPersonalIdentity }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:460px;margin:0 auto">
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Create your identity</h1>
+<p style="margin:0 0 22px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">Just enough to get you in. Everything else comes later, on your terms.</p>
+<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Full name</span><input type="text" value="{{ fName }}" onChange="{{ setName }}" placeholder="As you want it shown" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Country</span>
+<select value="{{ fCountry }}" onChange="{{ setCountry }}" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<option value="">Select your country</option>
+<sc-for list="{{ countries }}" as="co" hint-placeholder-count="15"><option value="{{ co.name }}">{{ co.name }}</option></sc-for>
+</select>
+<sc-if value="{{ hasCountry }}" hint-placeholder-val="{{ false }}"><span style="font:400 11px Inter,sans-serif;color:var(--text-1)">Default language: {{ countryLang }} · minimum age {{ countryMinAge }}</span></sc-if>
+</label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Phone number</span>
+<span style="display:flex;gap:8px"><span style="flex:none;min-height:44px;display:flex;align-items:center;padding:0 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface-sunken);color:var(--text-1);font:500 13px 'JetBrains Mono',monospace">{{ countryCode }}</span><input type="text" value="{{ fPhone }}" onChange="{{ setPhone }}" placeholder="Number" style="flex:1;min-width:0;min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></span>
+</label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Date of birth</span><input type="date" value="{{ fDob }}" onChange="{{ setDob }}" style="min-height:44px;padding:0 12px;border:1px solid {{ dobEdge }};border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<sc-if value="{{ dobUnderage }}" hint-placeholder-val="{{ false }}"><span style="font:400 11.5px Inter,sans-serif;color:var(--warning)">You need to be at least {{ countryMinAge }} in {{ fCountry }} to create a PROFILE account.</span></sc-if>
+</label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Email address</span><input type="text" value="{{ fEmail }}" onChange="{{ setEmail }}" placeholder="you@example.com" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Password</span>
+<span style="display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface)"><input type="{{ passType }}" value="{{ fPass }}" onChange="{{ setPass }}" placeholder="At least 8 characters" style="flex:1;min-width:0;min-height:44px;padding:0 12px;border:none;background:transparent;color:var(--text-0);font:400 14px Inter,sans-serif;outline:none"><button type="button" onClick="{{ togglePassEye }}" aria-label="Toggle password visibility" style="flex:none;width:40px;height:40px;border:none;background:transparent;color:var(--text-1);font:12px Inter,sans-serif;cursor:pointer">{{ passEyeLabel }}</button></span>
+</label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Confirm password</span>
+<span style="display:flex;align-items:center;border:1px solid {{ confirmEdge }};border-radius:9px;background:var(--surface)"><input type="{{ confirmType }}" value="{{ fConfirm }}" onChange="{{ setConfirm }}" placeholder="Type it again" style="flex:1;min-width:0;min-height:44px;padding:0 12px;border:none;background:transparent;color:var(--text-0);font:400 14px Inter,sans-serif;outline:none"><button type="button" onClick="{{ toggleConfirmEye }}" aria-label="Toggle password visibility" style="flex:none;width:40px;height:40px;border:none;background:transparent;color:var(--text-1);font:12px Inter,sans-serif;cursor:pointer">{{ confirmEyeLabel }}</button></span>
+<sc-if value="{{ passMismatch }}" hint-placeholder-val="{{ false }}"><span style="font:400 11.5px Inter,sans-serif;color:var(--warning)">Passwords don't match yet.</span></sc-if>
+</label>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:20px">By continuing you agree to PROFILE's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</div>
+<div style="display:flex;gap:10px">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ ctaBg }};color:{{ ctaInk }};font:600 14px Inter,sans-serif;cursor:{{ ctaCursor }}">Continue</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:400px;margin:0 auto">
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Verify your email</h1>
+<p style="margin:0 0 22px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">We sent a 6-digit code to {{ fEmailOrPlaceholder }}.</p>
+<label style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">6-digit code</span><input type="text" inputmode="numeric" maxlength="6" value="{{ fOtp }}" onChange="{{ setOtp }}" placeholder="000000" style="min-height:48px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 22px 'JetBrains Mono',monospace;letter-spacing:.3em;text-align:center;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1);margin-bottom:22px">Didn't get it? <a href="#">Resend code</a></div>
+<div style="display:flex;gap:10px">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ otpCtaBg }};color:{{ otpCtaInk }};font:600 14px Inter,sans-serif;cursor:{{ otpCtaCursor }}">Verify and continue</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:520px;margin:0 auto">
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Add a face to the name</h1>
+<p style="margin:0 0 22px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">A profile picture and cover image — nothing else. Both optional, both changeable any time.</p>
+
+<div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:11px">
+<div onClick="{{ toggleCover }}" style="height:140px;background:{{ coverBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative">
+<sc-if value="{{ coverEmpty }}" hint-placeholder-val="{{ true }}"><div style="text-align:center"><div style="font:600 12.5px Inter,sans-serif;color:var(--text-1);margin-bottom:3px">Add a cover image</div><div style="font:400 11px Inter,sans-serif;color:var(--text-2)">Wide, at least 1500 × 400px</div></div></sc-if>
+<sc-if value="{{ coverFilled }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:9px;right:9px;padding:4px 9px;border-radius:20px;background:rgba(0,0,0,.5);color:#fff;font:500 10.5px Inter,sans-serif">Reposition</div></sc-if>
+</div>
+<div style="padding:14px 16px;display:flex;gap:14px;align-items:center;background:var(--surface)">
+<span onClick="{{ toggleDp }}" style="cursor:pointer;flex:none;width:64px;height:64px;border-radius:50%;background:{{ dpBg }};border:3px solid var(--surface);box-shadow:0 0 0 1px var(--border-strong);display:flex;align-items:center;justify-content:center;margin-top:-38px">
+<sc-if value="{{ dpEmpty }}" hint-placeholder-val="{{ true }}"><span style="font:500 9.5px Inter,sans-serif;color:var(--text-2);text-align:center">Add<br>photo</span></sc-if>
+<sc-if value="{{ dpFilled }}" hint-placeholder-val="{{ false }}"><span style="color:#fff;font:600 18px Inter,sans-serif">{{ initials }}</span></sc-if>
+</span>
+<div style="flex:1;min-width:0"><div style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">{{ previewName }}</div><div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">Click either image to preview a fill</div></div>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-sunken);padding:13px 15px;margin-bottom:20px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">That's it — no ID, no CV, no certificates. Verification happens later, per record, only when you choose to request it.</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer">Continue</button>
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Skip for now</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:480px;margin:0 auto;text-align:center">
+<div style="width:52px;height:52px;border-radius:50%;background:var(--success-soft);border:2px solid var(--success);color:var(--success);display:flex;align-items:center;justify-content:center;font:700 22px Inter,sans-serif;margin:0 auto 18px">✓</div>
+<h1 style="margin:0 0 8px;font:700 clamp(22px,3vw,28px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Your PROFILE exists.</h1>
+<p style="margin:0 0 24px;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Nothing is verified yet, and that's expected — the next few minutes are about recording one real thing and asking someone to confirm it.</p>
+<a href="PROFILE Onboarding.dc.html" style="display:inline-flex;min-height:46px;padding:0 22px;align-items:center;border-radius:10px;background:var(--accent);color:#fff;font:600 14.5px Inter,sans-serif">Continue to your first record</a>
+</div>
+</sc-if>
+
+</div>
+</section>
+
+<div style="margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">The one rule this page exists to enforce</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Step 3 accepts exactly two image uploads. There is no file picker anywhere in this flow that accepts a document, and no copy that hints one is coming.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Routes</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">/create-account/context → /create-account/identity → /create-account/verify-email → /create-account/photos → /create-account/done → onboarding's first-record and verification steps → /home. Registration and onboarding are one continuous system per the Master Prompt's §8 — this page ends by handing off into it, not by dropping straight into Home. Back is available on every step except the first and last. Country selection drives phone country code, default language and the minimum age rule for personal accounts — the 15-country list here is illustrative; production covers every country. Organisation, institution and government paths skip date of birth entirely and require an existing personal PROFILE session plus an official-domain email before a request can be submitted for review.</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null, step: 0, context: -1,
+    name: "", email: "", pass: "", confirm: "", phone: "", country: "", dob: "", otp: "",
+    orgName: "", officialEmail: "",
+    showPass: false, showConfirm: false,
+    coverFilled: false, dpFilled: false
+  };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+  initialsOf(n) {
+    const p = n.trim().split(/\s+/).filter(Boolean);
+    if (!p.length) return "?";
+    return (p[0][0] + (p[1] ? p[1][0] : "")).toUpperCase();
+  }
+  countryData() {
+    return [
+      { name: "Nigeria", code: "+234", lang: "English", minAge: 16 },
+      { name: "United States", code: "+1", lang: "English", minAge: 13 },
+      { name: "United Kingdom", code: "+44", lang: "English", minAge: 13 },
+      { name: "Germany", code: "+49", lang: "German", minAge: 16 },
+      { name: "France", code: "+33", lang: "French", minAge: 15 },
+      { name: "India", code: "+91", lang: "Hindi / English", minAge: 18 },
+      { name: "Brazil", code: "+55", lang: "Portuguese", minAge: 13 },
+      { name: "Japan", code: "+81", lang: "Japanese", minAge: 16 },
+      { name: "South Korea", code: "+82", lang: "Korean", minAge: 14 },
+      { name: "South Africa", code: "+27", lang: "English", minAge: 13 },
+      { name: "United Arab Emirates", code: "+971", lang: "Arabic", minAge: 18 },
+      { name: "Kenya", code: "+254", lang: "English / Swahili", minAge: 13 },
+      { name: "Ghana", code: "+233", lang: "English", minAge: 13 },
+      { name: "Canada", code: "+1", lang: "English / French", minAge: 13 },
+      { name: "Egypt", code: "+20", lang: "Arabic", minAge: 16 }
+    ];
+  }
+  ageFromDob(dobStr) {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const notYetBirthday = (now.getMonth() < d.getMonth()) || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate());
+    if (notYetBirthday) age--;
+    return age;
+  }
+  renderVals() {
+    const s = this.state;
+    const step = s.step;
+    const contextChosen = s.context >= 0;
+    const countries = this.countryData();
+    const countryRec = countries.find(c => c.name === s.country);
+    const minAge = countryRec ? countryRec.minAge : 16;
+    const age = this.ageFromDob(s.dob);
+    const isOrgPath = [4, 5, 6].includes(s.context);
+    const dobUnderage = !isOrgPath && s.dob !== "" && age !== null && age < minAge;
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email.trim());
+    const passValid = s.pass.length >= 8;
+    const passwordsMatch = s.confirm.length > 0 && s.confirm === s.pass;
+    const passMismatch = s.confirm.length > 0 && s.confirm !== s.pass;
+    const identityValid = s.name.trim().length > 1 && !!countryRec && s.phone.trim().length > 3 &&
+      s.dob !== "" && !dobUnderage && emailValid && passValid && passwordsMatch;
+
+    const freeDomains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "aol.com", "protonmail.com"];
+    const officialDomain = s.officialEmail.includes("@") ? s.officialEmail.trim().toLowerCase().split("@")[1] : "";
+    const officialEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.officialEmail.trim()) && officialDomain && !freeDomains.includes(officialDomain);
+    const officialEmailBad = s.officialEmail.trim().length > 0 && !officialEmailValid;
+    const orgValid = s.orgName.trim().length > 1 && officialEmailValid && !!countryRec;
+
+    const otpValid = /^\d{6}$/.test(s.otp.trim());
+
+    const stepNames = ["Choose context", "Create identity", "Verify email", "Photos", "Done"];
+    const contextDefs = [
+      { title: "I'm a professional", body: "Working, with a career history to build on." },
+      { title: "I'm a student", body: "Studying, with projects and early work to record." },
+      { title: "I freelance or contract", body: "Independent work, delivered for different clients." },
+      { title: "I'm exploring", body: "Not sure yet — you can change this any time." },
+      { title: "Institution", body: "University, college, polytechnic or research body." },
+      { title: "Government", body: "Ministry, department or agency (MDA)." },
+      { title: "Organisation or company", body: "A business hiring, verifying or managing talent." }
+    ];
+    const verificationContexts = [4, 5, 6];
+    const contexts = contextDefs.map((c, i) => {
+      const on = s.context === i;
+      return { ...c, onSelect: () => this.setState({ context: i }),
+        bg: on ? "var(--accent-soft)" : "var(--surface)", edge: on ? "var(--accent)" : "var(--border)" };
+    });
+
+    return {
+      themeLabel: s.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = s.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+
+      stepNum: step + 1, stepName: stepNames[step], progressPct: Math.round((step / 4) * 100) + "%",
+      isStep0: step === 0, isStep1: step === 1, isStep2: step === 2, isStep3: step === 3, isStep4: step === 4,
+
+      contexts,
+      needsVerificationPath: verificationContexts.includes(s.context),
+      noVerificationPath: !verificationContexts.includes(s.context),
+      next: () => {
+        if (step === 0 && !contextChosen) return;
+        if (step === 1 && isOrgPath && !orgValid) return;
+        if (step === 1 && !isOrgPath && !identityValid) return;
+        if (step === 2 && !otpValid) return;
+        this.setState({ step: Math.min(4, step + 1) });
+      },
+      back: () => this.setState({ step: Math.max(0, step - 1) }),
+
+      isOrgIdentity: isOrgPath, isPersonalIdentity: !isOrgPath,
+      ctaBg: (step === 0 ? contextChosen : step === 1 ? identityValid : true) ? "var(--accent)" : "var(--surface-sunken)",
+      ctaInk: (step === 0 ? contextChosen : step === 1 ? identityValid : true) ? "#fff" : "var(--text-3)",
+      ctaCursor: (step === 0 ? contextChosen : step === 1 ? identityValid : true) ? "pointer" : "not-allowed",
+      orgCtaBg: orgValid ? "var(--accent)" : "var(--surface-sunken)",
+      orgCtaInk: orgValid ? "#fff" : "var(--text-3)",
+      orgCtaCursor: orgValid ? "pointer" : "not-allowed",
+      fOrgName: s.orgName, setOrgName: e => this.setState({ orgName: e.target.value }),
+      fOfficialEmail: s.officialEmail, setOfficialEmail: e => this.setState({ officialEmail: e.target.value }),
+      officialEmailBad, officialEmailEdge: officialEmailBad ? "var(--warning)" : "var(--border-strong)",
+      otpCtaBg: otpValid ? "var(--accent)" : "var(--surface-sunken)",
+      otpCtaInk: otpValid ? "#fff" : "var(--text-3)",
+      otpCtaCursor: otpValid ? "pointer" : "not-allowed",
+
+      countries, hasCountry: !!countryRec,
+      countryLang: countryRec ? countryRec.lang : "",
+      countryMinAge: minAge,
+      countryCode: countryRec ? countryRec.code : "+—",
+      fCountry: s.country, setCountry: e => this.setState({ country: e.target.value }),
+      fPhone: s.phone, setPhone: e => this.setState({ phone: e.target.value }),
+      fDob: s.dob, setDob: e => this.setState({ dob: e.target.value }),
+      dobUnderage, dobEdge: dobUnderage ? "var(--warning)" : "var(--border-strong)",
+
+      fName: s.name, fEmail: s.email, fPass: s.pass, fConfirm: s.confirm,
+      setName: e => this.setState({ name: e.target.value }),
+      setEmail: e => this.setState({ email: e.target.value }),
+      setPass: e => this.setState({ pass: e.target.value }),
+      setConfirm: e => this.setState({ confirm: e.target.value }),
+      passType: s.showPass ? "text" : "password",
+      confirmType: s.showConfirm ? "text" : "password",
+      passEyeLabel: s.showPass ? "Hide" : "Show",
+      confirmEyeLabel: s.showConfirm ? "Hide" : "Show",
+      togglePassEye: () => this.setState(st => ({ showPass: !st.showPass })),
+      toggleConfirmEye: () => this.setState(st => ({ showConfirm: !st.showConfirm })),
+      passMismatch, confirmEdge: passMismatch ? "var(--warning)" : "var(--border-strong)",
+
+      fOtp: s.otp, setOtp: e => this.setState({ otp: e.target.value.replace(/\D/g, "").slice(0, 6) }),
+      fEmailOrPlaceholder: s.email.trim() || "your email address",
+
+      coverFilled: s.coverFilled, coverEmpty: !s.coverFilled,
+      coverBg: s.coverFilled ? "linear-gradient(120deg,var(--accent-soft),var(--trust-soft))" : "var(--surface-sunken)",
+      toggleCover: () => this.setState(st => ({ coverFilled: !st.coverFilled })),
+      dpFilled: s.dpFilled, dpEmpty: !s.dpFilled,
+      dpBg: s.dpFilled ? "var(--accent)" : "var(--surface-sunken)",
+      toggleDp: () => this.setState(st => ({ dpFilled: !st.dpFilled })),
+      initials: this.initialsOf(s.name),
+      previewName: s.name.trim() || "Your name"
+    };
+  }
+}
+</script>
+</body>
+</html>

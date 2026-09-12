@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+.toggle{width:38px;height:22px;border-radius:20px;position:relative;cursor:pointer;border:none;flex:none}
+.knob{position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:900px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 70px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<h1 style="margin:0;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Settings &amp; Privacy</h1>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4"><button type="button" onClick="{{ t.onSelect }}" style="padding:8px 13px;border-radius:9px;border:1.5px solid {{ t.edge }};background:{{ t.bg }};color:{{ t.ink }};font:600 12px Inter,sans-serif;cursor:pointer">{{ t.label }}</button></sc-for>
+</div>
+
+<sc-if value="{{ showSecurity }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">Two-factor authentication</span><button type="button" onClick="{{ toggleMfa }}" class="toggle" style="background:{{ mfaOn ? 'var(--success)' : 'var(--border-strong)' }}"><span class="knob" style="left:{{ mfaKnob }}"></span></button></div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">A 6-digit code is required on unrecognised devices. {{ mfaStatus }}</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Signed-in devices</div>
+<sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+<span><span style="display:block;font:500 12.5px Inter,sans-serif;color:var(--text-0)">{{ d.name }}</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-1)">{{ d.location }} · {{ d.time }}</span></span>
+<sc-if value="{{ d.isCurrent }}" hint-placeholder-val="{{ false }}"><span style="font:600 11px Inter,sans-serif;color:var(--success)">This device</span></sc-if>
+<sc-if value="{{ d.canRevoke }}" hint-placeholder-val="{{ false }}"><button type="button" style="height:30px;padding:0 11px;border:1px solid var(--danger);border-radius:7px;background:var(--danger-soft);color:var(--danger);font:600 11.5px Inter,sans-serif;cursor:pointer">Sign out</button></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Recent security activity</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">212 suspicious login attempts blocked in the last 24 hours across the platform. No activity on your account required action.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPrivacy }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ visibility }}" as="v" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px">
+<span><span style="display:block;font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ v.label }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ v.body }}</span></span>
+<select value="{{ v.value }}" style="min-height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif">
+<sc-for list="{{ v.options }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+</select>
+</div>
+</sc-for>
+<div style="border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--accent-soft);padding:13px 15px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-0)">Verified badges and Trust Score always stay visible wherever your profile is — hiding them isn't offered, since it would let a claim be shown without its evidence trail.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNotif }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ notifPrefs }}" as="n" hint-placeholder-count="6">
+<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 16px">
+<span><span style="display:block;font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ n.label }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ n.body }}</span></span>
+<button type="button" onClick="{{ n.onToggle }}" class="toggle" style="background:{{ n.on ? 'var(--success)' : 'var(--border-strong)' }}"><span class="knob" style="left:{{ n.knob }}"></span></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showData }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">Export your data</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Download every record, evidence file and verification history tied to your account.</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+<sc-for list="{{ exportRequests }}" as="e" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:9px;padding:9px 12px;background:var(--surface-sunken)">
+<span><span style="display:block;font:500 12px Inter,sans-serif;color:var(--text-0)">Requested {{ e.date }}</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-1)">{{ e.size }}</span></span>
+<sc-if value="{{ e.ready }}" hint-placeholder-val="{{ false }}"><button type="button" style="height:30px;padding:0 12px;border:none;border-radius:7px;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;cursor:pointer">Download</button></sc-if>
+<sc-if value="{{ e.pending }}" hint-placeholder-val="{{ false }}"><span style="font:600 11px Inter,sans-serif;color:var(--warning)">Preparing…</span></sc-if>
+</div>
+</sc-for>
+</div>
+<button type="button" onClick="{{ requestExport }}" style="height:38px;padding:0 15px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface-sunken);color:var(--text-0);font:600 12.5px Inter,sans-serif;cursor:pointer">Request new export</button>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">What AI can use</div>
+<label style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><span style="font:400 12.5px Inter,sans-serif;color:var(--text-0)">Let Advisor read my records to give guidance</span><button type="button" class="toggle" style="background:var(--success)"><span class="knob" style="left:18px"></span></button></label>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">AI never fabricates a credential or achievement — see the Trust Centre for what it can and can't do.</div>
+</div>
+<div style="border:1px solid var(--danger);border-radius:13px;background:var(--danger-soft);padding:18px 20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--danger);margin-bottom:6px">Delete account</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-0);margin-bottom:12px">Removes your personal data. Records that institutions or employers independently verified may remain in their own systems.</div>
+<button type="button" style="height:38px;padding:0 15px;border:1px solid var(--danger);border-radius:9px;background:var(--surface);color:var(--danger);font:600 12.5px Inter,sans-serif;cursor:pointer">Start deletion</button>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, tab: "security", mfaOn: true, notifState: { verification: true, messages: true, opportunities: true, community: false, mission: true, marketing: false }, exports: [{ date: "8 Sep 2026", size: "1.2 GB", ready: true, pending: false }, { date: "10 Sep 2026", size: "estimating…", ready: false, pending: true }] };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const tabDefs = [{ key: "security", label: "Security" }, { key: "privacy", label: "Privacy & visibility" }, { key: "notif", label: "Notifications" }, { key: "data", label: "Data & AI" }];
+    const tabs = tabDefs.map(x => { const on = this.state.tab === x.key; return { label: x.label, onSelect: () => this.setState({ tab: x.key }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" }; });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      tabs, showSecurity: this.state.tab === "security", showPrivacy: this.state.tab === "privacy", showNotif: this.state.tab === "notif", showData: this.state.tab === "data",
+      notifPrefs: [
+        { key: "verification", label: "Verification updates", body: "When an institution or employer confirms, rejects, or requests more on a record." },
+        { key: "messages", label: "Messages", body: "New messages from connections, employers or institutions." },
+        { key: "opportunities", label: "Opportunity matches", body: "New matches above your minimum threshold." },
+        { key: "community", label: "Community activity", body: "Replies and mentions in communities you've joined." },
+        { key: "mission", label: "Trust & security alerts", body: "Sign-ins from new devices, password changes." },
+        { key: "marketing", label: "Product updates & marketing", body: "New features, occasional PROFILE news." }
+      ].map(n => ({ ...n, on: this.state.notifState[n.key], knob: this.state.notifState[n.key] ? "18px" : "2px",
+        onToggle: () => this.setState(s => ({ notifState: { ...s.notifState, [n.key]: !s.notifState[n.key] } })) })),
+      exportRequests: this.state.exports,
+      requestExport: () => this.setState(s => ({ exports: [{ date: "Just now", size: "estimating…", ready: false, pending: true }, ...s.exports] })),
+      mfaOn: this.state.mfaOn, mfaKnob: this.state.mfaOn ? "18px" : "2px", mfaStatus: this.state.mfaOn ? "Currently on." : "Currently off — turning this on is strongly recommended.",
+      toggleMfa: () => this.setState(s => ({ mfaOn: !s.mfaOn })),
+      devices: [
+        { name: "MacBook Pro · Chrome", location: "Lagos, Nigeria", time: "Active now", isCurrent: true, canRevoke: false },
+        { name: "iPhone 15 · PROFILE app", location: "Lagos, Nigeria", time: "2 hours ago", isCurrent: false, canRevoke: true },
+        { name: "Windows PC · Edge", location: "Abuja, Nigeria", time: "14 days ago", isCurrent: false, canRevoke: true }
+      ],
+      visibility: [
+        { label: "Profile visibility", body: "Who can find and view your full profile.", value: "Public", options: ["Public", "PROFILE members only", "Private"] },
+        { label: "Contact details", body: "Email and phone number on your profile.", value: "Connections only", options: ["Public", "Connections only", "Hidden"] },
+        { label: "Opportunity matching", body: "Whether organisations can discover you for roles.", value: "Discoverable", options: ["Discoverable", "Hidden"] },
+        { label: "Activity history", body: "Your recorded evidence timeline.", value: "Public", options: ["Public", "PROFILE members only", "Private"] },
+        { label: "Search engine indexing", body: "Whether your public profile appears in search results.", value: "Allowed", options: ["Allowed", "Not allowed"] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

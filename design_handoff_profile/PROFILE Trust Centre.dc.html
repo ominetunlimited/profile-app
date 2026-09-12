@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="min-height:100%">
+<header style="border-bottom:1px solid var(--border);background:var(--surface)">
+<div style="max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px clamp(14px,3vw,28px)">
+<a href="PROFILE Public Hero.dc.html" style="display:flex;align-items:center;gap:8px"><img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:24px;width:auto;aspect-ratio:1352/1736"><span style="font:700 13.5px Inter,sans-serif;color:var(--text-0)">PROFILE</span></a>
+<span style="flex:1"></span>
+<button type="button" onClick="{{ toggleTheme }}" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+<a href="PROFILE Account Creation.dc.html" style="height:32px;display:flex;align-items:center;padding:0 13px;border-radius:8px;background:var(--accent);color:#fff;font:600 12.5px Inter,sans-serif">Open Your PROFILE</a>
+</div>
+</header>
+
+<div style="max-width:1080px;margin:0 auto;padding:0 clamp(14px,3vw,28px) 70px">
+<div style="padding:44px 0 30px;text-align:center">
+<div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--trust);margin-bottom:10px">TRUST CENTRE</div>
+<h1 style="margin:0 0 12px;font:700 clamp(26px,3.6vw,38px)/1.15 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Credibility should be earned, not assumed.</h1>
+<p style="margin:0 auto;max-width:60ch;font:400 14.5px/1.65 Inter,sans-serif;color:var(--text-1)">Every trust-bearing number on PROFILE opens into a plain-language explanation. No score is ever just asserted — and none of it counts followers, likes or views.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;margin-bottom:44px">
+<sc-for list="{{ pillars }}" as="p" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card);padding:18px 17px">
+<span style="width:32px;height:32px;border-radius:9px;background:{{ p.bg }};color:{{ p.ink }};display:flex;align-items:center;justify-content:center;font:700 13px Inter,sans-serif;margin-bottom:12px">{{ p.glyph }}</span>
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ p.title }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">{{ p.body }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--trust);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-elev);padding:30px clamp(20px,4vw,40px);margin-bottom:44px">
+<div style="display:flex;flex-wrap:wrap;gap:26px;align-items:center">
+<div style="flex:none;position:relative;width:120px;height:120px">
+<div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--trust) 0turn .81turn,var(--surface-sunken) .81turn 1turn)"></div>
+<div style="position:absolute;inset:12px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 30px 'JetBrains Mono',monospace;color:var(--text-0)">812</div>
+</div>
+<div style="flex:1;min-width:260px">
+<div style="font:700 17px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">How the Trust Score is calculated</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ scoreInputs }}" as="s" hint-placeholder-count="5">
+<div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font:500 12.5px Inter,sans-serif;color:var(--text-0)">{{ s.label }}</span><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--text-1)">cap {{ s.cap }}</span></div><div style="height:6px;border-radius:3px;background:var(--surface-sunken);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--trust);width:{{ s.w }}"></div></div></div>
+</sc-for>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-top:10px">Illustrative example. Five capped inputs — no single one can carry a score.</div>
+</div>
+</div>
+</div>
+
+<div style="margin-bottom:44px">
+<h2 style="margin:0 0 18px;font:700 22px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0);text-align:center">Verification, in plain terms</h2>
+<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+<sc-for list="{{ flow }}" as="f" hint-placeholder-count="5">
+<span style="display:flex;align-items:center;gap:10px">
+<span style="padding:7px 14px;border-radius:20px;border:1.5px solid {{ f.edge }};background:{{ f.bg }};color:{{ f.ink }};font:600 12px Inter,sans-serif">{{ f.label }}</span>
+<sc-if value="{{ f.arrow }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-2)">→</span></sc-if>
+</span>
+</sc-for>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-bottom:44px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:20px 22px">
+<div style="font:700 15px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Two pathways, ranked equally</div>
+<div style="font:400 13px/1.7 Inter,sans-serif;color:var(--text-1)">Academic credentials and hands-on competency evidence carry the same weight. PROFILE never treats a degree as inherently stronger proof than eleven years of verified fieldwork.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:20px 22px">
+<div style="font:700 15px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Disagreements get a human</div>
+<div style="font:400 13px/1.7 Inter,sans-serif;color:var(--text-1);margin-bottom:12px">A rejected or revoked record can be disputed. A PROFILE reviewer examines both sides' evidence and both parties receive a written outcome — never an automated final answer.</div>
+<a href="PROFILE Dispute & Appeal.dc.html" style="font:600 12.5px Inter,sans-serif">See the dispute flow →</a>
+</div>
+</div>
+
+<div style="text-align:center;padding:34px 0">
+<h2 style="margin:0 0 10px;font:700 22px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">See it on a real profile</h2>
+<a href="PROFILE Public Profile Page.dc.html" style="display:inline-flex;height:44px;padding:0 20px;align-items:center;border-radius:10px;background:var(--accent);color:#fff;font:600 13.5px Inter,sans-serif">View an example profile</a>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const flowDefs = [
+      { label: "Draft", ink: "var(--text-1)", bg: "var(--surface)", edge: "var(--border-strong)" },
+      { label: "Submitted", ink: "var(--text-0)", bg: "var(--surface-sunken)", edge: "var(--border-strong)" },
+      { label: "Pending with verifier", ink: "var(--text-1)", bg: "var(--surface)", edge: "var(--border-strong)" },
+      { label: "Verified", ink: "var(--trust)", bg: "var(--trust-soft)", edge: "var(--trust)" },
+      { label: "Counted in Trust Score", ink: "var(--trust)", bg: "var(--trust-soft)", edge: "var(--trust)" }
+    ];
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      pillars: [
+        { glyph: "E", bg: "var(--accent-soft)", ink: "var(--accent)", title: "Evidence", body: "Structured records of what happened, not posts." },
+        { glyph: "✓", bg: "var(--trust-soft)", ink: "var(--trust)", title: "Verification", body: "Confirmed by the institution or person who was there." },
+        { glyph: "★", bg: "var(--gold-soft)", ink: "var(--gold)", title: "Trust Score", body: "Five capped, explainable inputs. Never a mystery number." },
+        { glyph: "⎘", bg: "var(--accent-soft)", ink: "var(--accent)", title: "Trust Passport", body: "A signed, revocable summary you share on your terms." }
+      ],
+      scoreInputs: [
+        { label: "Verified evidence", cap: 300, w: "89%" }, { label: "Strength of verifiers", cap: 250, w: "86%" },
+        { label: "Credential standing", cap: 200, w: "78%" }, { label: "Consistency over time", cap: 150, w: "83%" },
+        { label: "Identity assurance", cap: 100, w: "50%" }
+      ],
+      flow: flowDefs.map((f, i) => ({ ...f, arrow: i < flowDefs.length - 1 }))
+    };
+  }
+}
+</script>
+</body>
+</html>

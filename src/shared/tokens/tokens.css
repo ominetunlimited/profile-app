@@ -1,0 +1,94 @@
+/*
+  Source of truth: design_handoff_profile/README.md "Design Tokens" section,
+  itself sourced from `PROFILE Design System.dc.html`.
+
+  FLAGGED DISCREPANCY (per PROFILE_CLAUDE_CODE_BUILD_PROMPT.md §8 "flag, don't
+  silently resolve"): Master Prompt §3.1 gives flat (non-theme-split) hex values
+  for success/warning/danger/gold/trust that differ slightly from this file's
+  light-mode values. The dark-mode values agree almost exactly with the Master
+  Prompt's flat values, which reads as this Handoff being a later per-theme
+  refinement of the same palette rather than a competing decision — but this is
+  a reading, not a confirmed resolution. Held for product sign-off; do not
+  silently pick one side.
+*/
+
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-sunken: #f1f5f9;
+  --border: #e5e7eb;
+  --border-strong: #cbd5e1;
+  --text-0: #1e293b;
+  --text-1: #5b6b80;
+  --text-2: #8496a9;
+  --accent: #0057d9;
+  --trust: #0e7490;
+  --gold: #8a6200;
+  --success: #04763c;
+  --warning: #8a5200;
+  --danger: #c2181d;
+
+  --focus: var(--accent);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+.dark {
+  --bg: #060e1c;
+  --surface: #0c1829;
+  --surface-sunken: #050b16;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text-0: rgba(255, 255, 255, 0.9);
+  --text-1: rgba(255, 255, 255, 0.65);
+  --text-2: rgba(255, 255, 255, 0.4);
+  --accent: #4c8dff;
+  --trust: #00e5ff;
+  --gold: #f4b400;
+  --success: #3ddc7f;
+  --warning: #fbbf24;
+  --danger: #ff7a7a;
+
+  --focus: var(--accent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  background: var(--surface);
+  color: var(--text-0);
+  padding: 0.75rem 1.25rem;
+  border: 2px solid var(--focus);
+  border-radius: 0 0 6px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}

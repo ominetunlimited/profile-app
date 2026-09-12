@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:820px;margin:0 auto;padding:0 clamp(12px,3vw,28px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 18px">
+<a href="PROFILE Public Hero.dc.html" style="display:flex;align-items:center;gap:8px;text-decoration:none"><img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736"><span style="font:700 13px Inter,sans-serif;color:var(--text-0)">PROFILE</span></a>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<h1 style="margin:0 0 14px;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0);text-align:center">How can we help?</h1>
+<input type="text" value="{{ query }}" onChange="{{ setQuery }}" placeholder="Search help articles…" style="width:100%;box-sizing:border-box;min-height:48px;padding:0 16px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none;margin-bottom:22px">
+
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-1);margin-bottom:12px">{{ resultCount }} results</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ filtered }}" as="a" hint-placeholder-count="3">
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:13px 16px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">{{ a.title }}</div>
+<div style="font:400 12px/1.55 Inter,sans-serif;color:var(--text-1)">{{ a.body }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasNoQuery }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+<sc-for list="{{ categories }}" as="c" hint-placeholder-count="6">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);padding:15px 16px">
+<div style="font:600 13px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">{{ c.title }}</div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ c.body }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, query: "" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const articles = [
+      { title: "How does verification work?", body: "An institution or employer confirms your record directly — PROFILE never verifies on their behalf." },
+      { title: "Why was my record rejected?", body: "Common causes: date mismatch, wrong institution selected, or the verifier couldn't confirm your role. You can always dispute." },
+      { title: "How is my Trust Score calculated?", body: "Five capped inputs: verified evidence, verifier strength, credential standing, consistency, identity assurance." },
+      { title: "Can I hide my Trust Score?", body: "No — verified badges and Trust Score always stay visible so a claim is never shown without its evidence trail." },
+      { title: "How do I dispute a rejected record?", body: "Go to Trust Centre → Disagreements get a human, or open the record directly and select Dispute." },
+      { title: "What can PROFILE Advisor see?", body: "Only what you permit in Settings → Data & AI. It never fabricates a credential or achievement." },
+      { title: "How do I delete my account?", body: "Settings → Data & AI → Delete account. Records independently confirmed by an institution may remain in their system." },
+      { title: "How do organisation workspaces get approved?", body: "A person with a personal PROFILE account requests it with an official-domain email; a PROFILE reviewer confirms the domain." }
+    ];
+    const q = this.state.query.trim().toLowerCase();
+    const filtered = q ? articles.filter(a => a.title.toLowerCase().includes(q) || a.body.toLowerCase().includes(q)) : [];
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      query: this.state.query, setQuery: e => this.setState({ query: e.target.value }),
+      hasQuery: q.length > 0, hasNoQuery: q.length === 0,
+      filtered, resultCount: filtered.length,
+      categories: [
+        { title: "Getting started", body: "Account creation, your first record, understanding onboarding." },
+        { title: "Verification", body: "How confirmation works, rejection, disputes and appeals." },
+        { title: "Trust Score", body: "What it measures, how it's calculated, what it doesn't count." },
+        { title: "Career Engine", body: "CV, Portfolio, Cover Letter, and how evidence powers each." },
+        { title: "Organisations & institutions", body: "Workspace setup, staff roles, bulk verification." },
+        { title: "Privacy & security", body: "Visibility settings, data export, account deletion." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

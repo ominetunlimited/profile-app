@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;
+--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .28s cubic-bezier(.22,.61,.36,1)}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@keyframes l-spin{to{transform:rotate(360deg)}}
+@keyframes l-pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 96px">
+
+<header style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;padding:44px 0 22px;border-bottom:1px solid var(--border)">
+<div style="min-width:0">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:44px;width:auto;aspect-ratio:1352/1736">
+<img src="assets/profile-wordmark.svg" alt="PROFILE — Build. Verify. Grow." style="display:block;height:26px;width:auto;aspect-ratio:1354/331">
+</div>
+<div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px">Master Prompt §53 · Approved assets, not redrawn</div>
+<h1 style="margin:0;font:700 clamp(26px,3.6vw,38px)/1.1 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">Logo system</h1>
+<p style="margin:11px 0 0;max-width:62ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">The three supplied files, the rules that keep them from being distorted, and the one implementation pattern every surface uses. The artwork is used exactly as delivered — nothing here recolours, redraws or reconstructs it.</p>
+</div>
+<button type="button" onClick="{{ toggleTheme }}" style="flex:none;height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 13px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</header>
+
+<section style="padding:44px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">01</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">The assets</h2></div>
+<p style="margin:0 0 22px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Three files, three jobs. Every one is scalable vector artwork with a fixed intrinsic ratio — that ratio is what protects it.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px;margin-bottom:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="height:150px;display:flex;align-items:center;justify-content:center;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-mark.png" alt="PROFILE mark" style="display:block;height:104px;width:auto;aspect-ratio:1352/1736">
+</div>
+<div style="padding:15px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Mark</div>
+<div style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:9px">profile-mark-alpha.png · 1352 × 1736</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">App icon, avatar, favicon, top-bar identity anchor, loading state. The default in any space narrower than 160px.</div>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="height:150px;display:flex;align-items:center;justify-content:center;background:var(--surface-sunken);border-bottom:1px solid var(--border);padding:0 18px">
+<img src="assets/profile-wordmark.svg" alt="PROFILE — Build. Verify. Grow." style="display:block;width:100%;max-width:230px;height:auto;aspect-ratio:1354/331">
+</div>
+<div style="padding:15px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Wordmark with tagline</div>
+<div style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:9px">profile-wordmark.svg · 1354 × 331</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">Marketing pages, sign-in, documents, email, the passport header. The tagline is part of the artwork — never separate the two.</div>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="height:150px;display:flex;align-items:center;justify-content:center;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-mark-mono.png" alt="PROFILE mark, monochrome variant" style="display:block;height:104px;width:auto;aspect-ratio:1352/1736">
+</div>
+<div style="padding:15px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Mark — monochrome variant</div>
+<div style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:9px">profile-mark-mono.png · 1352 × 1736</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">For single-colour printing, embossing and watermarks. Transparent, greyscale-shaded.</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;gap:14px;padding:16px 18px;border:1px solid var(--gold);border-radius:12px;background:var(--gold-soft)">
+<div style="flex:none;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--success);padding-top:2px">CLOSED</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-0);max-width:76ch">The colour mark, the monochrome mark, the horizontal lockup and the PNG icon set are all complete — full shading, transparent, correctly scaling. Nothing outstanding on the logo itself remains.</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin-top:16px">
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="padding:22px;display:flex;align-items:center;justify-content:center;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-lockup-horizontal.png" alt="PROFILE — Build. Verify. Grow." style="display:block;width:100%;max-width:280px;height:auto">
+</div>
+<div style="padding:15px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Horizontal lockup</div>
+<div style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:9px">profile-lockup-horizontal.png · 865 × 360</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">Mark and wordmark side by side for wide headers, email signatures and print letterheads where a stacked lockup doesn't fit the aspect ratio.</div>
+</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
+<div style="padding:22px;display:flex;align-items:center;justify-content:center;gap:16px;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-icon-16.png" alt="" style="display:block;width:16px;height:16px">
+<img src="assets/profile-icon-32.png" alt="" style="display:block;width:32px;height:32px">
+<img src="assets/profile-icon-180.png" alt="" style="display:block;width:56px;height:56px">
+<img src="assets/profile-icon-512.png" alt="" style="display:block;width:70px;height:70px">
+</div>
+<div style="padding:15px 16px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Icon set</div>
+<div style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:9px">profile-icon-{16,32,180,512}.png</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-1)">Square canvas, mark centred with proportional padding — covers favicon, browser tab, iOS home-screen and Android/PWA sizes.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding:48px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">02</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Never distorted</h2></div>
+<p style="margin:0 0 22px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">One rule covers almost every failure: set one dimension and let the other follow. Both examples below use the same file — the difference is entirely in how it was sized.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;margin-bottom:18px">
+<div style="border:1.5px solid var(--success);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="height:132px;display:flex;align-items:center;justify-content:center;background:var(--success-soft)">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:92px;width:auto;aspect-ratio:1352/1736">
+</div>
+<div style="padding:13px 14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--success);margin-bottom:5px">✓ Correct</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:7px">Height fixed, width auto.</div>
+<div style="font:400 10.5px/1.5 'JetBrains Mono',monospace;color:var(--text-2)">height:92px<br>width:auto</div>
+</div>
+</div>
+<div style="border:1.5px solid var(--danger);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="height:132px;display:flex;align-items:center;justify-content:center;background:var(--danger-soft)">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:92px;width:150px">
+</div>
+<div style="padding:13px 14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--danger);margin-bottom:5px">✕ Stretched</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:7px">Both dimensions set. The mark widens.</div>
+<div style="font:400 10.5px/1.5 'JetBrains Mono',monospace;color:var(--text-2)">height:92px<br>width:150px</div>
+</div>
+</div>
+<div style="border:1.5px solid var(--danger);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="height:132px;display:flex;align-items:center;justify-content:center;background:var(--danger-soft)">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:92px;width:52px">
+</div>
+<div style="padding:13px 14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--danger);margin-bottom:5px">✕ Squeezed</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:7px">Common when a flex child is allowed to shrink.</div>
+<div style="font:400 10.5px/1.5 'JetBrains Mono',monospace;color:var(--text-2)">flex:1 without<br>flex:none</div>
+</div>
+</div>
+<div style="border:1.5px solid var(--danger);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="height:132px;display:flex;align-items:center;justify-content:center;background:var(--danger-soft);overflow:hidden">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:92px;width:auto;aspect-ratio:1352/1736;transform:rotate(-9deg) scale(1.08)">
+</div>
+<div style="padding:13px 14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--danger);margin-bottom:5px">✕ Rotated or skewed</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:7px">Including as a decorative flourish.</div>
+<div style="font:400 10.5px/1.5 'JetBrains Mono',monospace;color:var(--text-2)">transform:rotate()</div>
+</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">The only pattern to write</div>
+<div style="font:400 11.5px/1.75 'JetBrains Mono',monospace;color:var(--text-1);background:var(--surface-sunken);border-radius:9px;padding:12px 13px;margin-bottom:11px">&lt;img src="assets/profile-mark.png"<br>&nbsp;&nbsp;alt=""<br>&nbsp;&nbsp;style="display:block;<br>&nbsp;&nbsp;&nbsp;&nbsp;height:32px;<br>&nbsp;&nbsp;&nbsp;&nbsp;width:auto;<br>&nbsp;&nbsp;&nbsp;&nbsp;aspect-ratio:1352/1736;<br>&nbsp;&nbsp;&nbsp;&nbsp;flex:none"&gt;</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)"><span style="font-family:'JetBrains Mono',monospace;color:var(--text-0)">aspect-ratio</span> reserves the right box before the file loads, so nothing reflows. <span style="font-family:'JetBrains Mono',monospace;color:var(--text-0)">flex:none</span> stops a flex parent squeezing it. <span style="font-family:'JetBrains Mono',monospace;color:var(--text-0)">display:block</span> removes the inline baseline gap that makes a logo look vertically misaligned in a header.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Also never</div>
+<div style="display:flex;flex-direction:column;gap:8px;font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">
+<div style="display:flex;gap:9px"><span style="color:var(--danger);font-weight:600;flex:none">✕</span><span>Recolour it, apply a filter, add a shadow, or place it inside a coloured circle or rounded square.</span></div>
+<div style="display:flex;gap:9px"><span style="color:var(--danger);font-weight:600;flex:none">✕</span><span>Rebuild the wordmark in Inter, or set the tagline as live text alongside the mark.</span></div>
+<div style="display:flex;gap:9px"><span style="color:var(--danger);font-weight:600;flex:none">✕</span><span>Crop it, or use the counter shape alone as a graphic device.</span></div>
+<div style="display:flex;gap:9px"><span style="color:var(--danger);font-weight:600;flex:none">✕</span><span>Animate its geometry. Only opacity and uniform scale are permitted, and only in the loading state.</span></div>
+<div style="display:flex;gap:9px"><span style="color:var(--danger);font-weight:600;flex:none">✕</span><span>Place it over a photograph, a busy pattern, or a gradient that shifts behind the counter.</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding:48px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">03</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Clear space and minimum size</h2></div>
+<p style="margin:0 0 22px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Clear space is measured from the mark's own width, so it scales with the logo instead of needing a table of pixel values.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">Clear space = ¼ of the mark's width, all sides</div>
+<div style="display:flex;justify-content:center;padding:8px 0">
+<div style="border:1.5px dashed var(--accent);border-radius:8px;padding:19px;background:var(--accent-soft)">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:78px;width:auto;aspect-ratio:1352/1736">
+</div>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);margin-top:12px">Nothing enters the dashed area — no text, no rule, no icon, no card edge. At a 60px mark that is 15px of breathing room.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">Minimum sizes</div>
+<div style="display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+<div style="text-align:center"><img src="assets/profile-mark.png" alt="" style="display:block;height:16px;width:auto;aspect-ratio:1352/1736;margin:0 auto 7px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">16px<br>favicon</div></div>
+<div style="text-align:center"><img src="assets/profile-mark.png" alt="" style="display:block;height:24px;width:auto;aspect-ratio:1352/1736;margin:0 auto 7px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">24px<br>min. screen</div></div>
+<div style="text-align:center"><img src="assets/profile-mark.png" alt="" style="display:block;height:32px;width:auto;aspect-ratio:1352/1736;margin:0 auto 7px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">32px<br>app bar</div></div>
+<div style="text-align:center"><img src="assets/profile-mark.png" alt="" style="display:block;height:48px;width:auto;aspect-ratio:1352/1736;margin:0 auto 7px"><div style="font:400 10px 'JetBrains Mono',monospace;color:var(--text-2)">48px<br>sign-in</div></div>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1);padding-top:12px;border-top:1px solid var(--border)">Mark: 24px minimum on screen, 8mm in print. Wordmark: 120px minimum width — below that the tagline stops being legible and the mark should be used instead.</div>
+</div>
+</div>
+</section>
+
+<section style="padding:48px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">04</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Backgrounds</h2></div>
+<p style="margin:0 0 22px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">The artwork is transparent and carries its own colour, so it sits on both themes unchanged. The limit is contrast against the specific surface, not the theme.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px">
+<sc-for list="{{ grounds }}" as="g" hint-placeholder-count="5">
+<div style="border:1px solid {{ g.edge }};border-radius:13px;overflow:hidden;background:var(--surface)">
+<div style="height:110px;display:flex;align-items:center;justify-content:center;background:{{ g.bg }}">
+<img src="{{ g.src }}" alt="" style="display:block;height:56px;width:auto;aspect-ratio:1352/1736">
+</div>
+<div style="padding:12px 13px">
+<div style="font:600 11.5px Inter,sans-serif;color:{{ g.ink }};margin-bottom:4px">{{ g.verdict }}</div>
+<div style="font:400 11px/1.55 Inter,sans-serif;color:var(--text-1)">{{ g.note }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="padding:48px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">05</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Lockups in place</h2></div>
+<p style="margin:0 0 22px;max-width:64ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Where each variant actually appears in the product, at the size it appears.</p>
+
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:28px;width:auto;aspect-ratio:1352/1736;flex:none">
+<span style="flex:1;min-width:100px;display:flex;align-items:center;gap:8px;height:32px;padding:0 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface)"><span style="width:12px;height:12px;border-radius:50%;border:2px solid var(--text-2);flex:none"></span><span style="font:400 12px Inter,sans-serif;color:var(--text-2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Search people, jobs, organisations…</span></span>
+<span style="flex:none;width:28px;height:28px;border:1px solid var(--border-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;font:400 12px Inter,sans-serif;color:var(--text-1)">✉</span>
+<span style="flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:600 10.5px Inter,sans-serif;display:flex;align-items:center;justify-content:center">AO</span>
+</div>
+<div style="padding:13px 15px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)"><strong style="font-weight:600;color:var(--text-0)">App shell.</strong> Mark alone at 28px, no wordmark, no adjacent “PROFILE” text — the mark is the identity anchor and repeating the name beside it is redundant at this size. It is the only element in the bar with <span style="font-family:'JetBrains Mono',monospace">flex:none</span> and a fixed height.</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="padding:30px 22px;display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-wordmark.svg" alt="PROFILE — Build. Verify. Grow." style="display:block;width:100%;max-width:210px;height:auto;aspect-ratio:1354/331">
+<div style="width:100%;max-width:250px;display:flex;flex-direction:column;gap:8px">
+<div style="min-height:40px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);display:flex;align-items:center;padding:0 12px;font:400 12.5px Inter,sans-serif;color:var(--text-2)">Email address</div>
+<div style="min-height:40px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">Continue</div>
+</div>
+</div>
+<div style="padding:13px 15px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)"><strong style="font-weight:600;color:var(--text-0)">Sign-in and marketing.</strong> Wordmark with its tagline, centred, sized by width against the form below it. This is the only place the tagline appears in the product.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="padding:22px;display:flex;flex-direction:column;gap:12px;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<div style="border:1px solid var(--trust);border-radius:12px;background:var(--surface);overflow:hidden">
+<div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:11px 13px;background:var(--trust-soft);border-bottom:1px solid var(--trust)">
+<img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736;flex:none">
+<span style="flex:1;min-width:90px;font:600 12px Inter,sans-serif;color:var(--text-0)">Trust Passport</span>
+<span style="flex:none;font:500 10px 'JetBrains Mono',monospace;color:var(--trust)">PID-8F3A-22C1-9K</span>
+</div>
+<div style="padding:12px 13px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Amara Okafor · 14 verified records</div>
+</div>
+</div>
+<div style="padding:13px 15px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)"><strong style="font-weight:600;color:var(--text-0)">Trust Passport and documents.</strong> Mark at 22px acting as a provenance stamp — a passport is read by people outside PROFILE, so the source has to be identifiable at a glance and survive being printed.</div>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);overflow:hidden">
+<div style="padding:26px 22px;display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<div style="text-align:center">
+<img src="assets/profile-mark.png" alt="Loading" style="display:block;height:46px;width:auto;aspect-ratio:1352/1736;margin:0 auto 10px;animation:l-pulse 1.5s ease-in-out infinite">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">LOADING · opacity only</div>
+</div>
+<div style="text-align:center">
+<img src="assets/profile-mark.png" alt="" style="display:block;height:46px;width:auto;aspect-ratio:1352/1736;margin:0 auto 10px">
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">IDLE · settled state</div>
+</div>
+<div style="text-align:center">
+<div style="width:46px;height:46px;border-radius:50%;border:2.5px solid var(--trust-soft);border-top-color:var(--trust);animation:l-spin 1.1s linear infinite;margin:0 auto 10px"></div>
+<div style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">✕ NOT A SPINNER</div>
+</div>
+</div>
+<div style="padding:13px 15px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)"><strong style="font-weight:600;color:var(--text-0)">Loading.</strong> The mark pulses on opacity and settles — it never rotates, never flips, never reveals stroke by stroke. Generic spinners are replaced by it everywhere except inside a button, where a 14px mark would be illegible. All of it is suppressed under <span style="font-family:'JetBrains Mono',monospace">prefers-reduced-motion</span>, which this page honours.</div>
+</div>
+</div>
+</section>
+
+<section style="padding:48px 0 0">
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">06</span><h2 style="margin:0;font:600 22px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Accessibility and delivery</h2></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px;margin-top:20px">
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Alternative text</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">In the app bar next to nothing else, <span style="font-family:'JetBrains Mono',monospace;color:var(--text-0)">alt="PROFILE"</span> — it is the link home. In a lockup where the name is already text, or in a decorative row, <span style="font-family:'JetBrains Mono',monospace;color:var(--text-0)">alt=""</span> so a screen reader does not announce it twice.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">As a link</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">The mark in the app bar is a link to Home with a 44×44 hit area regardless of its visual size, and a visible focus ring at 2px offset 2px. It is not a menu trigger — a logo that opens something surprises people.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Delivery</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">The mark and its monochrome variant are delivered as transparent PNGs at 1352 × 1736 — the current masters, with shading baked in rather than referenced. The wordmark stays SVG. Favicon and app icons still need dedicated exports at 16, 32, 180 and 512px, produced from the master rather than scaled in the browser.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:16px 18px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Still needed</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Nothing — the lockup and icon set above closed the last two gaps.</div>
+</div>
+</div>
+</section>
+
+<footer style="margin-top:64px;padding-top:22px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between">
+<img src="assets/profile-wordmark.svg" alt="PROFILE — Build. Verify. Grow." style="display:block;width:100%;max-width:180px;height:auto;aspect-ratio:1354/331">
+<span style="font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-2)">Approved artwork · used as supplied · §53</span>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+  renderVals() {
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      grounds: [
+        { src: "assets/profile-mark.png", bg: "#FFFFFF", edge: "var(--success)", ink: "var(--success)", verdict: "✓ White", note: "The primary case. Full contrast on every element of the artwork." },
+        { src: "assets/profile-mark.png", bg: "#F1F5F9", edge: "var(--success)", ink: "var(--success)", verdict: "✓ Light surface", note: "Cards, sunken panels, the app bar. No change needed." },
+        { src: "assets/profile-mark.png", bg: "#060E1C", edge: "var(--success)", ink: "var(--success)", verdict: "✓ Dark base", note: "The blue holds against near-black. Same file, unmodified." },
+        { src: "assets/profile-mark.png", bg: "#0057D9", edge: "var(--danger)", ink: "var(--danger)", verdict: "✕ Brand blue", note: "The mark is this blue. It disappears into it — use white space or a card instead." },
+        { src: "assets/profile-mark.png", bg: "linear-gradient(120deg,#00E5FF,#003A8C)", edge: "var(--danger)", ink: "var(--danger)", verdict: "✕ Gradient", note: "Contrast shifts across the counter and the highlight is lost." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

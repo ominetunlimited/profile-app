@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:22px clamp(12px,3vw,28px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px">
+<div><div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--text-2);text-transform:uppercase;margin-bottom:6px">Windows desktop app</div><h1 style="margin:0;font:700 22px/1.2 Inter,sans-serif;color:var(--text-0)">PROFILE for Windows</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<div style="display:flex;gap:7px;margin-bottom:18px">
+<sc-for list="{{ picks }}" as="p" hint-placeholder-count="3">
+<button type="button" onClick="{{ p.onSelect }}" style="padding:7px 13px;border-radius:20px;border:1.5px solid {{ p.edge }};background:{{ p.bg }};color:{{ p.ink }};font:600 11.5px Inter,sans-serif;cursor:pointer">{{ p.label }}</button>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.18)">
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 4px 0 10px;background:var(--surface-sunken);border-bottom:1px solid var(--border)">
+<img src="assets/profile-mark.png" alt="" style="height:15px;width:auto;aspect-ratio:1352/1736">
+<span style="font:500 12px Inter,sans-serif;color:var(--text-1);flex:1">PROFILE — {{ windowTitle }}</span>
+<span style="width:44px;height:34px;display:flex;align-items:center;justify-content:center;font:12px Inter,sans-serif;color:var(--text-1)">–</span>
+<span style="width:44px;height:34px;display:flex;align-items:center;justify-content:center;font:11px Inter,sans-serif;color:var(--text-1)">▢</span>
+<span style="width:44px;height:34px;display:flex;align-items:center;justify-content:center;font:13px Inter,sans-serif;color:var(--text-1)">✕</span>
+</div>
+
+<div style="display:flex;height:600px">
+
+<sc-if value="{{ showWorkspace }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;min-width:0">
+<div style="flex:0 0 200px;border-right:1px solid var(--border);background:var(--surface-sunken);padding:12px 8px;display:flex;flex-direction:column;gap:2px">
+<div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);padding:6px 8px">CAREER ENGINE</div>
+<sc-for list="{{ workspaceNav }}" as="n" hint-placeholder-count="4"><div style="padding:8px 10px;border-radius:7px;background:{{ n.bg }};font:{{ n.font }};color:{{ n.ink }}">{{ n.label }}</div></sc-for>
+</div>
+<div style="flex:1;min-width:0;padding:20px 22px;overflow:auto" onDragOver="{{ onDragOver }}" onDrop="{{ onDrop }}" style2="drop-target">
+<div style="font:700 15px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">CV — Technical / Engineering template</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">Amara Okafor — Solar &amp; Electrical Engineer<br>11 years commissioning solar and hybrid systems across West Africa.</div>
+<div style="margin-top:12px;font:600 11px Inter,sans-serif;color:var(--text-0)">Experience</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Commissioning Lead — Independent contracts, 2023–Present</div>
+<sc-if value="{{ dropped }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;border:1px dashed var(--trust);border-radius:8px;background:var(--trust-soft);padding:9px 11px;font:500 11.5px Inter,sans-serif;color:var(--trust)">✓ Citation inserted: 45kW rooftop array, Ikeja General</div></sc-if>
+</div>
+<div style="flex:0 0 260px;border-left:1px solid var(--border);padding:16px 16px;overflow:auto">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Evidence panel</div>
+<div draggable="true" onDragStart="{{ onDragStart }}" style="border:1.5px solid var(--trust);border-radius:9px;background:{{ dragBg }};padding:11px 12px;margin-bottom:8px;font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-0);cursor:grab">✓ 45kW rooftop array, Ikeja General — drag onto CV to cite</div>
+<div style="border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:11px 12px;font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-0)">✓ GRIDCo switchgear programme</div>
+<div style="margin-top:10px;font:400 11px Inter,sans-serif;color:var(--text-2)">Drag an evidence card into the CV panel to insert a citation at the cursor.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPalette }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:70px;background:var(--bg)">
+<div style="width:440px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);box-shadow:0 12px 30px rgba(0,0,0,.16)">
+<div style="padding:12px 14px;border-bottom:1px solid var(--border)"><span style="font:400 13px Inter,sans-serif;color:var(--text-0)">verif</span><span style="font:400 13px Inter,sans-serif;color:var(--text-2)">y record</span></div>
+<sc-for list="{{ paletteResults }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;justify-content:space-between;padding:10px 14px;background:{{ r.bg }}"><span style="font:400 12.5px Inter,sans-serif;color:var(--text-0)">{{ r.label }}</span><span style="font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-2)">{{ r.shortcut }}</span></div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMission }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;padding:20px 24px;overflow:auto">
+<div style="font:700 15px Inter,sans-serif;color:var(--text-0);margin-bottom:14px">Mission Control</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+<sc-for list="{{ missionStats }}" as="m" hint-placeholder-count="3"><div style="border:1px solid var(--border);border-radius:9px;padding:11px 13px"><div style="font:500 9.5px 'JetBrains Mono',monospace;color:var(--text-2);margin-bottom:5px">{{ m.label }}</div><div style="font:600 18px 'JetBrains Mono',monospace;color:var(--text-0)">{{ m.value }}</div></div></sc-for>
+</div>
+<div style="border:1px solid var(--border);border-radius:9px;padding:14px 15px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Needs a decision</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">3 government workspace requests need manual domain review. Full detail on PROFILE Mission Control.dc.html.</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<div style="margin-top:16px;font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Windows optimises for multi-panel workflows and keyboard-first navigation — resizable panels, drag-and-drop evidence citing, and a command palette (Ctrl+K) rather than a wrapped website.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, screen: "workspace", dragging: false, dropped: false };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const s = this.state.screen;
+    const pickDefs = [
+      { key: "workspace", label: "Multi-panel workspace" }, { key: "palette", label: "Command palette" }, { key: "mission", label: "Mission Control" }
+    ];
+    const picks = pickDefs.map(p => {
+      const on = s === p.key;
+      return { label: p.label, onSelect: () => this.setState({ screen: p.key }), bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" };
+    });
+    const titles = { workspace: "Career Engine", palette: "Command Palette", mission: "Mission Control" };
+    const navDefs = [{ key: "cv", label: "CV" }, { key: "portfolio", label: "Portfolio" }, { key: "cover", label: "Cover Letter" }, { key: "advisor", label: "Advisor" }];
+    const workspaceNav = navDefs.map((n, i) => ({ label: n.label, bg: i === 0 ? "var(--accent-soft)" : "transparent", ink: i === 0 ? "var(--accent)" : "var(--text-1)", font: i === 0 ? "600 12.5px Inter,sans-serif" : "400 12.5px Inter,sans-serif" }));
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      picks, windowTitle: titles[s],
+      showWorkspace: s === "workspace", showPalette: s === "palette", showMission: s === "mission",
+      workspaceNav,
+      dragBg: this.state.dragging ? "var(--accent-soft)" : "var(--trust-soft)",
+      onDragStart: () => this.setState({ dragging: true }),
+      onDragOver: e => e.preventDefault(),
+      onDrop: e => { e.preventDefault(); this.setState({ dragging: false, dropped: true }); },
+      dropped: this.state.dropped,
+      paletteResults: [
+        { label: "Verify record: 45kW rooftop array", shortcut: "↵", bg: "var(--accent-soft)" },
+        { label: "Verify record: GRIDCo maintenance", shortcut: "", bg: "transparent" },
+        { label: "Go to Verification Review", shortcut: "", bg: "transparent" },
+        { label: "Open Trust Centre", shortcut: "", bg: "transparent" }
+      ],
+      missionStats: [
+        { label: "OPEN REQUESTS", value: "3,880" }, { label: "ACTIVE DISPUTES", value: "9" }, { label: "UPTIME (30D)", value: "99.97%" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

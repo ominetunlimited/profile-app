@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--surface-active:#142440;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1100px;margin:0 auto;padding:26px clamp(12px,3vw,28px) 60px;display:flex;flex-direction:column;align-items:center">
+<div style="width:100%;max-width:900px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:22px">
+<div><div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--text-2);text-transform:uppercase;margin-bottom:6px">Mobile app · iOS &amp; Android</div><h1 style="margin:0;font:700 22px/1.2 Inter,sans-serif;color:var(--text-0)">PROFILE on mobile</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:14px">
+<button type="button" onClick="{{ setIOS }}" style="padding:7px 14px;border-radius:20px;border:1.5px solid {{ iosEdge }};background:{{ iosBg }};color:{{ iosInk }};font:600 12px Inter,sans-serif;cursor:pointer">iOS</button>
+<button type="button" onClick="{{ setAndroid }}" style="padding:7px 14px;border-radius:20px;border:1.5px solid {{ androidEdge }};background:{{ androidBg }};color:{{ androidInk }};font:600 12px Inter,sans-serif;cursor:pointer">Android</button>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:24px;max-width:640px">
+<sc-for list="{{ picks }}" as="p" hint-placeholder-count="7">
+<button type="button" onClick="{{ p.onSelect }}" style="padding:7px 13px;border-radius:20px;border:1.5px solid {{ p.edge }};background:{{ p.bg }};color:{{ p.ink }};font:600 11.5px Inter,sans-serif;cursor:pointer">{{ p.label }}</button>
+</sc-for>
+</div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-2);margin-bottom:16px">Preview selector above is a design-review convenience — the phone's own navigation is the tab bar and icons inside it.</div>
+
+<sc-if value="{{ isIOSPlatform }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" hint-size="375px,812px">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--bg);font-family:Inter,system-ui,sans-serif">
+<div style="flex:1;min-height:0;overflow:auto;position:relative;padding-top:62px">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;align-items:center;gap:9px;padding:14px 16px 10px">
+<span style="width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">AO</span>
+<button type="button" onClick="{{ goSearch }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:34px;padding:0 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface)"><span style="font:400 12px Inter,sans-serif;color:var(--text-2)">Search PROFILE</span></button>
+<button type="button" onClick="{{ goNotif }}" style="flex:none;width:34px;height:34px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font:12px Inter,sans-serif;color:var(--text-1)">🔔</button>
+</div>
+<div style="padding:4px 16px 16px">
+<div style="border:1px solid var(--trust);border-radius:14px;background:var(--trust-soft);padding:15px 16px;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">Trust Score</span><span style="font:700 20px 'JetBrains Mono',monospace;color:var(--trust)">812</span></div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">14 verified records · 2 requests in review</div>
+</div>
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Next best action</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 14px;margin-bottom:14px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Add your load-calculation credential</div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">Closes your biggest gap for Renewable Systems Lead roles.</div>
+</div>
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Recent activity</div>
+<sc-for list="{{ homeFeed }}" as="f" hint-placeholder-count="3"><div style="border-bottom:1px solid var(--border);padding:10px 0;font:400 12px/1.5 Inter,sans-serif;color:var(--text-0)">{{ f }}</div></sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="height:96px;background:linear-gradient(120deg,var(--accent-soft),var(--trust-soft))"></div>
+<div style="padding:0 16px 16px;margin-top:-30px">
+<span style="display:flex;width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;font:600 20px Inter,sans-serif;align-items:center;justify-content:center;border:3px solid var(--surface)">AO</span>
+<div style="font:700 17px Inter,sans-serif;color:var(--text-0);margin-top:10px">Amara Okafor</div>
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1);margin-bottom:8px">Solar &amp; Electrical Engineer · Lagos, Nigeria</div>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--trust-soft);border:1px solid var(--trust);color:var(--trust);font:600 11px Inter,sans-serif;margin-bottom:14px">✓ Trust Passport · 812</span>
+<div style="display:flex;gap:6px;margin-bottom:16px"><span style="flex:1;text-align:center;padding:8px 0;border-radius:9px;background:var(--surface-sunken);font:600 11px Inter,sans-serif;color:var(--text-0)">14 records</span><span style="flex:1;text-align:center;padding:8px 0;border-radius:9px;background:var(--surface-sunken);font:600 11px Inter,sans-serif;color:var(--text-0)">6y history</span></div>
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">About</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">Electrical engineer commissioning solar and hybrid systems across West Africa.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ threads }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)">
+<span style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ t.initials }}</span>
+<span style="flex:1;min-width:0"><span style="display:flex;justify-content:space-between;gap:6px"><span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ t.name }}</span><span style="font:400 10px Inter,sans-serif;color:var(--text-2)">{{ t.time }}</span></span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.preview }}</span></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+<div style="display:flex;gap:10px;border-bottom:1px solid var(--border);padding-bottom:10px">
+<span style="flex:none;width:28px;height:28px;border-radius:8px;background:{{ n.bg }};color:{{ n.ink }};display:flex;align-items:center;justify-content:center;font:700 11px Inter,sans-serif">{{ n.glyph }}</span>
+<span><span style="display:block;font:400 12.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ n.text }}</span><span style="display:block;font:400 10.5px Inter,sans-serif;color:var(--text-2);margin-top:2px">{{ n.time }}</span></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCapture }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;height:100%">
+<div style="flex:1;background:repeating-linear-gradient(45deg,#1a2130 0 10px,#232c40 10px 20px);display:flex;align-items:center;justify-content:center;color:#8496A9;font:400 11px 'JetBrains Mono',monospace;min-height:340px">// camera viewfinder — evidence capture</div>
+<div style="padding:16px;text-align:center">
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Capture a sign-off sheet, site photo or document as new evidence.</div>
+<button type="button" style="width:64px;height:64px;border-radius:50%;background:var(--accent);border:4px solid var(--surface);box-shadow:0 0 0 2px var(--accent)"></button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOpps }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ opps }}" as="o" hint-placeholder-count="3">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 14px">
+<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:5px"><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">{{ o.title }}</span><span style="font:700 12px 'JetBrains Mono',monospace;color:var(--trust)">{{ o.match }}</span></div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ o.org }} · {{ o.location }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px">
+<input type="text" placeholder="Search people, jobs, organisations…" style="width:100%;min-height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13px Inter,sans-serif;outline:none;box-sizing:border-box;margin-bottom:16px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Recent</div>
+<sc-for list="{{ recentSearches }}" as="r" hint-placeholder-count="3"><div style="padding:9px 0;border-bottom:1px solid var(--border);font:400 12.5px Inter,sans-serif;color:var(--text-1)">{{ r }}</div></sc-for>
+</div>
+</sc-if>
+
+</div>
+
+<div style="flex:none;display:flex;align-items:center;justify-content:space-around;padding:8px 6px calc(env(safe-area-inset-bottom,0px)+6px);border-top:1px solid var(--border);background:var(--surface)">
+<sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+<button type="button" onClick="{{ tb.onSelect }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:transparent;padding:4px 0;min-height:44px;cursor:pointer">
+<span style="width:22px;height:22px;border-radius:6px;border:2px solid {{ tb.ink }};opacity:{{ tb.op }}"></span>
+<span style="font:600 9.5px Inter,sans-serif;color:{{ tb.ink }}">{{ tb.label }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isAndroidPlatform }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" dark="{{ isDark }}" hint-size="384px,832px">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--bg);font-family:Inter,system-ui,sans-serif;overflow:auto">
+<div style="flex:1;min-height:0;overflow:auto;position:relative">
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;align-items:center;gap:9px;padding:14px 16px 10px">
+<span style="width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">AO</span>
+<button type="button" onClick="{{ goSearch }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:34px;padding:0 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface)"><span style="font:400 12px Inter,sans-serif;color:var(--text-2)">Search PROFILE</span></button>
+<button type="button" onClick="{{ goNotif }}" style="flex:none;width:34px;height:34px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font:12px Inter,sans-serif;color:var(--text-1)">🔔</button>
+</div>
+<div style="padding:4px 16px 16px">
+<div style="border:1px solid var(--trust);border-radius:14px;background:var(--trust-soft);padding:15px 16px;margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">Trust Score</span><span style="font:700 20px 'JetBrains Mono',monospace;color:var(--trust)">812</span></div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">14 verified records · 2 requests in review</div>
+</div>
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Next best action</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 14px;margin-bottom:14px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Add your load-calculation credential</div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">Closes your biggest gap for Renewable Systems Lead roles.</div>
+</div>
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Recent activity</div>
+<sc-for list="{{ homeFeed }}" as="f" hint-placeholder-count="3"><div style="border-bottom:1px solid var(--border);padding:10px 0;font:400 12px/1.5 Inter,sans-serif;color:var(--text-0)">{{ f }}</div></sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ threads }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)">
+<span style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ t.initials }}</span>
+<span style="flex:1;min-width:0"><span style="display:flex;justify-content:space-between;gap:6px"><span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ t.name }}</span><span style="font:400 10px Inter,sans-serif;color:var(--text-2)">{{ t.time }}</span></span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.preview }}</span></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isOpps }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ opps }}" as="o" hint-placeholder-count="3">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 14px">
+<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:5px"><span style="font:600 13px Inter,sans-serif;color:var(--text-0)">{{ o.title }}</span><span style="font:700 12px 'JetBrains Mono',monospace;color:var(--trust)">{{ o.match }}</span></div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ o.org }} · {{ o.location }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="height:96px;background:linear-gradient(120deg,var(--accent-soft),var(--trust-soft))"></div>
+<div style="padding:0 16px 16px;margin-top:-30px">
+<span style="display:flex;width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;font:600 20px Inter,sans-serif;align-items:center;justify-content:center;border:3px solid var(--surface)">AO</span>
+<div style="font:700 17px Inter,sans-serif;color:var(--text-0);margin-top:10px">Amara Okafor</div>
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1)">Solar &amp; Electrical Engineer · Lagos, Nigeria</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+<div style="display:flex;gap:10px;border-bottom:1px solid var(--border);padding-bottom:10px">
+<span style="flex:none;width:28px;height:28px;border-radius:8px;background:{{ n.bg }};color:{{ n.ink }};display:flex;align-items:center;justify-content:center;font:700 11px Inter,sans-serif">{{ n.glyph }}</span>
+<span><span style="display:block;font:400 12.5px/1.5 Inter,sans-serif;color:var(--text-0)">{{ n.text }}</span><span style="display:block;font:400 10.5px Inter,sans-serif;color:var(--text-2);margin-top:2px">{{ n.time }}</span></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isCapture }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;height:100%">
+<div style="flex:1;background:repeating-linear-gradient(45deg,#1a2130 0 10px,#232c40 10px 20px);display:flex;align-items:center;justify-content:center;color:#8496A9;font:400 11px 'JetBrains Mono',monospace;min-height:340px">// camera viewfinder — evidence capture</div>
+<div style="padding:16px;text-align:center">
+<div style="font:400 12px Inter,sans-serif;color:var(--text-1);margin-bottom:14px">Capture a sign-off sheet, site photo or document as new evidence.</div>
+<button type="button" style="width:64px;height:64px;border-radius:50%;background:var(--accent);border:4px solid var(--surface);box-shadow:0 0 0 2px var(--accent)"></button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 16px">
+<input type="text" placeholder="Search people, jobs, organisations…" style="width:100%;min-height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13px Inter,sans-serif;outline:none;box-sizing:border-box;margin-bottom:16px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Recent</div>
+<sc-for list="{{ recentSearches }}" as="r" hint-placeholder-count="3"><div style="padding:9px 0;border-bottom:1px solid var(--border);font:400 12.5px Inter,sans-serif;color:var(--text-1)">{{ r }}</div></sc-for>
+</div>
+</sc-if>
+</div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-around;padding:8px 6px 10px;border-top:1px solid var(--border);background:var(--surface)">
+<sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+<button type="button" onClick="{{ tb.onSelect }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:transparent;padding:4px 0;min-height:44px;cursor:pointer">
+<span style="width:22px;height:22px;border-radius:6px;border:2px solid {{ tb.ink }};opacity:{{ tb.op }}"></span>
+<span style="font:600 9.5px Inter,sans-serif;color:{{ tb.ink }}">{{ tb.label }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, screen: "home", platform: "ios" };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    const s = this.state.screen;
+    const pickDefs = [
+      { key: "home", label: "Home" }, { key: "profile", label: "Profile" }, { key: "messages", label: "Messages" },
+      { key: "notif", label: "Notifications" }, { key: "capture", label: "Capture" }, { key: "opps", label: "Opportunities" }, { key: "search", label: "Search" }
+    ];
+    const picks = pickDefs.map(p => {
+      const on = s === p.key;
+      return { label: p.label, onSelect: () => this.setState({ screen: p.key }),
+        bg: on ? "var(--accent)" : "var(--surface)", ink: on ? "#fff" : "var(--text-1)", edge: on ? "var(--accent)" : "var(--border)" };
+    });
+    const tabDefs = [
+      { key: "home", label: "Home" }, { key: "messages", label: "Messages" }, { key: "capture", label: "Create" }, { key: "opps", label: "Opps" }, { key: "profile", label: "Profile" }
+    ];
+    const tabs = tabDefs.map(t => {
+      const on = s === t.key;
+      return { label: t.label, onSelect: () => this.setState({ screen: t.key }), ink: on ? "var(--accent)" : "var(--text-2)", op: on ? "1" : ".6" };
+    });
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      isDark: this.state.theme === "dark",
+      isIOSPlatform: this.state.platform === "ios", isAndroidPlatform: this.state.platform === "android",
+      setIOS: () => this.setState({ platform: "ios" }), setAndroid: () => this.setState({ platform: "android" }),
+      iosBg: this.state.platform === "ios" ? "var(--accent)" : "var(--surface)", iosInk: this.state.platform === "ios" ? "#fff" : "var(--text-1)", iosEdge: this.state.platform === "ios" ? "var(--accent)" : "var(--border)",
+      androidBg: this.state.platform === "android" ? "var(--accent)" : "var(--surface)", androidInk: this.state.platform === "android" ? "#fff" : "var(--text-1)", androidEdge: this.state.platform === "android" ? "var(--accent)" : "var(--border)",
+      picks, tabs,
+      isHome: s === "home", isProfile: s === "profile", isMessages: s === "messages", isNotif: s === "notif", isCapture: s === "capture", isOpps: s === "opps", isSearch: s === "search",
+      goSearch: () => this.setState({ screen: "search" }), goNotif: () => this.setState({ screen: "notif" }),
+      homeFeed: [
+        "Ikeja General Hospital confirmed your commissioning record.",
+        "GRIDCo Nigeria responded to your verification request.",
+        "New opportunity match: Renewable Systems Lead — Aurora Power."
+      ],
+      threads: [
+        { initials: "IG", name: "Ikeja General Hospital", time: "2h", preview: "We've confirmed the commissioning record." },
+        { initials: "AP", name: "Aurora Power — Recruiting", time: "1d", preview: "Could you share your availability?" },
+        { initials: "KM", name: "Kwame Mensah", time: "3d", preview: "Good working with you on the GRIDCo site." },
+        { initials: "GR", name: "GRIDCo Nigeria", time: "5d", preview: "Maintenance programme sign-off attached." }
+      ],
+      notifs: [
+        { glyph: "✓", bg: "var(--trust-soft)", ink: "var(--trust)", text: "Ikeja General Hospital verified your commissioning record.", time: "2h ago" },
+        { glyph: "★", bg: "var(--gold-soft)", ink: "var(--gold)", text: "Your Trust Score increased to 812.", time: "1d ago" },
+        { glyph: "◷", bg: "var(--surface-sunken)", ink: "var(--text-1)", text: "GRIDCo Nigeria is reviewing your maintenance record.", time: "2d ago" },
+        { glyph: "!", bg: "var(--success-soft)", ink: "var(--success)", text: "New opportunity match at 91%.", time: "3d ago" },
+        { glyph: "✎", bg: "var(--accent-soft)", ink: "var(--accent)", text: "Advisor suggests adding a load-calculation credential.", time: "4d ago" }
+      ],
+      opps: [
+        { title: "Renewable Systems Lead", org: "Aurora Power", location: "Lagos, Nigeria", match: "91%" },
+        { title: "Senior Commissioning Engineer", org: "GRIDCo Nigeria", location: "Abuja, Nigeria", match: "88%" },
+        { title: "Solar Project Engineer", org: "Sunward Energy", location: "Accra, Ghana", match: "76%" }
+      ],
+      recentSearches: ["Renewable Systems Lead", "GRIDCo Nigeria", "Load calculation credential"]
+    };
+  }
+}
+</script>
+</body>
+</html>

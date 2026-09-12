@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{
+--bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
+--border:#E5E7EB;--border-strong:#CBD5E1;
+--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--text-3:#C2CCD8;
+--accent:#0057D9;--accent-hover:#0048B3;--accent-press:#003A8C;--accent-soft:#EDF3FE;
+--trust:#0E7490;--trust-soft:#ECFEFF;--gold:#8A6200;--gold-soft:#FEF6E0;--coral:#C93B22;--coral-soft:#FFF0ED;
+--success:#04763C;--success-soft:#E8F8EE;--warning:#8A5200;--warning-soft:#FEF3E2;--danger:#C2181D;--danger-soft:#FDECEC;--info:#0369A1;--info-soft:#E8F4FD;
+--shadow-card:0 1px 2px rgba(16,24,40,.06);--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9;
+}
+[data-theme=dark]{
+--bg:#060E1C;--surface:#0C1829;--surface-2:#0F1F35;--surface-sunken:#050B16;--surface-active:#142440;
+--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);
+--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--text-3:rgba(255,255,255,.18);
+--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-press:#3B7BEE;--accent-soft:rgba(76,141,255,.14);
+--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--gold:#F4B400;--gold-soft:rgba(244,180,0,.12);--coral:#FF8B78;--coral-soft:rgba(255,111,89,.13);
+--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--info:#56C2F5;--info-soft:rgba(14,165,233,.13);
+--shadow-card:0 1px 2px rgba(0,0,0,.4);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF;
+}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .28s cubic-bezier(.22,.61,.36,1)}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+@keyframes o-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1420px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 80px">
+
+<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;padding:32px 0 18px">
+<div>
+<div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px">Master Prompt §46, §47 · Professional account</div>
+<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">Onboarding — the first five minutes</h1>
+<p style="margin:10px 0 0;max-width:64ch;font:400 14px/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Five steps, each one earning something visible. Nothing is asked for before the user can see why it matters, and the flow can be left at any point without losing work.</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+<button type="button" onClick="{{ reset }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">Restart flow</button>
+</div>
+</div>
+
+<section style="border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:26px">
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px clamp(14px,2.4vw,22px);border-bottom:1px solid var(--border);background:var(--surface-sunken)">
+<img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:26px;width:auto;aspect-ratio:1352/1736;flex:none">
+<span style="flex:1;min-width:120px;font:400 12px Inter,sans-serif;color:var(--text-1)">{{ progressLabel }}</span>
+<span style="flex:none;display:flex;align-items:center;gap:9px">
+<span style="width:100px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;display:block"><span style="display:block;height:100%;border-radius:3px;background:var(--accent);width:{{ progressPct }};transition:width .32s cubic-bezier(.22,.61,.36,1)"></span></span>
+<span style="font:500 11px 'JetBrains Mono',monospace;color:var(--text-1);font-variant-numeric:tabular-nums">{{ progressPct }}</span>
+</span>
+<button type="button" onClick="{{ saveExit }}" style="flex:none;height:30px;padding:0 11px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-1);font:500 11.5px Inter,sans-serif;cursor:pointer">Save and finish later</button>
+</div>
+
+<div style="display:flex;flex-wrap:wrap">
+
+<nav aria-label="Onboarding steps" style="flex:1 1 238px;min-width:222px;max-width:290px;border-right:1px solid var(--border);background:var(--surface-sunken);padding:20px 16px;display:flex;flex-direction:column;gap:3px">
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+<button type="button" onClick="{{ s.onSelect }}" style="display:flex;gap:11px;align-items:flex-start;text-align:left;border:1px solid {{ s.edge }};background:{{ s.bg }};border-radius:11px;padding:11px 12px;cursor:{{ s.cursor }};min-height:44px">
+<span style="flex:none;width:22px;height:22px;border-radius:50%;background:{{ s.dotBg }};border:1.5px solid {{ s.dotEdge }};color:{{ s.dotInk }};font:600 10.5px Inter,sans-serif;display:flex;align-items:center;justify-content:center;margin-top:1px">{{ s.dot }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:block;font:{{ s.titleFont }};color:{{ s.titleInk }};margin-bottom:2px">{{ s.title }}</span>
+<span style="display:block;font:400 11px/1.45 Inter,sans-serif;color:var(--text-1)">{{ s.sub }}</span>
+</span>
+</button>
+</sc-for>
+<div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--border-strong);font:400 11px/1.6 Inter,sans-serif;color:var(--text-1)">Steps 4 and 5 unlock as you go. Everything you enter is saved as you type — closing the tab loses nothing.</div>
+</nav>
+
+<main style="flex:1 1 460px;min-width:0;padding:clamp(18px,2.6vw,28px)">
+
+<sc-if value="{{ isStep0 }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:640px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:10px">STEP 1 OF 5 · ABOUT 40 SECONDS</div>
+<h2 style="margin:0 0 8px;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Let's start with your name and your work</h2>
+<p style="margin:0 0 22px;max-width:56ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Nothing here is public yet. You choose what to publish at the end, and you can change any of it later.</p>
+
+<div style="display:flex;flex-direction:column;gap:16px;margin-bottom:22px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Full name</span>
+<input type="text" value="{{ fName }}" onChange="{{ setName }}" placeholder="As it appears on official documents" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none;transition:border-color .12s,box-shadow .12s" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<span style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">We match this against your credentials when institutions verify them, so spelling matters more here than elsewhere.</span></label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">What do you do?</span>
+<input type="text" value="{{ fRole }}" onChange="{{ setRole }}" placeholder="e.g. Solar and electrical engineer" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<span style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">In your own words. This is not a dropdown of job titles — PROFILE works across professional systems that name the same work differently.</span></label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Where are you based?</span>
+<input type="text" value="{{ fPlace }}" onChange="{{ setPlace }}" placeholder="City and country" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
+<span style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">Used to find institutions that can verify your work, and opportunities near you. Never shown more precisely than the city.</span></label>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ ctaBg }};color:{{ ctaInk }};font:600 14px Inter,sans-serif;cursor:{{ ctaCursor }}">Continue</button>
+<span style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ step0Hint }}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:640px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:10px">STEP 2 OF 5 · ABOUT 30 SECONDS</div>
+<h2 style="margin:0 0 8px;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Confirm it's you</h2>
+<p style="margin:0 0 22px;max-width:56ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">One check now means every record you add afterwards carries weight. Without it, your work sits on PROFILE unverified and recruiters can filter it out.</p>
+
+<div style="display:flex;flex-direction:column;gap:11px;margin-bottom:20px">
+<sc-for list="{{ idOptions }}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{ o.onSelect }}" style="display:flex;gap:12px;align-items:flex-start;text-align:left;border:1.5px solid {{ o.edge }};background:{{ o.bg }};border-radius:12px;padding:14px 15px;cursor:pointer">
+<span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid {{ o.dotEdge }};background:{{ o.dotBg }};margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 9px Inter,sans-serif">{{ o.dot }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">{{ o.title }}</span><span style="padding:2px 8px;border-radius:20px;background:var(--surface-sunken);border:1px solid var(--border-strong);font:500 10.5px Inter,sans-serif;color:var(--text-1)">{{ o.time }}</span></span>
+<span style="display:block;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">{{ o.body }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-sunken);padding:14px 15px;margin-bottom:20px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:6px">What happens to the document</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">It is checked, then deleted. PROFILE stores the result of the check and the date, never the document or its number. Your passport number is not something a recruiter, an employer or PROFILE staff can ever see.</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer">Continue</button>
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Skip for now</button>
+<span style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1);flex:1 1 200px;min-width:0">Skipping is fine — you can verify later. Records added before then stay unverified until you do.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:640px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:10px">STEP 3 OF 5 · THE IMPORTANT ONE</div>
+<h2 style="margin:0 0 8px;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Record one piece of work you finished</h2>
+<p style="margin:0 0 20px;max-width:56ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Not your whole history. One thing, described plainly. This is what PROFILE is for, and everything else builds on it.</p>
+
+<div style="display:flex;flex-direction:column;gap:16px;margin-bottom:20px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">What did you do?</span>
+<input type="text" value="{{ fWork }}" onChange="{{ setWork }}" placeholder="e.g. Commissioned a 45kW rooftop solar array" style="min-height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
+
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Who was it for, and what changed because of it?</span>
+<textarea value="{{ fDetail }}" onChange="{{ setDetail }}" rows="3" placeholder="e.g. Ikeja General Hospital. The paediatric wing now runs through scheduled outages without the diesel generator." style="padding:11px 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 13.5px/1.6 Inter,sans-serif;outline:none;resize:vertical" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></textarea>
+<span style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">The outcome is what a recruiter reads first. It is also what a verifier confirms, so keep it to what actually happened.</span></label>
+
+<div>
+<div style="font:500 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Attach evidence — optional now, but it doubles what this record is worth</div>
+<div style="border:1.5px dashed var(--border-strong);border-radius:11px;background:var(--surface-sunken);padding:18px 16px;text-align:center">
+<div style="font:500 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Drop files, or take a photo</div>
+<div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);max-width:44ch;margin:0 auto 12px">A sign-off sheet, a purchase order, a site photo, a report. Anything a verifier would recognise.</div>
+<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button type="button" style="min-height:38px;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12.5px Inter,sans-serif;cursor:pointer">Choose files</button><button type="button" style="min-height:38px;padding:0 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12.5px Inter,sans-serif;cursor:pointer">Use camera</button></div>
+</div>
+</div>
+</div>
+
+<div style="border-left:3px solid var(--trust);border-radius:0 11px 11px 0;background:var(--trust-soft);padding:14px 15px;margin-bottom:20px">
+<div style="font:600 9.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:7px">COPILOT · SUGGESTION, NOT A REWRITE</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-0);margin-bottom:10px">From what you have typed, this looks like commissioning work. Three skills would normally attach to it: solar PV, load calculation, and site survey. Add the ones that are true.</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<sc-for list="{{ skillChips }}" as="c" hint-placeholder-count="3">
+<button type="button" onClick="{{ c.onToggle }}" style="min-height:32px;padding:0 12px;border-radius:20px;border:1px solid {{ c.edge }};background:{{ c.bg }};color:{{ c.ink }};font:{{ c.font }};cursor:pointer">{{ c.label }}</button>
+</sc-for>
+</div>
+<div style="font:400 11px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:9px">Copilot never adds a skill, a date or an achievement on your behalf. It suggests; you decide.</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:{{ workCtaBg }};color:{{ workCtaInk }};font:600 14px Inter,sans-serif;cursor:{{ workCtaCursor }}">Continue</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+<span style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ step2Hint }}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:640px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--accent);margin-bottom:10px">STEP 4 OF 5 · ABOUT A MINUTE</div>
+<h2 style="margin:0 0 8px;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Ask someone to confirm it</h2>
+<p style="margin:0 0 20px;max-width:56ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">This is the step that turns a claim into evidence. They see this one record and the files attached to it — nothing else on your profile.</p>
+
+<div style="display:flex;flex-direction:column;gap:11px;margin-bottom:20px">
+<sc-for list="{{ verifierOptions }}" as="v" hint-placeholder-count="3">
+<button type="button" onClick="{{ v.onSelect }}" style="display:flex;gap:12px;align-items:flex-start;text-align:left;border:1.5px solid {{ v.edge }};background:{{ v.bg }};border-radius:12px;padding:14px 15px;cursor:pointer">
+<span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid {{ v.dotEdge }};background:{{ v.dotBg }};margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 9px Inter,sans-serif">{{ v.dot }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">{{ v.title }}</span><span style="padding:2px 8px;border-radius:20px;background:{{ v.weightBg }};border:1px solid {{ v.weightInk }};color:{{ v.weightInk }};font:600 10.5px Inter,sans-serif">{{ v.weight }}</span></span>
+<span style="display:block;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">{{ v.body }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface-sunken);padding:15px 16px;margin-bottom:20px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">What they will be sent</div>
+<div style="border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:13px 14px;margin-bottom:10px">
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-0)">“{{ previewName }} has recorded work they say was carried out for you, and has asked you to confirm it. Confirming takes two clicks. If it is wrong, or you have no record of it, you can say so — and say why.”</div>
+</div>
+<div style="font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">You will see whether they opened it. If nothing happens in seven days we remind them once, and at fourteen days we offer you an alternative verifier.</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 18px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer">Send the request</button>
+<button type="button" onClick="{{ next }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Not yet</button>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:680px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:10px">STEP 5 OF 5 · DONE IN {{ elapsed }}</div>
+<h2 style="margin:0 0 8px;font:700 clamp(21px,2.6vw,27px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Here's what you have on PROFILE now</h2>
+<p style="margin:0 0 20px;max-width:58ch;font:400 13.5px/1.65 Inter,sans-serif;color:var(--text-1)">Not a congratulations screen. This is the actual state of your profile, including what is still missing.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-bottom:18px">
+<sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="4">
+<div style="border:1px solid {{ o.edge }};border-radius:12px;background:{{ o.bg }};padding:14px 15px">
+<div style="font:600 11.5px Inter,sans-serif;color:{{ o.ink }};margin-bottom:6px">{{ o.glyph }} {{ o.label }}</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">{{ o.body }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);box-shadow:var(--shadow-card);padding:17px 18px;margin-bottom:18px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:10px">Your first recommendation</div>
+<div style="border-left:3px solid var(--trust);border-radius:0 10px 10px 0;background:var(--trust-soft);padding:13px 14px">
+<div style="font:600 9.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:7px">COPILOT · FROM 1 RECORD AND YOUR STATED FIELD</div>
+<div style="font:400 12.5px/1.65 Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Commissioning work like yours matches three roles currently open in Lagos. All three ask for a load-calculation credential you have not recorded. That single credential is the highest-value thing you could add next.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" style="min-height:34px;padding:0 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 12px Inter,sans-serif;cursor:pointer">See the three roles</button><button type="button" style="min-height:34px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 12px Inter,sans-serif;cursor:pointer">Add that credential</button></div>
+</div>
+<div style="font:400 11px/1.55 Inter,sans-serif;color:var(--text-1);margin-top:11px">One recommendation, not a list. A first session that ends with eight suggested actions ends with none of them done.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;background:var(--surface-2);padding:17px 18px;margin-bottom:20px">
+<div style="font:600 13.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Before you go — what should be visible?</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1);margin-bottom:13px">Your profile is private until you answer this. You can change it any time.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ visibility }}" as="v" hint-placeholder-count="3">
+<button type="button" onClick="{{ v.onSelect }}" style="display:flex;gap:11px;align-items:flex-start;text-align:left;border:1.5px solid {{ v.edge }};background:{{ v.bg }};border-radius:11px;padding:12px 14px;cursor:pointer">
+<span style="flex:none;width:17px;height:17px;border-radius:50%;border:1.5px solid {{ v.dotEdge }};background:{{ v.dotBg }};margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 8.5px Inter,sans-serif">{{ v.dot }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:3px">{{ v.title }}</span><span style="display:block;font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1)">{{ v.body }}</span></span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<a href="PROFILE Home.dc.html" style="display:inline-flex;min-height:44px;padding:0 18px;align-items:center;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif">Go to my PROFILE</a>
+<button type="button" onClick="{{ back }}" style="min-height:44px;padding:0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-1);font:500 13px Inter,sans-serif;cursor:pointer">Back</button>
+</div>
+</div>
+</sc-if>
+
+</main>
+
+<aside style="flex:1 1 264px;min-width:250px;border-left:1px solid var(--border);background:var(--surface-sunken);padding:20px 16px;display:flex;flex-direction:column;gap:13px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2)">YOUR PROFILE SO FAR</div>
+
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px">
+<div style="display:flex;gap:11px;align-items:center;margin-bottom:12px">
+<span style="flex:none;width:42px;height:42px;border-radius:50%;background:{{ avatarBg }};color:#fff;font:600 15px Inter,sans-serif;display:flex;align-items:center;justify-content:center">{{ initials }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:600 13px Inter,sans-serif;color:{{ previewNameInk }}">{{ previewName }}</span><span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ previewRole }}</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-2)">{{ previewPlace }}</span></span>
+</div>
+<div style="display:flex;gap:9px;padding-top:12px;border-top:1px solid var(--border)">
+<span style="flex:1;min-width:0"><span style="display:block;font:500 9px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:3px">TRUST SCORE</span><span style="display:block;font:600 16px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">{{ liveScore }}</span></span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 9px 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--text-2);margin-bottom:3px">RECORDS</span><span style="display:block;font:600 16px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">{{ liveRecords }}</span></span>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">What each step earns you</div>
+<sc-for list="{{ earns }}" as="e" hint-placeholder-count="5">
+<div style="display:flex;gap:9px;align-items:flex-start;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+<span style="flex:none;font:600 11px Inter,sans-serif;color:{{ e.ink }};padding-top:1px">{{ e.glyph }}</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 11.5px Inter,sans-serif;color:{{ e.titleInk }}">{{ e.title }}</span><span style="display:block;font:400 10.5px/1.45 Inter,sans-serif;color:var(--text-1)">{{ e.body }}</span></span>
+</div>
+</sc-for>
+<div style="font:400 10.5px/1.55 Inter,sans-serif;color:var(--text-1)">This panel is the point of the flow: the user watches something real accumulate rather than filling in a form on faith.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px">
+<div style="font:600 12px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Not asked during onboarding</div>
+<div style="font:400 11.5px/1.65 Inter,sans-serif;color:var(--text-1)">Full employment history, education history, referees, salary expectations, photo, or a long profile summary. All of it can wait, and most of it PROFILE would rather derive from verified records than take on trust.</div>
+</div>
+</aside>
+
+</div>
+</section>
+
+<section style="margin-bottom:26px">
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:14px">
+<h2 style="margin:0;font:600 18px Inter,sans-serif;color:var(--text-0)">Mobile — 390px</h2>
+<p style="margin:0;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1);max-width:58ch">One question per screen, progress in the top bar, the primary action pinned above the keyboard. The step rail becomes a thin progress line — a five-item sidebar is not worth 90 vertical pixels on a phone.</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:22px">
+
+<div style="flex:none;width:390px;max-width:100%;border:1px solid var(--border-strong);border-radius:22px;background:var(--surface);box-shadow:var(--shadow-elev);overflow:hidden;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--border)">
+<span style="flex:none;font:400 15px Inter,sans-serif;color:var(--text-1)">←</span>
+<span style="flex:1;min-width:0"><span style="display:block;font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:4px">STEP 3 OF 5</span><span style="display:block;height:4px;border-radius:2px;background:var(--border);overflow:hidden"><span style="display:block;height:100%;width:60%;border-radius:2px;background:var(--accent)"></span></span></span>
+<span style="flex:none;font:500 11.5px Inter,sans-serif;color:var(--text-1)">Save</span>
+</div>
+<div style="flex:1;padding:18px 14px;display:flex;flex-direction:column;gap:15px;background:var(--bg)">
+<div>
+<h3 style="margin:0 0 7px;font:700 19px/1.25 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Record one piece of work you finished</h3>
+<p style="margin:0;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">One thing, described plainly. Everything else builds on it.</p>
+</div>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 11.5px Inter,sans-serif;color:var(--text-0)">What did you do?</span><span style="min-height:44px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--accent);border-radius:9px;background:var(--surface);font:400 13.5px Inter,sans-serif;color:var(--text-0);box-shadow:0 0 0 3px var(--accent-soft)">Commissioned a 45kW rooftop|</span></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 11.5px Inter,sans-serif;color:var(--text-0)">Who was it for, and what changed?</span><span style="min-height:70px;display:block;padding:11px 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-2)">Ikeja General Hospital. The paediatric wing now runs through outages…</span></label>
+<div style="border:1.5px dashed var(--border-strong);border-radius:11px;background:var(--surface-sunken);padding:14px;text-align:center">
+<div style="font:500 12px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Add evidence</div>
+<div style="display:flex;gap:8px"><span style="flex:1;min-height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);font:600 12px Inter,sans-serif;color:var(--text-0)">Camera</span><span style="flex:1;min-height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);font:600 12px Inter,sans-serif;color:var(--text-0)">Files</span></div>
+</div>
+</div>
+<div style="padding:12px 14px 14px;border-top:1px solid var(--border);background:var(--surface)">
+<button type="button" style="width:100%;min-height:46px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer">Continue</button>
+<div style="text-align:center;font:400 11px Inter,sans-serif;color:var(--text-1);margin-top:9px">Saved as you type</div>
+</div>
+</div>
+
+<div style="flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:12px">
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Why this order</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">Identity comes before verification because a check needs a name to match. Verification comes before the first record so that record can be confirmed immediately. The recommendation comes last because it needs one real record to be honest rather than generic.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Leaving and coming back</div>
+<div style="font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">Save and finish later exits to Home, where an unfinished onboarding appears as a single card naming the step they stopped on — not a modal, not a nag. Step 2 and step 4 are skippable; steps 1 and 3 are not, because a profile with neither is not a profile.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Routes</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">/onboarding/identity · /onboarding/verify-identity · /onboarding/first-record · /onboarding/request-verification · /onboarding/summary · Save and finish later → /home with a resume card · Go to my PROFILE → /home.</div>
+</div>
+<div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Prototype data</div>
+<div style="font:400 12px/1.7 Inter,sans-serif;color:var(--text-1)">Placeholder examples and the sample verifier names are illustrative content for design review. The live score in the side panel is derived from what you type, not from real platform data.</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<sc-if value="{{ exitOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeExit }}" style="position:fixed;inset:0;background:rgba(6,14,28,.55);backdrop-filter:blur(2px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px">
+<div role="dialog" aria-modal="true" style="width:min(420px,100%);border-radius:16px;background:var(--surface-2);border:1px solid var(--border);box-shadow:var(--shadow-elev);padding:24px">
+<div style="font:600 17px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">Saved. Nothing is lost.</div>
+<div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);margin-bottom:18px">You are on step {{ currentStepNumber }} of 5. When you come back, Home will show a single card picking up exactly where you stopped. We will not email you about it more than once.</div>
+<div style="display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap">
+<button type="button" onClick="{{ closeExit }}" style="min-height:38px;padding:0 14px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text-0);font:600 13px Inter,sans-serif;cursor:pointer">Keep going</button>
+<button type="button" onClick="{{ closeExit }}" style="min-height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Go to Home</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null, step: 0, exitOpen: false,
+    name: "", role: "", place: "",
+    work: "", detail: "",
+    idMethod: 0, verifier: 0, vis: 1,
+    skills: { "Solar PV": false, "Load calculation": false, "Site survey": false }
+  };
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t);
+    this.setState({ theme: t });
+  }
+  apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.body.setAttribute("data-theme", t);
+    try { localStorage.setItem("profile-ds-theme", t); } catch (e) {}
+  }
+
+  initialsOf(n) {
+    const parts = n.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "—";
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const step = s.step;
+    const named = s.name.trim().length > 1 && s.role.trim().length > 1;
+    const worked = s.work.trim().length > 3;
+
+    const stepDefs = [
+      { title: "Who you are", sub: "Name, work, location" },
+      { title: "Confirm it's you", sub: "One identity check" },
+      { title: "Your first record", sub: "One piece of finished work" },
+      { title: "Ask for verification", sub: "Turn a claim into evidence" },
+      { title: "What you have now", sub: "State of your profile" }
+    ];
+    const reachable = i => i <= Math.max(step, named ? 1 : 0);
+
+    const steps = stepDefs.map((d, i) => {
+      const done = i < step, active = i === step, open = reachable(i);
+      return {
+        title: d.title, sub: d.sub,
+        onSelect: () => { if (open) this.setState({ step: i }); },
+        cursor: open ? "pointer" : "not-allowed",
+        bg: active ? "var(--surface)" : "transparent",
+        edge: active ? "var(--accent)" : "transparent",
+        dot: done ? "✓" : String(i + 1),
+        dotBg: done ? "var(--trust)" : active ? "var(--accent)" : "transparent",
+        dotEdge: done ? "var(--trust)" : active ? "var(--accent)" : "var(--border-strong)",
+        dotInk: done ? "#04222B" : active ? "#fff" : "var(--text-2)",
+        titleFont: active ? "600 12.5px Inter,sans-serif" : "500 12.5px Inter,sans-serif",
+        titleInk: open ? "var(--text-0)" : "var(--text-2)"
+      };
+    });
+
+    const idDefs = [
+      { title: "Government ID", time: "instant", body: "Photograph a passport, national ID or driving licence. Checked automatically, then deleted." },
+      { title: "Work email at your employer", time: "2 minutes", body: "We send a code. Confirms your current employment as well as your identity." },
+      { title: "Through your institution", time: "1–5 days", body: "Your university or licensing body confirms you directly. Slowest, and the strongest." }
+    ];
+    const idOptions = idDefs.map((o, i) => {
+      const on = s.idMethod === i;
+      return { ...o, onSelect: () => this.setState({ idMethod: i }),
+        bg: on ? "var(--accent-soft)" : "var(--surface)", edge: on ? "var(--accent)" : "var(--border)",
+        dot: on ? "✓" : "", dotBg: on ? "var(--accent)" : "transparent", dotEdge: on ? "var(--accent)" : "var(--border-strong)" };
+    });
+
+    const vDefs = [
+      { title: "The organisation it was for", weight: "Strongest", body: "An institution or company confirming work they commissioned carries the most weight on PROFILE." },
+      { title: "A named person who was there", weight: "Moderate", body: "A supervisor, client contact or project lead. Weighted lower than an institution, and they cannot confirm their own work." },
+      { title: "A licensing or awarding body", weight: "Strongest", body: "For credentials rather than projects. They confirm the award directly from their own records." }
+    ];
+    const verifierOptions = vDefs.map((v, i) => {
+      const on = s.verifier === i;
+      const strong = v.weight === "Strongest";
+      return { ...v, onSelect: () => this.setState({ verifier: i }),
+        bg: on ? "var(--accent-soft)" : "var(--surface)", edge: on ? "var(--accent)" : "var(--border)",
+        dot: on ? "✓" : "", dotBg: on ? "var(--accent)" : "transparent", dotEdge: on ? "var(--accent)" : "var(--border-strong)",
+        weightBg: strong ? "var(--trust-soft)" : "var(--surface-sunken)",
+        weightInk: strong ? "var(--trust)" : "var(--text-1)" };
+    });
+
+    const visDefs = [
+      { title: "Private for now", body: "Only you. Nothing is discoverable, including by recruiters. You can publish later." },
+      { title: "Discoverable by verified recruiters and institutions", body: "Your name, field and verified records only. Not indexed by search engines." },
+      { title: "Public profile", body: "A public page at profile.app/amara-okafor, indexed by search engines. Verified records only." }
+    ];
+    const visibility = visDefs.map((v, i) => {
+      const on = s.vis === i;
+      return { ...v, onSelect: () => this.setState({ vis: i }),
+        bg: on ? "var(--accent-soft)" : "var(--surface)", edge: on ? "var(--accent)" : "var(--border)",
+        dot: on ? "✓" : "", dotBg: on ? "var(--accent)" : "transparent", dotEdge: on ? "var(--accent)" : "var(--border-strong)" };
+    });
+
+    const skillChips = Object.keys(s.skills).map(k => {
+      const on = s.skills[k];
+      return { label: on ? "✓ " + k : "+ " + k,
+        onToggle: () => this.setState(st => ({ skills: { ...st.skills, [k]: !st.skills[k] } })),
+        bg: on ? "var(--trust)" : "var(--surface)", ink: on ? "#04222B" : "var(--text-0)",
+        edge: on ? "var(--trust)" : "var(--border-strong)",
+        font: on ? "600 12px Inter,sans-serif" : "500 12px Inter,sans-serif" };
+    });
+
+    const earnDefs = [
+      { at: 0, title: "A professional identity", body: "A name PROFILE can match credentials against." },
+      { at: 1, title: "Records that carry weight", body: "Verified identity is what makes a record trustable." },
+      { at: 2, title: "Your first evidence", body: "One record, structured — not a post." },
+      { at: 3, title: "A verification in flight", body: "The step that turns a claim into evidence." },
+      { at: 4, title: "A real recommendation", body: "Grounded in your record, not in your job title." }
+    ];
+    const earns = earnDefs.map(e => {
+      const done = step > e.at;
+      const current = step === e.at;
+      return { title: e.title, body: e.body,
+        glyph: done ? "✓" : current ? "◷" : "○",
+        ink: done ? "var(--trust)" : current ? "var(--accent)" : "var(--text-3)",
+        titleInk: done || current ? "var(--text-0)" : "var(--text-2)" };
+    });
+
+    const outcomes = [
+      { glyph: "✓", label: "Identity", body: named ? "Confirmed. Every record you add from now on carries weight." : "Not yet confirmed — your records stay unverified until it is.",
+        edge: named ? "var(--trust)" : "var(--warning)", bg: named ? "var(--trust-soft)" : "var(--warning-soft)", ink: named ? "var(--trust)" : "var(--warning)" },
+      { glyph: "◷", label: "1 record, awaiting verification", body: "With your chosen verifier. Expected within five working days; you will be told either way.",
+        edge: "var(--border)", bg: "var(--surface-2)", ink: "var(--text-1)" },
+      { glyph: "○", label: "Trust Score not yet issued", body: "A score needs at least one verified record. Showing you a number now would be meaningless.",
+        edge: "var(--border)", bg: "var(--surface-2)", ink: "var(--text-1)" },
+      { glyph: "⚠", label: "Still missing", body: "No credentials recorded, and one record is not enough for opportunity matching to be useful yet.",
+        edge: "var(--border)", bg: "var(--surface-2)", ink: "var(--warning)" }
+    ];
+
+    const nameShown = s.name.trim() || "Your name";
+    const timeByStep = ["about 40 seconds", "1 minute", "2 minutes", "3 minutes", "4 minutes 20 seconds"];
+
+    return {
+      themeLabel: s.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = s.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      reset: () => this.setState({ step: 0, name: "", role: "", place: "", work: "", detail: "", skills: { "Solar PV": false, "Load calculation": false, "Site survey": false } }),
+
+      steps,
+      isStep0: step === 0, isStep1: step === 1, isStep2: step === 2, isStep3: step === 3, isStep4: step === 4,
+      currentStepNumber: step + 1,
+      progressLabel: "Setting up your PROFILE · step " + (step + 1) + " of 5",
+      progressPct: Math.round((step / 4) * 100) + "%",
+      elapsed: timeByStep[4],
+
+      next: () => { if (step === 0 && !named) return; if (step === 2 && !worked) return; this.setState({ step: Math.min(4, step + 1) }); },
+      back: () => this.setState({ step: Math.max(0, step - 1) }),
+      saveExit: () => this.setState({ exitOpen: true }),
+      closeExit: () => this.setState({ exitOpen: false }),
+      exitOpen: s.exitOpen,
+
+      fName: s.name, fRole: s.role, fPlace: s.place, fWork: s.work, fDetail: s.detail,
+      setName: e => this.setState({ name: e.target.value }),
+      setRole: e => this.setState({ role: e.target.value }),
+      setPlace: e => this.setState({ place: e.target.value }),
+      setWork: e => this.setState({ work: e.target.value }),
+      setDetail: e => this.setState({ detail: e.target.value }),
+
+      ctaBg: named ? "var(--accent)" : "var(--surface-sunken)",
+      ctaInk: named ? "#fff" : "var(--text-3)",
+      ctaCursor: named ? "pointer" : "not-allowed",
+      step0Hint: named ? "" : "Name and field of work are needed to continue.",
+      workCtaBg: worked ? "var(--accent)" : "var(--surface-sunken)",
+      workCtaInk: worked ? "#fff" : "var(--text-3)",
+      workCtaCursor: worked ? "pointer" : "not-allowed",
+      step2Hint: worked ? "" : "Describe what you did to continue.",
+
+      idOptions, verifierOptions, visibility, skillChips, earns, outcomes,
+
+      initials: this.initialsOf(s.name),
+      avatarBg: s.name.trim() ? "var(--accent)" : "var(--border-strong)",
+      previewName: nameShown,
+      previewNameInk: s.name.trim() ? "var(--text-0)" : "var(--text-2)",
+      previewRole: s.role.trim() || "Your field of work",
+      previewPlace: s.place.trim() || "Location",
+      liveScore: step >= 4 ? "—" : "—",
+      liveRecords: worked ? "1" : "0"
+    };
+  }
+}
+</script>
+</body>
+</html>

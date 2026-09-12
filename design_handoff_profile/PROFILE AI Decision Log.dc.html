@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--trust:#0E7490;--trust-soft:#ECFEFF;--warning:#8A5200;--warning-soft:#FEF3E2;--success:#04763C;--success-soft:#E8F8EE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+[data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--trust:#00E5FF;--trust-soft:rgba(0,229,255,.10);--warning:#FBBF24;--warning-soft:rgba(245,158,11,.13);--success:#3DDC7F;--success-soft:rgba(0,200,83,.13);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 clamp(12px,3vw,32px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:26px 0 6px">
+<div><div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--text-2);text-transform:uppercase;margin-bottom:8px">Internal · Owner / governance</div><h1 style="margin:0;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">AI decision log</h1></div>
+<button type="button" onClick="{{ toggleTheme }}" style="height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12.5px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
+</div>
+<p style="margin:0 0 22px;max-width:74ch;font:400 13px/1.65 Inter,sans-serif;color:var(--text-1)">Every AI-generated output that touched a real user, with what it was allowed to see and whether a human flagged it. Advisor and Copilot never fabricate a credential — this is the audit trail proving it.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-bottom:20px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div style="border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:var(--shadow-card);padding:12px 14px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--text-2);margin-bottom:5px">{{ s.label }}</div><div style="font:600 19px 'JetBrains Mono',monospace;color:{{ s.ink }}">{{ s.value }}</div></div>
+</sc-for>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:13px;overflow:hidden">
+<div style="display:grid;grid-template-columns:100px 1fr 1fr 120px 100px;background:var(--surface-sunken);font:600 10.5px Inter,sans-serif;letter-spacing:.04em"><div style="padding:9px 12px">SURFACE</div><div style="padding:9px 12px">OUTPUT</div><div style="padding:9px 12px">DATA ACCESSED</div><div style="padding:9px 12px">USER</div><div style="padding:9px 12px">REVIEW</div></div>
+<sc-for list="{{ logs }}" as="l" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:100px 1fr 1fr 120px 100px;border-top:1px solid var(--border);background:var(--surface);align-items:center;font:400 12px Inter,sans-serif">
+<div style="padding:9px 12px;color:var(--text-1)">{{ l.surface }}</div>
+<div style="padding:9px 12px;color:var(--text-0)">{{ l.output }}</div>
+<div style="padding:9px 12px;color:var(--text-1);font-size:11px">{{ l.data }}</div>
+<div style="padding:9px 12px;color:var(--text-1)">{{ l.user }}</div>
+<div style="padding:9px 12px"><span style="padding:2px 8px;border-radius:20px;background:{{ l.reviewBg }};color:{{ l.reviewInk }};font:600 10px Inter,sans-serif">{{ l.review }}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:18px;border-left:3px solid var(--warning);border-radius:0 10px 10px 0;background:var(--warning-soft);padding:14px 16px">
+<div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:5px">Policy rule enforced automatically</div>
+<div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">Any Advisor output that references an unverified claim as if verified is auto-flagged for review before it reaches the user — 0 such outputs shipped unreviewed this month.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
+    const t = saved || this.props.defaultTheme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    this.apply(t); this.setState({ theme: t });
+  }
+  apply(t) { document.documentElement.setAttribute("data-theme", t); document.body.setAttribute("data-theme", t); try { localStorage.setItem("profile-ds-theme", t); } catch (e) {} }
+  renderVals() {
+    return {
+      themeLabel: this.state.theme === "dark" ? "Dark" : "Light",
+      toggleTheme: () => { const n = this.state.theme === "dark" ? "light" : "dark"; this.apply(n); this.setState({ theme: n }); },
+      stats: [
+        { label: "AI OUTPUTS (7D)", value: "48,210", ink: "var(--text-0)" }, { label: "FLAGGED FOR REVIEW", value: "6", ink: "var(--warning)" },
+        { label: "CONFIRMED SAFE", value: "6", ink: "var(--success)" }, { label: "POLICY VIOLATIONS SHIPPED", value: "0", ink: "var(--success)" }
+      ],
+      logs: [
+        { surface: "Advisor", output: "\"Add a load-calculation credential\" suggestion", data: "3 verified records, Trust Score inputs", user: "Amara Okafor", review: "Not needed", reviewBg: "var(--surface-sunken)", reviewInk: "var(--text-1)" },
+        { surface: "Cover Letter", output: "Draft citing Ikeja General + GRIDCo records", data: "2 verified records only", user: "Amara Okafor", review: "Not needed", reviewBg: "var(--surface-sunken)", reviewInk: "var(--text-1)" },
+        { surface: "Copilot", output: "Explained Trust Score calculation", data: "Trust Score formula (public)", user: "Kwame Mensah", review: "Not needed", reviewBg: "var(--surface-sunken)", reviewInk: "var(--text-1)" },
+        { surface: "Advisor", output: "Flagged: referenced 'likely certified' language", data: "1 unverified claim, 1 verified record", user: "Joseph Tembo", review: "Reviewed — edited", reviewBg: "var(--warning-soft)", reviewInk: "var(--warning)" },
+        { surface: "Opportunity match", output: "Match confidence explanation", data: "Trust Score, skill tags", user: "Funmi Adeyemi", review: "Not needed", reviewBg: "var(--surface-sunken)", reviewInk: "var(--text-1)" },
+        { surface: "Creator Hub", output: "Template description auto-suggestion", data: "Template metadata only", user: "Ngozi Abara", review: "Confirmed safe", reviewBg: "var(--success-soft)", reviewInk: "var(--success)" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
