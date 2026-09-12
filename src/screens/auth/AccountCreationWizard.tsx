@@ -272,15 +272,15 @@ export function AccountCreationWizard() {
             </Field>
           </div>
           <p className="mb-5 text-xs text-text-1">
-            By continuing you agree to PROFILE's{' '}
+            After verifying your email, you'll review and accept PROFILE's{' '}
             <Link to="/terms" className="text-accent">
               Terms
             </Link>{' '}
             and{' '}
             <Link to="/privacy" className="text-accent">
               Privacy Policy
-            </Link>
-            .
+            </Link>{' '}
+            before your account is created — nothing here is agreed to automatically.
           </p>
           <div className="flex gap-2">
             <Button disabled={!individualValid} onClick={() => patch({ step: 'email-verify' })}>

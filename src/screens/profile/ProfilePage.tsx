@@ -128,7 +128,7 @@ export function ProfilePage() {
               </Link>
             ) : (
               account && (
-                <Link to="/messages" className="mb-1 flex-none rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white">
+                <Link to={`/messages?with=${encodeURIComponent(ownerKey(viewed))}`} className="mb-1 flex-none rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white">
                   Message
                 </Link>
               )

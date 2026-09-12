@@ -76,6 +76,15 @@ export function findAccountByUsername(username: string | undefined): Account | u
   return listAllAccounts().find((a) => 'username' in a && a.username === username)
 }
 
+/** Same lookup, keyed by the owner email messageStore.ts/activityStore.ts
+ * use internally — for resolving a display name for a conversation partner
+ * who may not have a username to look up by. */
+export function findAccountByEmail(email: string | undefined): Account | undefined {
+  if (!email) return undefined
+  const target = email.toLowerCase()
+  return listAllAccounts().find((a) => (a.accountType === 'individual' ? a.email : a.officialEmail).toLowerCase() === target)
+}
+
 /** Approve/reject an org's IOTR claim (§50.4) — updates the stored account
  * record; if that org is the currently active AccountContext session, the
  * caller must also call setAccount to refresh the live session. */

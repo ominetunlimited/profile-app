@@ -1,5 +1,5 @@
 import type { IndividualAccount, OrganisationAccount } from '@/app/accountTypes'
-import { emailIsRegistered, saveDemoAccount } from '@/app/demoAccountStore'
+import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/demoAccountStore'
 import { postActivity, listActivities } from '@/app/activityStore'
 import { saveCvDetails, getCvDetails } from '@/app/cvDetailsStore'
 import { toggleMembership, isMember } from '@/app/communitiesStore'
@@ -36,6 +36,17 @@ function seedIfMissing(ownerEmail: string, entries: Parameters<typeof postActivi
   for (const entry of entries) postActivity(entry)
 }
 
+/** First visit: register the account record. Every visit after: refresh the
+ * stored record to match this function's current literal, rather than
+ * `emailIsRegistered` permanently freezing whatever shape existed the first
+ * time this browser ever seeded it — the exact bug that left the Institution
+ * and Government fixtures permanently unreachable (no username) once seeded
+ * before that field was added below, immune to any later code fix. */
+function registerOrRefresh(email: string, account: IndividualAccount | OrganisationAccount) {
+  if (!emailIsRegistered(email)) saveDemoAccount(email, DEMO_PASSWORD, account)
+  else updateDemoAccount(email, account)
+}
+
 export function ensureOminiNfawaSeeded(): IndividualAccount {
   const account: IndividualAccount = {
     accountType: 'individual',
@@ -49,9 +60,7 @@ export function ensureOminiNfawaSeeded(): IndividualAccount {
     city: 'Lagos',
   }
 
-  if (!emailIsRegistered(OMINI_EMAIL)) {
-    saveDemoAccount(OMINI_EMAIL, DEMO_PASSWORD, account)
-  }
+  registerOrRefresh(OMINI_EMAIL, account)
 
   seedIfMissing(OMINI_EMAIL, [
     {
@@ -193,9 +202,7 @@ export function ensureOminetDigitalSeeded(): OrganisationAccount {
     orgRole: 'super_admin',
   }
 
-  if (!emailIsRegistered(OMINET_DIGITAL_EMAIL)) {
-    saveDemoAccount(OMINET_DIGITAL_EMAIL, DEMO_PASSWORD, account)
-  }
+  registerOrRefresh(OMINET_DIGITAL_EMAIL, account)
 
   seedIfMissing(OMINET_DIGITAL_EMAIL, [
     {
@@ -278,12 +285,17 @@ export function ensureInstitutionFixtureSeeded(): OrganisationAccount {
     accountType: 'organisation',
     orgType: 'University',
     legalName: 'Lagos Test University',
+    // Without a username this account had no way to be found by Search or
+    // resolved at /profile/:username at all — invisible to every other
+    // account on the browser, real gap behind "I should be seeing those
+    // accounts" complaints.
+    username: 'lagostestuniversity',
     officialEmail: email,
     country: 'Nigeria',
     registryLevel: 'verified',
     orgRole: 'super_admin',
   }
-  if (!emailIsRegistered(email)) saveDemoAccount(email, DEMO_PASSWORD, account)
+  registerOrRefresh(email, account)
   return account
 }
 
@@ -293,11 +305,12 @@ export function ensureGovernmentFixtureSeeded(): OrganisationAccount {
     accountType: 'organisation',
     orgType: 'Government Ministry',
     legalName: 'Test Ministry of Digital Affairs',
+    username: 'testministryofdigitalaffairs',
     officialEmail: email,
     country: 'Nigeria',
     registryLevel: 'verified',
     orgRole: 'super_admin',
   }
-  if (!emailIsRegistered(email)) saveDemoAccount(email, DEMO_PASSWORD, account)
+  registerOrRefresh(email, account)
   return account
 }

@@ -2281,13 +2281,26 @@ export function ageFromDob(dobStr: string): number | null {
 
 const FREE_EMAIL_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'aol.com', 'protonmail.com']
 
-/** §8.4.1 — organisation official email must not be on a free/personal domain. */
+/**
+ * §8.4.1 — organisation official email must not be on a free/personal domain.
+ *
+ * Both regexes here previously read `[^s@]` (missing the backslash on `\s`)
+ * — a character class excluding the literal letter 's', not whitespace. That
+ * silently rejected almost every real email address containing an 's'
+ * anywhere before the '@' or in the domain (which is most of them —
+ * "user", "test", "smith", "first.last", …), with no visible error message
+ * pointing at the email field. individualValid/orgValid stayed permanently
+ * false for those emails, so Continue looked broken for no apparent reason
+ * — the exact real bug behind "there's no tickbox, so I can't create an
+ * account" (the checkbox that IS there several steps later was never
+ * reached; email validation silently blocked getting that far).
+ */
 export function isOfficialDomainEmail(email: string): boolean {
-  if (!/^[^s@]+@[^s@]+.[^s@]+$/.test(email.trim())) return false
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return false
   const domain = email.trim().toLowerCase().split('@')[1]
   return !!domain && !FREE_EMAIL_DOMAINS.includes(domain)
 }
 
 export function isValidEmail(email: string): boolean {
-  return /^[^s@]+@[^s@]+.[^s@]+$/.test(email.trim())
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 }
