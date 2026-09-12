@@ -87,7 +87,12 @@ export function MissionControl() {
           <h2 className="mb-3 font-semibold text-text-0">Intelligence domains</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <DomainCard title="Growth Intelligence" real body={`${accountsRegistered} account(s) registered on this browser.`} />
-            <DomainCard title="Trust Intelligence" real body={`${disputesFiled} dispute(s) filed, ${pendingClaims.length} organisation claim(s) pending.`} />
+            <DomainCard
+              title="Trust Intelligence"
+              real
+              body={`${disputesFiled} dispute(s) filed, ${pendingClaims.length} organisation claim(s) pending.`}
+              link={{ to: '/internal/dispute-review', label: 'Open Dispute Review' }}
+            />
             <DomainCard title="Business Intelligence" real body={`${publishedTemplates.length} published creator template(s), ₦${totalCreatorEarnings.toLocaleString()} tracked earnings.`} />
             <DomainCard title="Infrastructure Intelligence" real body={`${routeReport.healthyCount}/${routeReport.total} routes healthy.`} link={{ to: '/internal/route-integrity', label: 'Open Route Integrity Engine' }} />
             <DomainCard title="Copilot Intelligence" real body="0 AI decisions logged — no AI Gateway connected yet." link={{ to: '/internal/ai-decision-log', label: 'Open AI Decision Log' }} />

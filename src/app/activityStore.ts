@@ -40,10 +40,26 @@ export interface ActivityRecord {
 
 const STORAGE_KEY = 'profile:demo-activities'
 
+/** Defends against records saved by an earlier version of this build before
+ * skills/tools/collaborators existed on ActivityRecord (or a real user
+ * leaving them blank) — every reader downstream (HomePage, CareerGrowthPage,
+ * OnboardingPage, badgeStore, AnalyticsPage) does `.skills.length` etc.
+ * directly, so this is the one place that needs to normalise rather than
+ * every call site guarding separately. */
+function normalize(a: Partial<ActivityRecord> & Record<string, unknown>): ActivityRecord {
+  return {
+    ...a,
+    skills: Array.isArray(a.skills) ? a.skills : [],
+    tools: Array.isArray(a.tools) ? a.tools : [],
+    collaborators: Array.isArray(a.collaborators) ? a.collaborators : [],
+  } as ActivityRecord
+}
+
 function readAll(): ActivityRecord[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed.map(normalize) : []
   } catch {
     return []
   }

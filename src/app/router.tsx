@@ -8,6 +8,7 @@ import { FeatureShell } from '@/screens/shared/FeatureShell'
 import { CVTemplatesRoute } from '@/screens/career/cv/CVTemplatesRoute'
 import { PortfolioTemplatesRoute } from '@/screens/career/portfolio/PortfolioTemplatesRoute'
 import { RouteIntegrityEngine } from '@/screens/internal/RouteIntegrityEngine'
+import { DisputeReview } from '@/screens/internal/DisputeReview'
 import { NotFoundShell } from '@/screens/shared/NotFoundShell'
 import { PublicHero } from '@/screens/public/PublicHero'
 import { AboutSolutions } from '@/screens/public/AboutSolutions'
@@ -233,6 +234,14 @@ function elementFor(route: RouteEntry): ReactElement {
         <RequireStaff>
           <RequireInternalAccessGate>
             <RouteIntegrityEngine />
+          </RequireInternalAccessGate>
+        </RequireStaff>
+      )
+    case '/internal/dispute-review':
+      return (
+        <RequireStaff>
+          <RequireInternalAccessGate>
+            <DisputeReview />
           </RequireInternalAccessGate>
         </RequireStaff>
       )

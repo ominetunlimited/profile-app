@@ -5,6 +5,7 @@ const LINKS = [
   { to: '/mission-control', label: 'Mission Control' },
   { to: '/internal/ai-decision-log', label: 'AI Decision Log' },
   { to: '/internal/route-integrity', label: 'Route Integrity' },
+  { to: '/internal/dispute-review', label: 'Dispute Review' },
   { to: '/internal/content-console', label: 'Content Console' },
 ]
 

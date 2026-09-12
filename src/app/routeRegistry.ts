@@ -273,6 +273,14 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/internal/ai-decision-log', screen: 'AI Decision Log', phase: 5, masterPromptRef: '§48', gate: { kind: 'staff' } },
   { path: '/internal/route-integrity', screen: 'Route Integrity Engine', phase: 5, masterPromptRef: '§49.3', gate: { kind: 'staff' } },
   {
+    path: '/internal/dispute-review',
+    screen: 'Dispute Review',
+    phase: 5,
+    masterPromptRef: '§26, §50.1, §28.4',
+    gate: { kind: 'staff' },
+    note: 'Closes a real gap: users could file a dispute (DisputeAppeal.tsx) but nothing let staff act on it — trust_score_dispute_management now has a real review/resolve queue.',
+  },
+  {
     path: '/internal/content-console',
     screen: 'Owner Content Console',
     phase: 5,

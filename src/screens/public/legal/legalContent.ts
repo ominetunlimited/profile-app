@@ -114,12 +114,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
   {
     path: '/community-guidelines',
     title: 'Community Guidelines',
-    plainSummary: 'How discussions, communities, and peer interactions are expected to work on PROFILE.',
+    plainSummary: 'Professional credibility grows through verified contribution and responsible participation — governance here is fair, transparent, institutional, and human; never authoritarian, arbitrary, algorithmically abusive, or opaque.',
     body: [
       'Communities exist for professional discussion, mentorship, and peer support — not promotional spam.',
-      'Moderators may remove content or suspend posting rights for confirmed violations of the Professional Conduct Standards.',
+      'Identity conduct: users and organisations must not impersonate individuals or organisations; create false verification claims or fake credentials; manipulate trust scores or verification systems; falsify work history, certifications, or institutional affiliations; form verification rings or review exchange networks; use bot-generated engagement or synthetic identities; or upload others’ work to the copyright system as their own.',
+      'General conduct: harassment, threats, hate speech, doxxing, extortion, blackmail, sexual exploitation, scam activity, predatory recruitment, stalking, coercion, malicious misinformation, abusive negotiations, fake reviews, review manipulation, and paid trust manipulation are all prohibited, for every account type.',
+      'Enforcement is escalating and always documented, explainable, and appealable within 14 days: (1) warning with documented explanation, (2) temporary feature restriction, (3) visibility reduction, (4) verification revocation, (5) account suspension, (6) permanent removal, (7) legal escalation where required by law.',
+      'Child safety: minimum account age is 15, and 18 to transact on the Marketplace. Exploitation, pornography, grooming, trafficking, and predatory behaviour toward minors receive zero tolerance, immediate law-enforcement escalation for confirmed violations, and carry no appeal right.',
     ],
-    pendingDraft: true,
   },
   {
     path: '/security-practices',
