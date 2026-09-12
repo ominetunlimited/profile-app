@@ -14,6 +14,8 @@ import { buildPortfolioData } from '@/app/portfolioData'
 import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
 import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplates'
 import { createRequest, findRequest, listRequestsForOwner, respondToRequest } from '@/app/cvRequestStore'
+import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
+import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
 type Tab = (typeof TABS)[number]
@@ -99,6 +101,16 @@ export function ProfilePage() {
                 <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-1">
                   {viewed.accountType === 'individual' ? 'Not yet verified' : ORG_TRUST_STATUS_LABEL[viewed.registryLevel]}
                 </span>
+                {/* §24.1 <PathwayBadge type="academic | competency" /> */}
+                {viewed.accountType === 'individual' && (
+                  <span className="rounded-full border border-trust px-2 py-0.5 text-[11px] font-medium capitalize text-trust">{viewed.pathway}</span>
+                )}
+                {/* §24.2 <OrgType /> — real, from accountTypes.ts's own OrganisationType, no new field. */}
+                {viewed.accountType === 'organisation' && (
+                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium capitalize text-text-1">
+                    {viewed.orgType.replace(/_/g, ' ')}
+                  </span>
+                )}
               </div>
               {viewed.accountType === 'individual' && viewed.headline && <p className="text-sm text-text-1">{viewed.headline}</p>}
               {/* §9.4 Name Collision Resolution — never display a bare name; always
@@ -108,26 +120,53 @@ export function ProfilePage() {
                 {viewed.username ? ` · @${viewed.username}` : ''}
               </p>
             </div>
-            {isSelf && (
+            {/* §24.1 <TrustScoreRing /> in the header, compact */}
+            <TrustScoreRing trust={trustScore} size={56} />
+            {isSelf ? (
               <Link to="/settings" className="mb-1 flex-none rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
                 Edit profile
               </Link>
+            ) : (
+              account && (
+                <Link to="/messages" className="mb-1 flex-none rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white">
+                  Message
+                </Link>
+              )
             )}
           </div>
 
+          {/* §24.1 <BadgesRow badges={user.badges} /> — real, computed (badgeStore.ts);
+              never rendered for organisations, which have no personal badge concept. */}
+          {viewed.accountType === 'individual' && <BadgesRow ownerAccount={viewed} />}
+
           <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {[
-              ['Activities', activityCount],
-              ['Trust Score', trustScore.total],
-              // Followers/Connections/Reviews/Verified items have no real data
-              // source in this build (no social graph, no review system, no
-              // verification pipeline) — honestly 0 rather than fabricated,
-              // same reasoning as computeTrustScore()'s current-always-0 result.
-              ['Followers', 0],
-              ['Connections', 0],
-              ['Reviews', 0],
-              ['Verified items', 0],
-            ].map(([label, value]) => (
+            {(
+              viewed.accountType === 'organisation'
+                ? [
+                    // §24.2 OrgProfilePage's <Stats> — Followers · Verified Staff ·
+                    // Projects Posted · Verified Programmes, not the individual
+                    // set. No real social graph, staff-verification pipeline, job
+                    // board, or programme registry exists yet in this build, so
+                    // each is honestly 0 rather than reusing individual-shaped
+                    // numbers (Connections/Reviews) that don't apply to an org.
+                    ['Followers', 0],
+                    ['Verified Staff', 0],
+                    ['Projects Posted', 0],
+                    ['Verified Programmes', 0],
+                  ]
+                : [
+                    ['Activities', activityCount],
+                    ['Trust Score', trustScore.total],
+                    // Followers/Connections/Reviews/Verified items have no real data
+                    // source in this build (no social graph, no review system, no
+                    // verification pipeline) — honestly 0 rather than fabricated,
+                    // same reasoning as computeTrustScore()'s current-always-0 result.
+                    ['Followers', 0],
+                    ['Connections', 0],
+                    ['Reviews', 0],
+                    ['Verified items', 0],
+                  ]
+            ).map(([label, value]) => (
               <div key={label as string} className="rounded-lg border border-border p-2.5 text-center">
                 <div className="font-mono text-lg font-semibold text-text-0">{value}</div>
                 <div className="text-[10.5px] text-text-1">{label}</div>
@@ -348,6 +387,33 @@ function CvPortfolioTab({
 
 function name(account: Account): string {
   return account.legalName
+}
+
+/**
+ * §14 Professional Badge System's `<BadgesRow />`. Shows only earned badges
+ * — the other ~13 of 16 are never rendered "locked" here (that pattern
+ * belongs to a gamified progress UI this section doesn't ask for); a badge
+ * either has real evidence behind it or it doesn't appear yet.
+ */
+function BadgesRow({ ownerAccount }: { ownerAccount: Account }) {
+  const earned = computeEarnedBadges(ownerAccount)
+  if (earned.length === 0) return null
+  return (
+    <div className="mt-3 flex flex-wrap gap-1.5">
+      {earned.map((type) => {
+        const def = BADGE_CATALOGUE.find((b) => b.type === type)!
+        return (
+          <span
+            key={type}
+            title={def.selfEvidenced ? 'Self-reported evidence, not institutionally verified' : 'Institutionally verified'}
+            className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${def.selfEvidenced ? 'border-border-strong text-text-1' : 'border-success text-success'}`}
+          >
+            {def.selfEvidenced ? '◇' : '✓'} {def.name}
+          </span>
+        )
+      })}
+    </div>
+  )
 }
 
 /** §11.1's `<SelfTagButton />` / §11.3 Self-Tag System — real, per-activity.

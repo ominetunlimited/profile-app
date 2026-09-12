@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
+import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { resizeImage } from '@/app/mediaStore'
@@ -40,8 +41,6 @@ export function TrustPassport() {
   const owner = account ? ownerKey(account) : ''
   const trust = computeTrustScore(account)
   const [requests, setRequests] = useState(() => listVerificationRequests(owner))
-  const ringPct = trust.total / 1000
-  const circumference = 2 * Math.PI * 54
 
   const dimensionSignals: Record<keyof TrustDimensions, string[]> = {
     identityTrust: [], academicTrust: [], professionalTrust: [], employmentTrust: [],
@@ -58,28 +57,7 @@ export function TrustPassport() {
         <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Your Trust Score</h1>
 
         <div className="mb-8 flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:gap-8">
-          <svg width="140" height="140" viewBox="0 0 120 120" className="flex-none">
-            <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border)" strokeWidth="10" />
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke={trust.tier.color}
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={circumference * (1 - ringPct)}
-              transform="rotate(-90 60 60)"
-              style={{ transition: 'stroke-dashoffset 1s ease-out' }}
-            />
-            <text x="60" y="56" textAnchor="middle" className="fill-current text-text-0" style={{ fontSize: 26, fontWeight: 700 }}>
-              {trust.total}
-            </text>
-            <text x="60" y="76" textAnchor="middle" className="fill-current text-text-2" style={{ fontSize: 11 }}>
-              / 1000
-            </text>
-          </svg>
+          <TrustScoreRing trust={trust} size={140} />
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-center gap-2">
               <span className="rounded-full px-2.5 py-1 text-xs font-bold text-white" style={{ background: trust.tier.color }}>

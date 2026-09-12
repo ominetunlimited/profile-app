@@ -136,6 +136,18 @@ function elementFor(route: RouteEntry): ReactElement {
           <OpportunityHub />
         </RequireAuthenticated>
       )
+    case '/opportunity/students':
+      return (
+        <RequireAuthenticated>
+          <OpportunityHub pinnedCluster="Students & Learners" title="Student Opportunity Hub" />
+        </RequireAuthenticated>
+      )
+    case '/opportunity/graduates':
+      return (
+        <RequireAuthenticated>
+          <OpportunityHub pinnedCluster="Graduates & Entry-Level" title="Graduate Launchpad" />
+        </RequireAuthenticated>
+      )
     case '/messages':
       return (
         <RequireAuthenticated>
