@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import type { OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
@@ -13,15 +14,36 @@ const REGISTRY_LEVELS: OrgRegistryLevel[] = ['verified', 'recognized', 'user_sub
  * org-internal roles, neither of which has a self-serve entry point yet
  * (§3.4 internal-only; §42's multi-seat invite flow isn't built). Not part of
  * the shipped product.
+ *
+ * At phone width this bar's ~15 buttons/selects used to wrap into a fixed
+ * strip nearly 40% of the viewport tall, permanently covering the real app
+ * on every screen with no way to dismiss it — a real problem for anyone
+ * actually viewing the demo on a phone. Below `sm`, it now defaults to a
+ * small collapsed pill; tapping it opens the full switcher as a scrollable
+ * bottom sheet capped at 70vh, with its own close control. Desktop is
+ * unchanged (there's room for the inline bar).
  */
 export function AccountSwitcher() {
   const { account, staffRole, hub, setAccount, setStaffRole } = useAccount()
   const navigate = useNavigate()
   const isOrg = account?.accountType === 'organisation'
+  const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-wrap items-center gap-3 border-t border-border-strong bg-surface px-4 py-2 font-mono text-xs text-text-1">
-      <span className="text-text-2">PROFILE DEMO</span>
+    <>
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="fixed bottom-3 right-3 z-50 rounded-full border border-accent bg-surface px-3 py-2 font-mono text-[11px] font-semibold text-accent shadow-lg sm:hidden"
+      >
+        {expanded ? 'Close demo ✕' : 'Demo ⚙'}
+      </button>
+      <div
+        className={`${expanded ? 'flex flex-col items-stretch gap-2' : 'hidden'} fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-y-auto border-t border-border-strong bg-surface px-4 py-3 font-mono text-xs text-text-1 sm:flex sm:max-h-none sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:overflow-visible sm:py-2`}
+      >
+        <button onClick={() => setExpanded(false)} className="self-end rounded border border-border px-2 py-1 text-[11px] font-semibold sm:hidden">
+          Close ✕
+        </button>
+        <span className="text-text-2">PROFILE DEMO</span>
       <button
         className="rounded border border-accent px-2 py-1 font-semibold text-accent hover:bg-surface-sunken"
         onClick={() => {
@@ -173,10 +195,11 @@ export function AccountSwitcher() {
       >
         Toggle theme
       </button>
-      <span className="ml-auto text-text-2">
+      <span className="sm:ml-auto text-text-2">
         current: {staffRole ?? account?.accountType ?? 'signed out'}
         {isOrg ? ` (${account.orgType} → ${hub}, ${account.registryLevel}, ${account.orgRole})` : ''}
       </span>
-    </div>
+      </div>
+    </>
   )
 }
