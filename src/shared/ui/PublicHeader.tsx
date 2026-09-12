@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useLanguage } from '@/app/LanguageContext'
 import { LanguagePicker } from './LanguagePicker'
+import { BRAND } from '@/shared/brand/assets'
 
 const NAV_LINKS = [
   { to: '/about', key: 'nav.about' },
@@ -20,8 +21,8 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-8">
-        <Link to="/" className="flex flex-none items-center gap-2 order-1" aria-label="PROFILE home">
-          <span className="font-sans text-[15px] font-bold tracking-tight text-text-0">PROFILE</span>
+        <Link to="/" className="flex flex-none items-center order-1" aria-label="PROFILE home">
+          <img src={BRAND.lockup} alt="PROFILE" className="h-6 w-auto sm:h-7" />
         </Link>
         <div className="order-2 ms-auto flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           <LanguagePicker />

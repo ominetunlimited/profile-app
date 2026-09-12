@@ -5,8 +5,11 @@ import { LANGUAGES, type LanguageCode } from '@/app/i18n'
 import { updateDemoAccount } from '@/app/demoAccountStore'
 import { ownerKey } from '@/app/activityStore'
 import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
+import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
+import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
+import { ImageUploadField } from '@/shared/ui/ImageUploadField'
 
 /** Supports both uncontrolled use (`defaultChecked`, most Settings toggles —
  * decorative in this no-backend build) and controlled use (`checked` +
@@ -68,6 +71,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function ProfileTab() {
   const { account, setAccount } = useAccount()
   const isIndividual = account?.accountType === 'individual'
+  const owner = account ? ownerKey(account) : ''
+  const [media, setMedia] = useState(() => (owner ? getProfileMedia(owner) : { avatarDataUrl: null, coverDataUrl: null }))
   const [form, setForm] = useState(() => ({
     legalName: account?.legalName ?? '',
     headline: isIndividual ? account.headline ?? '' : '',
@@ -90,6 +95,26 @@ export function ProfileTab() {
   return (
     <Section title="Profile">
       <div className="flex flex-col gap-3 pt-2">
+        <ImageUploadField
+          label="Cover image"
+          value={media.coverDataUrl}
+          maxDimension={1600}
+          shape="banner"
+          onUploaded={(dataUrl) => {
+            saveCover(owner, dataUrl)
+            setMedia((m) => ({ ...m, coverDataUrl: dataUrl }))
+          }}
+        />
+        <ImageUploadField
+          label={account?.accountType === 'organisation' ? 'Logo' : 'Profile photo'}
+          value={media.avatarDataUrl}
+          maxDimension={480}
+          shape="circle"
+          onUploaded={(dataUrl) => {
+            saveAvatar(owner, dataUrl)
+            setMedia((m) => ({ ...m, avatarDataUrl: dataUrl }))
+          }}
+        />
         <Field label="Full name">
           <TextInput value={form.legalName} onChange={(e) => setForm((f) => ({ ...f, legalName: e.target.value }))} />
         </Field>
@@ -351,13 +376,36 @@ export function LanguageTab() {
 
 /** §25 SETTINGS_TABS.Accessibility */
 export function AccessibilityTab() {
+  const [prefs, setPrefs] = useState(getAccessibilityPrefs)
+
+  function update(next: AccessibilityPrefs) {
+    setPrefs(next)
+    saveAccessibilityPrefs(next)
+    window.dispatchEvent(new Event('accessibility-prefs-changed'))
+  }
+
   return (
     <Section title="Accessibility">
-      <Toggle label="Reduce motion" />
-      <Toggle label="High contrast mode" />
-      <Toggle label="Screen reader optimisations" />
+      <Toggle
+        label="Reduce motion"
+        hint="Stops PROFILE's own animations (including the brand loading motion), regardless of your OS setting."
+        checked={prefs.reduceMotion}
+        onChange={(v) => update({ ...prefs, reduceMotion: v })}
+      />
+      <Toggle
+        label="High contrast mode"
+        hint="Strengthens borders and secondary text against the background."
+        checked={prefs.highContrast}
+        onChange={(v) => update({ ...prefs, highContrast: v })}
+      />
+      <Toggle
+        label="Screen reader optimisations"
+        hint="Keeps the skip-to-content link always visible and widens focus rings."
+        checked={prefs.screenReaderOptimised}
+        onChange={(v) => update({ ...prefs, screenReaderOptimised: v })}
+      />
       <Field label="Text size">
-        <SelectInput defaultValue="default">
+        <SelectInput value={prefs.textSize} onChange={(e) => update({ ...prefs, textSize: e.target.value as AccessibilityPrefs['textSize'] })}>
           <option value="default">Default</option>
           <option value="large">Large</option>
           <option value="larger">Larger</option>

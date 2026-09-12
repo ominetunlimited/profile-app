@@ -2,14 +2,28 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
+import { listAllAccounts } from '@/app/demoAccountStore'
+
+interface PersonResult {
+  kind: 'person'
+  path: string
+  screen: string
+  sub: string
+}
 
 /**
- * §29's Windows App reference: "keyboard-first navigation... a command
- * palette (Ctrl+K) rather than a wrapped website." A real, working
- * implementation rather than a native Windows/Electron shell this web
- * codebase can't produce (flagged separately) — searches the actual route
- * registry and only lists routes the current account can actually reach, so
- * it never offers a destination that then denies the user.
+ * §17 Discover/Smart Search + §10.2 UniversalSearch, merged into the same
+ * overlay this build already had for route search (§29's Ctrl+K palette) —
+ * one search surface, not two. Opens on Ctrl+K (power users) or the
+ * `open-global-search` window event (the visible search button in
+ * AppShell's header, for everyone else). §17.1's hard rule is respected by
+ * construction: nothing here ever reads follower/like/view counts, because
+ * this build has none.
+ *
+ * People/organisation results come from `listAllAccounts()` — every account
+ * actually registered on this browser, never fabricated profiles — and only
+ * accounts with a `username` are included, since that's the only thing
+ * `/profile/:username` can resolve.
  */
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
@@ -27,8 +41,15 @@ export function CommandPalette() {
       }
       if (e.key === 'Escape') setOpen(false)
     }
+    function onExternalOpen() {
+      setOpen(true)
+    }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('open-global-search', onExternalOpen)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('open-global-search', onExternalOpen)
+    }
   }, [])
 
   useEffect(() => {
@@ -84,11 +105,32 @@ export function CommandPalette() {
     })
   }, [account, staffRole, hub])
 
+  const people = useMemo<PersonResult[]>(() => {
+    if (!account && !staffRole) return []
+    return listAllAccounts()
+      .filter((a) => 'username' in a && a.username)
+      .map((a) => {
+        const username = (a as { username?: string }).username!
+        return {
+          kind: 'person' as const,
+          path: `/profile/${username}`,
+          screen: a.legalName,
+          sub: a.accountType === 'organisation' ? `@${username} · ${a.orgType}` : `@${username}`,
+        }
+      })
+  }, [account, staffRole])
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const list = q ? reachable.filter((r) => r.screen.toLowerCase().includes(q) || r.path.toLowerCase().includes(q)) : reachable.slice(0, 8)
-    return list.slice(0, 8)
-  }, [query, reachable])
+    if (!q) {
+      return reachable.slice(0, 8).map((r) => ({ kind: 'route' as const, path: r.path, screen: r.screen, sub: r.path }))
+    }
+    const routeMatches = reachable
+      .filter((r) => r.screen.toLowerCase().includes(q) || r.path.toLowerCase().includes(q))
+      .map((r) => ({ kind: 'route' as const, path: r.path, screen: r.screen, sub: r.path }))
+    const peopleMatches = people.filter((p) => p.screen.toLowerCase().includes(q) || p.sub.toLowerCase().includes(q))
+    return [...peopleMatches, ...routeMatches].slice(0, 8)
+  }, [query, reachable, people])
 
   if (!open) return null
 
@@ -98,7 +140,7 @@ export function CommandPalette() {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label="Search PROFILE"
         onClick={(e) => e.stopPropagation()}
         className="h-fit w-full max-w-[480px] overflow-hidden rounded-xl border border-border-strong bg-surface shadow-2xl"
       >
@@ -112,16 +154,16 @@ export function CommandPalette() {
               setOpen(false)
             }
           }}
-          placeholder="Search screens… (e.g. verify record)"
+          placeholder="Search people, organisations, or screens…"
           className="w-full border-b border-border bg-transparent px-3.5 py-3 text-sm text-text-0 outline-none"
         />
         <div>
           {results.length === 0 ? (
-            <p className="px-3.5 py-4 text-sm text-text-1">No matching screens.</p>
+            <p className="px-3.5 py-4 text-sm text-text-1">No matches.</p>
           ) : (
             results.map((r, i) => (
               <button
-                key={r.path}
+                key={`${r.kind}-${r.path}`}
                 onClick={() => {
                   navigate(r.path)
                   setOpen(false)
@@ -129,8 +171,11 @@ export function CommandPalette() {
                 className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm"
                 style={i === 0 ? { background: 'var(--surface-sunken)' } : undefined}
               >
-                <span className="text-text-0">{r.screen}</span>
-                <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? '↵' : r.path}</span>
+                <span className="text-text-0">
+                  {r.kind === 'person' && <span className="mr-1.5">👤</span>}
+                  {r.screen}
+                </span>
+                <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? '↵' : r.sub}</span>
               </button>
             ))
           )}

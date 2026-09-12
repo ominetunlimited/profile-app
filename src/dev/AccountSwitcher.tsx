@@ -1,6 +1,7 @@
 import { useAccount } from '@/app/AccountContext'
 import type { OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
 import { ORGANISATION_TYPES } from '@/app/accountTypes'
+import { ensureGovernmentFixtureSeeded, ensureInstitutionFixtureSeeded, ensureOminetDigitalSeeded, ensureOminiNfawaSeeded } from './seedDemoData'
 
 const ORG_ADMIN_ROLES: OrgAdminRoleV3[] = ['super_admin', 'admin', 'verification_officer', 'hr_manager', 'credential_manager', 'moderator', 'compliance_officer']
 const REGISTRY_LEVELS: OrgRegistryLevel[] = ['verified', 'recognized', 'user_submitted', 'rejected']
@@ -18,6 +19,46 @@ export function AccountSwitcher() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-wrap items-center gap-3 border-t border-border-strong bg-surface px-4 py-2 font-mono text-xs text-text-1">
+      <span className="text-text-2">PROFILE DEMO</span>
+      <button
+        className="rounded border border-accent px-2 py-1 font-semibold text-accent hover:bg-surface-sunken"
+        onClick={() => {
+          const seeded = ensureOminiNfawaSeeded()
+          setAccount(seeded)
+          setStaffRole(null)
+        }}
+      >
+        👤 Omini Nfawa · @ominet
+      </button>
+      <button
+        className="rounded border border-accent px-2 py-1 font-semibold text-accent hover:bg-surface-sunken"
+        onClick={() => {
+          const seeded = ensureOminetDigitalSeeded()
+          setAccount(seeded)
+          setStaffRole(null)
+        }}
+      >
+        🏢 Ominet Digital · @ominetdigital
+      </button>
+      <button
+        className="rounded border border-border px-2 py-1 text-text-1 hover:border-accent"
+        onClick={() => {
+          setAccount(ensureInstitutionFixtureSeeded())
+          setStaffRole(null)
+        }}
+      >
+        🎓 Institution fixture (test)
+      </button>
+      <button
+        className="rounded border border-border px-2 py-1 text-text-1 hover:border-accent"
+        onClick={() => {
+          setAccount(ensureGovernmentFixtureSeeded())
+          setStaffRole(null)
+        }}
+      >
+        🏛️ Government fixture (test)
+      </button>
+      <span className="text-text-2">|</span>
       <span className="text-text-2">DEV ACCOUNT SWITCHER</span>
       <button
         className="rounded border border-border px-2 py-1 hover:border-accent"

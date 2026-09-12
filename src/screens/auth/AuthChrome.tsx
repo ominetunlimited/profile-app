@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState, type ReactNode } from 'react'
+import { BRAND } from '@/shared/brand/assets'
 
 /** §6.2/§7.1/§8 shared chrome: logo + theme toggle, matching the Handoff's Sign
  * In / Account Creation pages exactly (a plain header, no full public nav). */
@@ -18,8 +19,8 @@ export function AuthChrome({
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
       <div className="w-full" style={{ maxWidth }}>
         <div className="mb-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-sm font-bold text-text-0">PROFILE</span>
+          <Link to="/" className="flex items-center">
+            <img src={BRAND.lockup} alt="PROFILE" className="h-6 w-auto" />
           </Link>
           <button
             type="button"

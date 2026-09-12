@@ -61,6 +61,13 @@ export function listAllOrganisations(): Extract<Account, { accountType: 'organis
     .filter((a): a is Extract<Account, { accountType: 'organisation' }> => a.accountType === 'organisation')
 }
 
+/** §17 Discover/Search's real "directory" — every account actually
+ * registered on this browser (never a fabricated people/org list). Global
+ * Search (CommandPalette.tsx) is the only current caller. */
+export function listAllAccounts(): Account[] {
+  return readAll().map((r) => r.account)
+}
+
 /** Approve/reject an org's IOTR claim (§50.4) — updates the stored account
  * record; if that org is the currently active AccountContext session, the
  * caller must also call setAccount to refresh the live session. */

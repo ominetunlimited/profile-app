@@ -1,106 +1,181 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
+import { ownerKey } from '@/app/activityStore'
+import { getProfileMedia } from '@/app/mediaStore'
+import { bottomTabs, hamburgerGroups, profileDrawerItems } from '@/app/navConfig'
+import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
 
+const TAB_ICON: Record<string, string> = {
+  home: '🏠',
+  connections: '🤝',
+  create: '➕',
+  opportunity: '💼',
+  cv_portfolio: '📄',
+}
+
 /**
- * §10.2 Top App Bar, condensed for this phase — a real, working nav across
- * Home/Opportunities/Messages/Learning/Notifications/Settings, not the full
- * 25-item Hamburger Menu (§10.4). That full ecosystem-wide menu reaches routes
- * this build hasn't built yet (Marketplace, Analytics, Collab Hub, Developer
- * Platform, Admin Centre, …) — outside the declared 43-screen/7-phase scope,
- * and wiring it in piecemeal here would either dead-end on unbuilt routes or
- * require inventing them ahead of their own phase. Flagged as deferred, not
- * silently skipped: build doc §49.3 forbids dead links, so this shell only
- * links to routes that are real in this build.
+ * Recovery patch — §10.1/§10.2/§10.3/§10.4 rebuilt from scratch. Previously
+ * this shell hardcoded 5 links total and a 4-item avatar menu; every other
+ * real route in the build (Store, Career Engine, Org/Institution/Government
+ * workspaces, Owner/Internal tools, and the 8 new recovery-patch screens)
+ * had no nav entry anywhere. Everything below reads from navConfig.ts's
+ * single account-aware source, so mobile and desktop never drift apart
+ * (§10.8's own quality gate).
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const { account, staffRole, setAccount, setStaffRole } = useAccount()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hamburgerOpen, setHamburgerOpen] = useState(false)
   const { t } = useLanguage()
 
   const displayName = account?.accountType === 'individual' ? account.legalName : account?.accountType === 'organisation' ? account.legalName : staffRole ? 'Staff' : 'Guest'
-  const cvPortfolioLabel = account?.accountType === 'organisation' ? 'Portfolio' : 'CV'
+  const owner = account ? ownerKey(account) : ''
+  const [avatarUrl, setAvatarUrl] = useState(() => (owner ? getProfileMedia(owner).avatarDataUrl : null))
+
+  useEffect(() => {
+    function refresh() {
+      setAvatarUrl(owner ? getProfileMedia(owner).avatarDataUrl : null)
+    }
+    refresh()
+    window.addEventListener('profile-media-changed', refresh)
+    return () => window.removeEventListener('profile-media-changed', refresh)
+  }, [owner])
+
+  const drawerItems = profileDrawerItems({ account, staffRole })
+  const groups = hamburgerGroups({ account, staffRole })
+  const tabs = bottomTabs({ account, staffRole })
+
+  function signOut() {
+    setAccount(null)
+    setStaffRole(null)
+    setMenuOpen(false)
+    setHamburgerOpen(false)
+    navigate('/')
+  }
 
   return (
     <div className="min-h-screen bg-bg">
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-3 px-4 py-2.5 sm:px-6">
-          <Link to="/home" className="flex-none text-sm font-bold text-text-0">
-            PROFILE
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6">
+          <Link to="/home" className="flex-none" aria-label="PROFILE home">
+            <img src={BRAND.mark} alt="" className="h-7 w-7" />
           </Link>
-          <nav aria-label="Primary" className="hidden flex-1 items-center gap-1 sm:flex">
-            <Link to="/home" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-text-1 hover:text-text-0">
-              {t('nav.home')}
-            </Link>
-            <Link to="/opportunities" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-text-1 hover:text-text-0">
-              {t('nav.opportunities')}
-            </Link>
-            <Link to="/messages" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-text-1 hover:text-text-0">
-              Messages
-            </Link>
-            <Link to="/communities" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-text-1 hover:text-text-0">
-              Communities
-            </Link>
-            <Link to="/learn" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-text-1 hover:text-text-0">
-              Learning
-            </Link>
-          </nav>
+
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event('open-global-search'))}
+            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-strong bg-surface-sunken px-3 text-sm text-text-2 sm:max-w-[360px]"
+          >
+            <span aria-hidden>🔍</span>
+            <span className="truncate">{t('nav.search')}</span>
+            <span className="ms-auto hidden font-mono text-[10px] text-text-2 sm:inline">Ctrl K</span>
+          </button>
+
           <div className="ms-auto flex flex-none items-center gap-1.5">
             <LanguagePicker />
-            <Link
-              to="/notifications"
-              aria-label="Notifications"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0"
-            >
+            <Link to="/notifications" aria-label="Notifications" className="flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
               🔔
             </Link>
+            <Link to="/messages" aria-label="Messages" className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
+              💬
+            </Link>
+            <button
+              type="button"
+              onClick={() => setHamburgerOpen(true)}
+              aria-label="Menu"
+              aria-haspopup="menu"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0"
+            >
+              ☰
+            </button>
             <div className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white"
+                aria-label="Profile"
+                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-accent text-xs font-semibold text-white"
               >
-                {displayName.slice(0, 1).toUpperCase()}
+                {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : displayName.slice(0, 1).toUpperCase()}
               </button>
               {menuOpen && (
                 <div role="menu" className="absolute end-0 top-11 w-56 rounded-xl border border-border bg-surface p-1.5 shadow-lg">
                   <div className="px-2.5 py-2 text-xs text-text-2">{displayName}</div>
-                  <Link to="/profile/me" onClick={() => setMenuOpen(false)} role="menuitem" className="block rounded-lg px-2.5 py-2 text-sm text-text-0 hover:bg-surface-sunken">
-                    My Profile
-                  </Link>
-                  <Link to="/profile/me?tab=cv-portfolio" onClick={() => setMenuOpen(false)} role="menuitem" className="block rounded-lg px-2.5 py-2 text-sm text-text-0 hover:bg-surface-sunken">
-                    My {cvPortfolioLabel}
-                  </Link>
-                  <Link to="/trust" onClick={() => setMenuOpen(false)} role="menuitem" className="block rounded-lg px-2.5 py-2 text-sm text-text-0 hover:bg-surface-sunken">
-                    Trust Centre
-                  </Link>
-                  <Link to="/settings" onClick={() => setMenuOpen(false)} role="menuitem" className="block rounded-lg px-2.5 py-2 text-sm text-text-0 hover:bg-surface-sunken">
-                    Settings
-                  </Link>
-                  <div className="my-1 h-px bg-border" />
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setAccount(null)
-                      setStaffRole(null)
-                      setMenuOpen(false)
-                      navigate('/')
-                    }}
-                    className="block w-full rounded-lg px-2.5 py-2 text-left text-sm text-danger hover:bg-surface-sunken"
-                  >
-                    Sign out
-                  </button>
+                  {drawerItems.map((item) => (
+                    <Link key={item.key} to={item.to} onClick={() => setMenuOpen(false)} role="menuitem" className="block rounded-lg px-2.5 py-2 text-sm text-text-0 hover:bg-surface-sunken">
+                      {item.label}
+                    </Link>
+                  ))}
+                  {(account || staffRole) && (
+                    <>
+                      <div className="my-1 h-px bg-border" />
+                      <button role="menuitem" onClick={signOut} className="block w-full rounded-lg px-2.5 py-2 text-left text-sm text-danger hover:bg-surface-sunken">
+                        Sign out
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </header>
-      <main>{children}</main>
+
+      <main className="pb-16 sm:pb-0">{children}</main>
+
+      {tabs.length > 0 && (
+        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur sm:hidden">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.key}
+              to={tab.to}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-text-1 ${tab.key === 'create' ? 'relative' : ''}`}
+            >
+              <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg text-white shadow-lg' : 'text-base'} aria-hidden>
+                {TAB_ICON[tab.key]}
+              </span>
+              {tab.key !== 'create' && tab.label}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {hamburgerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setHamburgerOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Menu" onClick={(e) => e.stopPropagation()} className="flex h-full w-full max-w-[320px] flex-col overflow-y-auto border-s border-border bg-surface p-2">
+            <div className="flex items-center justify-between px-2 py-2">
+              <img src={BRAND.lockup} alt="PROFILE" className="h-5 w-auto" />
+              <button onClick={() => setHamburgerOpen(false)} aria-label="Close menu" className="flex h-8 w-8 items-center justify-center rounded-lg text-text-1">
+                ✕
+              </button>
+            </div>
+            {groups.map((group, gi) => (
+              <div key={group.key}>
+                {gi > 0 && <div className="my-1.5 h-px bg-border" />}
+                <div className="flex flex-col gap-0.5 py-1">
+                  {group.items.map((item) => (
+                    <Link key={item.key} to={item.to} onClick={() => setHamburgerOpen(false)} role="menuitem" className="rounded-lg px-3 py-2.5 text-sm text-text-0 hover:bg-surface-sunken">
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {(account || staffRole) && (
+              <>
+                <div className="my-1.5 h-px bg-border" />
+                <button onClick={signOut} className="rounded-lg px-3 py-2.5 text-left text-sm text-danger hover:bg-surface-sunken">
+                  Sign out
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

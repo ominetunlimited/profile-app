@@ -273,4 +273,17 @@ export const routeRegistry: RouteEntry[] = [
     note:
       'Patch (pre-Phase-7) B9: registered as staff-gated at the router level; Owner-only enforcement happens inside the component itself via RequireOwner, matching the pattern used elsewhere (e.g. HubAccessDenied) for checks that need live account state.',
   },
+
+  // ---- Design Recovery Patch — §10.4 Hamburger Menu destinations with no ----
+  // ---- prior route; every real §10 nav item now resolves somewhere real. ----
+  { path: '/connections', screen: 'Connections', phase: 2, masterPromptRef: '§10.1', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.1 mobile bottom nav tab with no prior route.' },
+  { path: '/record', screen: 'Record Activity', phase: 2, masterPromptRef: '§10.1', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.1 primary create-activity action as its own route, reusing Home\'s Composer.' },
+  { path: '/credentials', screen: 'Credential Hub', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item, individual accounts only (enforced in-component).' },
+  { path: '/analytics', screen: 'Analytics', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item, individual accounts only (enforced in-component) — orgs already have Institution/Government Analytics.' },
+  { path: '/career-growth', screen: 'Career Growth', phase: 2, masterPromptRef: '§10.4, §18.5', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item, individual accounts only (enforced in-component).' },
+  { path: '/collaboration', screen: 'Collaboration Hub', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item.' },
+  { path: '/developer-platform', screen: 'Developer Platform', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item — honest "not built yet" real page, not a dead link.' },
+  { path: '/api-centre', screen: 'API Centre', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item — honest "not built yet" real page, not a dead link.' },
+  { path: '/feedback', screen: 'Feedback Centre', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item.' },
+  { path: '/release-notes', screen: 'Release Notes', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item — real changelog of this build\'s actual phase history.' },
 ]

@@ -90,7 +90,7 @@ export function HomePage() {
   )
 }
 
-function Composer({ owner, onClose, onPosted }: { owner: string; onClose: () => void; onPosted: () => void }) {
+export function Composer({ owner, onClose, onPosted }: { owner: string; onClose: () => void; onPosted: () => void }) {
   const [type, setType] = useState(ACTIVITY_TYPES[0])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')

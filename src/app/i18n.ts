@@ -58,6 +58,7 @@ export const TRANSLATIONS: Record<string, Partial<Record<LanguageCode, string>>>
   'nav.help': { en: 'Help', fr: 'Aide', zh: '帮助', ar: 'المساعدة', de: 'Hilfe', es: 'Ayuda', pt: 'Ajuda', hi: 'सहायता', ru: 'Помощь', ja: 'ヘルプ' },
   'nav.signin': { en: 'Sign In', fr: 'Se connecter', zh: '登录', ar: 'تسجيل الدخول', de: 'Anmelden', es: 'Iniciar sesión', pt: 'Entrar', hi: 'साइन इन करें', ru: 'Войти', ja: 'サインイン' },
   'nav.openProfile': { en: 'Open Your PROFILE', fr: 'Ouvrez votre PROFILE', zh: '开启您的 PROFILE', ar: 'افتح ملفك في PROFILE', de: 'Eröffnen Sie Ihr PROFILE', es: 'Abra su PROFILE', pt: 'Abra o seu PROFILE', hi: 'अपना PROFILE खोलें', ru: 'Откройте свой PROFILE', ja: 'PROFILEを開設' },
+  'nav.search': { en: 'Search PROFILE', fr: 'Rechercher sur PROFILE', zh: '搜索 PROFILE', ar: 'ابحث في PROFILE', de: 'PROFILE durchsuchen', es: 'Buscar en PROFILE', pt: 'Pesquisar no PROFILE', hi: 'PROFILE खोजें', ru: 'Поиск по PROFILE', ja: 'PROFILEを検索' },
 
   'hero.tag': { en: 'Built on Proof', de: 'Auf Beweisen aufgebaut', ar: 'مبني على الإثبات' },
   'hero.headline': { en: 'Where work becomes credibility.', de: 'Wo Arbeit zu Glaubwürdigkeit wird.', ar: 'حيث يتحول العمل إلى مصداقية.' },

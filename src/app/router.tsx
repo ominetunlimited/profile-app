@@ -46,6 +46,16 @@ import { StoreHub } from '@/screens/store/StoreHub'
 import { OwnerContentConsole } from '@/screens/internal/OwnerContentConsole'
 import { AdminManagement } from '@/screens/internal/AdminManagement'
 import { RequireInternalAccessGate } from './internalAccessGate'
+import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
+import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
+import { CredentialHub } from '@/screens/more/CredentialHub'
+import { AnalyticsPage } from '@/screens/more/AnalyticsPage'
+import { CareerGrowthPage } from '@/screens/more/CareerGrowthPage'
+import { CollaborationHub } from '@/screens/more/CollaborationHub'
+import { DeveloperPlatform } from '@/screens/more/DeveloperPlatform'
+import { ApiCentre } from '@/screens/more/ApiCentre'
+import { FeedbackCentre } from '@/screens/more/FeedbackCentre'
+import { ReleaseNotes } from '@/screens/more/ReleaseNotes'
 
 const LEGAL_PATHS = new Set([
   '/terms',
@@ -154,6 +164,50 @@ function elementFor(route: RouteEntry): ReactElement {
           <LearningPage />
         </RequireAuthenticated>
       )
+    case '/connections':
+      return (
+        <RequireAuthenticated>
+          <ConnectionsPage />
+        </RequireAuthenticated>
+      )
+    case '/record':
+      return (
+        <RequireAuthenticated>
+          <RecordActivityPage />
+        </RequireAuthenticated>
+      )
+    case '/credentials':
+      return (
+        <RequireAuthenticated>
+          <CredentialHub />
+        </RequireAuthenticated>
+      )
+    case '/analytics':
+      return (
+        <RequireAuthenticated>
+          <AnalyticsPage />
+        </RequireAuthenticated>
+      )
+    case '/career-growth':
+      return (
+        <RequireAuthenticated>
+          <CareerGrowthPage />
+        </RequireAuthenticated>
+      )
+    case '/collaboration':
+      return (
+        <RequireAuthenticated>
+          <CollaborationHub />
+        </RequireAuthenticated>
+      )
+    case '/developer-platform':
+      return <DeveloperPlatform />
+    case '/api-centre':
+      return <ApiCentre />
+    case '/feedback':
+      return <FeedbackCentre />
+    case '/release-notes':
+      return <ReleaseNotes />
     case '/internal/route-integrity':
       return (
         <RequireStaff>
