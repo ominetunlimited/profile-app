@@ -47,6 +47,28 @@ export function bottomTabs({ account, staffRole }: NavContext): NavItem[] {
   ].filter((t) => t.show)
 }
 
+/**
+ * V9 Enforcement Patch §3/§14: CV and Portfolio (and the rest of the
+ * high-value primary surfaces) must not disappear into the hamburger menu —
+ * a persistent, visible desktop nav row, not just the mobile bottom tabs
+ * and the hamburger's full list. Kept short and high-value on purpose;
+ * everything else still lives in the Hamburger Menu, which is for
+ * secondary/system functions (§15), not where core product modules hide.
+ */
+export function topNavItems({ account, staffRole }: NavContext): NavItem[] {
+  if (!account && !staffRole) return []
+  const isOrg = account?.accountType === 'organisation'
+  return [
+    { key: 'home', label: 'Home', to: '/home', show: true },
+    { key: 'profile', label: 'Profile', to: '/profile/me', show: !!account },
+    { key: 'cv_portfolio', label: isOrg ? 'Portfolio' : 'CV & Portfolio', to: isOrg ? '/career/portfolio/organisation-company-showcase' : '/career/cv/executive', show: !!account },
+    { key: 'trust', label: 'Trust Centre', to: '/trust', show: true },
+    { key: 'opportunities', label: 'Opportunities', to: '/opportunities', show: true },
+    { key: 'communities', label: 'Communities', to: '/communities', show: !!account },
+    { key: 'learning', label: 'Learning', to: '/learn', show: !!account },
+  ].filter((t) => t.show)
+}
+
 /** §10.3 Profile Drawer — kept short, opened from the avatar. */
 export function profileDrawerItems({ account }: NavContext): NavItem[] {
   if (!account) return []

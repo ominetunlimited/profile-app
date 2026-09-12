@@ -143,6 +143,15 @@ export function ensureOminiNfawaSeeded(): IndividualAccount {
       languages: [{ id: 'lang-1', language: 'English', proficiency: 'native' }],
       externalReferences: [],
       referencesMode: 'available_upon_request',
+      projects: [],
+      volunteer: [],
+      publications: [],
+      awards: [],
+      affiliations: [{ id: 'aff-1', organisation: 'PROFILE', role: 'Founder', since: '2024' }],
+      enabledSections: {
+        summary: true, skills: true, languages: true, experience: true, education: true,
+        projects: true, publications: true, volunteer: true, awards: true, affiliations: true, references: true,
+      },
     })
   }
 

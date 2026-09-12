@@ -1,6 +1,19 @@
 import type { Account } from './accountTypes'
 import { listActivities, ownerKey, type ActivityRecord } from './activityStore'
-import { getCvDetails, type CertificationEntry, type EducationEntry, type ExternalReferenceEntry, type LanguageEntry, type ReferencesMode } from './cvDetailsStore'
+import {
+  getCvDetails,
+  type AffiliationEntry,
+  type AwardEntry,
+  type CertificationEntry,
+  type CvSectionKey,
+  type EducationEntry,
+  type ExternalReferenceEntry,
+  type LanguageEntry,
+  type ProjectEntry,
+  type PublicationEntry,
+  type ReferencesMode,
+  type VolunteerEntry,
+} from './cvDetailsStore'
 
 /**
  * §15.1/§47.1 hard rule: the CV/Portfolio engine builds only from verified-or
@@ -25,6 +38,7 @@ export interface CvData {
   name: string
   role: string
   email: string
+  phone: string
   location: string
   /** Patch (pre-Phase-7): §4.1 header contact fields with no prior UI. */
   linkedInUrl: string
@@ -43,7 +57,34 @@ export interface CvData {
   languages: LanguageEntry[]
   externalReferences: ExternalReferenceEntry[]
   referencesMode: ReferencesMode
+  projects: ProjectEntry[]
+  volunteer: VolunteerEntry[]
+  publications: PublicationEntry[]
+  awards: AwardEntry[]
+  affiliations: AffiliationEntry[]
+  enabledSections: Record<CvSectionKey, boolean>
   hasContent: boolean
+}
+
+/**
+ * V9 Enforcement Patch §6/§7 — the real (if lightweight) auto-population
+ * pipeline: SOURCE (an Activity) → CLASSIFICATION (its `type`) → ELIGIBILITY
+ * (does that type map to this CV section) → USER REVIEW/ACTIVATION (the
+ * `hidden` flag, settable in CvDetailsEditor without deleting the
+ * underlying Activity) → DISPLAY (merged with manual entries below). A
+ * manually-added entry (no `sourceActivityId`) is never touched by this —
+ * only activity-derived candidates are subject to being superseded/hidden.
+ */
+function mergeAutoAndManual<T extends { id: string; sourceActivityId?: string; hidden?: boolean }>(
+  autoCandidates: T[],
+  manualEntries: T[],
+): T[] {
+  const manualByActivityId = new Map(manualEntries.filter((e) => e.sourceActivityId).map((e) => [e.sourceActivityId, e]))
+  const manualOnly = manualEntries.filter((e) => !e.sourceActivityId)
+  const fromActivities = autoCandidates
+    .map((candidate) => manualByActivityId.get(candidate.sourceActivityId) ?? candidate)
+    .filter((e) => !e.hidden)
+  return [...fromActivities, ...manualOnly]
 }
 
 /** GPA display rule (patch): shown only if >= 3.5 or graduated within ~2
@@ -67,6 +108,7 @@ export function buildCvData(account: Account | null): CvData {
       : (account?.country ?? '')
   const linkedInUrl = (account?.accountType === 'individual' && account.linkedInUrl) || ''
   const externalWebsiteUrl = (account?.accountType === 'individual' && account.externalWebsiteUrl) || ''
+  const phone = (account?.accountType === 'individual' && account.phone) || ''
 
   const activities = account ? listActivities(ownerKey(account)) : []
   const experience: CvExperienceEntry[] = activities
@@ -82,10 +124,24 @@ export function buildCvData(account: Account | null): CvData {
   const skills = Array.from(new Set(activities.flatMap((a) => a.skills)))
   const details = account ? getCvDetails(ownerKey(account)) : null
 
+  const projectCandidates: ProjectEntry[] = activities
+    .filter((a) => a.type === 'Project' || a.type === 'Portfolio Item')
+    .map((a) => ({ id: `act-${a.id}`, title: a.title, description: a.description, role: a.role || '', date: new Date(a.createdAt).getFullYear().toString(), tools: a.skills, sourceActivityId: a.id }))
+  const volunteerCandidates: VolunteerEntry[] = activities
+    .filter((a) => a.type === 'Volunteer Work')
+    .map((a) => ({ id: `act-${a.id}`, role: a.role || a.title, organisation: a.organisation || '', description: a.description, date: new Date(a.createdAt).getFullYear().toString(), sourceActivityId: a.id }))
+  const publicationCandidates: PublicationEntry[] = activities
+    .filter((a) => a.type === 'Publication')
+    .map((a) => ({ id: `act-${a.id}`, title: a.title, publisher: a.organisation || '', date: new Date(a.createdAt).getFullYear().toString(), url: '', sourceActivityId: a.id }))
+  const awardCandidates: AwardEntry[] = activities
+    .filter((a) => a.type === 'Achievement')
+    .map((a) => ({ id: `act-${a.id}`, title: a.title, issuer: a.organisation || '', date: new Date(a.createdAt).getFullYear().toString(), sourceActivityId: a.id }))
+
   return {
     name,
     role,
     email,
+    phone,
     location,
     linkedInUrl,
     externalWebsiteUrl,
@@ -104,6 +160,15 @@ export function buildCvData(account: Account | null): CvData {
     languages: details?.languages ?? [],
     externalReferences: details?.externalReferences ?? [],
     referencesMode: details?.referencesMode ?? 'listed',
+    projects: mergeAutoAndManual(projectCandidates, details?.projects ?? []),
+    volunteer: mergeAutoAndManual(volunteerCandidates, details?.volunteer ?? []),
+    publications: mergeAutoAndManual(publicationCandidates, details?.publications ?? []),
+    awards: mergeAutoAndManual(awardCandidates, details?.awards ?? []),
+    affiliations: details?.affiliations ?? [],
+    enabledSections: details?.enabledSections ?? {
+      summary: true, skills: true, languages: false, experience: true, education: true,
+      projects: false, publications: false, volunteer: false, awards: false, affiliations: false, references: false,
+    },
     hasContent: activities.length > 0,
   }
 }

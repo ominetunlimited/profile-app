@@ -1,10 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
 import { ownerKey } from '@/app/activityStore'
 import { getProfileMedia } from '@/app/mediaStore'
-import { bottomTabs, hamburgerGroups, profileDrawerItems } from '@/app/navConfig'
+import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
 
@@ -28,6 +28,7 @@ const TAB_ICON: Record<string, string> = {
 export function AppShell({ children }: { children: ReactNode }) {
   const { account, staffRole, setAccount, setStaffRole } = useAccount()
   const navigate = useNavigate()
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [hamburgerOpen, setHamburgerOpen] = useState(false)
   const { t } = useLanguage()
@@ -48,6 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const drawerItems = profileDrawerItems({ account, staffRole })
   const groups = hamburgerGroups({ account, staffRole })
   const tabs = bottomTabs({ account, staffRole })
+  const topItems = topNavItems({ account, staffRole })
 
   function signOut() {
     setAccount(null)
@@ -123,6 +125,24 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
+        {topItems.length > 0 && (
+          <nav aria-label="Primary" className="hidden border-t border-border sm:block">
+            <div className="mx-auto flex max-w-[1200px] gap-1 px-4 py-1.5 sm:px-6">
+              {topItems.map((item) => {
+                const active = location.pathname === item.to.split('?')[0]
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    className={`rounded-lg px-2.5 py-1.5 text-sm font-medium ${active ? 'bg-surface-sunken text-text-0' : 'text-text-1 hover:text-text-0'}`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </nav>
+        )}
       </header>
 
       <main className="pb-16 sm:pb-0">{children}</main>

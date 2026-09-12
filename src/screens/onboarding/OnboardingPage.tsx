@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
 import { Field, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, ownerKey, postActivity } from '@/app/activityStore'
+import { BRAND } from '@/shared/brand/assets'
 
 /**
  * §8.10 Post-Registration Progress Tracker — persistent, dismissible.
@@ -50,6 +51,18 @@ export function OnboardingPage() {
   return (
     <div className="min-h-screen bg-bg px-4 py-12 sm:px-8">
       <div className="mx-auto max-w-[640px]">
+        {/* A user should never get stuck mid-flow (no exception) — onboarding
+            previously had no persistent way out at all except the two
+            in-flow buttons below, which only ever offer "skip"/"continue",
+            never a plain way back to the app. */}
+        <div className="mb-8 flex items-center justify-between">
+          <Link to="/home" aria-label="Skip onboarding, go to Home">
+            <img src={BRAND.mark} alt="" className="h-7 w-7" />
+          </Link>
+          <Link to="/home" className="text-xs font-semibold text-text-1 hover:text-text-0">
+            Skip to Home →
+          </Link>
+        </div>
         <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Welcome, {name}.</h1>
         <p className="mb-8 text-sm text-text-1">
           Nothing is verified yet, and that's expected. Record one real thing, then ask someone to confirm it.

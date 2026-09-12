@@ -17,19 +17,31 @@ function EmptyNote({ text }: { text: string }) {
  * text tokens so it never introduces a new visual style (build doc §1).
  */
 function ExtraCvSections({ cv }: { cv: CvData }) {
-  const hasLinks = cv.linkedInUrl || cv.externalWebsiteUrl
-  const hasAnything = hasLinks || cv.education.length || cv.certifications.length || cv.languages.length || cv.externalReferences.length || cv.referencesMode === 'available_upon_request'
+  const s = cv.enabledSections
+  const hasLinks = cv.phone || cv.linkedInUrl || cv.externalWebsiteUrl
+  const showEducation = s.education && cv.education.length > 0
+  const showCertifications = cv.certifications.length > 0 // bucketed under Skills/Competencies (§4) — not independently toggleable
+  const showLanguages = s.languages && cv.languages.length > 0
+  const showProjects = s.projects && cv.projects.length > 0
+  const showPublications = s.publications && cv.publications.length > 0
+  const showVolunteer = s.volunteer && cv.volunteer.length > 0
+  const showAwards = s.awards && cv.awards.length > 0
+  const showAffiliations = s.affiliations && cv.affiliations.length > 0
+  const showReferences = s.references && (cv.referencesMode === 'available_upon_request' || cv.externalReferences.length > 0)
+  const hasAnything =
+    hasLinks || showEducation || showCertifications || showLanguages || showProjects || showPublications || showVolunteer || showAwards || showAffiliations || showReferences
   if (!hasAnything) return null
 
   return (
     <div className="mt-4 border-t border-gray-200 pt-3 text-[11.5px] text-gray-700">
       {hasLinks && (
         <div className="mb-2 flex flex-wrap gap-3">
+          {cv.phone && <span>{cv.phone}</span>}
           {cv.linkedInUrl && <span>{cv.linkedInUrl}</span>}
           {cv.externalWebsiteUrl && <span>{cv.externalWebsiteUrl}</span>}
         </div>
       )}
-      {cv.education.length > 0 && (
+      {showEducation && (
         <div className="mb-2">
           <span className="font-bold">Education </span>
           {cv.education.map((e, i) => (
@@ -42,7 +54,7 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
           ))}
         </div>
       )}
-      {cv.certifications.length > 0 && (
+      {showCertifications && (
         <div className="mb-2">
           <span className="font-bold">Certifications </span>
           {cv.certifications.map((c, i) => (
@@ -53,7 +65,7 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
           ))}
         </div>
       )}
-      {cv.languages.length > 0 && (
+      {showLanguages && (
         <div className="mb-2">
           <span className="font-bold">Languages </span>
           {cv.languages.map((l, i) => (
@@ -64,13 +76,77 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
           ))}
         </div>
       )}
-      {cv.referencesMode === 'available_upon_request' ? (
-        <div>
-          <span className="font-bold">References </span>
-          Available upon request.
+      {showProjects && (
+        <div className="mb-2">
+          <span className="font-bold">Projects </span>
+          {cv.projects.map((p, i) => (
+            <span key={p.id}>
+              {i > 0 && ' · '}
+              {p.title}
+              {p.date ? ` (${p.date})` : ''}
+              {p.description ? ` — ${p.description}` : ''}
+            </span>
+          ))}
         </div>
-      ) : (
-        cv.externalReferences.length > 0 && (
+      )}
+      {showPublications && (
+        <div className="mb-2">
+          <span className="font-bold">Publications </span>
+          {cv.publications.map((p, i) => (
+            <span key={p.id}>
+              {i > 0 && ' · '}
+              {p.title}
+              {p.publisher ? `, ${p.publisher}` : ''}
+              {p.date ? ` (${p.date})` : ''}
+            </span>
+          ))}
+        </div>
+      )}
+      {showVolunteer && (
+        <div className="mb-2">
+          <span className="font-bold">Volunteer Work </span>
+          {cv.volunteer.map((v, i) => (
+            <span key={v.id}>
+              {i > 0 && ' · '}
+              {v.role} — {v.organisation}
+              {v.date ? ` (${v.date})` : ''}
+            </span>
+          ))}
+        </div>
+      )}
+      {showAwards && (
+        <div className="mb-2">
+          <span className="font-bold">Awards & Honors </span>
+          {cv.awards.map((a, i) => (
+            <span key={a.id}>
+              {i > 0 && ' · '}
+              {a.title}
+              {a.issuer ? `, ${a.issuer}` : ''}
+              {a.date ? ` (${a.date})` : ''}
+            </span>
+          ))}
+        </div>
+      )}
+      {showAffiliations && (
+        <div className="mb-2">
+          <span className="font-bold">Professional Affiliations </span>
+          {cv.affiliations.map((a, i) => (
+            <span key={a.id}>
+              {i > 0 && ' · '}
+              {a.role ? `${a.role}, ` : ''}
+              {a.organisation}
+              {a.since ? ` (since ${a.since})` : ''}
+            </span>
+          ))}
+        </div>
+      )}
+      {showReferences &&
+        (cv.referencesMode === 'available_upon_request' ? (
+          <div>
+            <span className="font-bold">References </span>
+            Available upon request.
+          </div>
+        ) : (
           <div>
             <span className="font-bold">References </span>
             {cv.externalReferences.map((r, i) => (
@@ -80,8 +156,7 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
               </span>
             ))}
           </div>
-        )
-      )}
+        ))}
     </div>
   )
 }

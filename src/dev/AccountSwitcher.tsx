@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import type { OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
 import { ORGANISATION_TYPES } from '@/app/accountTypes'
@@ -15,6 +16,7 @@ const REGISTRY_LEVELS: OrgRegistryLevel[] = ['verified', 'recognized', 'user_sub
  */
 export function AccountSwitcher() {
   const { account, staffRole, hub, setAccount, setStaffRole } = useAccount()
+  const navigate = useNavigate()
   const isOrg = account?.accountType === 'organisation'
 
   return (
@@ -26,6 +28,7 @@ export function AccountSwitcher() {
           const seeded = ensureOminiNfawaSeeded()
           setAccount(seeded)
           setStaffRole(null)
+          navigate('/home')
         }}
       >
         👤 Omini Nfawa · @ominet
@@ -36,6 +39,7 @@ export function AccountSwitcher() {
           const seeded = ensureOminetDigitalSeeded()
           setAccount(seeded)
           setStaffRole(null)
+          navigate('/home')
         }}
       >
         🏢 Ominet Digital · @ominetdigital
@@ -45,6 +49,7 @@ export function AccountSwitcher() {
         onClick={() => {
           setAccount(ensureInstitutionFixtureSeeded())
           setStaffRole(null)
+          navigate('/home')
         }}
       >
         🎓 Institution fixture (test)
@@ -54,6 +59,7 @@ export function AccountSwitcher() {
         onClick={() => {
           setAccount(ensureGovernmentFixtureSeeded())
           setStaffRole(null)
+          navigate('/home')
         }}
       >
         🏛️ Government fixture (test)

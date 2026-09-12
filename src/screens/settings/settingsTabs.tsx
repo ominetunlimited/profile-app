@@ -76,6 +76,7 @@ export function ProfileTab() {
   const [form, setForm] = useState(() => ({
     legalName: account?.legalName ?? '',
     headline: isIndividual ? account.headline ?? '' : '',
+    phone: isIndividual ? account.phone ?? '' : '',
     city: isIndividual ? account.city ?? '' : '',
     stateOrRegion: isIndividual ? account.stateOrRegion ?? '' : '',
     linkedInUrl: isIndividual ? account.linkedInUrl ?? '' : '',
@@ -120,6 +121,9 @@ export function ProfileTab() {
         </Field>
         <Field label="Headline">
           <TextInput value={form.headline} onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))} placeholder="e.g. Structural Engineer" />
+        </Field>
+        <Field label="Phone" hint="Optional — auto-populates your CV header.">
+          <TextInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+234 800 000 0000" />
         </Field>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="City">

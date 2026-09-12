@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom'
 import { CommandPalette } from '@/shared/ui/CommandPalette'
+import { AccountSwitcher } from '@/dev/AccountSwitcher'
 import type { ReactElement } from 'react'
 import { routeRegistry, type RouteEntry } from './routeRegistry'
 import { RequireAuthenticated, RequireOrganisation, RequireOwner, RequireStaff } from './guards'
@@ -374,6 +375,7 @@ function RootLayout() {
     <>
       <Outlet />
       <CommandPalette />
+      <AccountSwitcher />
     </>
   )
 }

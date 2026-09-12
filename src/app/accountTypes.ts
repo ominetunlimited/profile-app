@@ -270,6 +270,9 @@ export interface IndividualAccount {
   /** Patch: distinct from §4.1's `profileUrl` (PROFILE's own myprofile.com/@username, §50.8) —
    * this is the user's own external site/GitHub, additive alongside it, never instead of it. */
   externalWebsiteUrl?: string
+  /** V9 Enforcement Patch: data-model.md's `IndividualProfile.phone` (E.164) had no field
+   * anywhere in this account model or any UI to set it — a real CV header gap. */
+  phone?: string
 }
 
 export type Account = IndividualAccount | OrganisationAccount
