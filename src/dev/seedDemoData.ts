@@ -6,6 +6,7 @@ import { toggleMembership, isMember } from '@/app/communitiesStore'
 import { createDraftTemplate, publishTemplate, listCreatorTemplates } from '@/app/creatorTemplateStore'
 import { setCommerceSettings, getCommerceSettings } from '@/app/commerceStore'
 import { saveOrgPortfolioConfig } from '@/app/organisationPortfolioStore'
+import { followOrg } from '@/app/followStore'
 
 /**
  * Design Recovery Patch §21-26 — two real, persistent demo accounts built
@@ -186,6 +187,14 @@ export function ensureOminiNfawaSeeded(): IndividualAccount {
     const t = createDraftTemplate(OMINI_EMAIL, 'Founder Executive CV', 'cv')
     publishTemplate(t.id, 0)
   }
+
+  // Real relationship, not a feed hack: Omini's Home feed shows Ominet
+  // Digital's public activity because Omini genuinely follows them
+  // (followStore.ts), exactly the same way any other account's feed would
+  // include an org they chose to follow. ensureOminetDigitalSeeded() is
+  // idempotent, so calling it here just guarantees the org account exists
+  // to be followed, whichever demo button gets clicked first.
+  followOrg(OMINI_EMAIL, ensureOminetDigitalSeeded().officialEmail)
 
   return account
 }

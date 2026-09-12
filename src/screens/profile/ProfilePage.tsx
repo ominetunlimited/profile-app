@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
+import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { useAccount } from '@/app/AccountContext'
 import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account } from '@/app/accountTypes'
-import { listActivities, ownerKey, type ActivityRecord } from '@/app/activityStore'
-import { myRequestFor, pendingRequestsForOwner, requestSelfTag, respondToSelfTag } from '@/app/selfTagStore'
+import { listActivities, ownerKey } from '@/app/activityStore'
+import { pendingRequestsForOwner, respondToSelfTag } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { findAccountByUsername } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
@@ -16,6 +17,8 @@ import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplat
 import { createRequest, findRequest, listRequestsForOwner, respondToRequest } from '@/app/cvRequestStore'
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
+import { followOrg, followerCount, isFollowing, unfollowOrg } from '@/app/followStore'
+import { acceptConnectionRequest, connectionCount, relationshipState, sendConnectionRequest, type RelationshipState } from '@/app/connectionStore'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
 type Tab = (typeof TABS)[number]
@@ -73,7 +76,18 @@ export function ProfilePage() {
     .toUpperCase()
   const canCv = isCvEligible(viewed)
   const canPortfolio = isPortfolioEligible(viewed)
-  const activityCount = listActivities(ownerKey(viewed)).length
+  const targetKey = ownerKey(viewed)
+  // §27 Profile Privacy: a visitor only ever sees `public` activity, plus
+  // `connections_only` once actually connected — never client-side-hidden
+  // after the fact, filtered at the one place every reader of this list goes
+  // through.
+  const activities = listActivities(targetKey).filter((a) => {
+    if (isSelf) return true
+    if (a.visibility === 'private') return false
+    if (a.visibility === 'connections_only') return relationshipState(ownerKey(account), targetKey) === 'connected'
+    return true
+  })
+  const activityCount = activities.length
   const trustScore = computeTrustScore(viewed)
   const media = getProfileMedia(viewerEmail)
 
@@ -128,9 +142,19 @@ export function ProfilePage() {
               </Link>
             ) : (
               account && (
-                <Link to={`/messages?with=${encodeURIComponent(ownerKey(viewed))}`} className="mb-1 flex-none rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white">
-                  Message
-                </Link>
+                <div className="mb-1 flex flex-none gap-2">
+                  {/* §24.1 ActionButtons names 'Connect' for individuals; §4.2's
+                      org-notification table names 'Org Follow' for organisations —
+                      two different relationship models, not one generic button. */}
+                  {viewed.accountType === 'organisation' ? (
+                    <FollowButton viewerEmail={ownerKey(account)} orgEmail={targetKey} />
+                  ) : (
+                    <ConnectButton viewerEmail={ownerKey(account)} otherEmail={targetKey} />
+                  )}
+                  <Link to={`/messages?with=${encodeURIComponent(targetKey)}`} className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
+                    Message
+                  </Link>
+                </div>
               )
             )}
           </div>
@@ -149,7 +173,7 @@ export function ProfilePage() {
                     // board, or programme registry exists yet in this build, so
                     // each is honestly 0 rather than reusing individual-shaped
                     // numbers (Connections/Reviews) that don't apply to an org.
-                    ['Followers', 0],
+                    ['Followers', followerCount(targetKey)],
                     ['Verified Staff', 0],
                     ['Projects Posted', 0],
                     ['Verified Programmes', 0],
@@ -157,12 +181,14 @@ export function ProfilePage() {
                 : [
                     ['Activities', activityCount],
                     ['Trust Score', trustScore.total],
-                    // Followers/Connections/Reviews/Verified items have no real data
-                    // source in this build (no social graph, no review system, no
-                    // verification pipeline) — honestly 0 rather than fabricated,
-                    // same reasoning as computeTrustScore()'s current-always-0 result.
+                    // Individuals have no follow concept in this build (§4.2's
+                    // notification table only names Org Follow) — honestly 0, real
+                    // once one exists. Connections is real (connectionStore.ts).
+                    // Reviews/Verified items have no review system/verification
+                    // pipeline yet — honestly 0 rather than fabricated, same
+                    // reasoning as computeTrustScore()'s current-always-0 result.
                     ['Followers', 0],
-                    ['Connections', 0],
+                    ['Connections', connectionCount(targetKey)],
                     ['Reviews', 0],
                     ['Verified items', 0],
                   ]
@@ -201,11 +227,9 @@ export function ProfilePage() {
                   />
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {listActivities(ownerKey(viewed))
-                      .slice(0, 5)
-                      .map((a) => (
-                        <ActivityRow key={a.id} activity={a} isSelf={isSelf} viewerAccount={account} targetEmail={ownerKey(viewed)} />
-                      ))}
+                    {activities.slice(0, 5).map((a) => (
+                      <ActivityCard key={a.id} activity={a} viewerAccount={account} viewerEmail={ownerKey(account)} />
+                    ))}
                   </div>
                 )}
               </div>
@@ -416,73 +440,57 @@ function BadgesRow({ ownerAccount }: { ownerAccount: Account }) {
   )
 }
 
-/** §11.1's `<SelfTagButton />` / §11.3 Self-Tag System — real, per-activity.
- * "Tag Me" only makes sense on someone else's activity. */
-function ActivityRow({
-  activity,
-  isSelf,
-  viewerAccount,
-  targetEmail,
-}: {
-  activity: ActivityRecord
-  isSelf: boolean
-  viewerAccount: Account | null
-  targetEmail: string
-}) {
-  const [, refresh] = useState(0)
-  const viewerEmail = viewerAccount ? ownerKey(viewerAccount) : ''
-  const existing = !isSelf && viewerEmail ? myRequestFor(viewerEmail, activity.id) : undefined
-  const [role, setRole] = useState('')
-  const [showRoleInput, setShowRoleInput] = useState(false)
-
+/** §4.2's org-notification table 'Org Follow' — one-way, no approval. */
+function FollowButton({ viewerEmail, orgEmail }: { viewerEmail: string; orgEmail: string }) {
+  const [following, setFollowing] = useState(() => isFollowing(viewerEmail, orgEmail))
   return (
-    <div className="rounded-lg border border-border bg-surface p-3">
-      <div className="mb-1 flex items-center gap-2 text-xs text-text-2">
-        <span className="rounded-full border border-border px-2 py-0.5">{activity.type}</span>
-        <span>{new Date(activity.createdAt).toLocaleDateString()}</span>
-      </div>
-      <div className="mb-1 text-sm font-medium text-text-0">{activity.title}</div>
-      {!isSelf && viewerAccount && (
-        <div className="mt-1.5">
-          {existing ? (
-            <span className="text-xs text-text-2">
-              {existing.status === 'requested' && 'Tag request sent — waiting for approval.'}
-              {existing.status === 'approved' && '✓ Tag approved'}
-              {existing.status === 'rejected' && 'Tag request declined'}
-            </span>
-          ) : showRoleInput ? (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <input
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="Your role in this"
-                className="min-h-[30px] rounded-md border border-border-strong bg-surface px-2 text-xs"
-              />
-              <button
-                onClick={() => {
-                  requestSelfTag({
-                    requesterEmail: viewerEmail,
-                    requesterName: viewerAccount.legalName,
-                    activityId: activity.id,
-                    activityOwnerEmail: targetEmail,
-                    activityTitle: activity.title,
-                    role: role || 'Collaborator',
-                  })
-                  refresh((n) => n + 1)
-                }}
-                className="text-xs font-semibold text-accent"
-              >
-                Send
-              </button>
-            </div>
-          ) : (
-            <button onClick={() => setShowRoleInput(true)} className="text-xs font-semibold text-accent">
-              + Tag Me
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+    <button
+      onClick={() => {
+        if (following) unfollowOrg(viewerEmail, orgEmail)
+        else followOrg(viewerEmail, orgEmail)
+        setFollowing(!following)
+      }}
+      className={`rounded-lg px-3 py-2 text-xs font-semibold ${following ? 'border border-border-strong text-text-0' : 'bg-accent text-white'}`}
+    >
+      {following ? 'Following' : 'Follow'}
+    </button>
+  )
+}
+
+/** §24.1 ActionButtons 'Connect' — a real request/accept relationship
+ * (connectionStore.ts), distinct from Follow above. */
+function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; otherEmail: string }) {
+  const [state, setState] = useState<RelationshipState>(() => relationshipState(viewerEmail, otherEmail))
+
+  if (state === 'connected') {
+    return <span className="rounded-lg border border-success px-3 py-2 text-xs font-semibold text-success">✓ Connected</span>
+  }
+  if (state === 'pending_sent') {
+    return <span className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-1">Pending</span>
+  }
+  if (state === 'pending_received') {
+    return (
+      <button
+        onClick={() => {
+          acceptConnectionRequest(viewerEmail, otherEmail)
+          setState(relationshipState(viewerEmail, otherEmail))
+        }}
+        className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white"
+      >
+        Accept request
+      </button>
+    )
+  }
+  return (
+    <button
+      onClick={() => {
+        sendConnectionRequest(viewerEmail, otherEmail)
+        setState(relationshipState(viewerEmail, otherEmail))
+      }}
+      className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white"
+    >
+      Connect
+    </button>
   )
 }
 

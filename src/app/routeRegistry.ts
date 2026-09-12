@@ -302,6 +302,14 @@ export const routeRegistry: RouteEntry[] = [
   // ---- prior route; every real §10 nav item now resolves somewhere real. ----
   { path: '/connections', screen: 'Connections', phase: 2, masterPromptRef: '§10.1', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.1 mobile bottom nav tab with no prior route.' },
   { path: '/record', screen: 'Record Activity', phase: 2, masterPromptRef: '§10.1', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.1 primary create-activity action as its own route, reusing Home\'s Composer.' },
+  {
+    path: '/activity/:id',
+    screen: 'Activity Detail',
+    phase: 2,
+    masterPromptRef: '§11.1',
+    gate: { kind: 'authenticated' },
+    note: 'V9 patch: closes the Home → activity → profile → activity loop — clicking an activity title now opens a real detail page (same ActivityCard, same reactions/comments) instead of nowhere.',
+  },
   { path: '/credentials', screen: 'Credential Hub', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item, individual accounts only (enforced in-component).' },
   { path: '/analytics', screen: 'Analytics', phase: 2, masterPromptRef: '§10.4, §23', gate: { kind: 'authenticated' }, note: '§23.1 for individuals, §23.2 ORG_METRICS for business_hub/community_hub orgs (in-component); institutional_hub/regulatory_console orgs use their own Institution/Government Analytics instead.' },
   { path: '/career-growth', screen: 'Career Growth', phase: 2, masterPromptRef: '§10.4, §18.5', gate: { kind: 'authenticated' }, note: 'Recovery patch: §10.4 Hamburger Menu item, individual accounts only (enforced in-component).' },

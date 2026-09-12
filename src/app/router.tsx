@@ -51,6 +51,7 @@ import { AdminManagement } from '@/screens/internal/AdminManagement'
 import { RequireInternalAccessGate } from './internalAccessGate'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
+import { ActivityDetailPage } from '@/screens/home/ActivityDetailPage'
 import { CredentialHub } from '@/screens/more/CredentialHub'
 import { AnalyticsPage } from '@/screens/more/AnalyticsPage'
 import { CareerGrowthPage } from '@/screens/more/CareerGrowthPage'
@@ -190,6 +191,12 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequireAuthenticated>
           <RecordActivityPage />
+        </RequireAuthenticated>
+      )
+    case '/activity/:id':
+      return (
+        <RequireAuthenticated>
+          <ActivityDetailPage />
         </RequireAuthenticated>
       )
     case '/credentials':

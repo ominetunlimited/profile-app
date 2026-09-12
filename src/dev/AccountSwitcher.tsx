@@ -1,9 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
-import type { OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
+import type { Account, OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
 import { ORGANISATION_TYPES } from '@/app/accountTypes'
 import { ensureGovernmentFixtureSeeded, ensureInstitutionFixtureSeeded, ensureOminetDigitalSeeded, ensureOminiNfawaSeeded } from './seedDemoData'
+import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/demoAccountStore'
+
+/** §24/§40's "same underlying data architecture, never fake the demo" rule
+ * applies to this quick-set tool too — previously these two accounts only
+ * ever existed as in-memory AccountContext state, never registered in
+ * demoAccountStore.ts, so Search/`/profile/:username`/Connect/Follow from
+ * any OTHER account could never find them at all. */
+function registerQuickSet(email: string, account: Account) {
+  if (!emailIsRegistered(email)) saveDemoAccount(email, 'quick-set', account)
+  else updateDemoAccount(email, account)
+}
 
 const ORG_ADMIN_ROLES: OrgAdminRoleV3[] = ['super_admin', 'admin', 'verification_officer', 'hr_manager', 'credential_manager', 'moderator', 'compliance_officer']
 const REGISTRY_LEVELS: OrgRegistryLevel[] = ['verified', 'recognized', 'user_submitted', 'rejected']
@@ -100,7 +111,7 @@ export function AccountSwitcher() {
       <button
         className="rounded border border-border px-2 py-1 hover:border-accent"
         onClick={() => {
-          setAccount({
+          const acct: Account = {
             accountType: 'individual',
             pathway: 'professional',
             legalName: 'Dev Test User',
@@ -108,7 +119,9 @@ export function AccountSwitcher() {
             headline: 'Dev Test Headline',
             email: 'dev@example.com',
             country: 'Nigeria',
-          })
+          }
+          registerQuickSet(acct.email, acct)
+          setAccount(acct)
           setStaffRole(null)
         }}
       >
@@ -120,15 +133,18 @@ export function AccountSwitcher() {
         onChange={(e) => {
           const orgType = e.target.value as OrganisationType
           if (!orgType) return
-          setAccount({
+          const acct: Account = {
             accountType: 'organisation',
             orgType,
             legalName: `Dev Test ${orgType}`,
+            username: `devtest${orgType.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
             officialEmail: 'admin@devtest.org',
             country: 'Nigeria',
             registryLevel: 'verified',
             orgRole: 'super_admin',
-          })
+          }
+          registerQuickSet(acct.officialEmail, acct)
+          setAccount(acct)
           setStaffRole(null)
         }}
       >

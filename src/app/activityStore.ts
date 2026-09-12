@@ -6,6 +6,8 @@
  * a backend exists — never extend this file into a permanent data layer.
  */
 import type { Account } from './accountTypes'
+import { listFollowedOrgs } from './followStore'
+import { listConnectedEmails } from './connectionStore'
 
 /** Simplified §4.3 Activity — the fields this build's UI actually reads/writes. */
 export interface ActivityRecord {
@@ -88,4 +90,37 @@ export function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt'>): A
   const record: ActivityRecord = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
   writeAll([...readAll(), record])
   return record
+}
+
+export function getActivityById(id: string): ActivityRecord | undefined {
+  return readAll().find((a) => a.id === id)
+}
+
+/**
+ * §1's real Home feed requirement: not just the signed-in account's own
+ * posts, but real activity from accounts they actually have a relationship
+ * with — followed organisations (followStore.ts) and connected individuals
+ * (connectionStore.ts) — restricted to what that relationship is honestly
+ * allowed to see (their `public` activity; a connection additionally sees
+ * `connections_only`). The owner always sees their own activity at every
+ * visibility level, same as before.
+ */
+export function listFeedFor(ownerEmail: string): ActivityRecord[] {
+  if (!ownerEmail) return []
+  const own = ownerEmail.toLowerCase()
+  const connectedEmails = new Set(listConnectedEmails(ownerEmail).map((e) => e.toLowerCase()))
+  const followedOrgs = new Set(listFollowedOrgs(ownerEmail).map((e) => e.toLowerCase()))
+
+  return readAll()
+    .filter((a) => {
+      const authorEmail = a.ownerEmail.toLowerCase()
+      if (authorEmail === own) return true
+      if (a.visibility === 'private') return false
+      if (a.visibility === 'connections_only') return connectedEmails.has(authorEmail)
+      // visibility === 'public': only from someone this account actually
+      // follows/connects with — a real feed, not "every public post from
+      // every account on the browser" (that would never scale past a demo).
+      return connectedEmails.has(authorEmail) || followedOrgs.has(authorEmail)
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }

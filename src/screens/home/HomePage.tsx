@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
+import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { useAccount } from '@/app/AccountContext'
-import { listActivities, ownerKey, postActivity, type ActivityRecord } from '@/app/activityStore'
-import { getMyReaction, getReactionCounts, setMyReaction, REACTIONS } from '@/app/reactionStore'
+import { listActivities, listFeedFor, ownerKey, postActivity } from '@/app/activityStore'
 
 /** §11.4 POST_COMPOSER_TYPES, verbatim. */
 const ACTIVITY_TYPES = [
@@ -22,11 +23,15 @@ const ACTIVITY_TYPES = [
   'Portfolio Item',
 ]
 
-/** §11 Home Feed & Record Work System. */
+/** §11 Home Feed & Record Work System — a real feed: the signed-in
+ * account's own activity plus real activity from accounts they actually
+ * follow/connect with (activityStore.ts's listFeedFor), not just a private
+ * personal log. */
 export function HomePage() {
   const { account } = useAccount()
   const owner = ownerKey(account)
-  const [activities, setActivities] = useState<ActivityRecord[]>(() => listActivities(owner))
+  const [myActivityCount, setMyActivityCount] = useState(() => listActivities(owner).length)
+  const [feed, setFeed] = useState(() => listFeedFor(owner))
   const [composerOpen, setComposerOpen] = useState(false)
 
   const name = account?.accountType === 'individual' ? account.legalName.split(' ')[0] : account?.accountType === 'organisation' ? account.legalName : ''
@@ -34,11 +39,12 @@ export function HomePage() {
   const gaps = [
     account?.accountType === 'individual' && !account.headline ? 'Add a professional headline' : null,
     account?.accountType === 'individual' && !account.username ? 'Choose a username' : null,
-    activities.length === 0 ? 'Record your first activity' : null,
+    myActivityCount === 0 ? 'Record your first activity' : null,
   ].filter((g): g is string => !!g)
 
   function refresh() {
-    setActivities(listActivities(owner))
+    setMyActivityCount(listActivities(owner).length)
+    setFeed(listFeedFor(owner))
   }
 
   return (
@@ -77,12 +83,20 @@ export function HomePage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {activities.length === 0 ? (
+          {feed.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
-              Nothing recorded yet. Your feed fills in as you record real work — never with filler content.
+              <p className="mb-3">
+                {myActivityCount === 0
+                  ? 'Nothing here yet — your feed fills in as you record real work, never with filler content.'
+                  : "You've recorded your own work, but your feed is otherwise quiet — follow organisations or connect with people to see their activity here too."}
+              </p>
+              <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold text-accent">
+                <Link to="/opportunities">Discover opportunities</Link>
+                <Link to="/communities">Join communities</Link>
+              </div>
             </div>
           ) : (
-            activities.map((a) => <ActivityCard key={a.id} activity={a} authorName={name} viewerEmail={owner} />)
+            feed.map((a) => <ActivityCard key={a.id} activity={a} viewerAccount={account} viewerEmail={owner} />)
           )}
         </div>
       </div>
@@ -191,67 +205,3 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
   )
 }
 
-function ActivityCard({ activity, authorName, viewerEmail }: { activity: ActivityRecord; authorName: string; viewerEmail: string }) {
-  const [myReaction, setMyReactionState] = useState(() => getMyReaction(activity.id, viewerEmail))
-  const [counts, setCounts] = useState(() => getReactionCounts(activity.id))
-
-  function react(type: (typeof REACTIONS)[number]['type']) {
-    setMyReaction(activity.id, viewerEmail, type)
-    setMyReactionState(getMyReaction(activity.id, viewerEmail))
-    setCounts(getReactionCounts(activity.id))
-  }
-
-  return (
-    <article className="rounded-xl border border-border bg-surface p-4">
-      <div className="mb-2 flex items-center gap-2 text-xs text-text-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white">
-          {authorName.slice(0, 1).toUpperCase()}
-        </span>
-        <span className="font-medium text-text-0">{authorName}</span>
-        <span className="rounded-full border border-border px-2 py-0.5">{activity.type}</span>
-        <span className="ml-auto">{new Date(activity.createdAt).toLocaleDateString()}</span>
-      </div>
-      <h2 className="mb-1 font-semibold text-text-0">{activity.title}</h2>
-      {activity.description && <p className="mb-2 text-sm text-text-1">{activity.description}</p>}
-      {activity.role && <p className="mb-2 text-xs text-text-2">Role: {activity.role}{activity.location ? ` · ${activity.location}` : ''}</p>}
-      {activity.skills.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-1.5">
-          {activity.skills.map((s) => (
-            <span key={s} className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-1">
-              {s}
-            </span>
-          ))}
-        </div>
-      )}
-      {activity.tools.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-1.5">
-          {activity.tools.map((t) => (
-            <span key={t} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10.5px] text-text-2">
-              🛠 {t}
-            </span>
-          ))}
-        </div>
-      )}
-      {activity.collaborators.length > 0 && (
-        <p className="mb-2 text-xs text-text-2">With {activity.collaborators.join(', ')} (self-reported)</p>
-      )}
-      <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-2 text-xs text-text-2">
-        {REACTIONS.map((r) => {
-          const active = myReaction === r.type
-          const count = counts[r.type]
-          return (
-            <button
-              key={r.type}
-              onClick={() => react(r.type)}
-              aria-pressed={active}
-              className={`rounded-full border px-2 py-1 ${active ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-2'}`}
-            >
-              {r.emoji} {r.label}
-              {count > 0 ? ` · ${count}` : ''}
-            </button>
-          )
-        })}
-      </div>
-    </article>
-  )
-}
