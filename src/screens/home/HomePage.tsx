@@ -97,6 +97,8 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
   const [role, setRole] = useState('')
   const [location, setLocation] = useState('')
   const [skillsInput, setSkillsInput] = useState('')
+  const [toolsInput, setToolsInput] = useState('')
+  const [collaboratorsInput, setCollaboratorsInput] = useState('')
   const [cvPortfolioInclude, setCvPortfolioInclude] = useState(true)
   const [visibility, setVisibility] = useState<'public' | 'connections_only' | 'private'>('public')
 
@@ -132,6 +134,12 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
       <Field label="Skills demonstrated (optional)" hint="Comma-separated — these are what CV/Portfolio Skills sections and Discover matching pull from">
         <TextInput value={skillsInput} onChange={(e) => setSkillsInput(e.target.value)} placeholder="e.g. React, Figma, Contract negotiation" />
       </Field>
+      <Field label="Tools used (optional)" hint="Comma-separated — distinct from skills, feeds your CV's Tools section (§4.8)">
+        <TextInput value={toolsInput} onChange={(e) => setToolsInput(e.target.value)} placeholder="e.g. Figma, AutoCAD, Salesforce" />
+      </Field>
+      <Field label="Collaborators (optional)" hint="Comma-separated names — self-reported, not linked to their PROFILE account yet">
+        <TextInput value={collaboratorsInput} onChange={(e) => setCollaboratorsInput(e.target.value)} placeholder="e.g. Amara Okafor, Chidi Eze" />
+      </Field>
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={cvPortfolioInclude} onChange={(e) => setCvPortfolioInclude(e.target.checked)} /> Include in CV / Portfolio
@@ -156,6 +164,14 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
               role: role || undefined,
               location: location || undefined,
               skills: skillsInput
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean),
+              tools: toolsInput
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean),
+              collaborators: collaboratorsInput
                 .split(',')
                 .map((s) => s.trim())
                 .filter(Boolean),
@@ -206,6 +222,18 @@ function ActivityCard({ activity, authorName, viewerEmail }: { activity: Activit
             </span>
           ))}
         </div>
+      )}
+      {activity.tools.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {activity.tools.map((t) => (
+            <span key={t} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10.5px] text-text-2">
+              🛠 {t}
+            </span>
+          ))}
+        </div>
+      )}
+      {activity.collaborators.length > 0 && (
+        <p className="mb-2 text-xs text-text-2">With {activity.collaborators.join(', ')} (self-reported)</p>
       )}
       <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-2 text-xs text-text-2">
         {REACTIONS.map((r) => {

@@ -21,6 +21,18 @@ export interface ActivityRecord {
    * entry's location is real, user-enterable data, not an inference. */
   location?: string
   skills: string[]
+  /** §4.3/§4.8 — tools are a distinct attribution axis from skills (a tool
+   * tag auto-feeds the ToolStack/CV Tools section, a skill doesn't). Kept as
+   * free-text tags here rather than the full editorial-controlled Tool
+   * registry §4.8 describes — no tool directory/provider-integration
+   * backend exists to validate against yet. */
+  tools: string[]
+  /** §4.3 `collaborators` — real, user-entered names. The spec's
+   * `Collaborator[]` links to other PROFILE accounts with an approval step
+   * before appearing on the tagged person's own CV; no multi-user backend
+   * exists to do that linking/approval yet, so these are honestly
+   * unverified free-text names, never presented as a confirmed tag. */
+  collaborators: string[]
   cvPortfolioInclude: boolean
   visibility: 'public' | 'connections_only' | 'private'
   createdAt: string

@@ -68,6 +68,14 @@ export function listAllAccounts(): Account[] {
   return readAll().map((r) => r.account)
 }
 
+/** Shared username→account lookup — used by ProfilePage's cross-account
+ * viewing and the CV-request pipeline (cvRequestStore.ts) so both resolve a
+ * target the same real way rather than re-deriving the lookup twice. */
+export function findAccountByUsername(username: string | undefined): Account | undefined {
+  if (!username) return undefined
+  return listAllAccounts().find((a) => 'username' in a && a.username === username)
+}
+
 /** Approve/reject an org's IOTR claim (§50.4) — updates the stored account
  * record; if that org is the currently active AccountContext session, the
  * caller must also call setAccount to refresh the live session. */
@@ -112,4 +120,27 @@ export function markDeviceKnown() {
   } catch {
     // best-effort
   }
+}
+
+/** §7.3 Account Recovery — path 1 (email reset link). No-ops (returns false)
+ * if the email isn't registered, same generic-response principle a real
+ * backend would use (never confirm/deny which emails exist). */
+export function resetPassword(email: string, newPassword: string): boolean {
+  const records = readAll()
+  const idx = records.findIndex((r) => r.email.toLowerCase() === email.trim().toLowerCase())
+  if (idx === -1) return false
+  records[idx] = { ...records[idx], password: newPassword }
+  writeAll(records)
+  return true
+}
+
+/** §7.4 Settings → Security's password-change form — real, unlike
+ * resetPassword above, this requires knowing the current password first. */
+export function changePassword(email: string, currentPassword: string, newPassword: string): boolean {
+  const records = readAll()
+  const idx = records.findIndex((r) => r.email.toLowerCase() === email.trim().toLowerCase() && r.password === currentPassword)
+  if (idx === -1) return false
+  records[idx] = { ...records[idx], password: newPassword }
+  writeAll(records)
+  return true
 }

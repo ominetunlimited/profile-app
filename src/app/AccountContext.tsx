@@ -19,6 +19,11 @@ interface AccountContextValue {
   sector: Sector | null
   setAccount: (account: Account | null) => void
   setStaffRole: (role: StaffRole) => void
+  /** §7.1's Remember Me toggle — real, not decorative: checked persists the
+   * session in localStorage (survives closing the browser); unchecked uses
+   * sessionStorage (cleared when the tab/browser closes). Still dev-only
+   * scaffolding, not a real auth boundary either way. */
+  setRemember: (remember: boolean) => void
 }
 
 const AccountContext = createContext<AccountContextValue | null>(null)
@@ -26,25 +31,34 @@ const AccountContext = createContext<AccountContextValue | null>(null)
 /**
  * Dev-only persistence so the AccountSwitcher's pick survives a full page
  * navigation/reload — there's no real session yet (Phase 1 replaces this with
- * a server-backed session). Never treat sessionStorage as an auth boundary.
+ * a server-backed session). Never treat either storage as an auth boundary.
  */
 const STORAGE_KEY = 'profile:dev-account-state'
 
-function loadPersisted(): { account: Account | null; staffRole: StaffRole } {
+function loadPersisted(): { account: Account | null; staffRole: StaffRole; remember: boolean } {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (!raw) return { account: null, staffRole: null }
-    return JSON.parse(raw)
+    const fromLocal = localStorage.getItem(STORAGE_KEY)
+    if (fromLocal) return { ...JSON.parse(fromLocal), remember: true }
+    const fromSession = sessionStorage.getItem(STORAGE_KEY)
+    if (fromSession) return { ...JSON.parse(fromSession), remember: false }
+    return { account: null, staffRole: null, remember: false }
   } catch {
-    return { account: null, staffRole: null }
+    return { account: null, staffRole: null, remember: false }
   }
 }
 
-function persist(account: Account | null, staffRole: StaffRole) {
+function persist(account: Account | null, staffRole: StaffRole, remember: boolean) {
+  const payload = JSON.stringify({ account, staffRole })
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ account, staffRole }))
+    if (remember) {
+      localStorage.setItem(STORAGE_KEY, payload)
+      sessionStorage.removeItem(STORAGE_KEY)
+    } else {
+      sessionStorage.setItem(STORAGE_KEY, payload)
+      localStorage.removeItem(STORAGE_KEY)
+    }
   } catch {
-    // sessionStorage unavailable — dev convenience only, safe to no-op.
+    // storage unavailable — dev convenience only, safe to no-op.
   }
 }
 
@@ -52,17 +66,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const initial = loadPersisted()
   const [account, setAccount] = useState<Account | null>(initial.account)
   const [staffRole, setStaffRole] = useState<StaffRole>(initial.staffRole)
+  const [remember, setRemember] = useState(initial.remember)
 
-  // Single effect over both fields — avoids the two setters' persist() calls
-  // clobbering each other with stale closure state when called back-to-back.
+  // Single effect over all three fields — avoids separate setters' persist()
+  // calls clobbering each other with stale closure state when called back-to-back.
   useEffect(() => {
-    persist(account, staffRole)
-  }, [account, staffRole])
+    persist(account, staffRole, remember)
+  }, [account, staffRole, remember])
 
   const value = useMemo<AccountContextValue>(() => {
     const hub = account?.accountType === 'organisation' ? hubForOrgType(account.orgType) : null
     const sector = account?.accountType === 'organisation' ? sectorForOrgType(account.orgType) : null
-    return { account, staffRole, hub, sector, setAccount, setStaffRole }
+    return { account, staffRole, hub, sector, setAccount, setStaffRole, setRemember }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, staffRole])
 

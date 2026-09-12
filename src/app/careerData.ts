@@ -52,6 +52,7 @@ export interface CvData {
   objectiveMode: boolean
   experience: CvExperienceEntry[]
   skills: string[]
+  tools: string[]
   education: EducationEntry[]
   certifications: CertificationEntry[]
   languages: LanguageEntry[]
@@ -122,11 +123,14 @@ export function buildCvData(account: Account | null): CvData {
     }))
 
   const skills = Array.from(new Set(activities.flatMap((a) => a.skills)))
+  /** §4.6 CVDocument.sections.tools — a distinct CV section from Skills,
+   * fed by Activity.tools (§4.3/§4.8), not skills. */
+  const tools = Array.from(new Set(activities.flatMap((a) => a.tools)))
   const details = account ? getCvDetails(ownerKey(account)) : null
 
   const projectCandidates: ProjectEntry[] = activities
     .filter((a) => a.type === 'Project' || a.type === 'Portfolio Item')
-    .map((a) => ({ id: `act-${a.id}`, title: a.title, description: a.description, role: a.role || '', date: new Date(a.createdAt).getFullYear().toString(), tools: a.skills, sourceActivityId: a.id }))
+    .map((a) => ({ id: `act-${a.id}`, title: a.title, description: a.description, role: a.role || '', date: new Date(a.createdAt).getFullYear().toString(), tools: a.tools, sourceActivityId: a.id }))
   const volunteerCandidates: VolunteerEntry[] = activities
     .filter((a) => a.type === 'Volunteer Work')
     .map((a) => ({ id: `act-${a.id}`, role: a.role || a.title, organisation: a.organisation || '', description: a.description, date: new Date(a.createdAt).getFullYear().toString(), sourceActivityId: a.id }))
@@ -155,6 +159,7 @@ export function buildCvData(account: Account | null): CvData {
     objectiveMode: details?.objectiveMode ?? false,
     experience,
     skills,
+    tools,
     education: details?.education ?? [],
     certifications: details?.certifications ?? [],
     languages: details?.languages ?? [],

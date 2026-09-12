@@ -62,7 +62,7 @@ export function topNavItems({ account, staffRole }: NavContext): NavItem[] {
     { key: 'home', label: 'Home', to: '/home', show: true },
     { key: 'profile', label: 'Profile', to: '/profile/me', show: !!account },
     { key: 'cv_portfolio', label: isOrg ? 'Portfolio' : 'CV & Portfolio', to: isOrg ? '/career/portfolio/organisation-company-showcase' : '/career/cv/executive', show: !!account },
-    { key: 'trust', label: 'Trust Centre', to: '/trust', show: true },
+    { key: 'trust', label: 'Trust Centre', to: '/trust-passport', show: true },
     { key: 'opportunities', label: 'Opportunities', to: '/opportunities', show: true },
     { key: 'communities', label: 'Communities', to: '/communities', show: !!account },
     { key: 'learning', label: 'Learning', to: '/learn', show: !!account },
@@ -96,7 +96,7 @@ export function hamburgerGroups({ account, staffRole }: NavContext): NavGroup[] 
 
   const core: NavItem[] = [
     { key: 'my-profile', label: 'My Profile', to: '/profile/me', show: !!account },
-    { key: 'trust-center', label: 'Trust Center', to: '/trust', show: true },
+    { key: 'trust-center', label: 'Trust Center', to: '/trust-passport', show: true },
     { key: 'credential-hub', label: 'Credential Hub', to: '/credentials', show: isIndividual },
     { key: 'marketplace', label: 'Marketplace', to: '/store', show: !!account },
     { key: 'analytics', label: 'Analytics', to: '/analytics', show: isIndividual },

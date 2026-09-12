@@ -2,12 +2,14 @@ import { useState, type ReactNode } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
-import { updateDemoAccount } from '@/app/demoAccountStore'
+import { changePassword, updateDemoAccount } from '@/app/demoAccountStore'
 import { ownerKey } from '@/app/activityStore'
 import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
-import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
+import { getSuspiciousLoginAlertsEnabled, listLoginHistory, setSuspiciousLoginAlertsEnabled } from '@/app/sessionStore'
+import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
+import { Field, PasswordInput, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
 import { ImageUploadField } from '@/shared/ui/ImageUploadField'
 
@@ -75,6 +77,7 @@ export function ProfileTab() {
   const [media, setMedia] = useState(() => (owner ? getProfileMedia(owner) : { avatarDataUrl: null, coverDataUrl: null }))
   const [form, setForm] = useState(() => ({
     legalName: account?.legalName ?? '',
+    preferredDisplayName: isIndividual ? account.preferredDisplayName ?? '' : '',
     headline: isIndividual ? account.headline ?? '' : '',
     phone: isIndividual ? account.phone ?? '' : '',
     city: isIndividual ? account.city ?? '' : '',
@@ -119,6 +122,9 @@ export function ProfileTab() {
         <Field label="Full name">
           <TextInput value={form.legalName} onChange={(e) => setForm((f) => ({ ...f, legalName: e.target.value }))} />
         </Field>
+        <Field label="Preferred display name" hint="Optional — shown publicly instead of your legal name if Privacy → Private Professional Mode is on.">
+          <TextInput value={form.preferredDisplayName} onChange={(e) => setForm((f) => ({ ...f, preferredDisplayName: e.target.value }))} placeholder="If different from your full name" />
+        </Field>
         <Field label="Headline">
           <TextInput value={form.headline} onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))} placeholder="e.g. Structural Engineer" />
         </Field>
@@ -153,8 +159,30 @@ export function ProfileTab() {
 
 /** §25 SETTINGS_TABS.PrivacyAndVisibility + §25.1 PrivacyMode */
 export function PrivacyTab() {
+  const { account } = useAccount()
+  const owner = account ? ownerKey(account) : ''
+  const [privacyMode, setPrivacyModeState] = useState(() => (owner ? getPrivacyMode(owner) : { legalNamePublicVisibility: 'public' as const }))
+
   return (
     <div className="flex flex-col gap-4">
+      {account?.accountType === 'individual' && (
+        <Section title="Private Professional Mode (§9.7)">
+          <p className="mb-2 text-xs text-text-1">
+            For anyone whose primary occupation can't be publicly named. Turning this on never weakens your Verified
+            Identity badge or Trust Score — it just stops disclosing which legal name was verified.
+          </p>
+          <Toggle
+            label="Keep my legal name private"
+            hint={account.preferredDisplayName ? `Visitors will see "${account.preferredDisplayName}" instead.` : 'Add a preferred display name below, or your legal name will still show.'}
+            checked={privacyMode.legalNamePublicVisibility === 'private'}
+            onChange={(v) => {
+              const next = { legalNamePublicVisibility: (v ? 'private' : 'public') as 'public' | 'private' }
+              setPrivacyModeState(next)
+              setPrivacyMode(owner, next)
+            }}
+          />
+        </Section>
+      )}
       <Section title="Visibility">
         <Toggle label="Profile visibility" hint="Public — anyone can view your profile" defaultChecked />
         <Toggle label="Credential visibility" hint="Show verified credentials to visitors" defaultChecked />
@@ -319,27 +347,88 @@ export function MentorshipTab() {
 }
 
 /** §25 SETTINGS_TABS.Security */
+/**
+ * §7.4 Session Management. Previously entirely decorative: uncontrolled
+ * password inputs with no save handler, uncontrolled MFA toggles, and a
+ * hardcoded "no other sessions" sentence that never read any real state.
+ * Password change and the login-history log are now real; Authenticator/
+ * Passkeys stay honestly labelled as needing a backend this build doesn't
+ * have (same pattern as SignInForm's Social Auth buttons) rather than
+ * pretending to toggle a real TOTP/WebAuthn enrollment.
+ */
 export function SecurityTab() {
+  const { account } = useAccount()
+  const email = account ? ownerKey(account) : ''
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
+  const [alertsEnabled, setAlertsEnabled] = useState(getSuspiciousLoginAlertsEnabled)
+  const [history, setHistory] = useState(() => listLoginHistory(email))
+
+  function submitPasswordChange() {
+    if (!account) return
+    const ok = changePassword(email, currentPassword, newPassword)
+    setPasswordMessage(ok ? 'Password updated.' : 'Current password is incorrect.')
+    if (ok) {
+      setCurrentPassword('')
+      setNewPassword('')
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Section title="Password & recovery">
         <div className="flex flex-col gap-3 pt-2">
           <Field label="Current password">
-            <TextInput type="password" />
+            <PasswordInput value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
           </Field>
           <Field label="New password" hint="At least 8 characters, with uppercase, lowercase, a number, and a symbol.">
-            <TextInput type="password" />
+            <PasswordInput showStrength value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
           </Field>
+          <div className="flex items-center gap-3">
+            <Button disabled={!currentPassword || !newPassword} onClick={submitPasswordChange}>
+              Update password
+            </Button>
+            {passwordMessage && <span className="text-xs text-text-1">{passwordMessage}</span>}
+          </div>
         </div>
       </Section>
       <Section title="Multi-factor authentication">
-        <Toggle label="Authenticator app (TOTP)" />
-        <Toggle label="Email verification" defaultChecked />
-        <Toggle label="Passkeys (WebAuthn)" />
-        <Toggle label="Suspicious login alerts" defaultChecked />
+        <Toggle label="Authenticator app (TOTP)" hint="Requires a real TOTP backend — not connected in this build." />
+        <Toggle label="Email verification" defaultChecked hint="Already real — this is the code sent at sign-up and account recovery." />
+        <Toggle label="Passkeys (WebAuthn)" hint="Requires real WebAuthn registration — not connected in this build." />
+        <Toggle
+          label="Suspicious login alerts"
+          checked={alertsEnabled}
+          onChange={(v) => {
+            setAlertsEnabled(v)
+            setSuspiciousLoginAlertsEnabled(v)
+          }}
+          hint="Real: controls whether an unrecognised device is challenged with a code at sign-in."
+        />
       </Section>
       <Section title="Sessions & devices">
-        <p className="text-sm text-text-1">No other active sessions or trusted devices yet.</p>
+        {history.length === 0 ? (
+          <p className="text-sm text-text-1">No sign-ins recorded yet on this device.</p>
+        ) : (
+          <div className="flex flex-col gap-2 pt-2">
+            {history.map((h, i) => (
+              <div key={h.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 text-sm">
+                <span className="text-text-0">
+                  {h.device} {i === 0 && <span className="text-xs text-success">· this session</span>}
+                </span>
+                <span className="text-xs text-text-2">{new Date(h.signedInAt).toLocaleString()}</span>
+              </div>
+            ))}
+            <p className="mt-1 text-xs text-text-2">
+              This build has one browser and no backend session store, so only real sign-ins on this device appear
+              here — multi-device session tracking needs a real backend.
+            </p>
+          </div>
+        )}
+        <button onClick={() => setHistory(listLoginHistory(email))} className="mt-2 text-xs font-semibold text-accent">
+          Refresh
+        </button>
       </Section>
     </div>
   )

@@ -1241,7 +1241,7 @@ Hero itself.
 ### 6.2 Logo System
 
 ```
-USE ONLY: Approved PROFILE SVG asset — never a PNG substitute where SVG is available
+USE ONLY: Approved PROFILE SVG/PNG asset — never a PNG substitute where SVG is available
 DO NOT:   Recreate · Redesign · Replace · Raster-ise
 
 The logo is the Hero's visual centerpiece — fully integrated and perfectly centered on

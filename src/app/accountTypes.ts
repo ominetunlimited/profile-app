@@ -252,6 +252,10 @@ export interface IndividualAccount {
   pathway: Pathway
   careerStage?: CareerStage
   legalName: string
+  /** §8.5 INDIVIDUAL_INFO_FIELDS — captured at signup but previously discarded
+   * on submit (never saved to the finalized account). Also the alias behind
+   * §9.7 Private Professional Mode's `publicDisplayIdentity`. */
+  preferredDisplayName?: string
   /** §4.1 — @handle, globally unique, captured at §8.8 profile setup. */
   username?: string
   headline?: string

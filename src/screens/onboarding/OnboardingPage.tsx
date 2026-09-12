@@ -113,6 +113,8 @@ export function OnboardingPage() {
                     title: recordTitle,
                     description: '',
                     skills: [],
+                    tools: [],
+                    collaborators: [],
                     cvPortfolioInclude: true,
                     visibility: 'public',
                   })

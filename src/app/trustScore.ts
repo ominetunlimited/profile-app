@@ -15,10 +15,6 @@ import type { Account } from './accountTypes'
  * §13.2's own hard rule that follower/like/view counts may never be a
  * ranking input is respected by construction, since nothing here reads them.
  */
-// Not yet consumed by computeTrustScore() below — every signal it weighs
-// needs a verification pipeline this build doesn't have yet. Kept here,
-// exported, so wiring a real signal in later means adding one real term to
-// the sum in computeTrustScore(), not inventing the weight table from scratch.
 export const TRUST_WEIGHTS = {
   identity_verification: 25,
   employment_verification: 25,
@@ -41,9 +37,81 @@ export const TRUST_TIERS = [
   { range: [800, 1000], tier: 'master', label: 'Master', color: '#F4B400' },
 ] as const
 
+/**
+ * §4.5 TrustScore.dimensions — a real, named breakdown, not a single opaque
+ * number. §13.2's 11 TRUST_WEIGHTS signals are the raw scoring inputs; the
+ * Master Prompt names these 8 dimensions as the display-level aggregation
+ * but doesn't give a signal→dimension crosswalk anywhere, so the mapping
+ * below is a documented, reasonable inference — flagged as such rather than
+ * presented as verbatim spec. Every dimension is honestly 0 today since no
+ * signal has a real data source yet (same reasoning as the total below).
+ */
+export const TRUST_DIMENSION_SIGNAL_MAP: Record<keyof typeof TRUST_WEIGHTS, keyof TrustDimensions> = {
+  identity_verification: 'identityTrust',
+  academic_degree_verification: 'academicTrust',
+  professional_licence: 'professionalTrust',
+  trade_competence: 'professionalTrust',
+  certification: 'professionalTrust',
+  employment_verification: 'employmentTrust',
+  client_review_verified: 'marketplaceTrust',
+  organisation_affiliation: 'organisationalTrust',
+  peer_endorsement_higher_tier: 'recruitmentTrust',
+  course_completed: 'contributionTrust',
+  activity_peer_validated: 'contributionTrust',
+}
+
+export interface TrustDimensions {
+  identityTrust: number
+  academicTrust: number
+  professionalTrust: number
+  employmentTrust: number
+  marketplaceTrust: number
+  organisationalTrust: number
+  recruitmentTrust: number
+  contributionTrust: number
+}
+
+export const TRUST_DIMENSION_LABELS: Record<keyof TrustDimensions, string> = {
+  identityTrust: 'Identity',
+  academicTrust: 'Academic',
+  professionalTrust: 'Professional',
+  employmentTrust: 'Employment',
+  marketplaceTrust: 'Marketplace',
+  organisationalTrust: 'Organisational',
+  recruitmentTrust: 'Recruitment',
+  contributionTrust: 'Contribution',
+}
+
+export interface TrustSignalEntry {
+  type: string
+  weight: number
+  source: string
+  date: string
+  verified: boolean
+}
+
 export interface TrustScoreResult {
   total: number
   tier: (typeof TRUST_TIERS)[number]
+  confidenceLevel: 'low' | 'moderate' | 'high' | 'institutional_grade'
+  dimensions: TrustDimensions
+  /** Every increment logged with its source (§4.5/§13.3) — honestly empty
+   * until a real verification produces one, never backfilled with fake
+   * history to make the log look populated. */
+  signals: TrustSignalEntry[]
+  formulaVersion: string
+  lastCalculated: string
+}
+
+const ZERO_DIMENSIONS: TrustDimensions = {
+  identityTrust: 0,
+  academicTrust: 0,
+  professionalTrust: 0,
+  employmentTrust: 0,
+  marketplaceTrust: 0,
+  organisationalTrust: 0,
+  recruitmentTrust: 0,
+  contributionTrust: 0,
 }
 
 export function computeTrustScore(_account: Account | null): TrustScoreResult {
@@ -57,5 +125,13 @@ export function computeTrustScore(_account: Account | null): TrustScoreResult {
   // component.
   const total = 0
   const tier = TRUST_TIERS.find((t) => total >= t.range[0] && total <= t.range[1]) ?? TRUST_TIERS[0]
-  return { total, tier }
+  return {
+    total,
+    tier,
+    confidenceLevel: 'low',
+    dimensions: ZERO_DIMENSIONS,
+    signals: [],
+    formulaVersion: '13.2-v1',
+    lastCalculated: new Date().toISOString(),
+  }
 }

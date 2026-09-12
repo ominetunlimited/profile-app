@@ -115,7 +115,13 @@ export function CommandPalette() {
           kind: 'person' as const,
           path: `/profile/${username}`,
           screen: a.legalName,
-          sub: a.accountType === 'organisation' ? `@${username} · ${a.orgType}` : `@${username}`,
+          // §9.4 Name Collision Resolution — never a bare name+username; carry
+          // headline/org-type and country alongside so two "John Smith"s are
+          // distinguishable at a glance, same rule ProfilePage's header follows.
+          sub:
+            a.accountType === 'organisation'
+              ? `@${username} · ${a.orgType} · ${a.country}`
+              : `@${username}${a.headline ? ` · ${a.headline}` : ''} · ${a.country}`,
         }
       })
   }, [account, staffRole])

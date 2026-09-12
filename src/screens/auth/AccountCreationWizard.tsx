@@ -15,7 +15,8 @@ import {
   type Pathway,
 } from '@/app/accountTypes'
 import { useAccount } from '@/app/AccountContext'
-import { emailIsRegistered, saveDemoAccount } from '@/app/demoAccountStore'
+import { emailIsRegistered, findAccountByUsername, saveDemoAccount } from '@/app/demoAccountStore'
+import { resizeImage, saveAvatar, saveCover } from '@/app/mediaStore'
 
 const INDIVIDUAL_STEP_ORDER = ['account-type', 'individual-info', 'email-verify', 'consent', 'goals', 'profile-setup', 'journey-setup', 'done']
 const INDIVIDUAL_STEP_NAMES: Record<string, string> = {
@@ -87,12 +88,22 @@ export function AccountCreationWizard() {
       pathway: s.pathway!,
       careerStage: s.careerStage ?? undefined,
       legalName: s.legalName,
+      // Bug fix: captured at Step 2 (§8.5) but never saved to the finalized
+      // account — same "collected then silently discarded" class of bug as
+      // the profile/cover photos above.
+      preferredDisplayName: s.preferredDisplayName || undefined,
       username: s.username || undefined,
       headline: s.headline || undefined,
       email: s.email,
       country: s.country,
     }
     saveDemoAccount(s.email, s.password, newAccount)
+    // Bug fix: §8.8's profilePicture/coverPicture were captured into wizard
+    // state and previewed, but never actually saved anywhere — completing
+    // registration silently discarded them. Now persisted through the same
+    // real pipeline Settings' photo upload uses (mediaStore.ts).
+    if (s.profilePhoto) saveAvatar(s.email, s.profilePhoto)
+    if (s.coverPhoto) saveCover(s.email, s.coverPhoto)
     setAccount(newAccount)
   }
 
@@ -517,14 +528,23 @@ function ProfileSetupStep({
   onContinue: () => void
   onBack: () => void
 }) {
-  const usernameTaken = s.username.trim().toLowerCase() === 'admin' || s.username.trim().toLowerCase() === 'profile'
+  const RESERVED_USERNAMES = ['admin', 'profile', 'settings', 'help', 'support', 'about', 'trust']
+  const normalizedUsername = s.username.trim().toLowerCase()
+  const usernameTaken = RESERVED_USERNAMES.includes(normalizedUsername) || !!findAccountByUsername(normalizedUsername)
   const usernameValid = /^[a-z0-9_]{3,20}$/i.test(s.username) && !usernameTaken
   const canContinue = usernameValid
 
   function handlePhoto(e: ChangeEvent<HTMLInputElement>, key: 'profilePhoto' | 'coverPhoto') {
     const file = e.target.files?.[0]
     if (!file) return
-    patch({ [key]: URL.createObjectURL(file) } as Partial<WizardState>)
+    // Real resize pipeline (mediaStore.ts) rather than a throwaway blob: URL —
+    // the result is a persistable data URL, the same shape Settings' photo
+    // upload already produces, so finalizeIndividualAccount can actually save it.
+    resizeImage(file, key === 'coverPhoto' ? 1600 : 480)
+      .then((dataUrl) => patch({ [key]: dataUrl } as Partial<WizardState>))
+      .catch(() => {
+        // best-effort demo scaffolding — an invalid file just leaves the field empty
+      })
   }
 
   return (

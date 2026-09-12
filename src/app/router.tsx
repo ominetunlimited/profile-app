@@ -57,6 +57,7 @@ import { DeveloperPlatform } from '@/screens/more/DeveloperPlatform'
 import { ApiCentre } from '@/screens/more/ApiCentre'
 import { FeedbackCentre } from '@/screens/more/FeedbackCentre'
 import { ReleaseNotes } from '@/screens/more/ReleaseNotes'
+import { TrustPassport } from '@/screens/trust/TrustPassport'
 
 const LEGAL_PATHS = new Set([
   '/terms',
@@ -199,6 +200,12 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequireAuthenticated>
           <CollaborationHub />
+        </RequireAuthenticated>
+      )
+    case '/trust-passport':
+      return (
+        <RequireAuthenticated>
+          <TrustPassport />
         </RequireAuthenticated>
       )
     case '/developer-platform':

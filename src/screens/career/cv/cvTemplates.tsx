@@ -19,6 +19,7 @@ function EmptyNote({ text }: { text: string }) {
 function ExtraCvSections({ cv }: { cv: CvData }) {
   const s = cv.enabledSections
   const hasLinks = cv.phone || cv.linkedInUrl || cv.externalWebsiteUrl
+  const showTools = cv.tools.length > 0 // §4.6's own Tools CV section — bucketed alongside Skills, not independently toggleable
   const showEducation = s.education && cv.education.length > 0
   const showCertifications = cv.certifications.length > 0 // bucketed under Skills/Competencies (§4) — not independently toggleable
   const showLanguages = s.languages && cv.languages.length > 0
@@ -29,7 +30,7 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
   const showAffiliations = s.affiliations && cv.affiliations.length > 0
   const showReferences = s.references && (cv.referencesMode === 'available_upon_request' || cv.externalReferences.length > 0)
   const hasAnything =
-    hasLinks || showEducation || showCertifications || showLanguages || showProjects || showPublications || showVolunteer || showAwards || showAffiliations || showReferences
+    hasLinks || showTools || showEducation || showCertifications || showLanguages || showProjects || showPublications || showVolunteer || showAwards || showAffiliations || showReferences
   if (!hasAnything) return null
 
   return (
@@ -39,6 +40,12 @@ function ExtraCvSections({ cv }: { cv: CvData }) {
           {cv.phone && <span>{cv.phone}</span>}
           {cv.linkedInUrl && <span>{cv.linkedInUrl}</span>}
           {cv.externalWebsiteUrl && <span>{cv.externalWebsiteUrl}</span>}
+        </div>
+      )}
+      {showTools && (
+        <div className="mb-2">
+          <span className="font-bold">Tools </span>
+          {cv.tools.join(' · ')}
         </div>
       )}
       {showEducation && (

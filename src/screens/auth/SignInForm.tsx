@@ -5,6 +5,8 @@ import { Button } from '@/shared/ui/Button'
 import { Field, PasswordInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { findDemoAccount, isKnownDevice, markDeviceKnown } from '@/app/demoAccountStore'
+import { getSuspiciousLoginAlertsEnabled, recordLogin } from '@/app/sessionStore'
+import { ownerKey } from '@/app/activityStore'
 
 /** §7.1 Sign-In Screen + §7.2 conditional step-up MFA. */
 export function SignInForm() {
@@ -13,7 +15,8 @@ export function SignInForm() {
   const [error, setError] = useState(false)
   const [stage, setStage] = useState<'form' | 'mfa'>('form')
   const [mfaCode, setMfaCode] = useState('')
-  const { setAccount, setStaffRole } = useAccount()
+  const [remember, setRememberState] = useState(false)
+  const { setAccount, setStaffRole, setRemember } = useAccount()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const returnTo = params.get('return') ? decodeURIComponent(params.get('return')!) : '/home'
@@ -26,8 +29,10 @@ export function SignInForm() {
     }
     setError(false)
     setStaffRole(null)
+    setRemember(remember)
     setAccount(account)
-    if (!isKnownDevice()) {
+    recordLogin(ownerKey(account))
+    if (!isKnownDevice() && getSuspiciousLoginAlertsEnabled()) {
       setStage('mfa')
       return
     }
@@ -78,10 +83,14 @@ export function SignInForm() {
           <TextInput value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </Field>
         <Field label="Password">
-          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
+          <PasswordInput showStrength value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
         </Field>
       </div>
-      <div className="mb-4 text-right">
+      <div className="mb-4 flex items-center justify-between">
+        <label className="flex items-center gap-2 text-xs text-text-1">
+          <input type="checkbox" checked={remember} onChange={(e) => setRememberState(e.target.checked)} />
+          Remember me
+        </label>
         <Link to="/auth?mode=recover" className="text-xs font-semibold text-accent">
           Forgot password?
         </Link>

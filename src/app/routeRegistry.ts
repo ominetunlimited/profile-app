@@ -286,4 +286,13 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/api-centre', screen: 'API Centre', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item — honest "not built yet" real page, not a dead link.' },
   { path: '/feedback', screen: 'Feedback Centre', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item.' },
   { path: '/release-notes', screen: 'Release Notes', phase: 2, masterPromptRef: '§10.4', gate: { kind: 'public' }, note: 'Recovery patch: §10.4 Hamburger Menu item — real changelog of this build\'s actual phase history.' },
+  {
+    path: '/trust-passport',
+    screen: 'Trust Passport',
+    phase: 2,
+    masterPromptRef: '§4.5, §12.6, §13',
+    gate: { kind: 'authenticated' },
+    note:
+      "Bug fix: every in-app 'Trust Centre' nav link previously pointed at the public /trust marketing page (PublicHeader/PublicFooter chrome), which took a signed-in user out of the app shell entirely. This is the real authenticated destination — Trust Score ring, §4.5 dimensions, and the §13.2 calculation matrix. /trust remains the public explainer for signed-out visitors.",
+  },
 ]

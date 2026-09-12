@@ -48,7 +48,7 @@ export function TrustCentre() {
 
         {account && (
           <Link
-            to="/profile"
+            to="/trust-passport"
             className="mb-10 inline-flex items-center gap-2 rounded-lg border border-trust bg-surface px-4 py-2 text-sm font-semibold text-trust"
           >
             View your Trust Passport →
