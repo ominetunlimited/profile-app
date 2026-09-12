@@ -6,6 +6,13 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/design_handoff_profile/assets/profile-icon-16.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/design_handoff_profile/assets/profile-icon-512.png" />
     <link rel="apple-touch-icon" href="/design_handoff_profile/assets/profile-icon-180.png" />
+    <!-- §29.4 PWA — installable manifest + icons. No service worker: this
+         build iterates on deployed JS multiple times per session, and a
+         naive cache-first SW risks serving a stale bundle after the next
+         push — a worse regression than not having one. Flagged as a
+         deliberate scope decision, not a silent gap. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0057d9" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

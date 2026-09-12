@@ -19,20 +19,28 @@ import {
   SecurityTab,
 } from './settingsTabs'
 
-const INDIVIDUAL_TABS = [
+const SHARED_TABS = [
   ['profile', 'Profile', ProfileTab],
   ['privacy', 'Privacy & Visibility', PrivacyTab],
   ['notifications', 'Notifications', NotificationsTab],
-  ['cv-export', 'CV & Export', CvExportTab],
-  ['career-journey', 'Career Journey', CareerJourneyTab],
   ['commerce', 'Commerce & Selling', CommerceTab],
   ['ai-assistant', 'AI Assistant', AiAssistantTab],
-  ['mentorship', 'Mentorship', MentorshipTab],
   ['security', 'Security', SecurityTab],
   ['language', 'Language & Region', LanguageTab],
   ['accessibility', 'Accessibility', AccessibilityTab],
   ['data-rights', 'Data Rights', DataRightsTab],
   ['premium', 'Premium Plans', PremiumPlansTab],
+] as const
+
+// §25's own tabs — CV/Portfolio, career stage, and mentorship are individual
+// concepts with no organisation equivalent (an org has no CV, no personal
+// career stage, no mentor capacity). §25.2 explicitly calls the organisation
+// side "parallel structure", not this set plus one bolted-on extra tab —
+// previously an org account saw all three of these anyway.
+const INDIVIDUAL_ONLY_TABS = [
+  ['cv-export', 'CV & Export', CvExportTab],
+  ['career-journey', 'Career Journey', CareerJourneyTab],
+  ['mentorship', 'Mentorship', MentorshipTab],
 ] as const
 
 const ORG_EXTRA_TABS = [['organisation', 'Organisation', OrganisationTab]] as const
@@ -41,7 +49,7 @@ const ORG_EXTRA_TABS = [['organisation', 'Organisation', OrganisationTab]] as co
 export function SettingsPage() {
   const { account } = useAccount()
   const [params, setParams] = useSearchParams()
-  const tabs = account?.accountType === 'organisation' ? [...ORG_EXTRA_TABS, ...INDIVIDUAL_TABS] : INDIVIDUAL_TABS
+  const tabs = account?.accountType === 'organisation' ? [...ORG_EXTRA_TABS, ...SHARED_TABS] : [...SHARED_TABS, ...INDIVIDUAL_ONLY_TABS]
   const [active, setActive] = useState(params.get('tab') ?? tabs[0][0])
 
   const ActiveComponent = tabs.find((t) => t[0] === active)?.[2] ?? tabs[0][2]

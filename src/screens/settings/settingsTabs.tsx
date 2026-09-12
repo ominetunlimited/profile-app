@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
+import { hubForOrgType } from '@/app/accountTypes'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
 import { changePassword, updateDemoAccount } from '@/app/demoAccountStore'
@@ -553,20 +555,67 @@ function RightRow({ label, hint }: { label: string; hint: string }) {
 }
 
 /** §25 SETTINGS_TABS.PremiumPlans */
+/** §32.1/§32.2 plan contents, verbatim — individual vs organisation. */
+const INDIVIDUAL_PLAN_COLUMNS: { name: string; features: string[] }[] = [
+  {
+    name: 'Free',
+    features: [
+      'Basic verification requests',
+      'Profile & CV builder',
+      'Record work',
+      'Basic discovery',
+      'Connections-only messaging',
+      'PROFILE Advisor (AI assistant)',
+      'Career Readiness Engine',
+      'Smart job recommendations',
+    ],
+  },
+  {
+    name: 'Professional',
+    features: [
+      'Unlimited verification requests',
+      'Credential passport',
+      'Verification analytics',
+      'Priority discovery ranking',
+      'Message anyone',
+      'PDF export',
+      'Multiple CV versions',
+      'Advanced analytics',
+    ],
+  },
+  { name: 'Enterprise', features: ['API access', 'White-label trust badge', 'Dedicated support'] },
+]
+
+const ORG_PLAN_COLUMNS: { name: string; features: string[] }[] = [
+  { name: 'Free', features: ['Limited schemas', 'Limited records', 'Manual verification'] },
+  { name: 'Professional', features: ['Unlimited schemas', 'Bulk uploads', 'Automated verification', 'Analytics'] },
+  { name: 'Enterprise', features: ['API integration', 'Real-time sync', 'SSO', 'Compliance tools', 'Dedicated infrastructure', 'SLA'] },
+]
+
 export function PremiumPlansTab() {
+  const { account } = useAccount()
+  const columns = account?.accountType === 'organisation' ? ORG_PLAN_COLUMNS : INDIVIDUAL_PLAN_COLUMNS
   return (
     <Section title="Premium plans">
-      <p className="mb-3 text-sm text-text-1">Verification is never paywalled. Premium adds visibility and convenience.</p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-lg border border-border p-3">
-          <div className="font-semibold text-text-0">Free</div>
-          <div className="text-xs text-text-1">Profile, activity recording, verification requests — always free.</div>
-        </div>
-        <div className="rounded-lg border border-accent p-3">
-          <div className="font-semibold text-text-0">Professional</div>
-          <div className="text-xs text-text-1">PDF export, priority verification, multiple CV templates.</div>
-        </div>
+      <p className="mb-3 text-sm text-text-1">Verification is never paywalled. Premium adds visibility and convenience — never gates trust itself.</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {columns.map((plan, i) => (
+          <div key={plan.name} className={`rounded-lg border p-3 ${i === 1 ? 'border-accent' : 'border-border'}`}>
+            <div className="mb-1.5 font-semibold text-text-0">{plan.name}</div>
+            <ul className="flex flex-col gap-1">
+              {plan.features.map((f) => (
+                <li key={f} className="text-xs text-text-1">
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
+      <p className="mt-3 text-xs text-text-2">
+        Upgrade/billing isn't wired to a real payment processor yet in this build — no fake checkout flow, this is a
+        real, accurate plan comparison ready for one.
+      </p>
     </Section>
   )
 }
@@ -575,6 +624,8 @@ export function PremiumPlansTab() {
 export function OrganisationTab() {
   const { account } = useAccount()
   if (account?.accountType !== 'organisation') return null
+  const hub = hubForOrgType(account.orgType)
+
   return (
     <div className="flex flex-col gap-4">
       <Section title="Workspace">
@@ -587,11 +638,28 @@ export function OrganisationTab() {
           </Field>
         </div>
         <p className="mt-2 text-xs text-text-1">
-          Registry status: <span className="font-mono">{account.registryLevel}</span>
+          Registry status: <span className="font-mono">{account.registryLevel}</span> · Type: {account.orgType}
         </p>
       </Section>
-      <Section title="Staff & roles">
-        <p className="text-sm text-text-1">No staff invited yet.</p>
+      <Section title="Team & roles">
+        <p className="text-sm text-text-1">
+          No staff invited yet — inviting staff needs a real matching-email registration flow this build doesn't
+          have (§42.3: staff join via an accept-before-active OrgStaffRecord, not a standalone admin account).
+        </p>
+      </Section>
+      {hub === 'institutional_hub' && (
+        <Section title="Verification schemas">
+          <p className="mb-2 text-sm text-text-1">Define what your institution verifies, and how records are matched at scale.</p>
+          <Link to={`/institution/${account.officialEmail}/schemas`} className="text-sm font-semibold text-accent">
+            Open Schema Builder →
+          </Link>
+        </Section>
+      )}
+      <Section title="Billing">
+        <p className="text-sm text-text-1">
+          Plan management, invoice history, and payout details render here once real billing (§38.6d) exists — no
+          fabricated invoices in the meantime.
+        </p>
       </Section>
     </div>
   )

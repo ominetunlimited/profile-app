@@ -10,6 +10,7 @@ import { PortfolioTemplatesRoute } from '@/screens/career/portfolio/PortfolioTem
 import { RouteIntegrityEngine } from '@/screens/internal/RouteIntegrityEngine'
 import { DisputeReview } from '@/screens/internal/DisputeReview'
 import { NotFoundShell } from '@/screens/shared/NotFoundShell'
+import { RootErrorBoundary } from '@/screens/shared/RootErrorBoundary'
 import { PublicHero } from '@/screens/public/PublicHero'
 import { AboutSolutions } from '@/screens/public/AboutSolutions'
 import { HowItWorks } from '@/screens/public/HowItWorks'
@@ -415,6 +416,11 @@ const router = createBrowserRouter([
       ...routeRegistry.map((route) => ({
         path: route.path,
         element: elementFor(route),
+        // §34.1 Resilience — a render-time throw on this route replaces only
+        // this route's content, not the whole app (CommandPalette/
+        // AccountSwitcher in RootLayout stay mounted since they're siblings
+        // of <Outlet/>, one level up from where this error is caught).
+        errorElement: <RootErrorBoundary />,
       })),
       // Backstop (§49.3) — an unregistered URL still hits a shell, never a
       // browser-level 404.
