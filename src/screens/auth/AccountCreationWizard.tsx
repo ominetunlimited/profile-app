@@ -45,6 +45,14 @@ const ORG_STEP_NAMES: Record<string, string> = {
  * still follows the Handoff's Account Creation screen exactly. */
 export function AccountCreationWizard() {
   const [s, setS] = useState<WizardState>(initialWizardState)
+  // A real, visible, required checkbox at the very first data-entry step —
+  // on top of (not instead of) §8.6's fuller two-document ConsentStep after
+  // email verification. Reported bug: the disabled Continue/Verify Email
+  // button gave no visible reason it was disabled, so an unchecked
+  // agreement box (easy to miss when it's just a sentence of body text)
+  // looked identical to a broken button. Making it a real checkbox makes
+  // the missing step visible and interactive instead of invisible.
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
   const { account, setAccount } = useAccount()
   const navigate = useNavigate()
 
@@ -72,7 +80,8 @@ export function AccountCreationWizard() {
     isValidEmail(s.email) &&
     !emailIsRegistered(s.email) &&
     passwordMeetsPolicy(s.password) &&
-    s.confirmPassword === s.password
+    s.confirmPassword === s.password &&
+    agreeToTerms
 
   const orgValid =
     s.orgLegalName.trim().length > 1 &&
@@ -271,17 +280,25 @@ export function AccountCreationWizard() {
               <PasswordInput value={s.confirmPassword} onChange={(e) => patch({ confirmPassword: e.target.value })} placeholder="Type it again" />
             </Field>
           </div>
-          <p className="mb-5 text-xs text-text-1">
-            After verifying your email, you'll review and accept PROFILE's{' '}
-            <Link to="/terms" className="text-accent">
-              Terms
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="text-accent">
-              Privacy Policy
-            </Link>{' '}
-            before your account is created — nothing here is agreed to automatically.
-          </p>
+          <label className="mb-5 flex items-start gap-2.5 rounded-lg border border-border-strong bg-surface p-3 text-xs text-text-1">
+            <input
+              type="checkbox"
+              checked={agreeToTerms}
+              onChange={(e) => setAgreeToTerms(e.target.checked)}
+              className="mt-0.5 h-4 w-4 flex-none"
+            />
+            <span>
+              I agree to PROFILE's{' '}
+              <Link to="/terms" className="text-accent" onClick={(e) => e.stopPropagation()}>
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-accent" onClick={(e) => e.stopPropagation()}>
+                Privacy Policy
+              </Link>
+              . You'll review both again, in full, after verifying your email.
+            </span>
+          </label>
           <div className="flex gap-2">
             {/* §3 Account Creation state machine: this is the real
                 EMAIL_PENDING trigger, not a step-navigation "Continue" —
@@ -294,6 +311,22 @@ export function AccountCreationWizard() {
               Back
             </Button>
           </div>
+          {!individualValid && (
+            <p className="mt-3 text-xs text-danger">
+              {(() => {
+                if (s.legalName.trim().length <= 1) return 'Enter your full name.'
+                if (!countryRec) return 'Select your country.'
+                if (s.dob === '') return 'Enter your date of birth.'
+                if (dobUnderage) return `You need to be at least ${countryRec?.minAge} in ${s.country} to create a PROFILE account.`
+                if (!isValidEmail(s.email)) return 'Enter a valid email address.'
+                if (emailIsRegistered(s.email)) return 'An account already exists with this email — try signing in instead.'
+                if (!passwordMeetsPolicy(s.password)) return 'Password needs 8+ characters, uppercase, lowercase, a number, and a symbol.'
+                if (s.confirmPassword !== s.password) return "Passwords don't match yet."
+                if (!agreeToTerms) return 'Check the box above to agree to the Terms and Privacy Policy.'
+                return null
+              })()}
+            </p>
+          )}
         </div>
       )}
 
