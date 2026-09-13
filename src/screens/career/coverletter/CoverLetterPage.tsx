@@ -1,12 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { RequireIndividual } from '@/app/guards'
 import { buildCvData } from '@/app/careerData'
-
-const TONES = ['Direct', 'Formal', 'Warm'] as const
+import { buildCoverLetterDraft, COVER_LETTER_TONES as TONES } from '@/app/coverLetterEngine'
 
 /**
  * §47.4 PROFILE Cover Letter — opportunity-aware. §48.0 forbids AI fabricating
@@ -22,12 +22,7 @@ function CoverLetterInner() {
   const [targetOrg, setTargetOrg] = useState('')
   const [tone, setTone] = useState<(typeof TONES)[number]>('Direct')
 
-  const opener = { Direct: "I'm writing to apply for", Formal: "I would like to be considered for", Warm: "I'm reaching out about" }[tone]
-  const roleLine = targetRole ? `the ${targetRole}${targetOrg ? ` role at ${targetOrg}` : ' role'}` : 'this opportunity'
-  const evidenceLine = cv.hasContent
-    ? `Over my recorded activity, I've worked as ${cv.experience.map((e) => `${e.title} at ${e.org}`).join('; ')}. Every claim here is a record on my PROFILE — not something I'm asking you to take on trust.`
-    : "I haven't recorded any activity on PROFILE yet, so this draft can't cite verified evidence — record your first activity from Home, then regenerate."
-  const body = `${opener} ${roleLine}.\n\n${evidenceLine}\n\nI'd welcome the chance to talk through how this applies here.\n\n${cv.name}`
+  const body = buildCoverLetterDraft(cv, targetRole, targetOrg, tone)
 
   return (
     <AppShell>
@@ -76,8 +71,12 @@ function CoverLetterInner() {
               <div className="whitespace-pre-line text-sm leading-relaxed text-text-0">{body}</div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button>Use with this application</Button>
-              <Button variant="secondary">Download PDF</Button>
+              <Link to="/opportunities">
+                <Button>Find a job to apply for</Button>
+              </Link>
+              <Button variant="secondary" onClick={() => window.print()}>
+                Download PDF
+              </Button>
             </div>
           </div>
         </div>

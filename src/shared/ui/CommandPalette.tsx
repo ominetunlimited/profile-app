@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
 import { listAllAccounts } from '@/app/demoAccountStore'
+import { TOOL_CATALOGUE, listAllProviders } from '@/app/toolCatalogue'
 
 interface PersonResult {
   kind: 'person'
@@ -135,7 +136,19 @@ export function CommandPalette() {
       .filter((r) => r.screen.toLowerCase().includes(q) || r.path.toLowerCase().includes(q))
       .map((r) => ({ kind: 'route' as const, path: r.path, screen: r.screen, sub: r.path }))
     const peopleMatches = people.filter((p) => p.screen.toLowerCase().includes(q) || p.sub.toLowerCase().includes(q))
-    return [...peopleMatches, ...routeMatches].slice(0, 8)
+    // §9 Search Integration — "Adobe Photoshop" resolves to a real Tool
+    // entity and its real Provider, categorised separately from routes and
+    // people rather than dumped into one undifferentiated list.
+    const toolMatches = TOOL_CATALOGUE.filter((t) => t.canonicalName.toLowerCase().includes(q) || t.aliases.some((a) => a.includes(q))).map((t) => ({
+      kind: 'tool' as const,
+      path: `/tool/${t.id}`,
+      screen: t.canonicalName,
+      sub: t.provider ? `Tool · made by ${t.provider.name}` : 'Tool',
+    }))
+    const providerMatches = listAllProviders()
+      .filter((p) => p.name.toLowerCase().includes(q))
+      .map((p) => ({ kind: 'provider' as const, path: `/provider/${p.id}`, screen: p.name, sub: 'Provider' }))
+    return [...peopleMatches, ...toolMatches, ...providerMatches, ...routeMatches].slice(0, 8)
   }, [query, reachable, people])
 
   if (!open) return null
@@ -179,6 +192,8 @@ export function CommandPalette() {
               >
                 <span className="text-text-0">
                   {r.kind === 'person' && <span className="mr-1.5">👤</span>}
+                  {r.kind === 'tool' && <span className="mr-1.5">🛠</span>}
+                  {r.kind === 'provider' && <span className="mr-1.5">🏭</span>}
                   {r.screen}
                 </span>
                 <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? '↵' : r.sub}</span>

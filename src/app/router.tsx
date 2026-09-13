@@ -3,7 +3,7 @@ import { CommandPalette } from '@/shared/ui/CommandPalette'
 import { AccountSwitcher } from '@/dev/AccountSwitcher'
 import type { ReactElement } from 'react'
 import { routeRegistry, type RouteEntry } from './routeRegistry'
-import { RequireAuthenticated, RequireOrganisation, RequireOwner, RequireStaff } from './guards'
+import { RequireAuthenticated, RequireIndividual, RequireOrganisation, RequireOwner, RequireStaff } from './guards'
 import { FeatureShell } from '@/screens/shared/FeatureShell'
 import { CVTemplatesRoute } from '@/screens/career/cv/CVTemplatesRoute'
 import { PortfolioTemplatesRoute } from '@/screens/career/portfolio/PortfolioTemplatesRoute'
@@ -52,6 +52,12 @@ import { RequireInternalAccessGate } from './internalAccessGate'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
 import { ActivityDetailPage } from '@/screens/home/ActivityDetailPage'
+import { ToolDetailPage } from '@/screens/catalogue/ToolDetailPage'
+import { ProviderDetailPage } from '@/screens/catalogue/ProviderDetailPage'
+import { JobDetailPage } from '@/screens/opportunities/JobDetailPage'
+import { ApplyWithProfilePage } from '@/screens/opportunities/ApplyWithProfilePage'
+import { ApplicationsPage } from '@/screens/opportunities/ApplicationsPage'
+import { AdsCentrePage } from '@/screens/ads/AdsCentrePage'
 import { CredentialHub } from '@/screens/more/CredentialHub'
 import { AnalyticsPage } from '@/screens/more/AnalyticsPage'
 import { CareerGrowthPage } from '@/screens/more/CareerGrowthPage'
@@ -197,6 +203,42 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequireAuthenticated>
           <ActivityDetailPage />
+        </RequireAuthenticated>
+      )
+    case '/tool/:id':
+      return (
+        <RequireAuthenticated>
+          <ToolDetailPage />
+        </RequireAuthenticated>
+      )
+    case '/provider/:id':
+      return (
+        <RequireAuthenticated>
+          <ProviderDetailPage />
+        </RequireAuthenticated>
+      )
+    case '/job/:id':
+      return (
+        <RequireAuthenticated>
+          <JobDetailPage />
+        </RequireAuthenticated>
+      )
+    case '/apply/:jobId':
+      return (
+        <RequireIndividual>
+          <ApplyWithProfilePage />
+        </RequireIndividual>
+      )
+    case '/applications':
+      return (
+        <RequireIndividual>
+          <ApplicationsPage />
+        </RequireIndividual>
+      )
+    case '/ads':
+      return (
+        <RequireAuthenticated>
+          <AdsCentrePage />
         </RequireAuthenticated>
       )
     case '/credentials':

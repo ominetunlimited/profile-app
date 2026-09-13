@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
+import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
 
 /** §18.2 JOB_LISTING_FIELDS.types */
 const WORK_TYPES = ['remote', 'hybrid', 'on_site'] as const
@@ -11,9 +13,13 @@ const CAREER_CLUSTERS = ['Students & Learners', 'Graduates & Entry-Level', 'Appr
 type CareerCluster = (typeof CAREER_CLUSTERS)[number]
 
 /**
- * §18 Opportunity Hub — browse/filter/match-detail. No listings exist without
- * a backend or a recruiter-side posting flow, so this is a real, functioning
- * filter UI over an honest empty state, not fabricated listings.
+ * §18 Opportunity Hub — browse/filter/apply. Previously honestly empty
+ * because no recruiter-side posting flow existed anywhere in this build;
+ * jobStore.ts (built for RecruiterWorkflow.tsx's real "Post job" form) now
+ * gives this a real source. Career-stage cluster selection stays visual
+ * only for now — JobListing doesn't capture a target-cluster field yet, so
+ * filtering by it would either do nothing honestly or fake a match; query
+ * and work-type filtering are real.
  *
  * `pinnedCluster` implements §18.5's Student Opportunity Hub / Graduate
  * Launchpad — named, linkable, bookmarkable sub-routes over this same data
@@ -25,6 +31,13 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
   const [workType, setWorkType] = useState<(typeof WORK_TYPES)[number] | 'all'>('all')
   const [query, setQuery] = useState('')
   const [cluster, setCluster] = useState<CareerCluster | null>(pinnedCluster ?? null)
+
+  const q = query.trim().toLowerCase()
+  const jobs = listOpenJobs().filter((j) => {
+    if (workType !== 'all' && j.workType !== workType) return false
+    if (!q) return true
+    return j.title.toLowerCase().includes(q) || j.description.toLowerCase().includes(q) || j.requiredSkills.some((s) => s.toLowerCase().includes(q)) || orgDisplayName(j.orgEmail).toLowerCase().includes(q)
+  })
 
   return (
     <AppShell>
@@ -71,10 +84,26 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
           ))}
         </div>
 
-        <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-          No opportunities posted yet{query || workType !== 'all' || cluster ? ' matching your filters' : ''}.
-          Recruiter-side posting isn't built yet in this phase — this browse/filter surface is real and ready for it.
-        </div>
+        {jobs.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
+            No opportunities posted yet{query || workType !== 'all' ? ' matching your filters' : ''}.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {jobs.map((j) => (
+              <Link key={j.id} to={`/job/${j.id}`} className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-text-0">{j.title}</span>
+                  <span className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-2">{j.workType.replace('_', ' ')}</span>
+                </div>
+                <p className="mb-1.5 text-xs text-text-2">
+                  {orgDisplayName(j.orgEmail)} · {j.location}
+                </p>
+                <p className="line-clamp-2 text-sm text-text-1">{j.description}</p>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </AppShell>
   )

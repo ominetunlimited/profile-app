@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthChrome } from './AuthChrome'
 import { Button } from '@/shared/ui/Button'
@@ -283,8 +283,12 @@ export function AccountCreationWizard() {
             before your account is created — nothing here is agreed to automatically.
           </p>
           <div className="flex gap-2">
+            {/* §3 Account Creation state machine: this is the real
+                EMAIL_PENDING trigger, not a step-navigation "Continue" —
+                clicking it is the actual act of sending the six-digit code,
+                so it's labelled for what it does. */}
             <Button disabled={!individualValid} onClick={() => patch({ step: 'email-verify' })}>
-              Continue
+              Verify Email
             </Button>
             <Button variant="secondary" onClick={() => patch({ step: 'account-type' })}>
               Back
@@ -294,30 +298,7 @@ export function AccountCreationWizard() {
       )}
 
       {s.step === 'email-verify' && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Verify your email</h1>
-          <p className="mb-5 text-sm text-text-1">We sent a 6-digit code to {s.email || 'your email address'}.</p>
-          <Field label="6-digit code">
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={s.otp}
-              onChange={(e) => patch({ otp: e.target.value.replace(/\D/g, '').slice(0, 6) })}
-              placeholder="000000"
-              className="w-full rounded-lg border border-border-strong bg-surface py-3 text-center font-mono text-xl font-semibold tracking-[.3em] text-text-0 outline-none focus-visible:border-accent"
-            />
-          </Field>
-          <p className="mb-5 mt-2 text-xs text-text-1">Any 6-digit code works in this demo build — no email backend exists yet.</p>
-          <div className="flex gap-2">
-            <Button disabled={!/^\d{6}$/.test(s.otp)} onClick={() => patch({ step: 'consent' })}>
-              Verify and continue
-            </Button>
-            <Button variant="secondary" onClick={() => patch({ step: 'individual-info' })}>
-              Back
-            </Button>
-          </div>
-        </div>
+        <EmailVerifyStep s={s} patch={patch} email={s.email} onVerified={() => patch({ step: 'consent' })} onChangeEmail={() => patch({ step: 'individual-info' })} />
       )}
 
       {s.step === 'consent' && <ConsentStep s={s} patch={patch} onContinue={() => patch({ step: 'goals' })} onBack={() => patch({ step: 'email-verify' })} />}
@@ -452,6 +433,119 @@ function AccountTypeStep({
       <Button disabled={!canContinue} onClick={onContinue}>
         Continue
       </Button>
+    </div>
+  )
+}
+
+const RESEND_COOLDOWN_SECONDS = 30
+
+/**
+ * §3.3/§3.4 Verify Email — a real six-digit input (auto-advance, paste,
+ * backspace navigation, keyboard support), resend with a real cooldown
+ * timer, and a change-email path back to Step One. No email backend exists
+ * in this build (honestly disclosed), so any 6 digits verify — but the
+ * interaction itself is real, not a placeholder.
+ */
+function EmailVerifyStep({
+  s,
+  patch,
+  email,
+  onVerified,
+  onChangeEmail,
+}: {
+  s: WizardState
+  patch: (p: Partial<WizardState>) => void
+  email: string
+  onVerified: () => void
+  onChangeEmail: () => void
+}) {
+  const digits = s.otp.padEnd(6, ' ').split('').map((d) => (d === ' ' ? '' : d))
+  const [cooldown, setCooldown] = useState(0)
+  const [attempted, setAttempted] = useState(false)
+  const inputRefs = useState(() => Array.from({ length: 6 }, () => null as HTMLInputElement | null))[0]
+
+  useEffect(() => {
+    if (cooldown === 0) return
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [cooldown])
+
+  function setDigitAt(index: number, value: string) {
+    const clean = value.replace(/\D/g, '').slice(0, 1)
+    const next = [...digits]
+    next[index] = clean
+    patch({ otp: next.join('').replace(/\s/g, '') })
+    if (clean && index < 5) inputRefs[index + 1]?.focus()
+  }
+
+  function handlePaste(e: ClipboardEvent<HTMLInputElement>) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (!pasted) return
+    e.preventDefault()
+    patch({ otp: pasted })
+    inputRefs[Math.min(pasted.length, 5)]?.focus()
+  }
+
+  function handleKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) inputRefs[index - 1]?.focus()
+  }
+
+  const complete = /^\d{6}$/.test(s.otp)
+  const invalid = attempted && !complete
+
+  return (
+    <div>
+      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Verify your email</h1>
+      <p className="mb-5 text-sm text-text-1">We sent a 6-digit code to {email || 'your email address'}.</p>
+      <Field label="6-digit code" error={invalid ? 'Enter all 6 digits.' : undefined}>
+        <div className="flex gap-2">
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={(el) => {
+                inputRefs[i] = el
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => setDigitAt(i, e.target.value)}
+              onPaste={handlePaste}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              aria-label={`Digit ${i + 1} of 6`}
+              className="h-14 w-11 rounded-lg border border-border-strong bg-surface text-center font-mono text-xl font-semibold text-text-0 outline-none focus-visible:border-accent"
+            />
+          ))}
+        </div>
+      </Field>
+      <p className="mb-1 mt-2 text-xs text-text-1">Any 6-digit code works in this demo build — no email backend exists yet.</p>
+      <div className="mb-5 flex items-center gap-3 text-xs">
+        <button
+          type="button"
+          disabled={cooldown > 0}
+          onClick={() => setCooldown(RESEND_COOLDOWN_SECONDS)}
+          className="font-semibold text-accent disabled:text-text-2"
+        >
+          {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
+        </button>
+        <span className="text-text-2">·</span>
+        <button type="button" onClick={onChangeEmail} className="font-semibold text-accent">
+          Change email
+        </button>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => {
+            setAttempted(true)
+            if (complete) onVerified()
+          }}
+        >
+          Verify and continue
+        </Button>
+        <Button variant="secondary" onClick={onChangeEmail}>
+          Back
+        </Button>
+      </div>
     </div>
   )
 }

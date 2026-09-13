@@ -1,3 +1,7 @@
+import { getActivityById } from './activityStore'
+import { findAccountByEmail } from './demoAccountStore'
+import { notify } from './notificationStore'
+
 /**
  * §11.1's ActivityCard names a real <CommentSection /> in its Actions row —
  * previously unbuilt anywhere in this codebase. Real, persisted comments
@@ -44,5 +48,16 @@ export function commentCount(activityId: string): number {
 export function postComment(activityId: string, authorEmail: string, text: string): CommentRecord {
   const record: CommentRecord = { id: crypto.randomUUID(), activityId, authorEmail, text, createdAt: new Date().toISOString() }
   writeAll([...readAll(), record])
+
+  const activity = getActivityById(activityId)
+  if (activity && activity.ownerEmail.toLowerCase() !== authorEmail.toLowerCase()) {
+    const commenter = findAccountByEmail(authorEmail)
+    notify({
+      recipientEmail: activity.ownerEmail,
+      category: 'community',
+      text: `${commenter?.legalName ?? 'Someone'} commented on "${activity.title}".`,
+      deepLink: `/activity/${activityId}`,
+    })
+  }
   return record
 }

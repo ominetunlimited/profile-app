@@ -1,22 +1,36 @@
+import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
+import { Button } from '@/shared/ui/Button'
+import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { getCommerceSettings } from '@/app/commerceStore'
+import { createStoreItem, listAllPublishedItems, listItemsForOwner, publishStoreItem, unpublishStoreItem, type StoreItem, type StoreItemType } from '@/app/storeItemStore'
+import { findAccountByEmail } from '@/app/demoAccountStore'
+import { resizeImage } from '@/app/mediaStore'
+
+const CATEGORIES = ['Design', 'Development', 'Writing', 'Marketing', 'Education', 'Consulting', 'Photography', 'Video', 'Other']
 
 /**
- * Patch (pre-Phase-7): §19/§38.4/§38.5/§38.6a already specify the pieces
- * (Marketplace listing types, verified business directory, the two-toggle
- * Commerce Activation mechanism) but never assemble them into one named
- * "Store Hub" screen with a Market / Create Store split. Market is always
- * visible to every account; Create Store only appears once Settings →
- * Commerce & Selling's `storeActivated` is on — and explains itself rather
- * than silently disappearing when it isn't (§49.8 honest-empty-state rule).
+ * §4.1/§4.2 Store Hub / Create Store — Market is always visible; Create
+ * Store only appears once Settings → Commerce & Selling's storeActivated
+ * is on, and explains itself rather than silently disappearing when it
+ * isn't (§49.8 honest-empty-state rule). Real item creation
+ * (storeItemStore.ts), real publish/unpublish, real Market discovery over
+ * every published item on this browser.
  */
 export function StoreHub() {
   const { account } = useAccount()
   const owner = ownerKey(account)
   const { storeActivated, sellingActivated } = getCommerceSettings(owner)
+  const [myItems, setMyItems] = useState<StoreItem[]>(() => listItemsForOwner(owner))
+  const [creating, setCreating] = useState(false)
+  const marketItems = listAllPublishedItems()
+
+  function refresh() {
+    setMyItems(listItemsForOwner(owner))
+  }
 
   return (
     <AppShell>
@@ -25,11 +39,19 @@ export function StoreHub() {
 
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Market</h2>
-          <p className="mb-4 text-sm text-text-1">Browse digital products, physical goods, and services listed by verified sellers on PROFILE.</p>
-          <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-            No listings yet — this is a real, always-visible browse surface (§19), ready for sellers once any exist
-            in this build.
-          </div>
+          <p className="mb-4 text-sm text-text-1">Browse digital products and services listed by sellers on PROFILE.</p>
+          {marketItems.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
+              No listings yet — this is a real, always-visible browse surface (§19), ready for sellers once any exist
+              in this build.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {marketItems.map((item) => (
+                <StoreItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
         </section>
 
         <section>
@@ -40,22 +62,163 @@ export function StoreHub() {
               <Link to="/settings?tab=commerce" className="font-semibold text-accent">
                 Settings → Commerce &amp; Selling
               </Link>{' '}
-              to list digital products, physical goods, or services here (§38.6a).
+              to list digital products or services here (§38.6a).
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <p className="mb-3 text-sm text-text-1">
-                Store activated{sellingActivated ? ' with payments enabled' : ' — payments not yet accepted'}. No
-                listings created yet.
-              </p>
-              <div className="rounded-lg border border-dashed border-border-strong bg-surface-sunken p-6 text-center text-xs text-text-1">
-                Listing creation isn't wired to a backend yet in this build — this section is real and unlocked,
-                ready for it.
+            <div className="flex flex-col gap-4">
+              <div className="rounded-xl border border-border bg-surface p-4">
+                <p className="mb-3 text-sm text-text-1">
+                  Store activated{sellingActivated ? ' with payments enabled' : ' — payments not yet accepted, price is informational only'}.
+                </p>
+                {!creating ? (
+                  <button onClick={() => setCreating(true)} className="w-full rounded-lg border border-dashed border-border-strong py-3 text-sm font-medium text-text-1">
+                    + Create item
+                  </button>
+                ) : (
+                  <CreateItemForm
+                    owner={owner}
+                    onClose={() => setCreating(false)}
+                    onCreated={() => {
+                      setCreating(false)
+                      refresh()
+                    }}
+                  />
+                )}
               </div>
+
+              {myItems.length > 0 && (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-text-0">Your items</h3>
+                  <div className="flex flex-col gap-2">
+                    {myItems.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between rounded-lg border border-border bg-surface p-3">
+                        <div>
+                          <div className="text-sm font-semibold text-text-0">{item.title}</div>
+                          <div className="text-xs text-text-2">
+                            {item.category} · {item.priceLabel} · {item.status === 'published' ? 'Published — visible in Market and your Portfolio' : 'Draft'}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (item.status === 'published') unpublishStoreItem(item.id)
+                            else publishStoreItem(item.id)
+                            refresh()
+                          }}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${item.status === 'published' ? 'border border-border-strong text-text-1' : 'bg-accent text-white'}`}
+                        >
+                          {item.status === 'published' ? 'Unpublish' : 'Publish'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
       </div>
     </AppShell>
+  )
+}
+
+function StoreItemCard({ item }: { item: StoreItem }) {
+  const owner = findAccountByEmail(item.ownerEmail)
+  const username = owner && 'username' in owner ? owner.username : undefined
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      {item.coverImageDataUrl && <img src={item.coverImageDataUrl} alt="" className="h-32 w-full object-cover" />}
+      <div className="p-4">
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <span className="font-semibold text-text-0">{item.title}</span>
+          <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-text-2">{item.type === 'digital_product' ? 'Digital' : 'Service'}</span>
+        </div>
+        <p className="mb-2 text-sm text-text-1">{item.shortDescription}</p>
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-accent">{item.priceLabel}</span>
+          {username ? (
+            <Link to={`/profile/${username}`} className="text-text-2 hover:text-accent">
+              {owner?.legalName}
+            </Link>
+          ) : (
+            <span className="text-text-2">{owner?.legalName}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CreateItemForm({ owner, onClose, onCreated }: { owner: string; onClose: () => void; onCreated: () => void }) {
+  const [title, setTitle] = useState('')
+  const [shortDescription, setShortDescription] = useState('')
+  const [fullDescription, setFullDescription] = useState('')
+  const [category, setCategory] = useState(CATEGORIES[0])
+  const [type, setType] = useState<StoreItemType>('digital_product')
+  const [priceLabel, setPriceLabel] = useState('')
+  const [coverImageDataUrl, setCoverImageDataUrl] = useState<string | undefined>(undefined)
+
+  async function handleCover(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const resized = await resizeImage(file, 800)
+      setCoverImageDataUrl(resized)
+    } catch {
+      // best-effort demo scaffolding — cover image is optional
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Field label="Title">
+        <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Brand Identity Design Package" />
+      </Field>
+      <Field label="Short description">
+        <TextInput value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} placeholder="One line for the Market card" />
+      </Field>
+      <Field label="Full description">
+        <textarea
+          value={fullDescription}
+          onChange={(e) => setFullDescription(e.target.value)}
+          rows={3}
+          className="min-h-[44px] rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text-0 outline-none focus-visible:border-accent"
+        />
+      </Field>
+      <div className="flex flex-wrap gap-3">
+        <Field label="Type">
+          <SelectInput value={type} onChange={(e) => setType(e.target.value as StoreItemType)}>
+            <option value="digital_product">Digital product</option>
+            <option value="service">Service</option>
+          </SelectInput>
+        </Field>
+        <Field label="Category">
+          <SelectInput value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </SelectInput>
+        </Field>
+        <Field label="Price" hint="Informational only — no payment processor in this build">
+          <TextInput value={priceLabel} onChange={(e) => setPriceLabel(e.target.value)} placeholder="e.g. $49 or Contact for quote" />
+        </Field>
+      </div>
+      <Field label="Cover image (optional)">
+        <input type="file" accept="image/*" onChange={handleCover} className="text-sm text-text-1" />
+      </Field>
+      <div className="flex gap-2">
+        <Button
+          disabled={!title.trim() || !shortDescription.trim()}
+          onClick={() => {
+            createStoreItem({ ownerEmail: owner, title, shortDescription, fullDescription, category, type, priceLabel: priceLabel || 'Contact for pricing', coverImageDataUrl })
+            onCreated()
+          }}
+        >
+          Create item
+        </Button>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+      </div>
+    </div>
   )
 }

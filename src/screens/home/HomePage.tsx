@@ -4,8 +4,11 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
+import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, listFeedFor, ownerKey, postActivity } from '@/app/activityStore'
+import { listActiveCampaignsForPlacement } from '@/app/adStore'
+
 
 /** §11.4 POST_COMPOSER_TYPES, verbatim. */
 const ACTIVITY_TYPES = [
@@ -33,6 +36,9 @@ export function HomePage() {
   const [myActivityCount, setMyActivityCount] = useState(() => listActivities(owner).length)
   const [feed, setFeed] = useState(() => listFeedFor(owner))
   const [composerOpen, setComposerOpen] = useState(false)
+  // §7.1 Feed Ad Position — real active campaigns for this placement only,
+  // never fabricated to look populated.
+  const sponsoredCampaigns = listActiveCampaignsForPlacement('home_feed')
 
   const name = account?.accountType === 'individual' ? account.legalName.split(' ')[0] : account?.accountType === 'organisation' ? account.legalName : ''
 
@@ -96,7 +102,16 @@ export function HomePage() {
               </div>
             </div>
           ) : (
-            feed.map((a) => <ActivityCard key={a.id} activity={a} viewerAccount={account} viewerEmail={owner} />)
+            feed.map((a, i) => (
+              <div key={a.id} className="flex flex-col gap-4">
+                <ActivityCard activity={a} viewerAccount={account} viewerEmail={owner} />
+                {/* Every 4th item, never the very first — a real, labelled,
+                    inline feed item, never an overlay (§7's hard rule). */}
+                {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
+                  <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} />
+                )}
+              </div>
+            ))
           )}
         </div>
       </div>

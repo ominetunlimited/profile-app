@@ -8,6 +8,7 @@
 import type { Account } from './accountTypes'
 import { listFollowedOrgs } from './followStore'
 import { listConnectedEmails } from './connectionStore'
+import { recordToolReferences } from './providerReferenceStore'
 
 /** Simplified §4.3 Activity — the fields this build's UI actually reads/writes. */
 export interface ActivityRecord {
@@ -89,6 +90,10 @@ export function listActivities(ownerEmail: string): ActivityRecord[] {
 export function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt'>): ActivityRecord {
   const record: ActivityRecord = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
   writeAll([...readAll(), record])
+  // §1.4 Provider Notification: real, honest "used" logging for any tool
+  // that resolves to the real catalogue (toolCatalogue.ts) — never a claim
+  // of endorsement, and never invented for a tool with no known provider.
+  recordToolReferences(record.id, record.ownerEmail, record.tools)
   return record
 }
 

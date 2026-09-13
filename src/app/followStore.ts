@@ -1,3 +1,6 @@
+import { findAccountByEmail } from './demoAccountStore'
+import { notify } from './notificationStore'
+
 /**
  * Organisation Follow — §4.2's org-notification table lists 'Org Follow' as
  * a real event ('follow.event → org.followerAlert'), and §24.1's individual
@@ -43,6 +46,10 @@ export function followOrg(followerEmail: string, orgEmail: string): void {
   if (followerEmail.toLowerCase() === orgEmail.toLowerCase()) return
   if (isFollowing(followerEmail, orgEmail)) return
   writeAll([...readAll(), { followerEmail, orgEmail, followedAt: new Date().toISOString() }])
+  // §4.2's own notification table: 'follow.event → org.followerAlert'.
+  const follower = findAccountByEmail(followerEmail)
+  const link = follower && 'username' in follower && follower.username ? `/profile/${follower.username}` : '/notifications'
+  notify({ recipientEmail: orgEmail, category: 'community', text: `${follower?.legalName ?? 'Someone'} started following your organisation.`, deepLink: link })
 }
 
 export function unfollowOrg(followerEmail: string, orgEmail: string): void {
@@ -63,4 +70,13 @@ export function listFollowedOrgs(followerEmail: string): string[] {
   return readAll()
     .filter((r) => r.followerEmail.toLowerCase() === f)
     .map((r) => r.orgEmail)
+}
+
+/** The reverse lookup — every real follower of this org, for real
+ * "new job posted" notifications instead of a blast to every account. */
+export function listFollowersOf(orgEmail: string): string[] {
+  const o = orgEmail.toLowerCase()
+  return readAll()
+    .filter((r) => r.orgEmail.toLowerCase() === o)
+    .map((r) => r.followerEmail)
 }

@@ -4,6 +4,7 @@ import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
 import { ownerKey } from '@/app/activityStore'
 import { getProfileMedia } from '@/app/mediaStore'
+import { unreadCount } from '@/app/notificationStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hamburgerOpen, setHamburgerOpen] = useState(false)
   const { t } = useLanguage()
+  const unread = account ? unreadCount(ownerKey(account)) : 0
 
   const displayName = account?.accountType === 'individual' ? account.legalName : account?.accountType === 'organisation' ? account.legalName : staffRole ? 'Staff' : 'Guest'
   const owner = account ? ownerKey(account) : ''
@@ -79,8 +81,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="ms-auto flex flex-none items-center gap-1.5">
             <LanguagePicker />
-            <Link to="/notifications" aria-label="Notifications" className="flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
+            <Link to="/notifications" aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
               🔔
+              {unread > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 font-mono text-[9px] font-bold text-white">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
             </Link>
             <Link to="/messages" aria-label="Messages" className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
               💬

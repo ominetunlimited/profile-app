@@ -1,3 +1,6 @@
+import { findAccountByEmail } from './demoAccountStore'
+import { notify } from './notificationStore'
+
 /**
  * §24.1 ActionButtons names 'Connect' for individual-to-individual profile
  * actions — a real request/accept relationship, distinct from
@@ -71,6 +74,8 @@ export function sendConnectionRequest(requesterEmail: string, recipientEmail: st
     respondedAt: null,
   }
   writeAll([...all, record])
+  const requester = findAccountByEmail(requesterEmail)
+  notify({ recipientEmail, category: 'community', text: `${requester?.legalName ?? 'Someone'} sent you a connection request.`, deepLink: '/connections' })
 }
 
 export function acceptConnectionRequest(viewerEmail: string, otherEmail: string): void {
@@ -78,6 +83,9 @@ export function acceptConnectionRequest(viewerEmail: string, otherEmail: string)
   const record = findBetween(all, viewerEmail, otherEmail)
   if (!record || record.status === 'accepted') return
   writeAll(all.map((r) => (r.id === record.id ? { ...r, status: 'accepted' as const, respondedAt: new Date().toISOString() } : r)))
+  const accepter = findAccountByEmail(viewerEmail)
+  const link = accepter && 'username' in accepter && accepter.username ? `/profile/${accepter.username}` : '/connections'
+  notify({ recipientEmail: otherEmail, category: 'community', text: `${accepter?.legalName ?? 'Someone'} accepted your connection request.`, deepLink: link })
 }
 
 export function removeConnection(viewerEmail: string, otherEmail: string): void {

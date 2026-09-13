@@ -7,7 +7,9 @@ import { computeTrustScore } from '@/app/trustScore'
 import { getMyReaction, getReactionCounts, setMyReaction, REACTIONS, type ReactionType } from '@/app/reactionStore'
 import { listComments, postComment } from '@/app/commentStore'
 import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
+import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
+import { AttributionSection } from './AttributionSection'
 
 /**
  * §11.1 ActivityCard, unified — previously HomePage.tsx had its own
@@ -128,14 +130,29 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
       )}
       {activity.tools.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {activity.tools.map((t) => (
-            <span key={t} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10.5px] text-text-2">
-              🛠 {t}
-            </span>
-          ))}
+          {activity.tools.map((t) => {
+            const resolved = resolveTool(t)
+            return resolved ? (
+              <Link
+                key={t}
+                to={`/tool/${resolved.id}`}
+                title={resolved.provider ? `Used — made by ${resolved.provider.name}` : 'Used'}
+                className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-1 hover:border-accent hover:text-accent"
+              >
+                🛠 {resolved.canonicalName}
+                {resolved.provider ? ` · ${resolved.provider.name}` : ''}
+              </Link>
+            ) : (
+              <span key={t} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10.5px] text-text-2">
+                🛠 {t}
+              </span>
+            )
+          })}
         </div>
       )}
       {activity.collaborators.length > 0 && <p className="mb-2 text-xs text-text-2">With {activity.collaborators.join(', ')} (self-reported)</p>}
+
+      <AttributionSection activityId={activity.id} activityOwnerEmail={activity.ownerEmail} isSelf={isSelf} viewerEmail={viewerEmail} />
 
       {!isSelf && viewerAccount && (
         <div className="mb-2">

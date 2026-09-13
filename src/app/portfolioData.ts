@@ -1,5 +1,6 @@
 import type { Account } from './accountTypes'
 import { listActivities, ownerKey } from './activityStore'
+import { listPublishedItemsForOwner } from './storeItemStore'
 
 /** §15.4/§47.3 — Portfolio is the real activity archive (every recorded item
  * with includeInPortfolio, which this build's composer defaults true), never
@@ -22,8 +23,18 @@ export interface PortfolioData {
 export function buildPortfolioData(account: Account | null): PortfolioData {
   if (!account) return { kind: 'individual', name: 'Your name', headline: '', items: [] }
 
+  // §4.7 — a published Store Item is automatically eligible for Portfolio
+  // representation, read live from storeItemStore.ts rather than copied,
+  // so editing or unpublishing the item is reflected here with no second
+  // write path to keep in sync.
+  const storeItems: PortfolioItem[] = listPublishedItemsForOwner(ownerKey(account)).map((i) => ({
+    title: i.title,
+    body: i.shortDescription,
+    type: i.type === 'digital_product' ? 'Digital Product' : 'Service',
+  }))
+
   if (account.accountType === 'organisation') {
-    return { kind: 'organisation', name: account.legalName, headline: `${account.orgType} · ${account.registryLevel}`, items: [] }
+    return { kind: 'organisation', name: account.legalName, headline: `${account.orgType} · ${account.registryLevel}`, items: storeItems }
   }
 
   const activities = listActivities(ownerKey(account))
@@ -35,6 +46,6 @@ export function buildPortfolioData(account: Account | null): PortfolioData {
     kind: 'individual',
     name: account.legalName,
     headline: account.headline ?? '',
-    items,
+    items: [...items, ...storeItems],
   }
 }

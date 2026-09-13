@@ -1,0 +1,101 @@
+import { notify } from './notificationStore'
+import { getJobById, orgDisplayName } from './jobStore'
+import { findAccountByEmail } from './demoAccountStore'
+
+/** §6.4 Application status, verbatim. */
+export type ApplicationStatus = 'submitted' | 'received' | 'under_review' | 'shortlisted' | 'interview' | 'offer' | 'rejected' | 'withdrawn'
+
+export interface Application {
+  id: string
+  jobId: string
+  applicantEmail: string
+  orgEmail: string
+  coverLetter: string
+  submittedAt: string
+  status: ApplicationStatus
+}
+
+const STORAGE_KEY = 'profile:demo-applications'
+
+function readAll(): Application[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function writeAll(records: Application[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
+  } catch {
+    // best-effort demo scaffolding only
+  }
+}
+
+/** §6.1 Apply With PROFILE — one application per job per applicant; a
+ * second submit is a no-op rather than a duplicate application. */
+export function submitApplication(input: { jobId: string; applicantEmail: string; orgEmail: string; coverLetter: string }): Application | undefined {
+  const all = readAll()
+  if (all.some((a) => a.jobId === input.jobId && a.applicantEmail.toLowerCase() === input.applicantEmail.toLowerCase())) return undefined
+  const record: Application = { ...input, id: crypto.randomUUID(), submittedAt: new Date().toISOString(), status: 'submitted' }
+  writeAll([...all, record])
+
+  const applicant = findAccountByEmail(input.applicantEmail)
+  const job = getJobById(input.jobId)
+  notify({
+    recipientEmail: input.orgEmail,
+    category: 'opportunities',
+    text: `${applicant?.legalName ?? 'Someone'} applied with PROFILE for "${job?.title ?? 'your job listing'}".`,
+    deepLink: `/org/recruiter`,
+  })
+  return record
+}
+
+export function listApplicationsFor(applicantEmail: string): Application[] {
+  const e = applicantEmail.toLowerCase()
+  return readAll()
+    .filter((a) => a.applicantEmail.toLowerCase() === e)
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+}
+
+export function listApplicationsForJob(jobId: string): Application[] {
+  return readAll().filter((a) => a.jobId === jobId)
+}
+
+export function listApplicationsForOrg(orgEmail: string): Application[] {
+  const e = orgEmail.toLowerCase()
+  return readAll()
+    .filter((a) => a.orgEmail.toLowerCase() === e)
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+}
+
+export function myApplicationFor(jobId: string, applicantEmail: string): Application | undefined {
+  const e = applicantEmail.toLowerCase()
+  return readAll().find((a) => a.jobId === jobId && a.applicantEmail.toLowerCase() === e)
+}
+
+export function updateApplicationStatus(id: string, status: ApplicationStatus): void {
+  const all = readAll()
+  const idx = all.findIndex((a) => a.id === id)
+  if (idx === -1) return
+  all[idx] = { ...all[idx], status }
+  writeAll(all)
+  const job = getJobById(all[idx].jobId)
+  notify({
+    recipientEmail: all[idx].applicantEmail,
+    category: 'opportunities',
+    text: `Your application for "${job?.title ?? 'a job'}" at ${orgDisplayName(all[idx].orgEmail)} is now "${status.replace(/_/g, ' ')}".`,
+    deepLink: `/applications`,
+  })
+}
+
+export function withdrawApplication(id: string, applicantEmail: string): void {
+  const all = readAll()
+  const idx = all.findIndex((a) => a.id === id && a.applicantEmail.toLowerCase() === applicantEmail.toLowerCase())
+  if (idx === -1) return
+  all[idx] = { ...all[idx], status: 'withdrawn' }
+  writeAll(all)
+}
