@@ -8,13 +8,15 @@ import { unreadCount } from '@/app/notificationStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
+import { IconBell, IconBriefcase, IconDocument, IconHandshake, IconHome, IconMenu, IconMessage, IconPlus, IconSearch, type IconProps } from './icons'
+import type { ComponentType } from 'react'
 
-const TAB_ICON: Record<string, string> = {
-  home: '🏠',
-  connections: '🤝',
-  create: '➕',
-  opportunity: '💼',
-  cv_portfolio: '📄',
+const TAB_ICON: Record<string, ComponentType<IconProps>> = {
+  home: IconHome,
+  connections: IconHandshake,
+  create: IconPlus,
+  opportunity: IconBriefcase,
+  cv_portfolio: IconDocument,
 }
 
 /**
@@ -74,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={() => window.dispatchEvent(new Event('open-global-search'))}
             className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-strong bg-surface-sunken px-3 text-sm text-text-2 sm:max-w-[360px]"
           >
-            <span aria-hidden>🔍</span>
+            <IconSearch size={16} />
             <span className="truncate">{t('nav.search')}</span>
             <span className="ms-auto hidden font-mono text-[10px] text-text-2 sm:inline">Ctrl K</span>
           </button>
@@ -82,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ms-auto flex flex-none items-center gap-1.5">
             <LanguagePicker />
             <Link to="/notifications" aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
-              🔔
+              <IconBell size={18} />
               {unread > 0 && (
                 <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 font-mono text-[9px] font-bold text-white">
                   {unread > 9 ? '9+' : unread}
@@ -90,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               )}
             </Link>
             <Link to="/messages" aria-label="Messages" className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
-              💬
+              <IconMessage size={18} />
             </Link>
             <button
               type="button"
@@ -99,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-haspopup="menu"
               className="flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0"
             >
-              ☰
+              <IconMenu size={18} />
             </button>
             <div className="relative">
               <button
@@ -156,18 +158,21 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {tabs.length > 0 && (
         <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur sm:hidden">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.key}
-              to={tab.to}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-text-1 ${tab.key === 'create' ? 'relative' : ''}`}
-            >
-              <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg text-white shadow-lg' : 'text-base'} aria-hidden>
-                {TAB_ICON[tab.key]}
-              </span>
-              {tab.key !== 'create' && tab.label}
-            </Link>
-          ))}
+          {tabs.map((tab) => {
+            const TabIcon = TAB_ICON[tab.key]
+            return (
+              <Link
+                key={tab.key}
+                to={tab.to}
+                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-text-1 ${tab.key === 'create' ? 'relative' : ''}`}
+              >
+                <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white shadow-lg' : 'flex items-center justify-center'}>
+                  <TabIcon size={tab.key === 'create' ? 22 : 20} />
+                </span>
+                {tab.key !== 'create' && tab.label}
+              </Link>
+            )
+          })}
         </nav>
       )}
 

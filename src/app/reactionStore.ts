@@ -10,13 +10,16 @@
  */
 export type ReactionType = 'appreciate' | 'respect' | 'insightful' | 'support' | 'skilled' | 'well_explained'
 
-export const REACTIONS: { type: ReactionType; emoji: string; label: string }[] = [
-  { type: 'appreciate', emoji: '👍', label: 'Appreciate' },
-  { type: 'respect', emoji: '🫡', label: 'Respect' },
-  { type: 'insightful', emoji: '💡', label: 'Insightful' },
-  { type: 'support', emoji: '🌱', label: 'Support' },
-  { type: 'skilled', emoji: '⚒️', label: 'Skilled' },
-  { type: 'well_explained', emoji: '🗣️', label: 'Well Explained' },
+/** V9 Unified Ecosystem Patch §17 — `icon` names a component from
+ * shared/ui/icons.tsx rather than an emoji string, so every reaction
+ * renders in the same custom icon family as the rest of the platform. */
+export const REACTIONS: { type: ReactionType; icon: 'thumbsUp' | 'medal' | 'lightbulb' | 'seedling' | 'hammer' | 'megaphone'; label: string }[] = [
+  { type: 'appreciate', icon: 'thumbsUp', label: 'Appreciate' },
+  { type: 'respect', icon: 'medal', label: 'Respect' },
+  { type: 'insightful', icon: 'lightbulb', label: 'Insightful' },
+  { type: 'support', icon: 'seedling', label: 'Support' },
+  { type: 'skilled', icon: 'hammer', label: 'Skilled' },
+  { type: 'well_explained', icon: 'megaphone', label: 'Well Explained' },
 ]
 
 interface ReactionState {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Account } from '@/app/accountTypes'
 import type { ActivityRecord } from '@/app/activityStore'
@@ -10,6 +10,16 @@ import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
 import { AttributionSection } from './AttributionSection'
+import { IconCheck, IconHammer, IconLightbulb, IconLink, IconMedal, IconMegaphone, IconMessage, IconSeedling, IconThumbsUp, IconTool, type IconProps } from './icons'
+
+const REACTION_ICON: Record<ReactionType, ComponentType<IconProps>> = {
+  appreciate: IconThumbsUp,
+  respect: IconMedal,
+  insightful: IconLightbulb,
+  support: IconSeedling,
+  skilled: IconHammer,
+  well_explained: IconMegaphone,
+}
 
 /**
  * §11.1 ActivityCard, unified — previously HomePage.tsx had its own
@@ -139,12 +149,12 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
                 title={resolved.provider ? `Used — made by ${resolved.provider.name}` : 'Used'}
                 className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-1 hover:border-accent hover:text-accent"
               >
-                🛠 {resolved.canonicalName}
+                <IconTool size={12} className="inline-block align-[-1.5px]" /> {resolved.canonicalName}
                 {resolved.provider ? ` · ${resolved.provider.name}` : ''}
               </Link>
             ) : (
               <span key={t} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10.5px] text-text-2">
-                🛠 {t}
+                <IconTool size={12} className="inline-block align-[-1.5px]" /> {t}
               </span>
             )
           })}
@@ -159,7 +169,11 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
           {tagRequest ? (
             <span className="text-xs text-text-2">
               {tagRequest.status === 'requested' && 'Tag request sent — waiting for approval.'}
-              {tagRequest.status === 'approved' && '✓ Tag approved'}
+              {tagRequest.status === 'approved' && (
+                <span className="inline-flex items-center gap-1">
+                  <IconCheck size={12} /> Tag approved
+                </span>
+              )}
               {tagRequest.status === 'rejected' && 'Tag request declined'}
             </span>
           ) : showTagInput ? (
@@ -203,7 +217,10 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
             aria-expanded={pickerOpen}
             className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken ${activeReaction ? 'text-accent' : 'text-text-2'}`}
           >
-            <span aria-hidden>{activeReaction?.emoji ?? '👍'}</span>
+            {(() => {
+              const ActiveIcon = REACTION_ICON[activeReaction?.type ?? 'appreciate']
+              return <ActiveIcon size={16} />
+            })()}
             <span className="hidden sm:inline">{activeReaction?.label ?? 'React'}</span>
             {totalReactions > 0 && <span className="text-[11px]">{totalReactions}</span>}
           </button>
@@ -213,19 +230,22 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
               aria-label="Choose a reaction"
               className="absolute bottom-full left-0 z-10 mb-1 flex gap-0.5 rounded-full border border-border-strong bg-surface p-1 shadow-lg"
             >
-              {REACTIONS.map((r) => (
-                <button
-                  key={r.type}
-                  role="menuitemradio"
-                  aria-checked={myReaction === r.type}
-                  aria-label={r.label}
-                  title={r.label}
-                  onClick={() => react(r.type)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full text-base hover:scale-110 hover:bg-surface-sunken ${myReaction === r.type ? 'bg-surface-sunken' : ''}`}
-                >
-                  {r.emoji}
-                </button>
-              ))}
+              {REACTIONS.map((r) => {
+                const ReactionIcon = REACTION_ICON[r.type]
+                return (
+                  <button
+                    key={r.type}
+                    role="menuitemradio"
+                    aria-checked={myReaction === r.type}
+                    aria-label={r.label}
+                    title={r.label}
+                    onClick={() => react(r.type)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full hover:scale-110 hover:bg-surface-sunken ${myReaction === r.type ? 'bg-surface-sunken text-accent' : ''}`}
+                  >
+                    <ReactionIcon size={18} />
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
@@ -236,13 +256,13 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
           aria-label="Comment"
           className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken"
         >
-          <span aria-hidden>💬</span>
+          <IconMessage size={16} />
           <span className="hidden sm:inline">Comment</span>
           {comments.length > 0 && <span className="text-[11px]">{comments.length}</span>}
         </button>
 
         <button onClick={share} aria-label="Copy link to this activity" className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken">
-          <span aria-hidden>🔗</span>
+          <IconLink size={16} />
           <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
         </button>
       </div>

@@ -5,6 +5,7 @@ import { useAccount } from '@/app/AccountContext'
 import { listAllAccounts } from '@/app/demoAccountStore'
 import { TOOL_CATALOGUE, listAllProviders } from '@/app/toolCatalogue'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { IconEnter, IconFactory, IconPerson, IconTool } from './icons'
 
 interface PersonResult {
   kind: 'person'
@@ -201,13 +202,13 @@ export function CommandPalette() {
                 className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm"
                 style={i === 0 ? { background: 'var(--surface-sunken)' } : undefined}
               >
-                <span className="text-text-0">
-                  {r.kind === 'person' && <span className="mr-1.5">👤</span>}
-                  {r.kind === 'tool' && <span className="mr-1.5">🛠</span>}
-                  {r.kind === 'provider' && <span className="mr-1.5">🏭</span>}
+                <span className="inline-flex items-center gap-1.5 text-text-0">
+                  {r.kind === 'person' && <IconPerson size={14} />}
+                  {r.kind === 'tool' && <IconTool size={14} />}
+                  {r.kind === 'provider' && <IconFactory size={14} />}
                   {r.screen}
                 </span>
-                <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? '↵' : r.sub}</span>
+                <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? <IconEnter size={13} /> : r.sub}</span>
               </button>
             ))
           )}

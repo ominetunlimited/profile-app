@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { addAttribution, disputeAttribution, listAttributionsFor, removeAttribution, type AttributionRecord, type AttributionSubjectType } from '@/app/attributionStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
+import { IconTag } from './icons'
 
 const SUBJECT_TYPES: { value: AttributionSubjectType; label: string }[] = [
   { value: 'person', label: 'Person' },
@@ -99,8 +100,8 @@ export function AttributionSection({ activityId, activityOwnerEmail, isSelf, vie
               </button>
             </div>
           ) : (
-            <button onClick={() => setFormOpen(true)} className="text-xs font-semibold text-accent">
-              🏷 Tag / Credit
+            <button onClick={() => setFormOpen(true)} className="inline-flex items-center gap-1 text-xs font-semibold text-accent">
+              <IconTag size={13} /> Tag / Credit
             </button>
           )}
         </div>
