@@ -38,6 +38,34 @@ const ORG_STEP_NAMES: Record<string, string> = {
   'org-done': 'Submitted',
 }
 
+/**
+ * Bug report: user filled the form with a password that (invisibly to them)
+ * lacked an uppercase letter, checked the terms box, and the Verify Email
+ * button stayed disabled — the only explanation was one line of red text
+ * below the whole form, easy to miss. `passwordMeetsPolicy` itself was never
+ * wrong; the problem was that its five conditions were invisible while
+ * typing. This renders each condition live, right under the field it
+ * concerns, so "which requirement isn't met yet" is never a mystery.
+ */
+function PasswordRequirements({ password }: { password: string }) {
+  const checks: [string, boolean][] = [
+    ['8+ characters', password.length >= 8],
+    ['One uppercase letter (A-Z)', /[A-Z]/.test(password)],
+    ['One lowercase letter (a-z)', /[a-z]/.test(password)],
+    ['One number (0-9)', /[0-9]/.test(password)],
+    ['One symbol (e.g. ! @ # $)', /[^A-Za-z0-9]/.test(password)],
+  ]
+  return (
+    <ul className="mt-1.5 grid grid-cols-1 gap-0.5 text-[11.5px] sm:grid-cols-2">
+      {checks.map(([label, met]) => (
+        <li key={label} className={met ? 'text-success' : 'text-text-2'}>
+          {met ? '✓' : '○'} {label}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /** §8 Registration & Onboarding System, in full — not the Handoff's compressed
  * 5-step prototype, per build doc §1's instruction that the Master Prompt
  * governs business logic/feature existence even where the Handoff simplified
@@ -273,8 +301,9 @@ export function AccountCreationWizard() {
             <Field label="Email address" error={s.email && emailIsRegistered(s.email) ? 'An account already exists with this email — try signing in instead.' : undefined}>
               <TextInput value={s.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@example.com" />
             </Field>
-            <Field label="Password" hint="At least 8 characters, with uppercase, lowercase, a number, and a symbol.">
+            <Field label="Password">
               <PasswordInput value={s.password} onChange={(e) => patch({ password: e.target.value })} placeholder="At least 8 characters" />
+              <PasswordRequirements password={s.password} />
             </Field>
             <Field label="Confirm password" error={s.confirmPassword && s.confirmPassword !== s.password ? "Passwords don't match yet." : undefined}>
               <PasswordInput value={s.confirmPassword} onChange={(e) => patch({ confirmPassword: e.target.value })} placeholder="Type it again" />
