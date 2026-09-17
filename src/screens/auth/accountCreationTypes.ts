@@ -9,9 +9,9 @@ export type Step =
   | 'profile-setup'
   | 'journey-setup'
   | 'done'
-  | 'org-gate'
   | 'org-info'
   | 'org-consent'
+  | 'org-identity-choice'
   | 'org-done'
 
 export interface WizardState {
@@ -52,6 +52,19 @@ export interface WizardState {
   journeyStage: string
   fieldOfStudy: string
   craftArea: string
+
+  /**
+   * V9 Unified Ecosystem Patch §2 override — an unauthenticated visitor can
+   * now start organisation registration; the human identity link happens
+   * as the LAST step instead of a prerequisite. When they choose "create
+   * my individual identity now" from that final step, this flags the
+   * individual flow (reused, not duplicated) to finalize straight into the
+   * organisation instead of continuing into goals/profile-setup — a real
+   * individual account still gets created, just without repeating this
+   * wizard's individual-only onboarding tail, which the org founder can
+   * still complete later from Settings.
+   */
+  orgFinalizeAfterIndividual: boolean
 }
 
 export const initialWizardState: WizardState = {
@@ -92,6 +105,8 @@ export const initialWizardState: WizardState = {
   journeyStage: '',
   fieldOfStudy: '',
   craftArea: '',
+
+  orgFinalizeAfterIndividual: false,
 }
 
 /** §8.7 ONBOARDING_GOALS, verbatim (14 options). */

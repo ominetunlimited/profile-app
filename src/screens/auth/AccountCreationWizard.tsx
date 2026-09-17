@@ -17,6 +17,7 @@ import {
 import { useAccount } from '@/app/AccountContext'
 import { emailIsRegistered, findAccountByUsername, saveDemoAccount } from '@/app/demoAccountStore'
 import { resizeImage, saveAvatar, saveCover } from '@/app/mediaStore'
+import { followOrg } from '@/app/followStore'
 
 const INDIVIDUAL_STEP_ORDER = ['account-type', 'individual-info', 'email-verify', 'consent', 'goals', 'profile-setup', 'journey-setup', 'done']
 const INDIVIDUAL_STEP_NAMES: Record<string, string> = {
@@ -29,12 +30,18 @@ const INDIVIDUAL_STEP_NAMES: Record<string, string> = {
   'journey-setup': 'Journey setup',
   done: 'Done',
 }
-const ORG_STEP_ORDER = ['account-type', 'org-info', 'org-consent', 'org-done']
+// 'individual-info'/'email-verify' are borrowed from the individual flow
+// when a not-yet-signed-in founder chooses "create my identity now" at the
+// final org-identity-choice step (§2 override) — included here so the
+// progress bar stays meaningful during that branch instead of resetting.
+const ORG_STEP_ORDER = ['account-type', 'org-info', 'org-consent', 'org-identity-choice', 'individual-info', 'email-verify', 'org-done']
 const ORG_STEP_NAMES: Record<string, string> = {
   'account-type': 'Choose account type',
-  'org-gate': 'Sign in required',
   'org-info': 'Workspace identity',
   'org-consent': 'Consent',
+  'org-identity-choice': 'Link your identity',
+  'individual-info': 'Create your identity',
+  'email-verify': 'Verify email',
   'org-done': 'Submitted',
 }
 
@@ -87,7 +94,7 @@ export function AccountCreationWizard() {
   const isOrgPath = s.accountKind === 'organisation'
   const stepOrder = isOrgPath ? ORG_STEP_ORDER : INDIVIDUAL_STEP_ORDER
   const stepNames = isOrgPath ? ORG_STEP_NAMES : INDIVIDUAL_STEP_NAMES
-  const visibleIndex = stepOrder.indexOf(s.step === 'org-gate' ? 'account-type' : s.step)
+  const visibleIndex = stepOrder.indexOf(s.step)
   const progress =
     s.step === 'done' || s.step === 'org-done'
       ? undefined
@@ -144,7 +151,14 @@ export function AccountCreationWizard() {
     setAccount(newAccount)
   }
 
-  function finalizeOrgAccount() {
+  /**
+   * V9 Unified Ecosystem Patch §2 override — `creatorEmail` is the human
+   * identity this org is now linked to: either the person who was already
+   * signed in as an individual, or the one just created inline via
+   * `orgFinalizeAfterIndividual`. New, not in the old §8.4.1 flow: that
+   * individual auto-follows the organisation the moment the link completes.
+   */
+  function finalizeOrgAccount(creatorEmail: string) {
     const newAccount = {
       accountType: 'organisation' as const,
       orgType: s.orgType!,
@@ -155,6 +169,7 @@ export function AccountCreationWizard() {
       orgRole: 'super_admin' as const,
     }
     saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
+    if (creatorEmail) followOrg(creatorEmail, s.officialEmail)
     setAccount(newAccount)
   }
 
@@ -166,33 +181,13 @@ export function AccountCreationWizard() {
           patch={patch}
           onContinue={() => {
             if (s.accountKind === 'individual' && s.pathway) patch({ step: 'individual-info' })
-            if (s.accountKind === 'organisation' && s.orgType) {
-              patch({ step: account?.accountType === 'individual' ? 'org-info' : 'org-gate' })
-            }
+            // §2 override — organisation registration no longer requires a
+            // pre-existing individual account; it always starts here now.
+            // The human identity link happens at org-identity-choice, the
+            // LAST step, not as a prerequisite before this one.
+            if (s.accountKind === 'organisation' && s.orgType) patch({ step: 'org-info' })
           }}
         />
-      )}
-
-      {s.step === 'org-gate' && (
-        <div>
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Set up the workspace</h1>
-          <p className="mb-5 text-sm leading-relaxed text-text-1">
-            Organisation, institution and government workspaces are opened by a person, not created from nothing —
-            you need a personal PROFILE account first.
-          </p>
-          <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-4 text-sm text-text-1">
-            You'll need to sign in with your personal PROFILE account first, using an email on your organisation's
-            own domain, not a personal address.
-          </div>
-          <div className="flex gap-2">
-            <Link to="/auth?mode=signin" className="flex min-h-[44px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
-              Sign in
-            </Link>
-            <Button variant="secondary" onClick={() => patch({ step: 'account-type', accountKind: null, orgType: null })}>
-              Back
-            </Button>
-          </div>
-        </div>
       )}
 
       {s.step === 'org-info' && (
@@ -265,10 +260,25 @@ export function AccountCreationWizard() {
           s={s}
           patch={patch}
           onContinue={() => {
-            finalizeOrgAccount()
-            patch({ step: 'org-done' })
+            // §2 override — if this browser is already signed in as an
+            // individual, that's the identity link, exactly as before.
+            // Otherwise defer to org-identity-choice, the new final step.
+            if (account?.accountType === 'individual') {
+              finalizeOrgAccount(account.email)
+              patch({ step: 'org-done' })
+            } else {
+              patch({ step: 'org-identity-choice' })
+            }
           }}
           onBack={() => patch({ step: 'org-info' })}
+        />
+      )}
+
+      {s.step === 'org-identity-choice' && (
+        <OrgIdentityChoiceStep
+          onSignIn={() => navigate('/auth?mode=signin')}
+          onCreateIdentity={(pathway) => patch({ orgFinalizeAfterIndividual: true, pathway, step: 'individual-info' })}
+          onBack={() => patch({ step: 'org-consent' })}
         />
       )}
 
@@ -336,7 +346,7 @@ export function AccountCreationWizard() {
             <Button disabled={!individualValid} onClick={() => patch({ step: 'email-verify' })}>
               Verify Email
             </Button>
-            <Button variant="secondary" onClick={() => patch({ step: 'account-type' })}>
+            <Button variant="secondary" onClick={() => patch({ step: s.orgFinalizeAfterIndividual ? 'org-identity-choice' : 'account-type' })}>
               Back
             </Button>
           </div>
@@ -360,7 +370,25 @@ export function AccountCreationWizard() {
       )}
 
       {s.step === 'email-verify' && (
-        <EmailVerifyStep s={s} patch={patch} email={s.email} onVerified={() => patch({ step: 'consent' })} onChangeEmail={() => patch({ step: 'individual-info' })} />
+        <EmailVerifyStep
+          s={s}
+          patch={patch}
+          email={s.email}
+          onVerified={() => {
+            // §2 override — this individual identity exists purely to link
+            // to the organisation being registered; finalize both here
+            // rather than sending them through goals/profile-setup, which
+            // they can still fill in later from Settings.
+            if (s.orgFinalizeAfterIndividual) {
+              finalizeIndividualAccount()
+              finalizeOrgAccount(s.email)
+              patch({ step: 'org-done' })
+            } else {
+              patch({ step: 'consent' })
+            }
+          }}
+          onChangeEmail={() => patch({ step: 'individual-info' })}
+        />
       )}
 
       {s.step === 'consent' && <ConsentStep s={s} patch={patch} onContinue={() => patch({ step: 'goals' })} onBack={() => patch({ step: 'email-verify' })} />}
@@ -495,6 +523,68 @@ function AccountTypeStep({
       <Button disabled={!canContinue} onClick={onContinue}>
         Continue
       </Button>
+    </div>
+  )
+}
+
+/**
+ * V9 Unified Ecosystem Patch §2 override's final step — the human identity
+ * link the old §8.4.1 rule required up front, now asked only once the
+ * workspace itself is fully filled in. "The organisation account cannot
+ * become active... until that human identity link exists" is honoured:
+ * finalizeOrgAccount() is only ever called after one of these two paths
+ * completes, never before.
+ */
+function OrgIdentityChoiceStep({
+  onSignIn,
+  onCreateIdentity,
+  onBack,
+}: {
+  onSignIn: () => void
+  onCreateIdentity: (pathway: Pathway) => void
+  onBack: () => void
+}) {
+  const [pathway, setPathway] = useState<Pathway | null>(null)
+
+  return (
+    <div>
+      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Link your identity</h1>
+      <p className="mb-5 text-sm leading-relaxed text-text-1">
+        Almost done. This workspace stays inactive — no posting, no submitting for verification, no inviting staff —
+        until a real person is linked to it as its founder.
+      </p>
+
+      <div className="mb-5 rounded-lg border border-border bg-surface p-4">
+        <p className="mb-3 text-sm font-semibold text-text-0">Already have a PROFILE account?</p>
+        <Button variant="secondary" onClick={onSignIn}>
+          Sign in with my @handle
+        </Button>
+        <p className="mt-2 text-[11px] text-text-2">This takes you to Sign In — you'll need to re-enter the workspace details above afterward.</p>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <p className="mb-3 text-sm font-semibold text-text-0">New to PROFILE? Create your identity now, without leaving this workspace setup.</p>
+        <p className="mb-2 text-xs text-text-2">What best describes you?</p>
+        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {(Object.keys(INDIVIDUAL_CATEGORIES) as Pathway[]).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPathway(p)}
+              className={`rounded-lg border p-2.5 text-left text-xs capitalize ${pathway === p ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'}`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <Button disabled={!pathway} onClick={() => pathway && onCreateIdentity(pathway)}>
+          Continue to identity setup
+        </Button>
+      </div>
+
+      <button onClick={onBack} className="mt-4 text-xs font-semibold text-text-1">
+        ← Back
+      </button>
     </div>
   )
 }
