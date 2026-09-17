@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
@@ -17,6 +17,44 @@ import {
   type AdPlacement,
   type AdType,
 } from '@/app/adStore'
+import { convertFromUsd, currencyForCountry, formatMoney, getFxRates } from '@/app/currencyStore'
+
+/**
+ * V9 Unified Ecosystem Patch §15 — this build's one genuinely structured
+ * USD amount (`estimatedCostUsd`) is exactly the patch's own worked
+ * example: "a $20 USD charge... must settle at that day's real conversion
+ * rate, clearly shown before checkout." Real live fetch (currencyStore.ts),
+ * never a hardcoded rate; shows nothing extra when the viewer's own
+ * currency already is USD, and honestly says "unavailable" rather than
+ * guessing if the fetch and the cache both come up empty.
+ */
+function ConvertedCost({ amountUsd, country }: { amountUsd: number; country: string }) {
+  const currency = currencyForCountry(country)
+  const [state, setState] = useState<{ loading: boolean; converted: number | null; stale: boolean }>({ loading: true, converted: null, stale: false })
+
+  useEffect(() => {
+    if (currency === 'USD') return
+    let cancelled = false
+    getFxRates().then((fx) => {
+      if (cancelled) return
+      setState({ loading: false, converted: convertFromUsd(amountUsd, currency, fx.rates), stale: fx.stale })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [amountUsd, currency])
+
+  if (currency === 'USD') return null
+  if (state.loading) return <span className="text-text-2"> (converting…)</span>
+  if (state.converted === null) return <span className="text-text-2"> (≈ {currency} unavailable right now)</span>
+  return (
+    <span className="text-text-2">
+      {' '}
+      (≈ {formatMoney(state.converted, currency)}
+      {state.stale ? ', last known rate' : ' at today’s rate'})
+    </span>
+  )
+}
 
 const PLACEMENT_LABEL: Record<AdPlacement, string> = {
   home_feed: 'Home feed',
@@ -58,6 +96,7 @@ export function AdsCentrePage() {
           <div className="mb-6 rounded-xl border border-border bg-surface p-4">
             <CreateCampaignForm
               advertiserEmail={owner}
+              advertiserCountry={account?.country ?? 'United States'}
               onClose={() => setCreating(false)}
               onCreated={() => {
                 setCreating(false)
@@ -85,6 +124,7 @@ export function AdsCentrePage() {
                 </div>
                 <p className="mb-2 text-xs text-text-2">
                   {c.adType} · {c.placements.map((p) => PLACEMENT_LABEL[p]).join(', ')} · {c.durationDays} days · ${c.estimatedCostUsd} estimated
+                  {account && <ConvertedCost amountUsd={c.estimatedCostUsd} country={account.country} />}
                 </p>
                 {c.status === 'draft' && (
                   <button
@@ -116,7 +156,7 @@ export function AdsCentrePage() {
   )
 }
 
-function CreateCampaignForm({ advertiserEmail, onClose, onCreated }: { advertiserEmail: string; onClose: () => void; onCreated: () => void }) {
+function CreateCampaignForm({ advertiserEmail, advertiserCountry, onClose, onCreated }: { advertiserEmail: string; advertiserCountry: string; onClose: () => void; onCreated: () => void }) {
   const [adType, setAdType] = useState<AdType>(AD_TYPES[0])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -177,7 +217,8 @@ function CreateCampaignForm({ advertiserEmail, onClose, onCreated }: { advertise
         </SelectInput>
       </Field>
       <div className="rounded-lg bg-surface-sunken p-3 text-xs text-text-1">
-        Estimated cost: <span className="font-mono font-semibold text-text-0">${cost}</span> ({placements.length} placement{placements.length === 1 ? '' : 's'} × {durationDays} days × $
+        Estimated cost: <span className="font-mono font-semibold text-text-0">${cost}</span>
+        <ConvertedCost amountUsd={cost} country={advertiserCountry} /> ({placements.length} placement{placements.length === 1 ? '' : 's'} × {durationDays} days × $
         {PRICE_PER_PLACEMENT_PER_DAY_USD}/day)
       </div>
       <div className="flex gap-2">
