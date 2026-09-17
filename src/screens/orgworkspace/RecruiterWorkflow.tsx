@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan } from '@/app/accountTypes'
 import { ownerKey } from '@/app/activityStore'
-import { postJob, listJobsByOrg, closeJob, type JobListing } from '@/app/jobStore'
-import { listApplicationsForJob, updateApplicationStatus, type Application, type ApplicationStatus } from '@/app/applicationStore'
+import { postJob, listJobsByOrg, closeJob, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
+import { listApplicationsForJob, updateApplicationStatus, hiredCountForJob, type Application, type ApplicationStatus } from '@/app/applicationStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
@@ -93,6 +93,9 @@ export function RecruiterWorkflow() {
                 <Link to={`/job/${selectedJob.id}`} className="text-sm font-semibold text-text-0 hover:text-accent">
                   {selectedJob.title} →
                 </Link>
+                <span className="text-xs text-text-2">
+                  {hiredCountForJob(selectedJob.id)}/{selectedJob.maxHires} hired (free tier cap)
+                </span>
                 {selectedJob.status === 'open' && canManage && (
                   <button
                     onClick={() => {
@@ -122,6 +125,7 @@ export function RecruiterWorkflow() {
                             const applicant = findAccountByEmail(a.applicantEmail)
                             const username = applicant && 'username' in applicant ? applicant.username : undefined
                             const next = NEXT_STAGE[a.status]
+                            const atHireCap = next === 'offer' && hiredCountForJob(selectedJob.id) >= selectedJob.maxHires
                             return (
                               <div key={a.id} className="rounded-lg border border-border bg-surface p-2.5 text-xs">
                                 {username ? (
@@ -135,11 +139,13 @@ export function RecruiterWorkflow() {
                                   <div className="mt-1.5 flex gap-1.5">
                                     {next && (
                                       <button
+                                        disabled={atHireCap}
+                                        title={atHireCap ? `Free tier cap reached — ${selectedJob.maxHires} hires on this listing` : undefined}
                                         onClick={() => {
                                           updateApplicationStatus(a.id, next)
                                           refreshApplications()
                                         }}
-                                        className="font-semibold text-accent"
+                                        className="font-semibold text-accent disabled:cursor-not-allowed disabled:text-text-2"
                                       >
                                         Advance →
                                       </button>
@@ -182,6 +188,7 @@ function PostJobForm({ orgEmail, onClose, onPosted }: { orgEmail: string; onClos
   const [skillsInput, setSkillsInput] = useState('')
   const [salaryRange, setSalaryRange] = useState('')
   const [closingDate, setClosingDate] = useState('')
+  const [maxHires, setMaxHires] = useState(FREE_TIER_MAX_HIRES)
 
   return (
     <div className="flex flex-col gap-3">
@@ -217,6 +224,15 @@ function PostJobForm({ orgEmail, onClose, onPosted }: { orgEmail: string; onClos
         <Field label="Closing date (optional)">
           <input type="date" value={closingDate} onChange={(e) => setClosingDate(e.target.value)} className="min-h-[44px] rounded-lg border border-border-strong bg-surface px-3 text-sm" />
         </Field>
+        <Field label="Hires on this listing" hint={`Free tier: up to ${FREE_TIER_MAX_HIRES}`}>
+          <SelectInput value={String(maxHires)} onChange={(e) => setMaxHires(Number(e.target.value))}>
+            {Array.from({ length: FREE_TIER_MAX_HIRES }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </SelectInput>
+        </Field>
       </div>
       <div className="flex gap-2">
         <Button
@@ -231,6 +247,7 @@ function PostJobForm({ orgEmail, onClose, onPosted }: { orgEmail: string; onClos
               requiredSkills: skillsInput.split(',').map((s) => s.trim()).filter(Boolean),
               salaryRange: salaryRange || undefined,
               closingDate: closingDate || undefined,
+              maxHires,
             })
             onPosted()
           }}

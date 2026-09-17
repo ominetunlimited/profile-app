@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
+import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 
 /** §18.2 JOB_LISTING_FIELDS.types */
 const WORK_TYPES = ['remote', 'hybrid', 'on_site'] as const
@@ -31,6 +33,11 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
   const [workType, setWorkType] = useState<(typeof WORK_TYPES)[number] | 'all'>('all')
   const [query, setQuery] = useState('')
   const [cluster, setCluster] = useState<CareerCluster | null>(pinnedCluster ?? null)
+
+  // V9 Unified Ecosystem Patch §10 — an advertiser paying for the
+  // 'opportunities' placement was previously charged for a surface that
+  // never rendered anything (only home_feed did); this closes that gap.
+  const sponsoredCampaigns = listActiveCampaignsForPlacement('opportunities')
 
   const q = query.trim().toLowerCase()
   const jobs = listOpenJobs().filter((j) => {
@@ -83,6 +90,12 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
             </button>
           ))}
         </div>
+
+        {sponsoredCampaigns[0] && (
+          <div className="mb-2">
+            <SponsoredCard campaign={sponsoredCampaigns[0]} />
+          </div>
+        )}
 
         {jobs.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">

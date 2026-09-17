@@ -117,3 +117,32 @@ export function listConnectedEmails(email: string): string[] {
     .filter((r) => r.status === 'accepted' && (r.requesterEmail.toLowerCase() === e || r.recipientEmail.toLowerCase() === e))
     .map((r) => (r.requesterEmail.toLowerCase() === e ? r.recipientEmail : r.requesterEmail))
 }
+
+/**
+ * V9 Unified Ecosystem Patch §12 "Connections-in-Common" — genuinely new,
+ * no prior equivalent anywhere in this build. `sharedConnections` is real,
+ * computed by intersecting both people's real connection lists. `cities` is
+ * real too, but limited to what this build actually has evidence for:
+ * there is no OrgStaffRecord/staff-affiliation model anywhere yet (see
+ * `OrganisationAccount.orgRole`'s own comment in accountTypes.ts), so a
+ * "shared organisation/school" claim would be fabricated — omitted rather
+ * than faked, same honesty rule as Trust Score and verification badges.
+ */
+export interface ConnectionsInCommon {
+  sharedConnections: string[]
+  sharedContext: { cities?: string[] }
+}
+
+export function connectionsInCommon(viewerEmail: string, subjectEmail: string): ConnectionsInCommon {
+  const viewerConnections = new Set(listConnectedEmails(viewerEmail).map((e) => e.toLowerCase()))
+  const sharedConnections = listConnectedEmails(subjectEmail).filter((e) => viewerConnections.has(e.toLowerCase()))
+
+  const viewer = findAccountByEmail(viewerEmail)
+  const subject = findAccountByEmail(subjectEmail)
+  const cities: string[] = []
+  if (viewer?.accountType === 'individual' && subject?.accountType === 'individual' && viewer.city && subject.city && viewer.city.trim().toLowerCase() === subject.city.trim().toLowerCase()) {
+    cities.push(subject.city)
+  }
+
+  return { sharedConnections, sharedContext: cities.length ? { cities } : {} }
+}

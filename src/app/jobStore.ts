@@ -15,9 +15,21 @@ export interface JobListing {
   requiredSkills: string[]
   salaryRange?: string
   closingDate?: string
+  /**
+   * V9 Unified Ecosystem Patch §9 — "Create Opportunity" is free-tier,
+   * capped at hiring up to 5 people per posting; this build has no real
+   * payment processor anywhere (adStore.ts, PremiumPlansTab), so every
+   * account here is honestly on the free tier and the cap applies
+   * platform-wide rather than gating on a subscription field that would
+   * otherwise never be real. Distinct from the paid Ads Centre / Recruiter
+   * Hub posting path (§10), which is unaffected by this cap.
+   */
+  maxHires: number
   status: 'open' | 'closed'
   createdAt: string
 }
+
+export const FREE_TIER_MAX_HIRES = 5
 
 const STORAGE_KEY = 'profile:demo-jobs'
 

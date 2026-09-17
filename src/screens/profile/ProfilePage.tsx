@@ -7,7 +7,7 @@ import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account
 import { listActivities, ownerKey } from '@/app/activityStore'
 import { pendingRequestsForOwner, respondToSelfTag } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { findAccountByUsername } from '@/app/demoAccountStore'
+import { findAccountByEmail, findAccountByUsername } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
 import { buildCvData } from '@/app/careerData'
 import { publicDisplayName } from '@/app/privacyModeStore'
@@ -18,7 +18,8 @@ import { createRequest, findRequest, listRequestsForOwner, respondToRequest } fr
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { followOrg, followerCount, isFollowing, unfollowOrg } from '@/app/followStore'
-import { acceptConnectionRequest, connectionCount, relationshipState, sendConnectionRequest, type RelationshipState } from '@/app/connectionStore'
+import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, type RelationshipState } from '@/app/connectionStore'
+import { getMentorshipPreference, menteeRequestState, sendMenteeRequest } from '@/app/mentorshipStore'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
 type Tab = (typeof TABS)[number]
@@ -151,6 +152,9 @@ export function ProfilePage() {
                   ) : (
                     <ConnectButton viewerEmail={ownerKey(account)} otherEmail={targetKey} />
                   )}
+                  {viewed.accountType === 'individual' && getMentorshipPreference(targetKey).openToMentoring && (
+                    <MenteeRequestButton menteeEmail={ownerKey(account)} mentorEmail={targetKey} />
+                  )}
                   <Link to={`/messages?with=${encodeURIComponent(targetKey)}`} className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
                     Message
                   </Link>
@@ -199,6 +203,10 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
+
+          {/* V9 Unified Ecosystem Patch §12 "Connections-in-Common" — real
+              mutual connections and shared city, surfaced on a profile visit. */}
+          {!isSelf && account && viewed.accountType === 'individual' && <InCommonRow viewerEmail={ownerKey(account)} subjectEmail={targetKey} />}
         </div>
       </div>
 
@@ -491,6 +499,57 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
     >
       Connect
     </button>
+  )
+}
+
+/** §5 Mentee Request — deliberately a distinct request type and store from
+ * ConnectButton's Connection Request above, per the patch's explicit "do
+ * not merge them into one request type" instruction. Only rendered on an
+ * individual profile whose "Open to mentoring" setting is on. */
+function MenteeRequestButton({ menteeEmail, mentorEmail }: { menteeEmail: string; mentorEmail: string }) {
+  const [state, setState] = useState(() => menteeRequestState(menteeEmail, mentorEmail))
+
+  if (state?.status === 'accepted') {
+    return <span className="rounded-lg border border-success px-3 py-2 text-xs font-semibold text-success">✓ Mentor</span>
+  }
+  if (state) {
+    return <span className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-1">Mentorship {state.status}</span>
+  }
+  return (
+    <button
+      onClick={() => {
+        sendMenteeRequest(menteeEmail, mentorEmail, 'I would like to request your mentorship.')
+        setState(menteeRequestState(menteeEmail, mentorEmail))
+      }}
+      className="rounded-lg border border-accent px-3 py-2 text-xs font-semibold text-accent"
+    >
+      Request mentorship
+    </button>
+  )
+}
+
+/** §12 Connections-in-Common — real mutual connections + shared city, or
+ * nothing rendered at all when there's genuinely none to show (never a
+ * padded-out "0 in common" line). */
+function InCommonRow({ viewerEmail, subjectEmail }: { viewerEmail: string; subjectEmail: string }) {
+  const { sharedConnections, sharedContext } = connectionsInCommon(viewerEmail, subjectEmail)
+  if (sharedConnections.length === 0 && !sharedContext.cities?.length) return null
+
+  const names = sharedConnections.map((email) => findAccountByEmail(email)?.legalName ?? email)
+
+  return (
+    <div className="mt-3 rounded-lg border border-border bg-surface-sunken px-3 py-2 text-xs text-text-1">
+      {sharedConnections.length > 0 && (
+        <p>
+          <span className="font-semibold text-text-0">
+            {sharedConnections.length} connection{sharedConnections.length === 1 ? '' : 's'} in common
+          </span>
+          : {names.slice(0, 3).join(', ')}
+          {names.length > 3 ? `, +${names.length - 3} more` : ''}
+        </p>
+      )}
+      {sharedContext.cities?.length ? <p>Also based in {sharedContext.cities[0]}.</p> : null}
+    </div>
   )
 }
 

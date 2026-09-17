@@ -11,6 +11,7 @@ import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs 
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
 import { getSuspiciousLoginAlertsEnabled, listLoginHistory, setSuspiciousLoginAlertsEnabled } from '@/app/sessionStore'
 import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
+import { getMentorshipPreference, setMentorshipPreference } from '@/app/mentorshipStore'
 import { Field, PasswordInput, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
 import { ImageUploadField } from '@/shared/ui/ImageUploadField'
@@ -336,14 +337,40 @@ export function AiAssistantTab() {
   )
 }
 
-/** §25 SETTINGS_TABS.Mentorship */
+/** §25 SETTINGS_TABS.Mentorship — previously an uncontrolled toggle and an
+ * uncontrolled number field with no store behind either (a real dead-toggle
+ * gap, §5 of the V9 Unified Ecosystem Patch); now real, persisted state that
+ * actually controls mentor discoverability (mentorshipStore.ts). */
 export function MentorshipTab() {
+  const { account } = useAccount()
+  const owner = account ? ownerKey(account) : ''
+  const [pref, setPref] = useState(() => getMentorshipPreference(owner))
+
   return (
     <Section title="Mentorship">
-      <Toggle label="Open to mentoring" />
-      <Field label="Mentee capacity">
-        <TextInput type="number" defaultValue={0} min={0} />
-      </Field>
+      <Toggle
+        label="Open to mentoring"
+        hint="Makes you discoverable as an available mentor and lets others send you mentee requests"
+        checked={pref.openToMentoring}
+        onChange={(next) => {
+          setMentorshipPreference(owner, { openToMentoring: next })
+          setPref(getMentorshipPreference(owner))
+        }}
+      />
+      {pref.openToMentoring && (
+        <Field label="Mentee capacity">
+          <TextInput
+            type="number"
+            value={pref.menteeCapacity}
+            min={0}
+            onChange={(e) => {
+              const menteeCapacity = Math.max(0, Number(e.target.value) || 0)
+              setMentorshipPreference(owner, { menteeCapacity })
+              setPref(getMentorshipPreference(owner))
+            }}
+          />
+        </Field>
+      )}
     </Section>
   )
 }

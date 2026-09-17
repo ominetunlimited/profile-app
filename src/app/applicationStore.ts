@@ -65,6 +65,13 @@ export function listApplicationsForJob(jobId: string): Application[] {
   return readAll().filter((a) => a.jobId === jobId)
 }
 
+/** §9's free-tier hire cap — an 'offer' is the real signal of a hiring
+ * decision made on this listing; there's no separate "mark as hired" step
+ * in this build's pipeline, so counting offers is the honest source. */
+export function hiredCountForJob(jobId: string): number {
+  return readAll().filter((a) => a.jobId === jobId && a.status === 'offer').length
+}
+
 export function listApplicationsForOrg(orgEmail: string): Application[] {
   const e = orgEmail.toLowerCase()
   return readAll()

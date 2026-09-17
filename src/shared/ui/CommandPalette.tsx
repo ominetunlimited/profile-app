@@ -4,6 +4,7 @@ import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
 import { listAllAccounts } from '@/app/demoAccountStore'
 import { TOOL_CATALOGUE, listAllProviders } from '@/app/toolCatalogue'
+import { listActiveCampaignsForPlacement } from '@/app/adStore'
 
 interface PersonResult {
   kind: 'person'
@@ -151,6 +152,16 @@ export function CommandPalette() {
     return [...peopleMatches, ...toolMatches, ...providerMatches, ...routeMatches].slice(0, 8)
   }, [query, reachable, people])
 
+  // V9 Unified Ecosystem Patch §10 — 'search' was a selectable, billed ad
+  // placement in AdsCentrePage with no real search-results surface to
+  // render it on; this modal is the closest real search surface this build
+  // has, so a sponsored result appears here, clearly labelled, only while
+  // an actual query is typed (never mixed into the empty-state route list).
+  const sponsoredResult = useMemo(() => {
+    if (!query.trim()) return null
+    return listActiveCampaignsForPlacement('search')[0] ?? null
+  }, [query])
+
   if (!open) return null
 
   return (
@@ -199,6 +210,25 @@ export function CommandPalette() {
                 <span className="font-mono text-[10.5px] text-text-2">{i === 0 ? '↵' : r.sub}</span>
               </button>
             ))
+          )}
+          {sponsoredResult && (
+            <button
+              onClick={() => {
+                if (/^https?:\/\//.test(sponsoredResult.destination)) {
+                  window.open(sponsoredResult.destination, '_blank', 'noopener,noreferrer')
+                } else {
+                  navigate(sponsoredResult.destination)
+                }
+                setOpen(false)
+              }}
+              className="flex w-full items-center justify-between border-t border-border px-3.5 py-2.5 text-left text-sm"
+            >
+              <span className="text-text-0">
+                <span className="mr-1.5 rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold text-accent">Sponsored</span>
+                {sponsoredResult.title}
+              </span>
+              <span className="text-[10.5px] text-text-2">{sponsoredResult.adType}</span>
+            </button>
           )}
         </div>
       </div>
