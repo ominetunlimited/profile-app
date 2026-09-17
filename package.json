@@ -10,6 +10,7 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.126.0",
     "framer-motion": "^11.11.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -3,17 +3,31 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { useAccount } from '@/app/AccountContext'
-import { ownerKey } from '@/app/activityStore'
+import { ownerKey, listActivities } from '@/app/activityStore'
 import { createDraftTemplate, listCreatorTemplates } from '@/app/creatorTemplateStore'
+import { buildCvData } from '@/app/careerData'
+import { buildPortfolioData } from '@/app/portfolioData'
+import { computeTrustScore } from '@/app/trustScore'
 
 const TABS = ['advisor', 'creator-hub'] as const
 
+interface AdvisorMessage {
+  role: 'user' | 'assistant' | 'error'
+  text: string
+}
+
 /**
  * §48.10 PROFILE Advisor + §47.13 Creator Hub, combined per the Handoff's
- * single screen. Advisor's chat is honestly disconnected — §48.0 forbids
- * fabricating confidence or output, and no AI Gateway (§48.11) exists in this
- * build, so it says so plainly rather than faking canned replies dressed up
- * as intelligent guidance.
+ * single screen. V9 Unified Ecosystem Patch §11 — priority build: this now
+ * calls a real model (api/advisor.ts, a Vercel serverless function backed
+ * by the Anthropic API) rather than the honest-disconnect placeholder this
+ * screen previously showed. §48.0's Hard Rules are enforced in the
+ * function's system prompt: never fabricate a credential/verification,
+ * always disclosed as AI, grounded in the real data sent below.
+ *
+ * If this deployment has no ANTHROPIC_API_KEY configured yet, the function
+ * honestly reports that — this screen never falls back to a fabricated
+ * canned reply pretending to be the model.
  */
 export function AdvisorCreatorHub() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('advisor')
@@ -21,7 +35,54 @@ export function AdvisorCreatorHub() {
   const owner = ownerKey(account)
   const [templates, setTemplates] = useState(() => listCreatorTemplates(owner))
   const [message, setMessage] = useState('')
-  const [asked, setAsked] = useState(false)
+  const [history, setHistory] = useState<AdvisorMessage[]>([])
+  const [sending, setSending] = useState(false)
+
+  async function ask() {
+    const text = message.trim()
+    if (!text || sending) return
+    setMessage('')
+    setHistory((h) => [...h, { role: 'user', text }])
+    setSending(true)
+
+    const cv = buildCvData(account)
+    const portfolio = buildPortfolioData(account)
+    const trust = computeTrustScore(account)
+    const activities = account ? listActivities(owner) : []
+
+    try {
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          context: {
+            name: cv.name,
+            headline: cv.role,
+            country: account?.country ?? '',
+            trustScoreTotal: trust.total,
+            trustScoreTier: trust.tier.label,
+            skills: cv.skills,
+            tools: cv.tools,
+            cvExperienceCount: cv.experience.length,
+            portfolioItemCount: portfolio.items.length,
+            recentActivities: activities.slice(0, 10).map((a) => ({ type: a.type, title: a.title })),
+          },
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setHistory((h) => [...h, { role: 'error', text: data.error ?? 'Something went wrong.' }])
+      } else {
+        setHistory((h) => [...h, { role: 'assistant', text: data.reply }])
+      }
+    } catch {
+      setHistory((h) => [...h, { role: 'error', text: "Couldn't reach PROFILE Advisor — check your connection and try again." }])
+    } finally {
+      setSending(false)
+    }
+  }
+
 
   return (
     <AppShell>
@@ -44,29 +105,33 @@ export function AdvisorCreatorHub() {
         {tab === 'advisor' && (
           <div className="flex flex-wrap gap-5">
             <div className="flex min-w-0 flex-1 basis-[400px] flex-col gap-3">
-              {asked && (
-                <div className="rounded-xl border border-border bg-surface p-3.5">
-                  <div className="mb-1 font-mono text-[9.5px] font-semibold tracking-widest text-trust">ADVISOR</div>
-                  <p className="text-sm text-text-0">
-                    PROFILE Advisor requires the AI Gateway backend (§48.11) — not yet connected in this build. I can't
-                    answer that honestly without it, so I won't pretend to.
-                  </p>
+              {history.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {history.map((m, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-xl border p-3.5 ${
+                        m.role === 'user' ? 'ml-8 border-border-strong bg-surface-sunken' : m.role === 'error' ? 'border-danger bg-surface' : 'border-border bg-surface'
+                      }`}
+                    >
+                      {m.role !== 'user' && <div className="mb-1 font-mono text-[9.5px] font-semibold tracking-widest text-trust">{m.role === 'error' ? 'ADVISOR — ISSUE' : 'ADVISOR'}</div>}
+                      <p className="whitespace-pre-wrap text-sm text-text-0">{m.text}</p>
+                    </div>
+                  ))}
+                  {sending && <div className="rounded-xl border border-border bg-surface p-3.5 text-sm text-text-1">Thinking…</div>}
                 </div>
               )}
               <div className="flex gap-2">
                 <input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') ask()
+                  }}
                   placeholder="Ask about your profile, a role, or what's missing"
                   className="min-h-[44px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
                 />
-                <Button
-                  disabled={!message.trim()}
-                  onClick={() => {
-                    setAsked(true)
-                    setMessage('')
-                  }}
-                >
+                <Button disabled={!message.trim() || sending} onClick={ask}>
                   Ask
                 </Button>
               </div>
