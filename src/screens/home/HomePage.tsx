@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
+import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, listFeedFor, ownerKey, postActivity } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
@@ -161,13 +162,13 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
         <TextInput value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lagos, Nigeria" />
       </Field>
       <Field label="Skills demonstrated (optional)" hint="Comma-separated — these are what CV/Portfolio Skills sections and Discover matching pull from">
-        <TextInput value={skillsInput} onChange={(e) => setSkillsInput(e.target.value)} placeholder="e.g. React, Figma, Contract negotiation" />
+        <EntityAutocomplete value={skillsInput} onChange={setSkillsInput} fieldContext="skills" placeholder="e.g. React, Figma, Contract negotiation" />
       </Field>
       <Field label="Tools used (optional)" hint="Comma-separated — distinct from skills, feeds your CV's Tools section (§4.8)">
-        <TextInput value={toolsInput} onChange={(e) => setToolsInput(e.target.value)} placeholder="e.g. Figma, AutoCAD, Salesforce" />
+        <EntityAutocomplete value={toolsInput} onChange={setToolsInput} fieldContext="tools" placeholder="e.g. Figma, AutoCAD, Salesforce" />
       </Field>
       <Field label="Collaborators (optional)" hint="Comma-separated names — self-reported, not linked to their PROFILE account yet">
-        <TextInput value={collaboratorsInput} onChange={(e) => setCollaboratorsInput(e.target.value)} placeholder="e.g. Amara Okafor, Chidi Eze" />
+        <EntityAutocomplete value={collaboratorsInput} onChange={setCollaboratorsInput} fieldContext="collaborators" placeholder="e.g. Amara Okafor, Chidi Eze, or @handle" />
       </Field>
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <label className="flex items-center gap-2">

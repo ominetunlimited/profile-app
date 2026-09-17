@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
+import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { Button } from '@/shared/ui/Button'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
@@ -188,8 +189,8 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
       <Field label={selectedModule.identifierLabel}>
         <TextInput value={identifierValue} onChange={(e) => setIdentifierValue(e.target.value)} />
       </Field>
-      <Field label="Issuing institution / authority">
-        <TextInput value={issuerName} onChange={(e) => setIssuerName(e.target.value)} placeholder="e.g. University of Lagos" />
+      <Field label="Issuing institution / authority" hint="Resolves against real registered organisations on PROFILE where one matches — free text otherwise">
+        <EntityAutocomplete value={issuerName} onChange={setIssuerName} fieldContext="tag_institution" multi={false} placeholder="e.g. University of Lagos" />
       </Field>
       <Field label="Supporting document (optional)">
         <input
