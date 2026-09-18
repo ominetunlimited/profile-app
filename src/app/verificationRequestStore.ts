@@ -85,3 +85,28 @@ export function submitVerificationRequest(input: {
   writeAll(all)
   return request
 }
+
+/**
+ * Design handoff gap audit — Institution Workspace's "Verification queue"
+ * needed a real institution-side view of requests naming them, which
+ * didn't exist (this store only ever supported "list my own submitted
+ * requests"). `issuerName` is real, not free-floating: the Trust Passport
+ * submission form's EntityAutocomplete (fieldContext="tag_institution")
+ * resolves it against real registered organisations where one matches, so
+ * filtering by the institution's own legalName is a real query, not a
+ * fabricated join.
+ */
+export function listRequestsForIssuer(issuerName: string): VerificationRequest[] {
+  const target = issuerName.trim().toLowerCase()
+  return readAll()
+    .filter((r) => r.issuerName.trim().toLowerCase() === target)
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+}
+
+export function setVerificationRequestStatus(id: string, status: VerificationStatus): void {
+  const all = readAll()
+  const idx = all.findIndex((r) => r.id === id)
+  if (idx === -1) return
+  all[idx] = { ...all[idx], status }
+  writeAll(all)
+}
