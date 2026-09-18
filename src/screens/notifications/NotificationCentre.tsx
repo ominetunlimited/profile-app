@@ -19,6 +19,19 @@ const CATEGORY_LABEL: Record<(typeof CATEGORIES)[number], string> = {
   marketing: 'Marketing',
 }
 
+/** PROFILE Notification Centre.dc.html's row layout uses a colored icon
+ * square per notification, not a plain text badge — its own 6 example rows
+ * don't map 1:1 onto this build's real category enum, so glyphs/tones are
+ * chosen per real category rather than copied verbatim. */
+const CATEGORY_GLYPH: Record<NotificationCategory, { glyph: string; bg: string; ink: string }> = {
+  verification: { glyph: '✓', bg: 'bg-trust-soft', ink: 'text-trust' },
+  messages: { glyph: '@', bg: 'bg-accent-soft', ink: 'text-accent' },
+  opportunities: { glyph: '!', bg: 'bg-success-soft', ink: 'text-success' },
+  community: { glyph: '◍', bg: 'bg-accent-soft', ink: 'text-accent' },
+  security: { glyph: '!', bg: 'bg-warning-soft', ink: 'text-warning' },
+  marketing: { glyph: '✎', bg: 'bg-surface-sunken', ink: 'text-text-1' },
+}
+
 /** §10, §20 Notification Centre — full-width inbox, real events only
  * (notificationStore.ts). Every item deep-links to the entity that
  * generated it — a follow, a connection request, a comment, an
@@ -75,20 +88,28 @@ export function NotificationCentre() {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {filtered.map((n) => (
-              <button
-                key={n.id}
-                onClick={() => {
-                  markRead(n.id)
-                  navigate(n.deepLink)
-                }}
-                className={`flex items-center gap-3 rounded-lg border p-3 text-left ${n.read ? 'border-border bg-surface' : 'border-accent bg-surface-sunken'}`}
-              >
-                <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase text-text-2">{n.category}</span>
-                <span className="flex-1 text-sm text-text-0">{n.text}</span>
-                <span className="flex-none text-xs text-text-2">{new Date(n.createdAt).toLocaleDateString()}</span>
-              </button>
-            ))}
+            {filtered.map((n) => {
+              const g = CATEGORY_GLYPH[n.category]
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => {
+                    markRead(n.id)
+                    navigate(n.deepLink)
+                  }}
+                  className={`flex items-start gap-3 rounded-xl border p-3.5 text-left ${n.read ? 'border-border bg-surface' : 'border-border bg-surface-sunken'}`}
+                >
+                  <span className={`flex h-8 w-8 flex-none items-center justify-center rounded-lg text-xs font-bold ${g.bg} ${g.ink}`}>{g.glyph}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className={`block text-sm text-text-0 ${n.read ? 'font-normal' : 'font-semibold'}`}>{n.text}</span>
+                    <span className="mt-0.5 block text-xs text-text-2">
+                      {new Date(n.createdAt).toLocaleDateString()} · {CATEGORY_LABEL[n.category]}
+                    </span>
+                  </span>
+                  {!n.read && <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-accent" />}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
