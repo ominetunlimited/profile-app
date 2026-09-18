@@ -28,6 +28,7 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
   return (
     <AppShell>
       <div className="mx-auto max-w-[800px] px-4 py-8 sm:px-6">
+        <h1 className="mb-6 text-xl font-bold text-text-0">Messages &amp; Communities</h1>
         <div className="mb-6 flex gap-2 border-b border-border">
           {TABS.map((t) => (
             <button

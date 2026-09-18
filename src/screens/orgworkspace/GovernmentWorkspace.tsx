@@ -22,6 +22,10 @@ export function GovernmentWorkspace() {
 
   return (
     <OrgWorkspaceShell title="Government Console">
+      <div className="mb-6 rounded-lg border border-gold bg-gold-soft p-4 text-sm text-text-0">
+        Regulatory scope only. This workspace never accesses individual accounts directly — every action here
+        operates on records already submitted for confirmation within your authorised licence category.
+      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FEATURES.map((f) => (
           <div key={f.title} className="rounded-xl border border-border bg-surface p-4">

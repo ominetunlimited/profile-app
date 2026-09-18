@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 
 const FILTERS = ['all', 'cv', 'portfolio'] as const
+// Design handoff gap audit: CSS `capitalize` only uppercases the first
+// letter of the raw filter key, producing "Cv"/"Portfolio" instead of the
+// mockup's "CV templates"/"Portfolio templates" — real display labels.
+const FILTER_LABEL: Record<(typeof FILTERS)[number], string> = { all: 'All', cv: 'CV templates', portfolio: 'Portfolio templates' }
 
 /** §19.1/§38.12 Creator Marketplace — buyer-side browse. Real filter UI over
  * an honest empty state: no multi-user backend exists yet for other creators
@@ -27,9 +31,9 @@ export function CreatorMarketplace() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-semibold capitalize ${filter === f ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'}`}
+              className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-semibold ${filter === f ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'}`}
             >
-              {f}
+              {FILTER_LABEL[f]}
             </button>
           ))}
         </div>

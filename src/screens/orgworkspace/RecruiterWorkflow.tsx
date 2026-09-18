@@ -6,6 +6,7 @@ import { ownerKey } from '@/app/activityStore'
 import { postJob, listJobsByOrg, closeJob, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
 import { listApplicationsForJob, updateApplicationStatus, hiredCountForJob, type Application, type ApplicationStatus } from '@/app/applicationStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
+import { computeTrustScore } from '@/app/trustScore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
 import { OrgWorkspaceShell } from './OrgWorkspaceShell'
@@ -124,17 +125,21 @@ export function RecruiterWorkflow() {
                           {stageApplications.map((a) => {
                             const applicant = findAccountByEmail(a.applicantEmail)
                             const username = applicant && 'username' in applicant ? applicant.username : undefined
+                            const trust = computeTrustScore(applicant ?? null)
                             const next = NEXT_STAGE[a.status]
                             const atHireCap = next === 'offer' && hiredCountForJob(selectedJob.id) >= selectedJob.maxHires
                             return (
                               <div key={a.id} className="rounded-lg border border-border bg-surface p-2.5 text-xs">
-                                {username ? (
-                                  <Link to={`/profile/${username}`} className="font-semibold text-text-0 hover:text-accent">
-                                    {applicant?.legalName}
-                                  </Link>
-                                ) : (
-                                  <span className="font-semibold text-text-0">{applicant?.legalName ?? 'Applicant'}</span>
-                                )}
+                                <div className="mb-0.5 flex items-center gap-1.5">
+                                  {username ? (
+                                    <Link to={`/profile/${username}`} className="font-semibold text-text-0 hover:text-accent">
+                                      {applicant?.legalName}
+                                    </Link>
+                                  ) : (
+                                    <span className="font-semibold text-text-0">{applicant?.legalName ?? 'Applicant'}</span>
+                                  )}
+                                  <span className="rounded-full border border-trust px-1.5 py-0.5 font-mono text-[9.5px] font-semibold text-trust">{trust.total}</span>
+                                </div>
                                 {canManage && (
                                   <div className="mt-1.5 flex gap-1.5">
                                     {next && (

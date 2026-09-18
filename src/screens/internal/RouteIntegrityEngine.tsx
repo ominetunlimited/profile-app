@@ -126,16 +126,19 @@ function RouteRow({ row }: { row: RouteHealthRow }) {
   )
 }
 
+// Design handoff gap audit: mockup status pills are a solid soft-tint
+// fill with no border; real rendered as a bordered outline on transparent
+// background instead — fixed now that the -soft tokens exist to fill with.
 function StatusBadge({ label, tone }: { label: string; tone: 'success' | 'warning' | 'danger' }) {
-  const toneClass = tone === 'danger' ? 'border-danger text-danger' : tone === 'warning' ? 'border-warning text-warning' : 'border-success text-success'
-  return <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${toneClass}`}>{label}</span>
+  const toneClass = tone === 'danger' ? 'bg-danger-soft text-danger' : tone === 'warning' ? 'bg-warning-soft text-warning' : 'bg-success-soft text-success'
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${toneClass}`}>{label}</span>
 }
 
 function Stat({ label, value, tone }: { label: string; value: number; tone?: 'success' | 'warning' | 'danger' }) {
   const toneClass = tone === 'danger' ? 'text-danger' : tone === 'warning' ? 'text-warning' : tone === 'success' ? 'text-success' : 'text-text-0'
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      <p className="text-xs uppercase tracking-wide text-text-2">{label}</p>
+      <p className="font-mono text-xs uppercase tracking-wide text-text-2">{label}</p>
       <p className={`mt-1 font-mono text-2xl font-semibold ${toneClass}`}>{value}</p>
     </div>
   )

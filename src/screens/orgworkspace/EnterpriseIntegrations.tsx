@@ -35,7 +35,7 @@ export function EnterpriseIntegrations() {
             disabled={!canEdit}
             onClick={() => setKeys((k) => [...k, `pk_demo_${crypto.randomUUID().slice(0, 12)}`])}
           >
-            Generate key
+            Generate new key
           </Button>
         </div>
         {keys.length === 0 ? (

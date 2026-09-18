@@ -74,7 +74,11 @@ export function SignInForm() {
 
       {error && (
         <div role="alert" aria-live="polite" className="mb-4 rounded-lg border border-danger bg-surface-sunken p-3 text-sm text-text-0">
-          That email and password don't match, or no account exists yet with those details.
+          That email and password don't match.{' '}
+          <Link to="/auth?mode=recover" className="font-semibold text-accent">
+            Reset your password
+          </Link>{' '}
+          or try again.
         </div>
       )}
 

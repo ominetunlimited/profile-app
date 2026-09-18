@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
@@ -44,6 +44,9 @@ export function CommunityDetail() {
   return (
     <AppShell>
       <div className="mx-auto max-w-[760px] px-4 py-8 sm:px-6">
+        <Link to="/communities" className="mb-3 inline-block text-sm font-semibold text-accent">
+          ← Communities
+        </Link>
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-text-0">{community.name}</h1>
@@ -170,8 +173,21 @@ export function CommunityDetail() {
         )}
 
         {tab === 'about' && (
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <p className="text-sm text-text-1">{community.description}</p>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <p className="text-sm text-text-1">{community.description}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <h2 className="mb-2 text-sm font-semibold text-text-0">Guidelines</h2>
+              <p className="text-sm text-text-1">
+                Real work and real questions only — no self-promotion outside a designated thread, no unverified
+                claims presented as fact, and no vote-brigading or engagement-farming. Moderation follows PROFILE's{' '}
+                <Link to="/community-guidelines" className="text-accent">
+                  platform-wide Community Guidelines
+                </Link>
+                .
+              </p>
+            </div>
           </div>
         )}
       </div>

@@ -28,7 +28,7 @@ function CoverLetterInner() {
     <AppShell>
       <div className="mx-auto max-w-[900px] px-4 py-8 sm:px-6">
         <div className="mb-2 font-mono text-[11px] uppercase tracking-widest text-text-2">Career Engine</div>
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Cover Letter</h1>
+        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Cover letter</h1>
 
         <div className="flex flex-wrap gap-6">
           <div className="flex min-w-[260px] flex-1 flex-col gap-4">

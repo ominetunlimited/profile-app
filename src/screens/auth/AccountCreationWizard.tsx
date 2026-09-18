@@ -469,7 +469,7 @@ function AccountTypeStep({
   const canContinue = (s.accountKind === 'individual' && !!s.pathway) || (s.accountKind === 'organisation' && !!s.orgType)
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">What best describes you?</h1>
+      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">What best describes you right now?</h1>
       <p className="mb-5 text-sm text-text-1">This shapes what PROFILE shows you first. Nothing here is permanent.</p>
 
       <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Individual</div>

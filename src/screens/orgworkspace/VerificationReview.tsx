@@ -48,7 +48,7 @@ export function VerificationReview() {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => decide(org.officialEmail, 'verified')} className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white">
-                    Approve → verified
+                    Approve &amp; provision
                   </button>
                   <button onClick={() => decide(org.officialEmail, 'rejected')} className="rounded-lg border border-danger px-3 py-1.5 text-xs font-semibold text-danger">
                     Reject

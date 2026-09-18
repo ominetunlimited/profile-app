@@ -8,6 +8,7 @@ import { createDraftTemplate, listCreatorTemplates } from '@/app/creatorTemplate
 import { buildCvData } from '@/app/careerData'
 import { buildPortfolioData } from '@/app/portfolioData'
 import { computeTrustScore } from '@/app/trustScore'
+import { logAiDecision } from '@/app/aiDecisionLogStore'
 
 const TABS = ['advisor', 'creator-hub'] as const
 
@@ -49,6 +50,7 @@ export function AdvisorCreatorHub() {
     const portfolio = buildPortfolioData(account)
     const trust = computeTrustScore(account)
     const activities = account ? listActivities(owner) : []
+    const dataAccessed = ['cv', 'portfolio', 'trust_score', 'skills', 'tools', 'recent_activities']
 
     try {
       const res = await fetch('/api/advisor', {
@@ -75,6 +77,9 @@ export function AdvisorCreatorHub() {
         setHistory((h) => [...h, { role: 'error', text: data.error ?? 'Something went wrong.' }])
       } else {
         setHistory((h) => [...h, { role: 'assistant', text: data.reply }])
+        // §48 AI Engine governance — every real AI output gets a real audit
+        // trail entry now that Advisor actually calls a model (api/advisor.ts).
+        if (owner) logAiDecision({ surface: 'advisor', output: data.reply, dataAccessed, userId: owner, reviewStatus: 'unreviewed' })
       }
     } catch {
       setHistory((h) => [...h, { role: 'error', text: "Couldn't reach PROFILE Advisor — check your connection and try again." }])

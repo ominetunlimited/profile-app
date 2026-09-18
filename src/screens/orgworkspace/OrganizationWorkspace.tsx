@@ -4,6 +4,14 @@ import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan } from '@/app/accountTypes'
 
 const TABS = ['talent-search', 'requests', 'staff'] as const
+// Design handoff gap audit: mockup labels are "Talent search" / "Verification
+// requests" / "Staff & roles" — real labels via key-replace + CSS
+// `capitalize` dropped the "Verification"/"& roles" qualifiers entirely.
+const TAB_LABEL: Record<(typeof TABS)[number], string> = {
+  'talent-search': 'Talent search',
+  requests: 'Verification requests',
+  staff: 'Staff & roles',
+}
 
 /** §16/§42 Organization Workspace — talent search, requests, staff. */
 export function OrganizationWorkspace() {
@@ -19,9 +27,9 @@ export function OrganizationWorkspace() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`-mb-px border-b-2 pb-3 text-sm font-semibold capitalize ${tab === t ? 'border-accent text-text-0' : 'border-transparent text-text-1'}`}
+            className={`-mb-px border-b-2 pb-3 text-sm font-semibold ${tab === t ? 'border-accent text-text-0' : 'border-transparent text-text-1'}`}
           >
-            {t.replace('-', ' ')}
+            {TAB_LABEL[t]}
           </button>
         ))}
       </div>
@@ -38,8 +46,9 @@ export function OrganizationWorkspace() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search verified candidates by skill, trust tier, or profession…"
-            className="mb-4 min-h-[44px] w-full rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
+            className="mb-2 min-h-[44px] w-full rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
           />
+          <p className="mb-4 text-xs text-text-2">Ranked by Trust Score and verified evidence — never by followers, likes or views.</p>
           <div className="mb-4 flex flex-wrap gap-1.5">
             {['Verified Identity', 'Verified Education', 'Verified Employment', 'Verified Skills'].map((f) => (
               <span key={f} className="rounded-full border border-border px-3 py-1 text-xs text-text-1">

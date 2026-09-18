@@ -27,12 +27,11 @@ export function listAiDecisions(): AiDecisionLogEntry[] {
 }
 
 /**
- * No call site in this build ever invokes this. §48.11's AI Gateway doesn't
- * exist yet — Cover Letter is honestly template-assembled (not AI) and
- * Advisor honestly declines every question, so there is no real AI output
- * anywhere to log. This function exists so the log has a real, correct write
- * path ready for when an actual AI Gateway lands — not to be called
- * speculatively or seeded with fabricated entries to make the log look busy.
+ * Called from AdvisorCreatorHub.tsx after every real PROFILE Advisor reply
+ * (api/advisor.ts, a Vercel serverless function backed by the Anthropic
+ * API) — the one real AI Gateway call site this build has. Cover Letter
+ * remains honestly template-assembled (not AI), so it does not call this.
+ * Never call this speculatively or seed it with fabricated entries.
  */
 export function logAiDecision(entry: Omit<AiDecisionLogEntry, 'id' | 'timestamp'>): void {
   const record: AiDecisionLogEntry = { ...entry, id: crypto.randomUUID(), timestamp: new Date().toISOString() }

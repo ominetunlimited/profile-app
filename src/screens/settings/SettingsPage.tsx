@@ -56,7 +56,10 @@ export function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto flex max-w-[1000px] gap-6 px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-[1000px] px-4 pt-8 sm:px-6">
+        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Settings &amp; Privacy</h1>
+      </div>
+      <div className="mx-auto flex max-w-[1000px] gap-6 px-4 pb-8 sm:px-6">
         <nav aria-label="Settings sections" className="hidden w-52 flex-none flex-col gap-0.5 sm:flex">
           {tabs.map(([key, label]) => (
             <button

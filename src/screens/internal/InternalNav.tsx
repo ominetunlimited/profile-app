@@ -7,6 +7,12 @@ const LINKS = [
   { to: '/internal/route-integrity', label: 'Route Integrity' },
   { to: '/internal/dispute-review', label: 'Dispute Review' },
   { to: '/internal/content-console', label: 'Content Console' },
+  // Design handoff gap audit — Route Integrity Engine's own worked example
+  // (a Mission Control link with no destination, resolved by registering
+  // the route rather than removing the link, per routeRegistry.ts's own
+  // note on '/mission-control/executive-copilots') was only half true: the
+  // route existed but no real link to it did. This is that link.
+  { to: '/mission-control/executive-copilots', label: 'Executive Copilots' },
 ]
 
 const OWNER_LINKS = [{ to: '/internal/admin-management', label: 'Admin Management' }]
