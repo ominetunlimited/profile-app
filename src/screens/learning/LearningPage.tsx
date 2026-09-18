@@ -78,22 +78,27 @@ export function LearningPage() {
             {ACADEMY_TOPICS.map((topic) => {
               const enrolled = enrollments.some((e) => e.topic === topic)
               return (
-                <div key={topic} className="rounded-xl border border-border bg-surface p-4">
-                  <div className="mb-1 font-semibold text-text-0">{topic}</div>
-                  <div className="mb-3 text-xs text-text-1">PROFILE Academy · self-paced course</div>
-                  {enrolled ? (
-                    <span className="text-xs font-semibold text-text-2">Already enrolled</span>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        startCourse(owner, topic)
-                        refresh()
-                      }}
-                    >
-                      Start course
-                    </Button>
-                  )}
+                <div key={topic} className="overflow-hidden rounded-xl border border-trust bg-surface shadow-sm">
+                  <div className="flex h-[100px] items-center justify-center bg-[repeating-linear-gradient(45deg,var(--surface-sunken)_0_8px,var(--accent-soft)_8px_16px)] font-mono text-[10.5px] text-text-2">
+                    {'// course thumbnail'}
+                  </div>
+                  <div className="p-4">
+                    <div className="mb-1 font-semibold text-text-0">{topic}</div>
+                    <div className="mb-3 text-xs text-text-1">PROFILE Academy · self-paced course</div>
+                    {enrolled ? (
+                      <span className="text-xs font-semibold text-text-2">Already enrolled</span>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          startCourse(owner, topic)
+                          refresh()
+                        }}
+                      >
+                        Start course
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )
             })}
@@ -124,9 +129,12 @@ export function LearningPage() {
           ) : (
             <div className="flex flex-col gap-2">
               {completed.map((e) => (
-                <div key={e.topic} className="rounded-lg border border-success bg-surface p-3 text-sm">
-                  <span className="font-medium text-text-0">{e.topic}</span>
-                  <span className="ms-2 text-xs text-text-2">Completed {e.completedAt ? new Date(e.completedAt).toLocaleDateString() : ''} · on your CV</span>
+                <div key={e.topic} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface p-3">
+                  <span>
+                    <span className="block text-sm font-semibold text-text-0">{e.topic}</span>
+                    <span className="block text-xs text-text-1">Completed {e.completedAt ? new Date(e.completedAt).toLocaleDateString() : ''} · PROFILE Academy</span>
+                  </span>
+                  <span className="flex items-center gap-1 rounded-full border border-success bg-success-soft px-2.5 py-0.5 text-[11px] font-semibold text-success">✓ On your CV</span>
                 </div>
               ))}
             </div>
