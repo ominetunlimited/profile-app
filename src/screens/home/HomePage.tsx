@@ -6,9 +6,13 @@ import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
+import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, listFeedFor, ownerKey, postActivity } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { computeTrustScore } from '@/app/trustScore'
+import { listVerificationRequests } from '@/app/verificationRequestStore'
+import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
 
 
 /** §11.4 POST_COMPOSER_TYPES, verbatim. */
@@ -54,69 +58,227 @@ export function HomePage() {
     setFeed(listFeedFor(owner))
   }
 
+  // Design handoff gap audit — PROFILE Home.dc.html's right sidebar
+  // (Trust Score, Profile health, Matched opportunities, Verification in
+  // progress) had no real equivalent at all. Every figure below is
+  // computed from this build's own real stores — none of the mockup's
+  // illustrative numbers (14 records, 72% readiness, "812" score) are
+  // ported; where this build genuinely has no real signal for something
+  // the mockup shows, that's called out below rather than invented.
+  const myActivities = listActivities(owner)
+  const distinctSkills = Array.from(new Set(myActivities.flatMap((a) => a.skills.map((s) => s.trim()).filter(Boolean))))
+  const trust = computeTrustScore(account)
+  const verifications = listVerificationRequests(owner)
+  const verifiedCount = verifications.filter((v) => v.status === 'verified').length
+  const inProgressVerifications = verifications.filter((v) => v.status !== 'verified' && v.status !== 'rejected')
+  const identityConfirmed = verifications.some((v) => v.moduleKey === 'identity' && v.status === 'verified')
+  const verificationCoveragePct = verifications.length > 0 ? Math.round((verifiedCount / verifications.length) * 100) : 0
+  const health = [
+    { label: 'Identity confirmed', value: identityConfirmed ? 'Yes' : 'No', pct: identityConfirmed ? 100 : 8 },
+    { label: 'Evidence depth', value: `${myActivities.length} record${myActivities.length === 1 ? '' : 's'}`, pct: Math.min(100, myActivities.length * 8) },
+    { label: 'Verification coverage', value: `${verificationCoveragePct}%`, pct: verificationCoveragePct },
+    { label: 'Skills mapped', value: `${distinctSkills.length}`, pct: Math.min(100, distinctSkills.length * 5) },
+  ]
+  const healthPct = Math.round(health.reduce((s, h) => s + h.pct, 0) / health.length)
+
+  // Matched opportunities — a real, if simple, match%: overlap between
+  // this account's own recorded skills and a job's required skills. Never
+  // a fabricated ML-style score, since no matching engine exists.
+  const matchedOpportunities = listOpenJobs()
+    .map((job) => {
+      const overlap = job.requiredSkills.filter((req) => distinctSkills.some((s) => s.toLowerCase() === req.toLowerCase()))
+      const matchPct = job.requiredSkills.length > 0 ? Math.round((overlap.length / job.requiredSkills.length) * 100) : 0
+      return { job, matchPct, overlap }
+    })
+    .filter((m) => m.matchPct > 0)
+    .sort((a, b) => b.matchPct - a.matchPct)
+    .slice(0, 2)
+
   return (
     <AppShell>
-      <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
-        <h1 className="mb-6 text-xl font-bold text-text-0">Good to see you, {name}.</h1>
+      <div className="mx-auto flex max-w-[1120px] flex-wrap gap-6 px-4 py-8 sm:px-6">
+        <div className="min-w-0 flex-1 basis-[560px]">
+          <h1 className="mb-6 text-xl font-bold text-text-0">Good to see you, {name}.</h1>
 
-        {gaps.length > 0 && (
+          {gaps.length > 0 && (
+            <div className="mb-6 rounded-xl border border-border bg-surface p-4">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Suggested next steps</div>
+              <div className="flex flex-col gap-1.5">
+                {gaps.map((g) => (
+                  <div key={g} className="flex items-center gap-2 text-sm text-text-0">
+                    <span className="text-text-2">·</span> {g}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mb-6 rounded-xl border border-border bg-surface p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Suggested next steps</div>
-            <div className="flex flex-col gap-1.5">
-              {gaps.map((g) => (
-                <div key={g} className="flex items-center gap-2 text-sm text-text-0">
-                  <span className="text-text-2">·</span> {g}
+            {!composerOpen ? (
+              <button onClick={() => setComposerOpen(true)} className="w-full rounded-lg border border-dashed border-border-strong py-3 text-sm font-medium text-text-1">
+                + Record work
+              </button>
+            ) : (
+              <Composer
+                owner={owner}
+                onClose={() => setComposerOpen(false)}
+                onPosted={() => {
+                  setComposerOpen(false)
+                  refresh()
+                }}
+              />
+            )}
+          </div>
+
+          {/* Design handoff gap audit — PROFILE Home.dc.html's 3-metric row.
+              Values are real (own activity/verification data), not the
+              mockup's illustrative "14"/"72%"/"38" — this build has no
+              Career Readiness Engine (§50.9.2) or profile-view tracking
+              yet, so those two stay honestly "—"/0 rather than invented. */}
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <HomeMetric label="Verified records" value={verifiedCount} note="Records confirmed by an institution or employer." link={{ to: '/trust-passport', label: 'View all records' }} />
+            <HomeMetric label="Career readiness" value="—" note="No Career Readiness Engine exists in this build yet (§50.9.2)." link={{ to: '/career-growth', label: "See what's missing" }} />
+            <HomeMetric label="Profile views by verifiers" value={0} note="Recruiters and institutions only. Not a vanity count." link={{ to: '/notifications', label: 'Who viewed' }} />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {feed.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
+                <p className="mb-3">
+                  {myActivityCount === 0
+                    ? 'Nothing here yet — your feed fills in as you record real work, never with filler content.'
+                    : "You've recorded your own work, but your feed is otherwise quiet — follow organisations or connect with people to see their activity here too."}
+                </p>
+                <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold text-accent">
+                  <Link to="/opportunities">Discover opportunities</Link>
+                  <Link to="/communities">Join communities</Link>
                 </div>
-              ))}
+              </div>
+            ) : (
+              feed.map((a, i) => (
+                <div key={a.id} className="flex flex-col gap-4">
+                  <ActivityCard activity={a} viewerAccount={account} viewerEmail={owner} />
+                  {/* Every 4th item, never the very first — a real, labelled,
+                      inline feed item, never an overlay (§7's hard rule). */}
+                  {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
+                    <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} />
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Design handoff gap audit — PROFILE Home.dc.html's right sidebar
+            had no real equivalent at all. Hidden below lg since AppShell's
+            own mobile chrome already reprioritises this content into the
+            main column, matching the mockup's own "Mobile — 390px" note
+            that the sidebar becomes a horizontal set below the fold rather
+            than disappearing. */}
+        <aside className="hidden w-[280px] flex-none flex-col gap-3.5 lg:flex">
+          <div className="flex items-center gap-3.5 rounded-xl border border-border bg-surface p-4">
+            <TrustScoreRing trust={trust} size={64} />
+            <div className="min-w-0 flex-1">
+              <div className="mb-0.5 text-sm font-semibold text-text-0">Trust Score</div>
+              <p className="mb-1.5 text-xs leading-relaxed text-text-1">{trust.tier.label} tier.</p>
+              <Link to="/trust-passport" className="text-xs font-semibold text-trust">
+                How this is calculated
+              </Link>
             </div>
           </div>
-        )}
 
-        <div className="mb-6 rounded-xl border border-border bg-surface p-4">
-          {!composerOpen ? (
-            <button onClick={() => setComposerOpen(true)} className="w-full rounded-lg border border-dashed border-border-strong py-3 text-sm font-medium text-text-1">
-              + Record work
-            </button>
-          ) : (
-            <Composer
-              owner={owner}
-              onClose={() => setComposerOpen(false)}
-              onPosted={() => {
-                setComposerOpen(false)
-                refresh()
-              }}
-            />
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          {feed.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
-              <p className="mb-3">
-                {myActivityCount === 0
-                  ? 'Nothing here yet — your feed fills in as you record real work, never with filler content.'
-                  : "You've recorded your own work, but your feed is otherwise quiet — follow organisations or connect with people to see their activity here too."}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold text-accent">
-                <Link to="/opportunities">Discover opportunities</Link>
-                <Link to="/communities">Join communities</Link>
-              </div>
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <div className="mb-2.5 flex items-baseline justify-between gap-2">
+              <span className="text-sm font-semibold text-text-0">Profile health</span>
+              <span className="font-mono text-xs text-text-1">{healthPct}%</span>
             </div>
-          ) : (
-            feed.map((a, i) => (
-              <div key={a.id} className="flex flex-col gap-4">
-                <ActivityCard activity={a} viewerAccount={account} viewerEmail={owner} />
-                {/* Every 4th item, never the very first — a real, labelled,
-                    inline feed item, never an overlay (§7's hard rule). */}
-                {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
-                  <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} />
-                )}
+            {health.map((h) => (
+              <div key={h.label} className="mb-2.5">
+                <div className="mb-1 flex justify-between gap-2 text-xs text-text-1">
+                  <span>{h.label}</span>
+                  <span className="font-mono text-text-2">{h.value}</span>
+                </div>
+                <div className="h-[5px] overflow-hidden rounded-full bg-surface-sunken">
+                  <div className="h-full rounded-full bg-accent" style={{ width: `${h.pct}%` }} />
+                </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+            <p className="border-t border-border pt-2 text-[11px] text-text-1">Health measures evidence and verification depth. It is not a popularity score.</p>
+          </div>
+
+          {/* Design handoff gap audit — the mockup's Copilot card asserts a
+              specific, written gap analysis ("your hospital commissioning
+              work covers two of four requirements..."). No real gap-
+              analysis engine exists to compute that, and this build never
+              fabricates a specific AI claim with nothing behind it — the
+              real PROFILE Advisor (api/advisor.ts) can actually answer this
+              kind of question live, so this invites that instead of
+              inventing a canned insight. Flagging this substitution rather
+              than silently shipping fabricated analysis. */}
+          <Link to="/career/advisor" className="block rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5">
+            <div className="mb-1.5 font-mono text-[9.5px] font-semibold tracking-wide text-trust">COPILOT</div>
+            <p className="text-xs leading-relaxed text-text-0">
+              Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting — grounded in
+              your real records, never a guess.
+            </p>
+          </Link>
+
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <div className="mb-2.5 text-sm font-semibold text-text-0">Matched opportunities</div>
+            {matchedOpportunities.length === 0 ? (
+              <p className="mb-2.5 text-xs text-text-1">No open listing overlaps your recorded skills yet.</p>
+            ) : (
+              matchedOpportunities.map(({ job, matchPct }) => (
+                <Link key={job.id} to={`/job/${job.id}`} className="mb-2.5 block border-b border-border pb-2.5">
+                  <div className="mb-0.5 flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-semibold text-text-0">{job.title}</span>
+                    <span className="font-mono text-[10.5px] text-trust">{matchPct}%</span>
+                  </div>
+                  <span className="mb-1 block text-[11px] text-text-1">{orgDisplayName(job.orgEmail)}</span>
+                  <span className="block text-[11px] leading-relaxed text-text-1">Based on skills you've recorded that this listing asks for.</span>
+                </Link>
+              ))
+            )}
+            <Link to="/opportunities" className="text-xs font-semibold text-accent">
+              All opportunities
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <div className="mb-2.5 text-sm font-semibold text-text-0">Verification in progress</div>
+            {inProgressVerifications.length === 0 ? (
+              <p className="mb-2.5 text-xs text-text-1">Nothing in progress right now.</p>
+            ) : (
+              inProgressVerifications.map((v) => (
+                <div key={v.id} className="mb-2 flex items-start gap-2">
+                  <span className="mt-1 h-2 w-2 flex-none rounded-full bg-trust" />
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-text-0">{v.moduleName}</div>
+                    <div className="text-[11px] text-text-1">{v.status.replace(/_/g, ' ')} · {v.issuerName}</div>
+                  </div>
+                </div>
+              ))
+            )}
+            <Link to="/trust-passport" className="text-xs font-semibold text-accent">
+              Trust Center
+            </Link>
+          </div>
+        </aside>
       </div>
     </AppShell>
+  )
+}
+
+function HomeMetric({ label, value, note, link }: { label: string; value: string | number; note: string; link: { to: string; label: string } }) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-sm">
+      <span className="font-mono text-[10px] uppercase tracking-wide text-text-2">{label}</span>
+      <span className="font-mono text-2xl font-semibold text-text-0">{value}</span>
+      <span className="text-xs leading-relaxed text-text-1">{note}</span>
+      <Link to={link.to} className="mt-auto text-xs font-semibold text-accent">
+        {link.label}
+      </Link>
+    </div>
   )
 }
 
