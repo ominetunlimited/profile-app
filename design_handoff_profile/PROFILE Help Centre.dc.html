@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-soft:#EDF3FE;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
 [data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-soft:rgba(76,141,255,.14);--shadow-card:0 1px 2px rgba(0,0,0,.4)}
 body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
@@ -20,7 +20,7 @@ a{color:var(--accent);text-decoration:none}
 <a href="PROFILE Public Hero.dc.html" style="display:flex;align-items:center;gap:8px;text-decoration:none"><img src="assets/profile-mark.png" alt="PROFILE" style="display:block;height:22px;width:auto;aspect-ratio:1352/1736"><span style="font:700 13px Inter,sans-serif;color:var(--text-0)">PROFILE</span></a>
 <button type="button" onClick="{{ toggleTheme }}" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-0);font:500 12px Inter,sans-serif;cursor:pointer">{{ themeLabel }}</button>
 </div>
-<h1 style="margin:0 0 14px;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0);text-align:center">How can we help?</h1>
+<h1 style="margin:0 0 14px;font:700 26px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0);text-align:center">How can we help?</h1>
 <input type="text" value="{{ query }}" onChange="{{ setQuery }}" placeholder="Search help articles…" style="width:100%;box-sizing:border-box;min-height:48px;padding:0 16px;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none;margin-bottom:22px">
 
 <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">

@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--border-strong:#CBD5E1;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-hover:#0048B3;--accent-soft:#EDF3FE;--danger:#C2181D;--danger-soft:#FDECEC;--shadow-elev:0 10px 28px rgba(16,24,40,.14);--focus:#0057D9}
 [data-theme=dark]{--bg:#060E1C;--surface:#0C1829;--surface-sunken:#050B16;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text-0:rgba(255,255,255,.90);--text-1:rgba(255,255,255,.65);--text-2:rgba(255,255,255,.40);--accent:#4C8DFF;--accent-hover:#6BA1FF;--accent-soft:rgba(76,141,255,.14);--danger:#FF7A7A;--danger-soft:rgba(220,38,38,.16);--shadow-elev:0 14px 34px rgba(0,0,0,.55);--focus:#7FB2FF}
 body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
@@ -23,33 +23,34 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover)}
 </div>
 
 <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
-<h1 style="margin:0 0 6px;font:700 26px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Sign in</h1>
+<h1 style="margin:0 0 6px;font:700 26px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0)">Sign in</h1>
 <p style="margin:0 0 24px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">Continue building on proof.</p>
 
 <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;gap:10px;padding:12px 14px;border:1px solid var(--danger);border-radius:10px;background:var(--danger-soft);margin-bottom:16px">
 <span style="flex:none;font:700 12px Inter,sans-serif;color:var(--danger)">!</span>
-<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-0)">That email and password don't match. <a href="#">Reset your password</a> or try again.</div>
+<div style="font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-0)">That email and password don't match. <a href="javascript:void(0)" onClick="{{ sendReset }}">Reset your password</a> or try again.</div>
 </div>
 </sc-if>
 
 <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:8px">
 <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Email address</span><input type="text" value="{{ email }}" onChange="{{ setEmail }}" placeholder="you@example.com" style="min-height:46px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:400 14px Inter,sans-serif;outline:none" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)"></label>
 <label style="display:flex;flex-direction:column;gap:6px">
-<span style="display:flex;justify-content:space-between"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Password</span><a href="#" style="font:500 12px Inter,sans-serif">Forgot password?</a></span>
+<span style="display:flex;justify-content:space-between"><span style="font:500 12px Inter,sans-serif;color:var(--text-0)">Password</span><a href="javascript:void(0)" onClick="{{ sendReset }}" style="font:500 12px Inter,sans-serif">Forgot password?</a></span>
 <span style="display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface)"><input type="{{ passType }}" value="{{ pass }}" onChange="{{ setPass }}" placeholder="Your password" style="flex:1;min-width:0;min-height:46px;padding:0 12px;border:none;background:transparent;color:var(--text-0);font:400 14px Inter,sans-serif;outline:none"><button type="button" onClick="{{ toggleEye }}" style="flex:none;width:40px;height:40px;border:none;background:transparent;color:var(--text-1);font:12px Inter,sans-serif;cursor:pointer">{{ eyeLabel }}</button></span>
 </label>
 </div>
 <button type="button" onClick="{{ submit }}" style="width:100%;min-height:46px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer;margin-bottom:18px">Sign in</button>
 <div style="text-align:center;font:400 13px Inter,sans-serif;color:var(--text-1)">New to PROFILE? <a href="PROFILE Account Creation.dc.html">Open your PROFILE</a></div>
+<sc-if value="{{ resetSent }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;padding:10px 13px;border:1px solid var(--accent);border-radius:9px;background:var(--accent-soft);text-align:center;font:500 12.5px Inter,sans-serif;color:var(--text-0)">Reset link sent — check your email.</div></sc-if>
 </sc-if>
 
 <sc-if value="{{ isMfa }}" hint-placeholder-val="{{ false }}">
-<h1 style="margin:0 0 6px;font:700 24px/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Confirm it's you</h1>
+<h1 style="margin:0 0 6px;font:700 24px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0)">Confirm it's you</h1>
 <p style="margin:0 0 22px;font:400 13.5px/1.6 Inter,sans-serif;color:var(--text-1)">We sent a 6-digit code to your email — this device hasn't signed in before.</p>
 <input type="text" inputmode="numeric" maxlength="6" value="{{ mfaCode }}" onChange="{{ setMfa }}" placeholder="000000" style="width:100%;min-height:50px;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text-0);font:600 22px 'JetBrains Mono',monospace;letter-spacing:.3em;text-align:center;outline:none;margin-bottom:16px;box-sizing:border-box" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)">
 <button type="button" onClick="{{ finishMfa }}" style="width:100%;min-height:46px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;cursor:pointer;margin-bottom:12px">Verify and continue</button>
-<div style="text-align:center;font:400 12.5px Inter,sans-serif;color:var(--text-1)">Didn't get it? <a href="#">Resend code</a></div>
+<div style="text-align:center;font:400 12.5px Inter,sans-serif;color:var(--text-1)">{{ resendLabel }} <a href="javascript:void(0)" onClick="{{ resendCode }}">{{ resendAction }}</a></div>
 </sc-if>
 </div>
 
@@ -61,7 +62,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover)}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
 class Component extends DCLogic {
-  state = { theme: null, stage: "form", email: "", pass: "", showPass: false, mfaCode: "", triedOnce: false };
+  state = { theme: null, stage: "form", email: "", pass: "", showPass: false, mfaCode: "", triedOnce: false, resetSent: false, resendCount: 0 };
   componentDidMount() {
     let saved = null;
     try { saved = localStorage.getItem("profile-ds-theme"); } catch (e) {}
@@ -85,7 +86,10 @@ class Component extends DCLogic {
         else this.setState({ triedOnce: true });
       },
       mfaCode: s.mfaCode, setMfa: e => this.setState({ mfaCode: e.target.value.replace(/\D/g, "").slice(0, 6) }),
-      finishMfa: () => { window.location.href = "PROFILE Home.dc.html"; }
+      finishMfa: () => { window.location.href = "PROFILE Home.dc.html"; },
+      resetSent: s.resetSent, sendReset: () => this.setState({ resetSent: true }),
+      resendLabel: s.resendCount > 0 ? "Code resent." : "Didn't get it?", resendAction: s.resendCount > 0 ? "Send again" : "Resend code",
+      resendCode: () => this.setState(st => ({ resendCount: st.resendCount + 1 }))
     };
   }
 }

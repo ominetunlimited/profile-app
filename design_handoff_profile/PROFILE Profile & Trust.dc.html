@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{
 --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
 --border:#E5E7EB;--border-strong:#CBD5E1;
@@ -37,7 +37,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;padding:32px 0 18px">
 <div>
 <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px">Phase 5 · Master Prompt §16, §17, §18</div>
-<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">Profile, Trust Passport, verification</h1>
+<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.025em;color:var(--text-0)">Profile, Trust Passport, verification</h1>
 <p style="margin:10px 0 0;max-width:64ch;font:400 14px/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">A living professional identity where evidence outranks presentation. The passport is the shareable, revocable view of it; verification states are the machinery underneath.</p>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -132,7 +132,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:14px;padding-top:14px;border-top:1px solid var(--trust);font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">
 <div style="flex:1 1 260px;min-width:0"><strong style="font-weight:600">What would raise it:</strong> a load-calculation credential (+18 est.), or verification of the two pending records (+22 est.). Estimates, not promises.</div>
-<div style="flex:1 1 260px;min-width:0"><strong style="font-weight:600">Disagree with it?</strong> <a href="#">Open a score review</a>. A human reviews the inputs and you get a written response within five working days.</div>
+<div style="flex:1 1 260px;min-width:0"><strong style="font-weight:600">Disagree with it?</strong> <a href="PROFILE Dispute & Appeal.dc.html">Open a score review</a>. A human reviews the inputs and you get a written response within five working days.</div>
 </div>
 </div>
 </sc-if>
@@ -182,7 +182,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 
 <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--border)">
 <span style="flex:1 1 200px;min-width:0;font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ r.source }}</span>
-<a href="#" style="flex:none;font:500 12px Inter,sans-serif">Open record</a>
+<a href="PROFILE Dispute & Appeal.dc.html" style="flex:none;font:500 12px Inter,sans-serif">Open record</a>
 </div>
 </div>
 <sc-if value="{{ r.noticePlain }}" hint-placeholder-val="{{ false }}">
@@ -302,7 +302,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 </div>
 <div style="padding-top:14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;font:400 11px/1.55 Inter,sans-serif;color:var(--text-1)">
 <div style="flex:1 1 180px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">Issued</strong> 12 Aug 2026 to Aurora Power<br><strong style="font-weight:600;color:var(--text-0)">Expires</strong> 11 Sep 2026 · revocable any time</div>
-<div style="flex:1 1 150px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">Verify independently</strong><br><a href="#">profile.app/v/PID-8F3A-22C1-9K</a></div>
+<div style="flex:1 1 150px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">Verify independently</strong><br><span style="color:var(--text-1)" title="Illustrative — real records get a live verification URL">profile.app/v/PID-8F3A-22C1-9K</span></div>
 </div>
 </div>
 </div>
@@ -405,7 +405,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font:400 12px/1.65 Inter,sans-serif;color:var(--text-1)">
 <div style="flex:1 1 240px;min-width:0"><strong style="font-weight:600;color:var(--text-0)">✓ shown · ◷ on request · ✕ never.</strong> The AI column governs what Copilot may read when generating a CV or answering a recruiter's question. It never reads anything marked ✕, and it never asserts a claim no record supports.</div>
-<div style="flex:1 1 200px;min-width:0"><a href="#">Full privacy statement</a> · <a href="#">Download my data</a> · <a href="#">Delete my account</a></div>
+<div style="flex:1 1 200px;min-width:0"><a href="PROFILE Legal.dc.html">Full privacy statement</a> · <a href="PROFILE Settings & Privacy.dc.html">Download my data</a> · <a href="PROFILE Settings & Privacy.dc.html">Delete my account</a></div>
 </div>
 </div>
 </sc-if>
@@ -431,7 +431,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <span style="flex:1;min-width:0"><span style="display:block;font:700 16px Inter,sans-serif;color:var(--text-0);letter-spacing:-.02em">Amara Okafor</span><span style="display:block;font:400 12px Inter,sans-serif;color:var(--text-1);margin-top:2px">Solar and electrical engineer</span><span style="display:block;font:400 11px Inter,sans-serif;color:var(--text-2);margin-top:2px">Lagos, Nigeria</span></span>
 </div>
 <div style="display:flex;gap:9px">
-<div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 12px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">TRUST SCORE</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">812</div><a href="#" style="display:block;font:500 10.5px Inter,sans-serif;color:var(--trust);margin-top:4px">How it's calculated</a></div>
+<div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 12px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">TRUST SCORE</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">812</div><a href="PROFILE Trust Centre.dc.html" style="display:block;font:500 10.5px Inter,sans-serif;color:var(--trust);margin-top:4px">How it's calculated</a></div>
 <div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px 12px"><div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:5px">VERIFIED</div><div style="font:600 19px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">14</div><div style="font:400 10.5px Inter,sans-serif;color:var(--text-1);margin-top:4px">by 6 verifiers</div></div>
 </div>
 <button type="button" style="min-height:44px;border:none;border-radius:9px;background:var(--accent);color:#fff;font:600 13px Inter,sans-serif;cursor:pointer">Share Trust Passport</button>

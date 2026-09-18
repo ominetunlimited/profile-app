@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{
 --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
 --border:#E5E7EB;--border-strong:#CBD5E1;
@@ -49,7 +49,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 
 <header style="position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(6px)">
 <div style="max-width:1360px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px clamp(16px,3vw,32px)">
-<a href="#" aria-label="PROFILE home" style="display:flex;align-items:center;gap:9px;flex:none;order:1">
+<a href="PROFILE Public Hero.dc.html" aria-label="PROFILE home" style="display:flex;align-items:center;gap:9px;flex:none;order:1">
 <img src="assets/profile-mark.png" alt="" style="display:block;height:28px;width:auto;aspect-ratio:1352/1736">
 <span style="font:700 15px Inter,sans-serif;letter-spacing:-.01em;color:var(--text-0)">PROFILE</span>
 </a>
@@ -65,7 +65,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <sc-if value="{{ solutionsOpen }}" hint-placeholder-val="{{ false }}">
 <div style="position:absolute;top:calc(100% + 8px);left:-4px;width:560px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);box-shadow:var(--shadow-elev);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:4px;z-index:50">
 <sc-for list="{{ solutionLinks }}" as="s" hint-placeholder-count="8">
-<a href="#" style="display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:9px">
+<a href="PROFILE About & Solutions.dc.html" style="display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:9px">
 <span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ s.title }}</span>
 <span style="font:400 11px Inter,sans-serif;color:var(--text-1)">{{ s.sub }}</span>
 </a>
@@ -77,7 +77,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <a href="#opportunities" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Opportunities</a>
 <a href="PROFILE CV Templates.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Career</a>
 <a href="PROFILE Blog & News.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Blog</a>
-<a href="#" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Help</a>
+<a href="PROFILE Help Centre.dc.html" style="padding:9px 11px;border-radius:8px;font:500 13px Inter,sans-serif;color:var(--text-1);white-space:nowrap">Help</a>
 </nav>
 </div>
 </header>
@@ -86,7 +86,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="position:absolute;inset:0;background:radial-gradient(circle at 22% 18%,var(--accent-soft),transparent 55%),radial-gradient(circle at 82% 8%,var(--trust-soft),transparent 50%);pointer-events:none"></div>
 <div style="max-width:900px;margin:0 auto;position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px">
 <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font:500 11.5px Inter,sans-serif;color:var(--text-1)">Built on Proof</span>
-<h1 style="margin:0;font:800 clamp(34px,6.4vw,64px)/1.05 Inter,sans-serif;letter-spacing:-.03em;color:var(--text-0);text-wrap:balance">Where work becomes credibility.</h1>
+<h1 style="margin:0;font:800 clamp(34px,6.4vw,64px)/1.05 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0);text-wrap:balance">Where work becomes credibility.</h1>
 <p style="margin:0;max-width:62ch;font:400 clamp(15px,1.6vw,18px)/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Build your professional identity, turn your work into evidence, verify what matters, and let trust — not attention — open the next opportunity.</p>
 <div style="display:flex;flex-wrap:wrap;gap:11px;justify-content:center;margin-top:6px">
 <a href="PROFILE Account Creation.dc.html" style="height:48px;padding:0 22px;display:flex;align-items:center;border-radius:10px;background:var(--accent);color:#fff;font:600 15px Inter,sans-serif;box-shadow:var(--shadow-elev)">Open Your PROFILE</a>
@@ -143,7 +143,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.09em;color:var(--trust);margin-bottom:9px">TRUST</div>
 <h2 style="margin:0 0 12px;font:700 clamp(22px,2.8vw,30px)/1.2 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Credibility should be earned, not assumed.</h2>
 <p style="margin:0 0 16px;max-width:52ch;font:400 14px/1.7 Inter,sans-serif;color:var(--text-1)">Every trust-bearing number on PROFILE opens into a plain-language explanation of how it was calculated. No score is ever just asserted.</p>
-<a href="#" style="font:600 13.5px Inter,sans-serif">Visit the Trust Centre →</a>
+<a href="PROFILE Trust Centre.dc.html" style="font:600 13.5px Inter,sans-serif">Visit the Trust Centre →</a>
 </div>
 <div style="flex:1 1 300px;min-width:260px;border:1px solid var(--trust);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-elev);padding:18px">
 <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
@@ -227,7 +227,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <h3 style="margin:0;font:800 27px/1.1 Inter,sans-serif;letter-spacing:-.02em;color:var(--text-0)">Where work becomes credibility.</h3>
 <p style="margin:0;font:400 12.5px/1.6 Inter,sans-serif;color:var(--text-1)">Build identity, record evidence, get it verified, grow.</p>
 <a href="PROFILE Account Creation.dc.html" style="width:100%;height:46px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif">Open Your PROFILE</a>
-<a href="#" style="font:600 13px Inter,sans-serif;color:var(--text-0)">See how it works</a>
+<a href="PROFILE About & Solutions.dc.html" style="font:600 13px Inter,sans-serif;color:var(--text-0)">See how it works</a>
 </div>
 <div style="padding:16px;border-top:1px solid var(--border)">
 <div style="font:600 11.5px Inter,sans-serif;color:var(--text-0);margin-bottom:8px">PROFILE for...</div>

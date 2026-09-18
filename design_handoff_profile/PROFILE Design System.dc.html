@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{
 --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
 --border:#E5E7EB;--border-strong:#CBD5E1;
@@ -31,6 +31,8 @@
 [data-theme=dark][data-accent=orange]{--cta:#FF8A3D;--cta-hover:#FFA063;--cta-press:#F2762A;--cta-soft:rgba(255,138,61,.14);}
 body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif;transition:background-color .28s cubic-bezier(.22,.61,.36,1),color .28s cubic-bezier(.22,.61,.36,1);-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);text-decoration:underline}
+.ds-card-hover{transition:transform .18s ease,box-shadow .18s ease}
+.ds-card-hover:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,87,217,.10)}
 @keyframes ds-spin{to{transform:rotate(360deg)}}
 @keyframes ds-shimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}}
@@ -41,7 +43,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <header style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;padding:44px 0 22px;border-bottom:1px solid var(--border)">
 <div style="min-width:0">
 <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:12px">Foundation · v0.1 · Master Prompt §3</div>
-<h1 style="margin:0;font:700 clamp(28px,4vw,42px)/1.08 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">PROFILE Design System</h1>
+<h1 style="margin:0;font:700 clamp(28px,4vw,42px)/1.08 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0)">PROFILE Design System</h1>
 <p style="margin:12px 0 0;max-width:62ch;font:400 15px/1.65 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">Tokens, typography, and the component set the product is assembled from. Light and dark are two tuned themes over one token layer, not an inversion. Every value here comes from the Master Prompt; where it was silent, the decision is labelled.</p>
 </div>
 <div style="display:flex;gap:8px;align-items:center;flex:none">
@@ -134,7 +136,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 
 <section id="type" style="padding:56px 0 0;scroll-margin-top:20px">
 <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--accent)">02</span><h2 style="margin:0;font:600 24px/1.2 Inter,sans-serif;letter-spacing:-.015em;color:var(--text-0)">Typography</h2></div>
-<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Inter for the interface, IBM Plex Sans for dense data tables, JetBrains Mono for anything a person might need to read character by character. All sizes are fluid via clamp; nothing below 12px ships.</p>
+<p style="margin:0 0 26px;max-width:66ch;font:400 14px/1.65 Inter,sans-serif;color:var(--text-1)">Plus Jakarta Sans for headings only (h1–h3 / page titles — bold, distinctive, merged in from the Figma-Make source). Inter for the interface, IBM Plex Sans for dense data tables, JetBrains Mono for anything a person might need to read character by character. All sizes are fluid via clamp; nothing below 12px ships.</p>
 <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:16px">
 <sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="9">
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
@@ -313,6 +315,18 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 </div>
 <div style="font:400 13px/1.65 Inter,sans-serif;color:var(--text-1);min-height:52px">{{ tabBody }}</div>
 <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Arrow keys move between tabs, Tab moves into the panel. Selected state is weight plus rule, not colour alone. Overflowing sets scroll horizontally rather than wrapping to two rows.</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">
+<h3 style="margin:0 0 14px;font:600 16px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">Card hover-lift &amp; Trust ring (merged from Figma)</h3>
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px">
+<div class="ds-card-hover" style="flex:1;min-width:160px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);padding:14px;cursor:pointer"><div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:4px">Hover this card</div><div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">Lifts 2px, gains a soft accent-tinted shadow. Class: <span style="font-family:'JetBrains Mono',monospace">.ds-card-hover</span>. Use on any clickable card — never on static display cards.</div></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px">
+<div style="width:58px;height:58px;border-radius:50%;background:conic-gradient(var(--accent) 0 81.2%,var(--surface-sunken) 81.2% 100%);display:flex;align-items:center;justify-content:center"><span style="width:44px;height:44px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">812</span></div>
+<div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1);max-width:180px">Trust Score ring — <span style="font-family:'JetBrains Mono',monospace">conic-gradient</span> fill to score/1000, never animated on every render (§32 — once on first reveal only).</div>
+</div>
+</div>
+<div style="padding-top:12px;border-top:1px solid var(--border);font:400 11.5px/1.6 Inter,sans-serif;color:var(--text-1)">Both patterns adopted from the Figma-Make source as genuine improvements. Not adopted from that source: like/comment/view counters and any "upgrade to see who viewed you" pattern — both conflict with §16/§48's anti-vanity-metric rule and stay out of PROFILE.</div>
 </div>
 
 <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);padding:20px 22px">

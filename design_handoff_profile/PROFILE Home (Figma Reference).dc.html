@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface-sunken:#F1F5F9;--border:#E5E7EB;--text-0:#1E293B;--text-1:#5B6B80;--text-2:#8496A9;--accent:#0057D9;--accent-deep:#003A8C;--gold:#F4B400;--success:#16A34A;--warning:#D97706;--shadow-card:0 1px 2px rgba(16,24,40,.06)}
+body{margin:0;background:var(--bg);color:var(--text-0);font-family:Inter,system-ui,sans-serif}
+.card-hover{transition:transform .18s ease,box-shadow .18s ease}
+.card-hover:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,87,217,.10)}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms !important}}
+</style></helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 60px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:22px 0 10px">
+<div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--text-2);text-transform:uppercase">Figma-sourced reference · not the shipped Home</div>
+</div>
+<div style="margin-bottom:12px;padding:10px 14px;border-left:3px solid var(--warning);background:#FEF3E2;border-radius:0 10px 10px 0;font:400 12px/1.6 Inter,sans-serif;color:var(--text-0)">This is a faithful recreation of the Figma-Make Dashboard, kept as-is for comparison. It uses like/comment counts and "recruiter view" upsell copy that conflict with our Master Prompt's anti-vanity-metric rule — flagged, not silently fixed.</div>
+
+<div style="border-radius:18px;padding:22px;color:#fff;background:linear-gradient(135deg,var(--accent-deep),var(--accent));margin-bottom:20px">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-bottom:16px">
+<div>
+<div style="font:700 10.5px Inter,sans-serif;letter-spacing:.1em;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Today's Focus</div>
+<h1 style="margin:0;font:700 22px 'Plus Jakarta Sans',sans-serif">Good morning, James <span style="color:var(--gold)">✦</span></h1>
+<p style="margin:4px 0 0;font:400 13px Inter,sans-serif;color:rgba(255,255,255,.7)">Trust Score +3 this week · 4 ranked actions ready</p>
+</div>
+<div style="text-align:right"><div style="font:800 30px 'Plus Jakarta Sans',sans-serif">87</div><div style="font:400 11px Inter,sans-serif;color:rgba(255,255,255,.6)">Trust Score</div></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+<sc-for list="{{ focusCards }}" as="f" hint-placeholder-count="4">
+<button type="button" style="text-align:left;border:none;background:rgba(255,255,255,.1);border-radius:11px;padding:11px;cursor:pointer">
+<span style="display:inline-block;padding:2px 7px;border-radius:20px;background:{{ f.badgeBg }};color:{{ f.badgeInk }};font:700 9.5px Inter,sans-serif;margin-bottom:7px">{{ f.badge }}</span>
+<div style="font:600 12px/1.3 Inter,sans-serif;color:#fff;margin-bottom:4px">{{ f.label }}</div>
+<div style="font:400 10px Inter,sans-serif;color:rgba(255,255,255,.6);margin-bottom:6px">{{ f.impact }}</div>
+<div style="font:700 11px Inter,sans-serif;color:var(--gold)">{{ f.cta }} →</div>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+<div class="card-hover" style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:15px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<span style="width:34px;height:34px;border-radius:9px;background:{{ s.bg }};display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif;color:{{ s.color }}">{{ s.glyph }}</span>
+<span style="font:600 11px Inter,sans-serif;color:var(--success)">{{ s.delta }}</span>
+</div>
+<div style="margin-top:10px;font:700 22px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">{{ s.value }}</div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ s.label }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr;gap:20px">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h2 style="margin:0;font:700 16px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">Activity Feed</h2>
+<div style="display:flex;gap:4px">
+<sc-for list="{{ feedTabs }}" as="ft" hint-placeholder-count="3"><button type="button" onClick="{{ ft.onSelect }}" style="padding:5px 11px;border:none;border-radius:8px;background:{{ ft.bg }};color:{{ ft.ink }};font:500 11.5px Inter,sans-serif;cursor:pointer">{{ ft.label }}</button></sc-for>
+</div>
+</div>
+
+<sc-for list="{{ activities }}" as="a" hint-placeholder-count="3">
+<div class="card-hover" style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+<div style="padding:16px">
+<div style="display:flex;gap:10px;align-items:flex-start">
+<span style="width:44px;height:44px;border-radius:50%;background:var(--accent);flex:none;color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px Inter,sans-serif">{{ a.initials }}</span>
+<div style="flex:1;min-width:0">
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font:600 13.5px Inter,sans-serif;color:var(--text-0)">{{ a.name }}</span><sc-if value="{{ a.verified }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px Inter,sans-serif;color:var(--accent);background:#EEF4FF;padding:1px 7px;border-radius:20px">✓ Verified</span></sc-if></div>
+<div style="font:400 11.5px Inter,sans-serif;color:var(--text-1)">{{ a.title }}</div>
+<div style="font:400 10.5px Inter,sans-serif;color:var(--text-2)">{{ a.time }}</div>
+</div>
+<sc-if value="{{ a.addedToCV }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px Inter,sans-serif;color:var(--accent);background:#EEF4FF;padding:2px 8px;border-radius:20px;flex:none">✓ CV</span></sc-if>
+</div>
+<p style="margin:10px 0 0;font:400 13px/1.6 Inter,sans-serif;color:var(--text-0)">{{ a.content }}</p>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"><sc-for list="{{ a.tags }}" as="t" hint-placeholder-count="3"><span style="padding:2px 9px;border-radius:20px;border:1px solid var(--border);font:500 11px Inter,sans-serif;color:var(--text-1)">{{ t }}</span></sc-for></div>
+</div>
+<sc-if value="{{ a.media }}" hint-placeholder-val="{{ false }}"><div style="margin:0 16px 16px;height:170px;border-radius:11px;background:repeating-linear-gradient(45deg,var(--surface-sunken) 0 8px,var(--border) 8px 16px);display:flex;align-items:center;justify-content:center;color:var(--text-2);font:400 10.5px 'JetBrains Mono',monospace">// activity image</div></sc-if>
+<div style="padding:10px 16px;border-top:1px solid var(--surface-sunken);display:flex;gap:2px;align-items:center">
+<button type="button" onClick="{{ a.onLike }}" style="display:flex;align-items:center;gap:5px;padding:6px 10px;border:none;border-radius:8px;background:{{ a.likeBg }};color:{{ a.likeInk }};font:500 11.5px Inter,sans-serif;cursor:pointer">♥ {{ a.likeCount }}</button>
+<button type="button" style="display:flex;align-items:center;gap:5px;padding:6px 10px;border:none;border-radius:8px;background:none;color:var(--text-1);font:500 11.5px Inter,sans-serif;cursor:pointer">💬 {{ a.comments }}</button>
+<button type="button" style="display:flex;align-items:center;gap:5px;padding:6px 10px;border:none;border-radius:8px;background:none;color:var(--text-1);font:500 11.5px Inter,sans-serif;cursor:pointer">Share</button>
+<button type="button" onClick="{{ a.onSave }}" style="margin-left:auto;display:flex;align-items:center;gap:5px;padding:6px 10px;border:none;border-radius:8px;background:{{ a.saveBg }};color:{{ a.saveInk }};font:500 11.5px Inter,sans-serif;cursor:pointer">{{ a.saveLabel }}</button>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px">
+<div style="display:flex;justify-content:space-between;margin-bottom:12px"><h3 style="margin:0;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">Trust Profile</h3><button type="button" style="border:none;background:none;color:var(--accent);font:600 11.5px Inter,sans-serif;cursor:pointer">View report</button></div>
+<div style="display:flex;gap:14px;align-items:center">
+<div style="flex:none;width:58px;height:58px;border-radius:50%;background:conic-gradient(var(--accent) 0 87%,var(--surface-sunken) 87% 100%);display:flex;align-items:center;justify-content:center"><span style="width:44px;height:44px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 15px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">87</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ trustBreakdown }}" as="tb" hint-placeholder-count="4">
+<div><div style="display:flex;justify-content:space-between;font:400 11px Inter,sans-serif;color:var(--text-1);margin-bottom:2px"><span>{{ tb.label }}</span><span style="font-family:'JetBrains Mono',monospace">{{ tb.pct }}%</span></div><div style="height:5px;border-radius:20px;background:var(--surface-sunken)"><div style="height:5px;border-radius:20px;background:var(--accent);width:{{ tb.pct }}%"></div></div></div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px">
+<div style="display:flex;justify-content:space-between;margin-bottom:10px"><h3 style="margin:0;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">Verification Status</h3><span style="font:600 10.5px Inter,sans-serif;color:var(--accent);background:#EEF4FF;padding:2px 8px;border-radius:20px">3 of 4</span></div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ verificationTasks }}" as="v" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:9px">
+<span style="width:19px;height:19px;border-radius:50%;background:{{ v.dotBg }};color:{{ v.dotInk }};flex:none;display:flex;align-items:center;justify-content:center;font:11px Inter,sans-serif">{{ v.glyph }}</span>
+<span style="flex:1;font:400 12px/1.4 Inter,sans-serif;color:var(--text-0)">{{ v.label }}</span>
+<sc-if value="{{ v.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px Inter,sans-serif;color:{{ v.badgeInk }};background:{{ v.badgeBg }};padding:2px 7px;border-radius:20px">{{ v.badgeLabel }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<button type="button" style="margin-top:10px;width:100%;height:34px;border:none;border-radius:9px;background:#EEF4FF;color:var(--accent);font:600 12px Inter,sans-serif;cursor:pointer">Complete verification</button>
+</div>
+
+<div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px">
+<div style="display:flex;justify-content:space-between;margin-bottom:10px"><h3 style="margin:0;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--text-0)">Top Matches</h3><button type="button" style="border:none;background:none;color:var(--accent);font:600 11.5px Inter,sans-serif;cursor:pointer">View all →</button></div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{ opportunities }}" as="o" hint-placeholder-count="3">
+<div style="display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:11px;cursor:pointer">
+<span style="width:34px;height:34px;border-radius:9px;background:var(--surface-sunken);flex:none;display:flex;align-items:center;justify-content:center;font:600 10px Inter,sans-serif;color:var(--text-1)">{{ o.initial }}</span>
+<div style="flex:1;min-width:0"><div style="font:600 12px Inter,sans-serif;color:var(--text-0)">{{ o.title }}</div><div style="font:400 11px Inter,sans-serif;color:var(--text-1)">{{ o.company }}</div><div style="display:flex;gap:6px;align-items:center;margin-top:4px"><span style="font:700 10px Inter,sans-serif;color:var(--accent);background:#EEF4FF;padding:1px 7px;border-radius:20px">{{ o.match }}% match</span><span style="font:400 10px Inter,sans-serif;color:var(--text-2)">{{ o.salary }}</span></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="border-radius:16px;padding:18px;color:#fff;background:linear-gradient(135deg,#0A2E8A,var(--accent))">
+<div style="font:700 13.5px 'Plus Jakarta Sans',sans-serif;margin-bottom:4px">👁 143 recruiters</div>
+<p style="margin:0;font:400 12px/1.6 Inter,sans-serif;color:rgba(255,255,255,.75)">viewed your profile this week.</p>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    feedTab: "All",
+    activities: [
+      { name: "James Okafor", initials: "JO", title: "Software Engineer · Google", time: "2 hours ago", verified: true, addedToCV: true,
+        content: "Completed Google Cloud Professional Architect certification. Three months of study, dozens of practice exams, and countless late nights — but it's done. This one matters for the distributed systems work we're doing.",
+        tags: ["Cloud Architecture", "GCP", "Certification"], media: true, likes: 247, comments: 38, liked: false, saved: false },
+      { name: "Amara Diallo", initials: "AD", title: "UX Research Lead · Figma", time: "5 hours ago", verified: true, addedToCV: false,
+        content: "Published new case study: Redesigning onboarding for 50M users. We reduced drop-off by 40% through a 6-month research-driven redesign.",
+        tags: ["UX Research", "Product Design", "Case Study"], media: false, likes: 892, comments: 124, liked: false, saved: false },
+      { name: "Kwame Mensah", initials: "KM", title: "Structural Engineer · Bechtel", time: "1 day ago", verified: true, addedToCV: false,
+        content: "Received Professional Engineer (PE) license verification from the National Society of Professional Engineers. This license is now verified and visible on my PROFILE trust record.",
+        tags: ["Engineering", "PE License", "Verified Credential"], media: false, likes: 413, comments: 56, liked: false, saved: false }
+    ]
+  };
+  renderVals() {
+    const feedTabDefs = ["All", "Following", "Trending"];
+    const feedTabs = feedTabDefs.map(f => { const on = this.state.feedTab === f; return { label: f, onSelect: () => this.setState({ feedTab: f }), bg: on ? "var(--accent)" : "transparent", ink: on ? "#fff" : "var(--text-1)" }; });
+    const activities = this.state.activities.map((a, i) => ({
+      ...a, likeCount: a.likes + (a.liked ? 1 : 0),
+      likeBg: a.liked ? "#FEE2E2" : "transparent", likeInk: a.liked ? "#DC2626" : "var(--text-1)",
+      onLike: () => { const next = [...this.state.activities]; next[i] = { ...a, liked: !a.liked }; this.setState({ activities: next }); },
+      saveLabel: a.saved ? "Saved" : "Save", saveBg: a.saved ? "#EEF4FF" : "transparent", saveInk: a.saved ? "var(--accent)" : "var(--text-1)",
+      onSave: () => { const next = [...this.state.activities]; next[i] = { ...a, saved: !a.saved }; this.setState({ activities: next }); }
+    }));
+    return {
+      feedTabs, activities,
+      focusCards: [
+        { badge: "Priority", badgeBg: "rgba(255,111,89,.3)", badgeInk: "#FFE4C4", label: "Complete identity verification", impact: "+8 Trust pts", cta: "Start now" },
+        { badge: "Suggested", badgeBg: "rgba(255,255,255,.2)", badgeInk: "rgba(255,255,255,.7)", label: "Request a professional reference", impact: "+3 Trust pts each", cta: "Request" },
+        { badge: "Priority", badgeBg: "rgba(255,111,89,.3)", badgeInk: "#FFE4C4", label: "Recruiter viewed your profile", impact: "Apply while top of mind", cta: "Apply now" },
+        { badge: "Suggested", badgeBg: "rgba(255,255,255,.2)", badgeInk: "rgba(255,255,255,.7)", label: "New 94% match at Stripe", impact: "Closes in 4 days", cta: "View role" }
+      ],
+      stats: [
+        { label: "Profile Views", value: "2,847", delta: "+18%", glyph: "◎", color: "var(--accent)", bg: "#EEF4FF" },
+        { label: "Recruiter Interest", value: "143", delta: "+34%", glyph: "◈", color: "var(--success)", bg: "#DCFCE7" },
+        { label: "Opportunities", value: "28", delta: "+7", glyph: "▣", color: "#7C3AED", bg: "#EDE9FE" },
+        { label: "Trust Score", value: "87", delta: "+3pts", glyph: "★", color: "var(--gold)", bg: "#FFF8E1" }
+      ],
+      trustBreakdown: [
+        { label: "Education", pct: 100 }, { label: "Experience", pct: 75 }, { label: "Skills", pct: 88 }, { label: "References", pct: 60 }
+      ],
+      verificationTasks: [
+        { label: "BSc Computer Science · MIT", glyph: "✓", dotBg: "var(--accent)", dotInk: "#fff", hasBadge: false },
+        { label: "Google Cloud Architect Cert", glyph: "✓", dotBg: "var(--accent)", dotInk: "#fff", hasBadge: false },
+        { label: "Employment at Google (2021–)", glyph: "◔", dotBg: "#FEF3C7", dotInk: "#D97706", hasBadge: true, badgeLabel: "Pending", badgeBg: "#FEF3E2", badgeInk: "var(--warning)" },
+        { label: "GitHub Portfolio Review", glyph: "!", dotBg: "var(--surface-sunken)", dotInk: "var(--text-1)", hasBadge: true, badgeLabel: "Action", badgeBg: "#FFF8E1", badgeInk: "var(--gold)" }
+      ],
+      opportunities: [
+        { initial: "S", title: "Senior Software Engineer", company: "Stripe", match: 94, salary: "$180k–$240k" },
+        { initial: "Sh", title: "Lead Systems Architect", company: "Shopify", match: 88, salary: "$160k–$200k" },
+        { initial: "N", title: "Cloud Infrastructure Lead", company: "Notion", match: 82, salary: "$120/hr" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

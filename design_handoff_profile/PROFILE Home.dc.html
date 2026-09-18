@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
 :root{
 --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#FFFFFF;--surface-sunken:#F1F5F9;--surface-active:#EEF3FB;
 --border:#E5E7EB;--border-strong:#CBD5E1;
@@ -38,7 +38,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;padding:32px 0 18px">
 <div>
 <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px">Phase 4 · Master Prompt §10, §15 · Professional account</div>
-<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 Inter,sans-serif;letter-spacing:-.025em;color:var(--text-0)">PROFILE Home</h1>
+<h1 style="margin:0;font:700 clamp(24px,3.4vw,34px)/1.1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--text-0)">PROFILE Home</h1>
 <p style="margin:10px 0 0;max-width:64ch;font:400 14px/1.6 Inter,sans-serif;color:var(--text-1);text-wrap:pretty">A professional command centre, not a feed. Four questions answered above the fold: where am I, how am I doing, what matters, what next.</p>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -70,14 +70,14 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 
 <nav aria-label="Primary" style="flex:0 0 188px;border-right:1px solid var(--border);background:var(--surface-sunken);padding:14px 10px;display:flex;flex-direction:column;gap:2px;min-width:170px">
 <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
-<a href="#" style="display:flex;align-items:center;gap:9px;min-height:38px;padding:0 10px;border-radius:9px;background:{{ n.bg }};text-decoration:none">
+<a href="{{ n.href }}" style="display:flex;align-items:center;gap:9px;min-height:38px;padding:0 10px;border-radius:9px;background:{{ n.bg }};text-decoration:none">
 <span style="width:16px;height:16px;border-radius:4px;border:1.5px solid {{ n.ink }};flex:none"></span>
 <span style="font:{{ n.font }};color:{{ n.ink }};flex:1;min-width:0">{{ n.label }}</span>
 <sc-if value="{{ n.count }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font:500 10.5px 'JetBrains Mono',monospace;color:var(--text-2);font-variant-numeric:tabular-nums">{{ n.count }}</span></sc-if>
 </a>
 </sc-for>
 <div style="margin-top:auto;padding-top:12px;border-top:1px dashed var(--border-strong)">
-<a href="#" style="display:flex;align-items:center;gap:9px;min-height:38px;padding:0 10px;border-radius:9px;text-decoration:none"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--text-1);flex:none"></span><span style="font:400 12.5px Inter,sans-serif;color:var(--text-1)">All of PROFILE</span></a>
+<a href="PROFILE About & Solutions.dc.html" style="display:flex;align-items:center;gap:9px;min-height:38px;padding:0 10px;border-radius:9px;text-decoration:none"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--text-1);flex:none"></span><span style="font:400 12.5px Inter,sans-serif;color:var(--text-1)">All of PROFILE</span></a>
 </div>
 </nav>
 
@@ -110,7 +110,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="display:flex;align-items:center;gap:7px"><span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);text-transform:uppercase">{{ m.label }}</span></div>
 <div style="display:flex;align-items:baseline;gap:8px"><span style="font:600 26px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums;letter-spacing:-.02em">{{ m.value }}</span><span style="font:500 11.5px Inter,sans-serif;color:{{ m.deltaColor }}">{{ m.delta }}</span></div>
 <div style="font:400 11.5px/1.5 Inter,sans-serif;color:var(--text-1)">{{ m.note }}</div>
-<a href="#" style="font:500 11.5px Inter,sans-serif;color:var(--accent);margin-top:auto">{{ m.link }}</a>
+<a href="{{ m.href }}" style="font:500 11.5px Inter,sans-serif;color:var(--accent);margin-top:auto">{{ m.link }}</a>
 </div>
 </sc-for>
 </div>
@@ -149,7 +149,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-card);overflow:hidden">
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 16px 0">
 <h3 style="margin:0;font:600 14.5px Inter,sans-serif;color:var(--text-0);flex:1 1 auto">Professional activity</h3>
-<a href="#" style="font:500 12px Inter,sans-serif;color:var(--accent);flex:none">Why this order?</a>
+<a href="javascript:void(0)" onClick="{{ explainOrder }}" style="font:500 12px Inter,sans-serif;color:var(--accent);flex:none">Why this order?</a>
 </div>
 <div role="tablist" style="display:flex;gap:16px;padding:10px 16px 0;border-bottom:1px solid var(--border);overflow:auto">
 <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
@@ -204,7 +204,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 </sc-for>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:14px;padding-top:11px;border-top:1px solid var(--border);font:400 11.5px Inter,sans-serif;color:var(--text-1)">
-<span>{{ f.evidence }}</span><span>{{ f.verifier }}</span><a href="#" style="font-weight:500">Open record</a>
+<span>{{ f.evidence }}</span><span>{{ f.verifier }}</span><a href="PROFILE Profile & Trust.dc.html" style="font-weight:500">Open record</a>
 </div>
 </article>
 </sc-for>
@@ -227,7 +227,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="flex:1;min-width:112px">
 <div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:3px">Trust Score</div>
 <div style="font:400 11.5px/1.55 Inter,sans-serif;color:var(--text-1);margin-bottom:8px">{{ trustNote }}</div>
-<a href="#" style="font:500 11.5px Inter,sans-serif;color:var(--trust)">How this is calculated</a>
+<a href="PROFILE Trust Centre.dc.html" style="font:500 11.5px Inter,sans-serif;color:var(--trust)">How this is calculated</a>
 </div>
 </div>
 
@@ -251,13 +251,13 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:15px">
 <div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:11px">Matched opportunities</div>
 <sc-for list="{{ opportunities }}" as="o" hint-placeholder-count="2">
-<a href="#" style="display:block;text-decoration:none;padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--border)">
+<a href="PROFILE Opportunity Hub.dc.html" style="display:block;text-decoration:none;padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--border)">
 <span style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font:600 12.5px Inter,sans-serif;color:var(--text-0)">{{ o.role }}</span><span style="flex:none;font:500 10.5px 'JetBrains Mono',monospace;color:var(--trust);font-variant-numeric:tabular-nums">{{ o.match }}</span></span>
 <span style="display:block;font:400 11.5px Inter,sans-serif;color:var(--text-1);margin-bottom:6px">{{ o.org }}</span>
 <span style="display:block;font:400 11px/1.5 Inter,sans-serif;color:var(--text-1)">{{ o.why }}</span>
 </a>
 </sc-for>
-<a href="#" style="font:500 11.5px Inter,sans-serif;color:var(--accent)">All opportunities</a>
+<a href="PROFILE Opportunity Hub.dc.html" style="font:500 11.5px Inter,sans-serif;color:var(--accent)">All opportunities</a>
 </div>
 
 <div style="border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:15px">
@@ -268,7 +268,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <span style="flex:1;min-width:0"><span style="display:block;font:500 11.5px Inter,sans-serif;color:var(--text-0)">{{ v.name }}</span><span style="display:block;font:400 11px/1.5 Inter,sans-serif;color:var(--text-1)">{{ v.state }}</span></span>
 </div>
 </sc-for>
-<a href="#" style="font:500 11.5px Inter,sans-serif;color:var(--accent)">Trust Center</a>
+<a href="PROFILE Trust Centre.dc.html" style="font:500 11.5px Inter,sans-serif;color:var(--accent)">Trust Center</a>
 </div>
 
 </aside>
@@ -302,7 +302,7 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 13px">
 <div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:6px">TRUST SCORE</div>
 <div style="display:flex;align-items:baseline;gap:6px"><span style="font:600 21px 'JetBrains Mono',monospace;color:var(--text-0);font-variant-numeric:tabular-nums">{{ trustScore }}</span><span style="font:500 11px Inter,sans-serif;color:var(--success)">{{ trustDelta }}</span></div>
-<a href="#" style="display:block;font:500 11px Inter,sans-serif;color:var(--trust);margin-top:6px">How it's calculated</a>
+<a href="PROFILE Trust Centre.dc.html" style="display:block;font:500 11px Inter,sans-serif;color:var(--trust);margin-top:6px">How it's calculated</a>
 </div>
 <div style="flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 13px">
 <div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--text-2);margin-bottom:6px">PROFILE HEALTH</div>
@@ -331,13 +331,13 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-hover);tex
 <div style="font:600 12.5px Inter,sans-serif;color:var(--text-0);margin-bottom:9px">Professional activity</div>
 <div style="display:flex;gap:9px;align-items:center;margin-bottom:8px"><span style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:600 11px Inter,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">AO</span><span style="flex:1;min-width:0"><span style="display:block;font:600 12px Inter,sans-serif;color:var(--text-0)">Amara Okafor</span><span style="display:block;font:400 10.5px Inter,sans-serif;color:var(--text-1)">Solar installation · 12 Aug</span></span><span style="flex:none;padding:2px 7px;border-radius:20px;background:var(--trust-soft);border:1px solid var(--trust);color:var(--trust);font:600 10px Inter,sans-serif">✓ Verified</span></div>
 <div style="font:400 12px/1.6 Inter,sans-serif;color:var(--text-1)">Commissioned a 45kW rooftop array for Ikeja General Hospital, cutting diesel dependency on the paediatric wing.</div>
-<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font:400 11px Inter,sans-serif;color:var(--text-1)"><span>3 evidence files</span><a href="#" style="font-weight:500">Open record</a></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font:400 11px Inter,sans-serif;color:var(--text-1)"><span>3 evidence files</span><a href="PROFILE Profile & Trust.dc.html" style="font-weight:500">Open record</a></div>
 </div>
 </div>
 
 <div style="position:relative;border-top:1px solid var(--border);background:var(--surface);display:grid;grid-template-columns:repeat(5,1fr);padding:9px 4px 12px">
 <sc-for list="{{ bottomNav }}" as="b" hint-placeholder-count="5">
-<a href="#" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:44px;text-decoration:none;justify-content:flex-end">
+<a href="{{ b.href }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:44px;text-decoration:none;justify-content:flex-end">
 <span style="width:{{ b.size }};height:{{ b.size }};border-radius:{{ b.radius }};border:{{ b.border }};background:{{ b.bg }};color:#fff;display:flex;align-items:center;justify-content:center;font:600 17px Inter,sans-serif;margin-top:{{ b.lift }};box-shadow:{{ b.shadow }}">{{ b.glyph }}</span>
 <span style="font:500 9.5px Inter,sans-serif;color:{{ b.ink }}">{{ b.label }}</span>
 </a>
@@ -400,16 +400,17 @@ class Component extends DCLogic {
     }));
 
     const nav = [
-      { label: "Home", active: true },
-      { label: "Connections", count: "" },
-      { label: "Opportunities", count: "12" },
-      { label: "Messages", count: "3" },
-      { label: "CV / Portfolio", count: "" },
-      { label: "Trust Center", count: "" },
-      { label: "Career Growth", count: "" },
-      { label: "Learning", count: "" }
+      { label: "Home", active: true, href: "PROFILE Home.dc.html" },
+      { label: "Connections", count: "", href: "PROFILE Messaging & Communities.dc.html" },
+      { label: "Opportunities", count: "12", href: "PROFILE Opportunity Hub.dc.html" },
+      { label: "Messages", count: "3", href: "PROFILE Messaging & Communities.dc.html" },
+      { label: "CV / Portfolio", count: "", href: "PROFILE CV Templates.dc.html" },
+      { label: "Trust Center", count: "", href: "PROFILE Trust Centre.dc.html" },
+      { label: "Career Growth", count: "", href: "PROFILE Learning.dc.html" },
+      { label: "Learning", count: "", href: "PROFILE Learning.dc.html" }
     ].map(n => ({
       label: n.label,
+      href: n.href,
       count: n.count || false,
       bg: n.active ? "var(--accent-soft)" : "transparent",
       ink: n.active ? "var(--accent)" : "var(--text-1)",
@@ -477,11 +478,12 @@ class Component extends DCLogic {
       tabs, feed, skeletons: [1, 2],
 
       metrics: [
-        { label: "Verified records", value: first ? "0" : "14", delta: first ? "" : "+2", deltaColor: "var(--success)", note: first ? "Records confirmed by an institution or employer." : "Two cleared verification this month.", link: "View all records" },
-        { label: "Career readiness", value: first ? "—" : "72%", delta: first ? "" : "+6", deltaColor: "var(--success)", note: first ? "Calculated once you have recorded work." : "Against Renewable Systems Lead roles.", link: "See what's missing" },
-        { label: "Profile views by verifiers", value: first ? "0" : "38", delta: first ? "" : "+11", deltaColor: "var(--success)", note: "Recruiters and institutions only. Not a vanity count.", link: "Who viewed" }
+        { label: "Verified records", value: first ? "0" : "14", delta: first ? "" : "+2", deltaColor: "var(--success)", note: first ? "Records confirmed by an institution or employer." : "Two cleared verification this month.", link: "View all records", href: "PROFILE Profile & Trust.dc.html" },
+        { label: "Career readiness", value: first ? "—" : "72%", delta: first ? "" : "+6", deltaColor: "var(--success)", note: first ? "Calculated once you have recorded work." : "Against Renewable Systems Lead roles.", link: "See what's missing", href: "PROFILE Opportunity Hub.dc.html" },
+        { label: "Profile views by verifiers", value: first ? "0" : "38", delta: first ? "" : "+11", deltaColor: "var(--success)", note: "Recruiters and institutions only. Not a vanity count.", link: "Who viewed", href: "PROFILE Notification Centre.dc.html" }
       ],
 
+      explainOrder: () => alert("Ranked by: your open verification requests, then opportunity deadlines, then evidence closest to completion. Never by recency alone."),
       trustScore: first ? "—" : "812",
       trustDelta: first ? "" : "+14",
       trustNote: first ? "Your score starts once your first record is verified." : "Established tier. Up 14 — the hospital record cleared verification.",
@@ -505,11 +507,11 @@ class Component extends DCLogic {
 
       nav,
       bottomNav: [
-        { label: "Home", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--accent)", bg: "transparent", ink: "var(--accent)", lift: "0", shadow: "none" },
-        { label: "Connect", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" },
-        { label: "Record", glyph: "+", size: "44px", radius: "50%", border: "none", bg: "var(--accent)", ink: "var(--accent)", lift: "-20px", shadow: "0 4px 12px rgba(0,87,217,.34)" },
-        { label: "Opportunity", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" },
-        { label: "CV", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" }
+        { label: "Home", href: "PROFILE Home.dc.html", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--accent)", bg: "transparent", ink: "var(--accent)", lift: "0", shadow: "none" },
+        { label: "Connect", href: "PROFILE Messaging & Communities.dc.html", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" },
+        { label: "Record", href: "PROFILE Onboarding.dc.html", glyph: "+", size: "44px", radius: "50%", border: "none", bg: "var(--accent)", ink: "var(--accent)", lift: "-20px", shadow: "0 4px 12px rgba(0,87,217,.34)" },
+        { label: "Opportunity", href: "PROFILE Opportunity Hub.dc.html", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" },
+        { label: "CV", href: "PROFILE CV Templates.dc.html", glyph: "", size: "22px", radius: "6px", border: "1.5px solid var(--text-1)", bg: "transparent", ink: "var(--text-1)", lift: "0", shadow: "none" }
       ]
     };
   }
