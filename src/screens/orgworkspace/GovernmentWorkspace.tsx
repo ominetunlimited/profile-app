@@ -2,17 +2,18 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessGovernmentConsole, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
-import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { listRequestsForIssuer, setVerificationRequestStatus, type VerificationRequest } from '@/app/verificationRequestStore'
 import { ACCESS_LABEL, inviteStaffBulk, listStaffFor, revokeStaff, MAX_STAFF } from '@/app/orgStaffStore'
 import { listAuditLogFor, logOrgAction } from '@/app/orgAuditLogStore'
 
-const TABS = ['licences', 'analytics', 'compliance', 'staff', 'audit', 'settings'] as const
+/** Analytics is a real separate route in this build — see the identical
+ * note in InstitutionWorkspace.tsx. */
+const TABS = ['licences', 'compliance', 'staff', 'audit', 'settings'] as const
 const TAB_LABEL: Record<(typeof TABS)[number], string> = {
   licences: 'Licence confirmations',
-  analytics: 'Analytics',
   compliance: 'Compliance exports',
   staff: 'Staff & roles',
   audit: 'Audit trail',
@@ -84,20 +85,17 @@ export function GovernmentWorkspace() {
     URL.revokeObjectURL(url)
   }
 
-  return (
-    <OrgWorkspaceShell title={TAB_LABEL[tab]}>
-      <div role="tablist" className="mb-4 flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-semibold ${tab === t ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'}`}
-          >
-            {TAB_LABEL[t]}
-          </button>
-        ))}
-      </div>
+  const navItems: OrgNavItem[] = [
+    { key: 'licences', label: TAB_LABEL.licences, active: tab === 'licences', onSelect: () => setTab('licences') },
+    { key: 'analytics', label: 'Analytics', active: false, to: '/government/me/analytics' },
+    { key: 'compliance', label: TAB_LABEL.compliance, active: tab === 'compliance', onSelect: () => setTab('compliance') },
+    { key: 'staff', label: TAB_LABEL.staff, active: tab === 'staff', onSelect: () => setTab('staff') },
+    { key: 'audit', label: TAB_LABEL.audit, active: tab === 'audit', onSelect: () => setTab('audit') },
+    { key: 'settings', label: TAB_LABEL.settings, active: tab === 'settings', onSelect: () => setTab('settings') },
+  ]
 
+  return (
+    <OrgWorkspaceShell title={TAB_LABEL[tab]} navItems={navItems}>
       <div className="mb-6 flex gap-2 rounded-lg border border-gold bg-gold-soft p-3 text-sm text-text-0">
         <span className="flex-none font-semibold text-gold">ⓘ</span>
         <p>
@@ -147,12 +145,6 @@ export function GovernmentWorkspace() {
             })}
           </div>
         ))}
-
-      {tab === 'analytics' && (
-        <Link to="/government/me/analytics" className="inline-flex h-[42px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
-          Open licence confirmation analytics →
-        </Link>
-      )}
 
       {tab === 'compliance' && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

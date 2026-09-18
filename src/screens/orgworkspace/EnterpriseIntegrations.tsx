@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan } from '@/app/accountTypes'
-import { OrgWorkspaceShell } from './OrgWorkspaceShell'
+import { OrgSubPageShell } from './OrgWorkspaceShell'
 import { Button } from '@/shared/ui/Button'
 
 const TABS = ['sso', 'api'] as const
@@ -33,7 +33,7 @@ export function EnterpriseIntegrations() {
   const canEdit = account ? orgRoleCan(account, 'editOrgProfile') : false
 
   return (
-    <OrgWorkspaceShell title="Integrations">
+    <OrgSubPageShell title="Integrations" crumb={`${account?.legalName ?? 'Organisation'} · Enterprise workspace`}>
       {!canEdit && (
         <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
           Managing SSO and API keys requires super_admin or admin (§42.2) — view only for your role.
@@ -126,6 +126,6 @@ export function EnterpriseIntegrations() {
           </p>
         </div>
       )}
-    </OrgWorkspaceShell>
+    </OrgSubPageShell>
   )
 }

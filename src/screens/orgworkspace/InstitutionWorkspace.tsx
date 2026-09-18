@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
-import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { listRequestsForIssuer, setVerificationRequestStatus, type VerificationRequest } from '@/app/verificationRequestStore'
@@ -10,11 +10,14 @@ import { listSchemas } from '@/app/schemaStore'
 import { ACCESS_LABEL, inviteStaffBulk, listStaffFor, revokeStaff, MAX_STAFF } from '@/app/orgStaffStore'
 import { listAuditLogFor, logOrgAction } from '@/app/orgAuditLogStore'
 
-const TABS = ['queue', 'analytics', 'schema', 'compliance', 'staff', 'records', 'settings'] as const
+/** Analytics and Credential Schemas are real separate routes in this build
+ * (not local tabs) — the mockup's sidebar sets a local `section` and shows
+ * an intermediate "Open X →" button in the main panel; since this build
+ * already has real distinct pages for both, the sidebar item links straight
+ * there instead of reproducing that extra middle click. */
+const TABS = ['queue', 'compliance', 'staff', 'records', 'settings'] as const
 const TAB_LABEL: Record<(typeof TABS)[number], string> = {
   queue: 'Verification queue',
-  analytics: 'Analytics',
-  schema: 'Credential schemas',
   compliance: 'Compliance exports',
   staff: 'Staff & roles',
   records: 'Institutional records',
@@ -81,20 +84,18 @@ export function InstitutionWorkspace() {
     URL.revokeObjectURL(url)
   }
 
-  return (
-    <OrgWorkspaceShell title={TAB_LABEL[tab]}>
-      <div role="tablist" className="mb-6 flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-semibold ${tab === t ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'}`}
-          >
-            {TAB_LABEL[t]}
-          </button>
-        ))}
-      </div>
+  const navItems: OrgNavItem[] = [
+    { key: 'queue', label: TAB_LABEL.queue, active: tab === 'queue', onSelect: () => setTab('queue') },
+    { key: 'analytics', label: 'Analytics', active: false, to: '/institution/me/analytics' },
+    { key: 'schema', label: 'Credential schemas', active: false, to: '/institution/me/schemas' },
+    { key: 'compliance', label: TAB_LABEL.compliance, active: tab === 'compliance', onSelect: () => setTab('compliance') },
+    { key: 'staff', label: TAB_LABEL.staff, active: tab === 'staff', onSelect: () => setTab('staff') },
+    { key: 'records', label: TAB_LABEL.records, active: tab === 'records', onSelect: () => setTab('records') },
+    { key: 'settings', label: TAB_LABEL.settings, active: tab === 'settings', onSelect: () => setTab('settings') },
+  ]
 
+  return (
+    <OrgWorkspaceShell title={TAB_LABEL[tab]} navItems={navItems}>
       {tab === 'queue' && (
         <div>
           <p className="mb-4 max-w-[70ch] text-sm leading-relaxed text-text-1">
@@ -185,18 +186,6 @@ export function InstitutionWorkspace() {
             </>
           )}
         </div>
-      )}
-
-      {tab === 'analytics' && (
-        <Link to="/institution/me/analytics" className="inline-flex h-[42px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
-          Open verification analytics →
-        </Link>
-      )}
-
-      {tab === 'schema' && (
-        <Link to="/institution/me/schemas" className="inline-flex h-[42px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
-          Open credential schema builder →
-        </Link>
       )}
 
       {tab === 'compliance' && (

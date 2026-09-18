@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools } from '@/app/accountTypes'
-import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
 import { listSchemas } from '@/app/schemaStore'
 
 /** §23/§16 Institution Analytics — verification volume trends. Real counts
@@ -17,10 +16,7 @@ export function InstitutionAnalytics() {
   const published = schemas.filter((s) => s.status === 'published')
 
   return (
-    <OrgWorkspaceShell title="Institution Analytics">
-      <Link to="/institution/me" className="mb-3 inline-block text-sm font-semibold text-accent">
-        ← {account.legalName} workspace
-      </Link>
+    <OrgSubPageShell title="Analytics" back={{ to: '/institution/me', label: `${account.legalName} workspace` }}>
       {/* Design handoff gap audit: real stat labels tracked different
           metrics than PROFILE Institution Analytics.dc.html specifies —
           relabelled to match exactly. Values stay honest (0/—), unlike the
@@ -40,7 +36,7 @@ export function InstitutionAnalytics() {
         No verification volume yet — trends populate once bulk ingestion (§16.3) or individual verification requests
         start flowing through your published schemas.
       </div>
-    </OrgWorkspaceShell>
+    </OrgSubPageShell>
   )
 }
 

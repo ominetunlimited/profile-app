@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools, orgRoleCan } from '@/app/accountTypes'
-import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import {
@@ -67,7 +67,7 @@ export function CredentialSchemaBuilder() {
   }
 
   return (
-    <OrgWorkspaceShell title="Credential schema builder">
+    <OrgSubPageShell title="Credential schema builder" crumb={`${account.legalName} · Institution workspace`}>
       <p className="mb-5 max-w-[70ch] text-sm leading-relaxed text-text-1">
         Define the record types your institution can confirm — the fields required, and what evidence a submitter
         must attach before it enters your review queue.
@@ -320,6 +320,6 @@ export function CredentialSchemaBuilder() {
           )}
         </div>
       </div>
-    </OrgWorkspaceShell>
+    </OrgSubPageShell>
   )
 }

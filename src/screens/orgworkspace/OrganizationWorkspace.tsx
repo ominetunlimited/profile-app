@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { OrgWorkspaceShell } from './OrgWorkspaceShell'
+import { OrgWorkspaceShell, type OrgNavItem } from './OrgWorkspaceShell'
 import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
 import { ownerKey, listActivities } from '@/app/activityStore'
@@ -41,20 +41,13 @@ export function OrganizationWorkspace() {
   const orgActivities = listActivities(owner)
   const openJobsCount = listJobsByOrg(owner).filter((j) => j.status === 'open').length
 
-  return (
-    <OrgWorkspaceShell title="Organization Workspace">
-      <div role="tablist" className="mb-6 flex flex-wrap gap-2 border-b border-border">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`-mb-px border-b-2 pb-3 text-sm font-semibold ${tab === t ? 'border-accent text-text-0' : 'border-transparent text-text-1'}`}
-          >
-            {TAB_LABEL[t]}
-          </button>
-        ))}
-      </div>
+  const navItems: OrgNavItem[] = [
+    ...TABS.map((t) => ({ key: t, label: TAB_LABEL[t], active: tab === t, onSelect: () => setTab(t) })),
+    { key: 'integrations', label: 'Integrations', active: false, to: '/org/me/integrations' },
+  ]
 
+  return (
+    <OrgWorkspaceShell title={TAB_LABEL[tab]} navItems={navItems}>
       {tab === 'overview' && (
         <div>
           {/* Design handoff gap audit — real stats: staff/open-jobs/followers

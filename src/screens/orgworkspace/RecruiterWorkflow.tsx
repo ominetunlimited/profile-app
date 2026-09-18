@@ -9,7 +9,7 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
-import { OrgWorkspaceShell } from './OrgWorkspaceShell'
+import { OrgSubPageShell } from './OrgWorkspaceShell'
 
 /** §18.3/§39 Recruiter Workflow — candidate pipeline, interview scheduling. */
 const KANBAN_PIPELINE: ApplicationStatus[] = ['submitted', 'under_review', 'shortlisted', 'interview', 'offer']
@@ -66,8 +66,10 @@ export function RecruiterWorkflow() {
     setJobs(listJobsByOrg(owner))
   }
 
+  const orgLabel = account?.accountType === 'organisation' ? account.legalName : 'Organisation'
+
   return (
-    <OrgWorkspaceShell title="Recruiter Workflow">
+    <OrgSubPageShell title={selectedJob ? `${selectedJob.title} — pipeline` : 'Recruiter Workflow'} back={{ to: '/org/me/talent', label: `${orgLabel} workspace` }}>
       {!canManage && (
         <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
           Managing the hiring pipeline requires super_admin, admin, or hr_manager (§42.2) — view only for your role.
@@ -249,7 +251,7 @@ export function RecruiterWorkflow() {
       )}
 
       <p className="mt-6 text-sm text-text-1">Candidates apply with their verified PROFILE, never a CV upload (§18.1).</p>
-    </OrgWorkspaceShell>
+    </OrgSubPageShell>
   )
 }
 

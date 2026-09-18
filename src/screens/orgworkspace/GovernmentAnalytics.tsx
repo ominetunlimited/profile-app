@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessGovernmentConsole } from '@/app/accountTypes'
-import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
 
 /** §23/§16 Government Analytics — licence confirmation trends. Honest
  * zero-state, same principle as Institution Analytics. */
@@ -12,10 +11,7 @@ export function GovernmentAnalytics() {
   }
 
   return (
-    <OrgWorkspaceShell title="Government Analytics">
-      <Link to="/government/me" className="mb-3 inline-block text-sm font-semibold text-accent">
-        ← {account.legalName} workspace
-      </Link>
+    <OrgSubPageShell title="Analytics" back={{ to: '/government/me', label: `${account.legalName} workspace` }}>
       {/* Design handoff gap audit: relabelled to match PROFILE Government
           Analytics.dc.html's exact four stats. Values stay honestly 0/—,
           unlike the mockup's illustrative populated example. */}
@@ -28,7 +24,7 @@ export function GovernmentAnalytics() {
       <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
         No licence confirmation activity yet.
       </div>
-    </OrgWorkspaceShell>
+    </OrgSubPageShell>
   )
 }
 

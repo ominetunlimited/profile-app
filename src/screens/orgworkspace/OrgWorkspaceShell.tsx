@@ -1,58 +1,131 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type Account } from '@/app/accountTypes'
+import { BRAND } from '@/shared/brand/assets'
+
+/** A workspace's own section nav item — either a real route (`to`, e.g.
+ * Analytics/Schemas which are genuinely separate pages) or an in-page tab
+ * switch (`onSelect`), matching how each of PROFILE Organization/Institution/
+ * Government Workspace.dc.html's own `nav` array mixes both. */
+export interface OrgNavItem {
+  key: string
+  label: string
+  active: boolean
+  to?: string
+  onSelect?: () => void
+}
 
 /**
  * Shared Org Workspace shell (build doc §6: "build the shared Org Workspace
  * shell first, then layer sector-scoped module visibility on top of it — do
  * not fork a separate codebase per sector"). Every /org, /institution,
- * /government route renders through this one header/nav, with which nav
- * links show driven by the account's actual hub — not per-route duplication.
+ * /government route renders through this one shell.
+ *
+ * Design handoff gap audit: rebuilt from a top pill-tab bar to the real
+ * left-sidebar nav every one of PROFILE Organization/Institution/Government
+ * Workspace.dc.html actually specifies (200-210px fixed rail, logo + org
+ * name, stacked nav buttons with a small bordered-square bullet, an
+ * identity chip pinned to the bottom via a dashed top border) — confirmed
+ * by re-reading all three source files directly, not assumed from memory.
+ * The mockups' own persona identity chip ("Registrar's Office · Admin",
+ * "Ngozi Abara · Admin") is illustrative; this build's OrganisationAccount
+ * has no separate signed-in-staff-person identity distinct from the
+ * account itself, so the real equivalent shown is the account's own
+ * officialEmail and orgRole.
  */
-export function OrgWorkspaceShell({ title, children }: { title: string; children: ReactNode }) {
+export function OrgWorkspaceShell({ title, navItems, children }: { title: string; navItems: OrgNavItem[]; children: ReactNode }) {
   const { account } = useAccount()
-  const { id } = useParams<{ id: string }>()
   if (!account || account.accountType !== 'organisation') return null
   const hub = hubForOrgType(account.orgType)
-  const orgId = id ?? 'me'
-
-  const links: { to: string; label: string; show: boolean }[] = [
-    { to: `/org/${orgId}/talent`, label: 'Talent', show: hub === 'business_hub' || hub === 'community_hub' },
-    { to: `/institution/${orgId}`, label: 'Verification Queue', show: hub === 'institutional_hub' },
-    { to: `/institution/${orgId}/schemas`, label: 'Schemas', show: hub === 'institutional_hub' },
-    { to: `/institution/${orgId}/analytics`, label: 'Analytics', show: hub === 'institutional_hub' },
-    { to: `/government/${orgId}`, label: 'Console', show: hub === 'regulatory_console' },
-    { to: `/government/${orgId}/analytics`, label: 'Analytics', show: hub === 'regulatory_console' },
-    { to: `/org/${orgId}/recruiter`, label: 'Recruiter', show: hub === 'business_hub' },
-    { to: `/org/${orgId}/integrations`, label: 'Integrations', show: true },
-  ]
+  const initials = account.legalName
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
 
   return (
     <AppShell>
-      <div className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6">
+      <div className="flex min-h-[calc(100vh-97px)] flex-col sm:flex-row">
+        <nav className="flex flex-none flex-row gap-1 overflow-x-auto border-b border-border bg-surface-sunken p-2.5 sm:w-[210px] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-b-0 sm:border-e sm:p-3">
+          <div className="mb-3.5 hidden items-center gap-2 px-2 sm:flex">
+            <img src={BRAND.mark} alt="" className="h-[22px] w-auto" />
+            <span className="truncate text-[12.5px] font-bold text-text-0">{account.legalName}</span>
+          </div>
+          {navItems.map((item) => {
+            const inner = (
+              <>
+                <span className={`h-3.5 w-3.5 flex-none rounded ${item.active ? 'border-[1.5px] border-accent' : 'border-[1.5px] border-text-1'}`} />
+                <span className={`whitespace-nowrap text-xs ${item.active ? 'font-semibold text-accent' : 'text-text-1'}`}>{item.label}</span>
+              </>
+            )
+            const cls = `flex min-h-[38px] flex-none items-center gap-2.5 rounded-lg px-2.5 text-left ${item.active ? 'bg-accent-soft' : ''}`
+            return item.to ? (
+              <Link key={item.key} to={item.to} className={cls}>
+                {inner}
+              </Link>
+            ) : (
+              <button key={item.key} onClick={item.onSelect} className={cls}>
+                {inner}
+              </button>
+            )
+          })}
+          <div className="mt-auto hidden items-center gap-2 border-t border-dashed border-border-strong pt-3 ps-2 sm:flex">
+            <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg bg-accent text-[10px] font-semibold text-white">{initials}</span>
+            <span className="truncate text-[11.5px] text-text-1">
+              {account.officialEmail} · {account.orgRole.replace(/_/g, ' ')}
+            </span>
+          </div>
+        </nav>
+
+        <div className="min-w-0 flex-1 px-4 py-6 sm:px-8">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold text-text-0">{account.legalName}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-text-0 sm:text-2xl">{title}</h1>
             <StatusBadge account={account} />
           </div>
-          <p className="mb-4 text-sm text-text-1">
+          <p className="mb-5 text-sm text-text-1">
             {account.orgType} · {hub}
           </p>
-          <nav className="flex flex-wrap gap-1.5">
-            {links
-              .filter((l) => l.show)
-              .map((l) => (
-                <Link key={l.to} to={l.to} className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-1 hover:border-accent hover:text-text-0">
-                  {l.label}
-                </Link>
-              ))}
-          </nav>
+          {children}
         </div>
       </div>
-      <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-6">
-        <h2 className="mb-5 text-lg font-bold text-text-0">{title}</h2>
+    </AppShell>
+  )
+}
+
+/**
+ * A handful of workspace pages reached via "Open X →" links (Institution/
+ * Government Analytics, Recruiter Workflow, Credential Schema Builder,
+ * Enterprise Integrations) are standalone pages in their own mockups — no
+ * sidebar, just a small breadcrumb label or a "← <org> workspace" back-link
+ * above the title. Confirmed by reading each file directly rather than
+ * assumed from the sidebar-shell pattern the three main workspace screens
+ * use.
+ */
+export function OrgSubPageShell({
+  crumb,
+  back,
+  title,
+  children,
+}: {
+  crumb?: string
+  back?: { to: string; label: string }
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6">
+        {back && (
+          <Link to={back.to} className="mb-2.5 inline-block text-sm font-semibold text-accent">
+            ← {back.label}
+          </Link>
+        )}
+        {crumb && <div className="mb-2 font-mono text-[11px] uppercase tracking-wide text-text-2">{crumb}</div>}
+        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">{title}</h1>
         {children}
       </div>
     </AppShell>
@@ -103,4 +176,3 @@ function Condition({ ok, label }: { ok: boolean; label: string }) {
     </div>
   )
 }
-
