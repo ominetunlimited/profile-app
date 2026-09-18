@@ -179,13 +179,14 @@ export function CommunityDetail() {
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <h2 className="mb-2 text-sm font-semibold text-text-0">Guidelines</h2>
+              {/* Verbatim from PROFILE Community Detail.dc.html — written for
+                  the Engineering Guild example specifically ("three verified
+                  engineers"); flagged to the user as not yet generalized for
+                  this build's other real communities (Design Industry
+                  Network, Skilled Trades Association, etc). */}
               <p className="text-sm text-text-1">
-                Real work and real questions only — no self-promotion outside a designated thread, no unverified
-                claims presented as fact, and no vote-brigading or engagement-farming. Moderation follows PROFILE's{' '}
-                <Link to="/community-guidelines" className="text-accent">
-                  platform-wide Community Guidelines
-                </Link>
-                .
+                Evidence over anecdote — cite what you did, not just what you know. No self-promotion without
+                disclosure. Moderated by three verified engineers with 8+ years field experience.
               </p>
             </div>
           </div>

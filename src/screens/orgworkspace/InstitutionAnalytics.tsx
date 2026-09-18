@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools } from '@/app/accountTypes'
 import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
@@ -17,12 +18,24 @@ export function InstitutionAnalytics() {
 
   return (
     <OrgWorkspaceShell title="Institution Analytics">
+      <Link to="/institution/me" className="mb-3 inline-block text-sm font-semibold text-accent">
+        ← {account.legalName} workspace
+      </Link>
+      {/* Design handoff gap audit: real stat labels tracked different
+          metrics than PROFILE Institution Analytics.dc.html specifies —
+          relabelled to match exactly. Values stay honest (0/—), unlike the
+          mockup's illustrative populated example (312 confirmed, 3.4d avg,
+          etc.) — no real verification pipeline flows through this build's
+          schemas yet, and "published schemas" is this file's own real,
+          additional metric the mockup doesn't show but is kept since it's
+          real data, not a replacement for one of the four spec'd stats. */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Published schemas" value={published.length} />
-        <Stat label="Verifications this month" value={0} />
-        <Stat label="Auto-verify rate" value="—" />
-        <Stat label="Avg. review time" value="—" />
+        <Stat label="Confirmed this month" value={0} />
+        <Stat label="Avg. response time" value="—" />
+        <Stat label="Rejection rate" value="—" />
+        <Stat label="Total records confirmed" value={0} />
       </div>
+      <p className="mb-6 text-xs text-text-2">{published.length} published schema{published.length === 1 ? '' : 's'} on this institution's account.</p>
       <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
         No verification volume yet — trends populate once bulk ingestion (§16.3) or individual verification requests
         start flowing through your published schemas.

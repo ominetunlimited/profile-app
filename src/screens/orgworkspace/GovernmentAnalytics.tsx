@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { canAccessGovernmentConsole } from '@/app/accountTypes'
 import { OrgWorkspaceShell, HubAccessDenied } from './OrgWorkspaceShell'
@@ -12,11 +13,17 @@ export function GovernmentAnalytics() {
 
   return (
     <OrgWorkspaceShell title="Government Analytics">
+      <Link to="/government/me" className="mb-3 inline-block text-sm font-semibold text-accent">
+        ← {account.legalName} workspace
+      </Link>
+      {/* Design handoff gap audit: relabelled to match PROFILE Government
+          Analytics.dc.html's exact four stats. Values stay honestly 0/—,
+          unlike the mockup's illustrative populated example. */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Licences confirmed" value={0} />
-        <Stat label="Institutions accredited" value={0} />
-        <Stat label="Audit reports filed" value={0} />
-        <Stat label="This month" value={0} />
+        <Stat label="Confirmed this month" value={0} />
+        <Stat label="Avg. response time" value="—" />
+        <Stat label="Expired, renewal pending" value={0} />
+        <Stat label="Total licences confirmed" value={0} />
       </div>
       <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
         No licence confirmation activity yet.
