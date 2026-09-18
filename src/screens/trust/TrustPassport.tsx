@@ -24,6 +24,7 @@ import {
   type VerificationModuleKey,
   type VerificationRequest,
 } from '@/app/verificationRequestStore'
+import { displayPid, listSharesFor, revokePassportShare, shareTrustPassport, type PassportAccessExpiry } from '@/app/trustPassportShareStore'
 
 /**
  * §4.5 Trust Score Schema + §12.6 Trust Passport — the real, in-app,
@@ -42,6 +43,18 @@ export function TrustPassport() {
   const owner = account ? ownerKey(account) : ''
   const trust = computeTrustScore(account)
   const [requests, setRequests] = useState(() => listVerificationRequests(owner))
+  const [shares, setShares] = useState(() => listSharesFor(owner))
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+
+  const verifiedCount = requests.filter((r) => r.status === 'verified').length
+  const pendingCount = requests.filter((r) => r.status !== 'verified' && r.status !== 'rejected').length
+  const headline = account?.accountType === 'individual' ? account.headline : account?.accountType === 'organisation' ? account.orgType : ''
+  const initials = account?.legalName
+    ?.split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
   const dimensionSignals: Record<keyof TrustDimensions, string[]> = {
     identityTrust: [], academicTrust: [], professionalTrust: [], employmentTrust: [],
@@ -75,6 +88,127 @@ export function TrustPassport() {
             </Link>
           </div>
         </div>
+
+        {/* Design handoff gap audit — PROFILE Profile & Trust.dc.html's
+            Trust Passport share flow (passport card, share modal, "who
+            currently holds it" + Revoke) had no real equivalent. Built from
+            the mockup's exact source text/structure; "opened N times" is
+            never reproduced since no real recipient-side session exists in
+            this build to track an open event — shares honestly always show
+            "not yet opened". */}
+        <section className="mb-8 flex flex-wrap items-start gap-6">
+          <div className="min-w-0 flex-1 basis-[400px]">
+            <h2 className="mb-1.5 font-semibold text-text-0">Trust Passport</h2>
+            <p className="mb-4 max-w-[62ch] text-xs leading-relaxed text-text-1">
+              A signed, verifiable summary you share with one party at a time. It states what has been confirmed and
+              by whom, carries an expiry, and can be revoked after you send it.
+            </p>
+
+            <div className="max-w-[520px] overflow-hidden rounded-2xl border border-trust bg-surface shadow-lg">
+              <div className="flex flex-wrap items-center gap-2.5 border-b border-trust bg-trust-soft px-4 py-3.5">
+                <span className="flex-1 text-sm font-semibold text-text-0">Trust Passport</span>
+                <span className="font-mono text-[10.5px] text-trust">{displayPid(owner)}</span>
+              </div>
+              <div className="p-4">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="flex h-[46px] w-[46px] flex-none items-center justify-center rounded-full bg-accent text-base font-semibold text-white">{initials}</span>
+                  <div className="min-w-[140px] flex-1">
+                    <div className="text-sm font-semibold text-text-0">{account?.legalName}</div>
+                    <div className="text-xs text-text-1">{headline}</div>
+                  </div>
+                  <div className="flex-none text-right">
+                    <div className="font-mono text-xl font-semibold text-text-0">{trust.total}</div>
+                    <div className="text-[10px] text-text-1">Trust Score</div>
+                  </div>
+                </div>
+                <div className="mb-4 flex flex-col gap-2">
+                  <div className="flex items-start gap-2.5 rounded-lg border border-border bg-surface p-2.5">
+                    <span className="flex-none text-xs font-semibold text-trust">✓</span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-text-0">{verifiedCount} verified record{verifiedCount === 1 ? '' : 's'}</div>
+                      <div className="text-[11px] leading-relaxed text-text-1">Confirmed by an institution or employer.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5 rounded-lg border border-border bg-surface p-2.5">
+                    <span className="flex-none text-xs font-semibold text-text-2">◌</span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-text-0">{pendingCount} pending</div>
+                      <div className="text-[11px] leading-relaxed text-text-1">Stated openly. A passport never hides an incomplete item.</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 border-t border-border pt-3.5 text-[11px] leading-relaxed text-text-1">
+                  <div className="min-w-0 flex-1 basis-[180px]">
+                    <strong className="font-semibold text-text-0">Issued</strong> {new Date().toLocaleDateString()}
+                    <br />
+                    <strong className="font-semibold text-text-0">Expires</strong> per share below · revocable any time
+                  </div>
+                  <div className="min-w-0 flex-1 basis-[150px]">
+                    <strong className="font-semibold text-text-0">Verify independently</strong>
+                    <br />
+                    <span title="Illustrative — a live public verification page isn't built in this pass">profile.app/v/{displayPid(owner)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3.5 flex flex-wrap gap-2">
+              <Button onClick={() => setShareModalOpen(true)}>Share with someone</Button>
+              <Button variant="secondary" disabled title="Passport PDF export isn't built in this pass — flagged, not silently faked">
+                Download PDF
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex min-w-[250px] flex-1 basis-[270px] flex-col gap-3.5">
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <div className="mb-2.5 text-sm font-semibold text-text-0">Who currently holds it</div>
+              {shares.length === 0 ? (
+                <p className="mb-2.5 text-xs text-text-1">You haven't shared your passport with anyone yet.</p>
+              ) : (
+                shares.map((s) => (
+                  <div key={s.id} className="mb-2.5 flex flex-wrap items-center gap-2 border-b border-border pb-2.5">
+                    <div className="min-w-0 flex-1 basis-[120px]">
+                      <div className="text-xs font-medium text-text-0">{s.sharedWith}</div>
+                      <div className="text-[10.5px] text-text-1">
+                        Shared {new Date(s.sharedAt).toLocaleDateString()} · not yet opened ·{' '}
+                        {s.expiresAt ? `expires ${new Date(s.expiresAt).toLocaleDateString()}` : 'until revoked'}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        revokePassportShare(s.id, owner)
+                        setShares(listSharesFor(owner))
+                      }}
+                      className="flex-none rounded-lg border border-danger px-2.5 py-1 text-[11px] font-semibold text-danger"
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                ))
+              )}
+              <p className="text-[11px] text-text-1">Revoking takes effect immediately. The holder sees that access was withdrawn, not why.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <div className="mb-2.5 text-sm font-semibold text-text-0">What a passport never contains</div>
+              <p className="text-xs leading-relaxed text-text-1">
+                Date of birth, home address, national ID numbers, document scans, salary history, or anything you
+                have not published. It states that a check passed — never the underlying document.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {shareModalOpen && (
+          <ShareModal
+            onClose={() => setShareModalOpen(false)}
+            onShare={(sharedWith, accessExpiry) => {
+              shareTrustPassport(owner, sharedWith, accessExpiry)
+              setShares(listSharesFor(owner))
+              setShareModalOpen(false)
+            }}
+          />
+        )}
 
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Trust dimensions</h2>
@@ -246,6 +380,68 @@ function VerificationRequestCard({ request }: { request: VerificationRequest }) 
         </div>
       )}
       {!isRejected && <p className="mt-1.5 text-[10.5px] uppercase tracking-wide text-text-2">{request.status.replace(/_/g, ' ')}</p>}
+    </div>
+  )
+}
+
+const EXPIRY_OPTIONS: { value: PassportAccessExpiry; label: string }[] = [
+  { value: '30_days', label: '30 days' },
+  { value: '90_days', label: '90 days' },
+  { value: 'until_revoked', label: 'Until revoked' },
+]
+
+function ShareModal({ onClose, onShare }: { onClose: () => void; onShare: (sharedWith: string, accessExpiry: PassportAccessExpiry) => void }) {
+  const [sharedWith, setSharedWith] = useState('')
+  const [accessExpiry, setAccessExpiry] = useState<PassportAccessExpiry>('30_days')
+
+  return (
+    <div role="presentation" onClick={onClose} className="fixed inset-0 z-[200] flex items-center justify-center bg-[rgba(6,14,28,0.55)] p-5 backdrop-blur-[2px]">
+      <div role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} className="max-h-[88vh] w-[min(460px,100%)] overflow-auto rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+        <div className="mb-2 text-[17px] font-semibold text-text-0">Share your Trust Passport</div>
+        <p className="mb-4 text-sm leading-relaxed text-text-1">
+          They will see your verified records, credentials and score — and nothing else. You can withdraw access at
+          any time.
+        </p>
+        <label className="mb-3.5 flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-text-0">Share with</span>
+          <input
+            autoFocus
+            value={sharedWith}
+            onChange={(e) => setSharedWith(e.target.value)}
+            placeholder="Organisation or email address"
+            className="h-[42px] rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-0 outline-none focus-visible:border-accent"
+          />
+        </label>
+        <div className="mb-4 flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-text-0">Access expires</span>
+          <div className="flex flex-wrap gap-1.5">
+            {EXPIRY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setAccessExpiry(opt.value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${accessExpiry === opt.value ? 'bg-accent text-white' : 'border border-border-strong text-text-1'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-4 rounded-lg border border-border bg-surface-sunken p-3 text-xs leading-relaxed text-text-1">
+          They will be told who shared it and when. Every time they open it, you see it in your access log.
+        </div>
+        <div className="flex flex-wrap justify-end gap-2">
+          <button onClick={onClose} className="rounded-lg border border-border-strong px-3.5 py-2 text-sm font-semibold text-text-0">
+            Cancel
+          </button>
+          <button
+            disabled={!sharedWith.trim()}
+            onClick={() => onShare(sharedWith.trim(), accessExpiry)}
+            className="rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            Share passport
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
