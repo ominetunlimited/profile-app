@@ -100,7 +100,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
     )
 
   return (
-    <article className="rounded-xl border border-border bg-surface p-4">
+    <article className="ds-card-hover rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         <AuthorLink className="flex-none">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">

@@ -104,7 +104,7 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
         ) : (
           <div className="flex flex-col gap-2">
             {jobs.map((j) => (
-              <Link key={j.id} to={`/job/${j.id}`} className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+              <Link key={j.id} to={`/job/${j.id}`} className="ds-card-hover rounded-xl border border-border bg-surface p-4 hover:border-accent">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-text-0">{j.title}</span>
                   <span className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-2">{j.workType.replace('_', ' ')}</span>

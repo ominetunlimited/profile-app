@@ -29,12 +29,21 @@ export const TRUST_WEIGHTS = {
   activity_peer_validated: 5,
 } as const
 
+// Design handoff gap audit: these were raw hex, and three of the five
+// happened to be one theme's specific token value copy-pasted in (light
+// --accent for 'established', dark --trust for 'trusted', dark --gold for
+// 'master') — frozen regardless of the active theme instead of adapting.
+// Switched to the actual CSS custom properties so each tier correctly
+// follows light/dark. 'expert' has no existing semantic token to reuse
+// (it's a tier-ladder color, not one of the six base tokens design-handoff
+// README defines) — left as a literal hex per "never invent new tokens,"
+// flagged here rather than silently matched to an unrelated var.
 export const TRUST_TIERS = [
-  { range: [0, 199], tier: 'emerging', label: 'Emerging', color: '#94A3B8' },
-  { range: [200, 399], tier: 'established', label: 'Established', color: '#0057D9' },
-  { range: [400, 599], tier: 'trusted', label: 'Trusted', color: '#00E5FF' },
+  { range: [0, 199], tier: 'emerging', label: 'Emerging', color: 'var(--text-2)' },
+  { range: [200, 399], tier: 'established', label: 'Established', color: 'var(--accent)' },
+  { range: [400, 599], tier: 'trusted', label: 'Trusted', color: 'var(--trust)' },
   { range: [600, 799], tier: 'expert', label: 'Expert', color: '#003A8C' },
-  { range: [800, 1000], tier: 'master', label: 'Master', color: '#F4B400' },
+  { range: [800, 1000], tier: 'master', label: 'Master', color: 'var(--gold)' },
 ] as const
 
 /**

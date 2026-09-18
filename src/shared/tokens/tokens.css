@@ -32,6 +32,23 @@
 
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  /* Design handoff gap audit: every mockup's h1/h2 spec 'Plus Jakarta Sans'
+     700/800 for headings — loaded in index.html, applied globally below. */
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  /* Design handoff gap audit: mockups style warning/success/danger/etc.
+     callouts and status pills as a soft filled tint behind same-color text
+     (e.g. AI Decision Log's policy callout, Route Integrity's status
+     pills) — this token family never existed, so real components fell
+     back to plain neutral/bordered treatments. `color-mix` against the
+     existing base var means one definition adapts correctly in both
+     themes, same pattern already used by this file's own keyframes below. */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --trust-soft: color-mix(in srgb, var(--trust) 12%, transparent);
+  --gold-soft: color-mix(in srgb, var(--gold) 15%, transparent);
+  --success-soft: color-mix(in srgb, var(--success) 15%, transparent);
+  --warning-soft: color-mix(in srgb, var(--warning) 15%, transparent);
+  --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
 }
 
 .dark {
@@ -75,6 +92,38 @@ body {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Design handoff gap audit: h1-h3 use Plus Jakarta Sans everywhere (design
+   system spec: "headings only, h1-h3 / page titles"), applied once here
+   instead of a className sweep across 40+ screen files. An element
+   selector loses to any explicit `font-sans`/`font-mono` utility class on
+   a heading (higher specificity) — none were found in the audit, but a
+   screen that genuinely needs Inter on a heading should reach for
+   `font-sans` explicitly rather than relying on this rule losing. */
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+/* Design handoff gap audit: PROFILE Design System.dc.html's `.ds-card-hover`
+   pattern (2px lift + soft accent shadow) was documented as a reusable
+   pattern but never implemented anywhere — apply it opt-in via this class
+   rather than globally on every bordered box, since not every card is a
+   clickable/navigable one. */
+.ds-card-hover {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ds-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-card-hover {
+    transition: none;
+  }
+  .ds-card-hover:hover {
+    transform: none;
+  }
 }
 
 .skip-link {

@@ -24,10 +24,26 @@ export default {
         success: 'var(--success)',
         warning: 'var(--warning)',
         danger: 'var(--danger)',
+        // Design handoff gap audit: mockups style callouts/pills as a soft
+        // filled tint (e.g. `background:var(--warning-soft)`) — this token
+        // family didn't exist anywhere in the app, so real components fell
+        // back to plain bordered/neutral treatments instead.
+        'accent-soft': 'var(--accent-soft)',
+        'trust-soft': 'var(--trust-soft)',
+        'gold-soft': 'var(--gold-soft)',
+        'success-soft': 'var(--success-soft)',
+        'warning-soft': 'var(--warning-soft)',
+        'danger-soft': 'var(--danger-soft)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
+        // Design handoff gap audit (6/6 screen groups flagged this): every
+        // mockup's h1/h2 spec 'Plus Jakarta Sans' 700/800 — never loaded or
+        // applied anywhere in the real app before this. `font-heading` is
+        // additionally applied as a global h1-h3 rule in tokens.css so no
+        // per-screen className sweep was needed.
+        heading: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

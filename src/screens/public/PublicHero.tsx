@@ -2,6 +2,34 @@ import { Link } from 'react-router-dom'
 import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { useLanguage } from '@/app/LanguageContext'
+import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
+import { TRUST_TIERS, type TrustScoreResult } from '@/app/trustScore'
+
+// Design handoff gap audit: this page had its own second, hand-rolled
+// conic-gradient trust ring — the Design System doc is explicit that the
+// point of extracting TrustScoreRing.tsx was "never two independent-
+// looking trust rings." This is a real, honestly-labelled illustrative
+// figure (no anonymous visitor has a real score to show), not a live
+// computation — hence a constructed result object rather than
+// computeTrustScore(), but it now renders through the one real component.
+const ILLUSTRATIVE_TRUST_SCORE: TrustScoreResult = {
+  total: 812,
+  tier: TRUST_TIERS[4],
+  confidenceLevel: 'high',
+  dimensions: {
+    identityTrust: 0,
+    academicTrust: 0,
+    professionalTrust: 0,
+    employmentTrust: 0,
+    marketplaceTrust: 0,
+    organisationalTrust: 0,
+    recruitmentTrust: 0,
+    contributionTrust: 0,
+  },
+  signals: [],
+  formulaVersion: 'illustrative',
+  lastCalculated: new Date(0).toISOString(),
+}
 
 const LOOP_CARDS = [
   { title: 'Record the work', body: 'Structured evidence — what happened, for whom, with what changed as a result.' },
@@ -112,14 +140,8 @@ export function PublicHero() {
           </div>
           <div className="min-w-[260px] flex-1 basis-[300px] rounded-2xl border border-trust bg-surface p-5 shadow-lg">
             <div className="mb-3.5 flex items-center gap-3.5">
-              <div className="relative h-16 w-16 flex-none">
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: 'conic-gradient(var(--trust) 0turn .81turn, var(--surface-sunken) .81turn 1turn)' }}
-                />
-                <div className="absolute inset-2 flex items-center justify-center rounded-full bg-surface font-mono text-base font-bold text-text-0">
-                  812
-                </div>
+              <div className="h-16 w-16 flex-none">
+                <TrustScoreRing trust={ILLUSTRATIVE_TRUST_SCORE} size={64} />
               </div>
               <div className="text-[12.5px] leading-relaxed text-text-1">Illustrative example, not a real Trust Score.</div>
             </div>
