@@ -4,7 +4,7 @@ import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan } from '@/app/accountTypes'
 import { ownerKey } from '@/app/activityStore'
 import { postJob, listJobsByOrg, closeJob, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
-import { listApplicationsForJob, updateApplicationStatus, hiredCountForJob, type Application, type ApplicationStatus } from '@/app/applicationStore'
+import { listApplicationsForJob, updateApplicationStatus, scheduleInterview, hiredCountForJob, type Application, type ApplicationStatus } from '@/app/applicationStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
@@ -30,6 +30,24 @@ const NEXT_STAGE: Partial<Record<ApplicationStatus, ApplicationStatus>> = {
   interview: 'offer',
 }
 
+/** Real calendar-derived slots (next two weekdays, two business-hour
+ * openings each, starting tomorrow), not the mockup's fixed illustrative
+ * dates. */
+function upcomingInterviewSlots(): string[] {
+  const slots: string[] = []
+  const cursor = new Date()
+  cursor.setDate(cursor.getDate() + 1)
+  while (slots.length < 4) {
+    const day = cursor.getDay()
+    if (day !== 0 && day !== 6) {
+      const label = cursor.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+      slots.push(`${label} · 10:00`, `${label} · 14:00`)
+    }
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return slots.slice(0, 4)
+}
+
 export function RecruiterWorkflow() {
   const { account } = useAccount()
   const canManage = account ? orgRoleCan(account, 'manageHiring') : false
@@ -37,6 +55,9 @@ export function RecruiterWorkflow() {
   const [jobs, setJobs] = useState<JobListing[]>(() => listJobsByOrg(owner))
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [posting, setPosting] = useState(false)
+  const [schedulingFor, setSchedulingFor] = useState<Application | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const slots = useState(upcomingInterviewSlots)[0]
 
   const selectedJob = jobs.find((j) => j.id === selectedJobId) ?? jobs[0]
   const applications: Application[] = selectedJob ? listApplicationsForJob(selectedJob.id) : []
@@ -140,6 +161,9 @@ export function RecruiterWorkflow() {
                                   )}
                                   <span className="rounded-full border border-trust px-1.5 py-0.5 font-mono text-[9.5px] font-semibold text-trust">{trust.total}</span>
                                 </div>
+                                {a.status === 'interview' && a.interviewSlot && (
+                                  <div className="mb-1.5 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[10.5px] font-medium text-accent">{a.interviewSlot}</div>
+                                )}
                                 {canManage && (
                                   <div className="mt-1.5 flex gap-1.5">
                                     {next && (
@@ -147,8 +171,13 @@ export function RecruiterWorkflow() {
                                         disabled={atHireCap}
                                         title={atHireCap ? `Free tier cap reached — ${selectedJob.maxHires} hires on this listing` : undefined}
                                         onClick={() => {
-                                          updateApplicationStatus(a.id, next)
-                                          refreshApplications()
+                                          if (next === 'interview') {
+                                            setSchedulingFor(a)
+                                            setSelectedSlot(null)
+                                          } else {
+                                            updateApplicationStatus(a.id, next)
+                                            refreshApplications()
+                                          }
                                         }}
                                         className="font-semibold text-accent disabled:cursor-not-allowed disabled:text-text-2"
                                       >
@@ -175,6 +204,45 @@ export function RecruiterWorkflow() {
                   )
                 })}
               </div>
+
+              {schedulingFor && (
+                <div className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+                  <div className="mb-3.5 text-sm font-semibold text-text-0">
+                    Schedule interview — {findAccountByEmail(schedulingFor.applicantEmail)?.legalName ?? schedulingFor.applicantEmail}
+                  </div>
+                  <div className="mb-3.5 flex flex-wrap gap-2.5">
+                    {slots.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setSelectedSlot(s)}
+                        className={`rounded-lg border-[1.5px] px-3.5 py-2.5 text-xs font-semibold ${selectedSlot === s ? 'border-accent bg-accent text-white' : 'border-border-strong bg-surface text-text-1'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      disabled={!selectedSlot}
+                      onClick={() => {
+                        scheduleInterview(schedulingFor.id, owner, selectedSlot!)
+                        setSchedulingFor(null)
+                        setSelectedSlot(null)
+                        refreshApplications()
+                      }}
+                      className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      Confirm &amp; send invite
+                    </button>
+                    <button onClick={() => setSchedulingFor(null)} className="h-10 rounded-lg border border-border-strong px-3.5 text-sm font-semibold text-text-0">
+                      Cancel
+                    </button>
+                  </div>
+                  <p className="mt-2.5 text-[11.5px] leading-relaxed text-text-1">
+                    {findAccountByEmail(schedulingFor.applicantEmail)?.legalName ?? 'They'} receive this on their own Messages — interview scheduling never bypasses their notice or consent.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </>

@@ -1,6 +1,7 @@
 import { notify } from './notificationStore'
 import { getJobById, orgDisplayName } from './jobStore'
 import { findAccountByEmail } from './demoAccountStore'
+import { conversationIdFor, sendMessage } from './messageStore'
 
 /** §6.4 Application status, verbatim. */
 export type ApplicationStatus = 'submitted' | 'received' | 'under_review' | 'shortlisted' | 'interview' | 'offer' | 'rejected' | 'withdrawn'
@@ -13,6 +14,10 @@ export interface Application {
   coverLetter: string
   submittedAt: string
   status: ApplicationStatus
+  /** Design handoff gap audit — PROFILE Recruiter Workflow.dc.html's
+   * Interview-stage cards show a scheduled slot as a pill; previously no
+   * field existed to hold one. */
+  interviewSlot?: string
 }
 
 const STORAGE_KEY = 'profile:demo-applications'
@@ -97,6 +102,31 @@ export function updateApplicationStatus(id: string, status: ApplicationStatus): 
     text: `Your application for "${job?.title ?? 'a job'}" at ${orgDisplayName(all[idx].orgEmail)} is now "${status.replace(/_/g, ' ')}".`,
     deepLink: `/applications`,
   })
+}
+
+/**
+ * §18.3/§39 "Confirm & send invite" — a real status change plus a real
+ * message on the applicant's own Messages thread with the recruiter,
+ * matching the mockup's own disclosure ("interview scheduling never
+ * bypasses her notice or consent") instead of a fabricated "sent" toast.
+ */
+export function scheduleInterview(id: string, orgEmail: string, slot: string): void {
+  const all = readAll()
+  const idx = all.findIndex((a) => a.id === id)
+  if (idx === -1) return
+  all[idx] = { ...all[idx], status: 'interview', interviewSlot: slot }
+  writeAll(all)
+
+  const application = all[idx]
+  const job = getJobById(application.jobId)
+  notify({
+    recipientEmail: application.applicantEmail,
+    category: 'messages',
+    text: `${orgDisplayName(orgEmail)} scheduled an interview for "${job?.title ?? 'your application'}" — ${slot}.`,
+    deepLink: `/messages`,
+  })
+  const conversationId = conversationIdFor(orgEmail, application.applicantEmail)
+  sendMessage(conversationId, orgEmail, `We'd like to schedule your interview for "${job?.title ?? 'the role'}" on ${slot}. Let us know if this works.`)
 }
 
 export function withdrawApplication(id: string, applicantEmail: string): void {
