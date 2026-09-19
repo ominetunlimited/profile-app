@@ -66,7 +66,7 @@ export function PublicHero() {
           <div className="mt-1 flex flex-wrap justify-center gap-3">
             <Link
               to="/auth?mode=signup"
-              className="flex h-12 items-center rounded-lg bg-accent px-6 text-[15px] font-semibold text-white shadow-lg"
+              className="flex h-12 items-center rounded-lg bg-accent-solid px-6 text-[15px] font-semibold text-white shadow-lg"
             >
               {t('hero.cta.primary')}
             </Link>
@@ -186,7 +186,7 @@ export function PublicHero() {
           <h2 className="text-[clamp(24px,3.4vw,34px)] font-bold tracking-tight text-bg">Your work already tells a story.</h2>
           <p className="text-[15px] text-bg opacity-75">PROFILE helps turn that story into trusted professional identity.</p>
           <div className="mt-1 flex flex-wrap justify-center gap-2.5">
-            <Link to="/auth?mode=signup" className="flex h-[46px] items-center rounded-lg bg-accent px-5 text-[14.5px] font-semibold text-white">
+            <Link to="/auth?mode=signup" className="flex h-[46px] items-center rounded-lg bg-accent-solid px-5 text-[14.5px] font-semibold text-white">
               Open Your PROFILE
             </Link>
             <a href="#story" className="flex h-[46px] items-center rounded-lg border border-white/30 px-[18px] text-[14.5px] font-semibold text-bg">

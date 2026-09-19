@@ -123,7 +123,7 @@ export function OwnerContentConsole() {
           <button
             onClick={saveDraft}
             disabled={!title.trim() || !body.trim() || !authorLabel.trim()}
-            className="mt-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+            className="mt-2 rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
           >
             Save draft
           </button>

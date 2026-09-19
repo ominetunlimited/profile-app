@@ -65,7 +65,7 @@ export function PublicFooter() {
             <Link to="/auth" className="flex h-[34px] items-center rounded-lg border border-border-strong px-3 text-xs font-semibold text-text-0">
               Sign In
             </Link>
-            <Link to="/auth?mode=signup" className="flex h-[34px] items-center rounded-lg bg-accent px-3.5 text-xs font-semibold text-white">
+            <Link to="/auth?mode=signup" className="flex h-[34px] items-center rounded-lg bg-accent-solid px-3.5 text-xs font-semibold text-white">
               Open Your PROFILE
             </Link>
           </div>

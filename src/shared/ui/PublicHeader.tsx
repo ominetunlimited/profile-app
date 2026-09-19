@@ -39,7 +39,7 @@ export function PublicHeader() {
           <Link to="/auth" className="flex h-[34px] items-center rounded-lg px-3 text-sm font-semibold text-text-0">
             {t('nav.signin')}
           </Link>
-          <Link to="/auth?mode=signup" className="flex h-[34px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
+          <Link to="/auth?mode=signup" className="flex h-[34px] items-center rounded-lg bg-accent-solid px-4 text-sm font-semibold text-white">
             {t('nav.openProfile')}
           </Link>
         </div>

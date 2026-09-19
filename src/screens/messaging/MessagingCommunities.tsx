@@ -151,7 +151,7 @@ function ConversationThread({ ownerEmail, conversationId, onBack }: { ownerEmail
             {messages.map((m) => {
               const mine = m.senderEmail.toLowerCase() === ownerEmail.toLowerCase()
               return (
-                <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${mine ? 'ml-auto bg-accent text-white' : 'bg-surface-sunken text-text-0'}`}>
+                <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${mine ? 'ml-auto bg-accent-solid text-white' : 'bg-surface-sunken text-text-0'}`}>
                   {m.text}
                 </div>
               )
@@ -169,7 +169,7 @@ function ConversationThread({ ownerEmail, conversationId, onBack }: { ownerEmail
           placeholder="Type a message…"
           className="min-h-[42px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
         />
-        <button onClick={handleSend} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+        <button onClick={handleSend} className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white">
           Send
         </button>
       </div>

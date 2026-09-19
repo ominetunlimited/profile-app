@@ -196,7 +196,7 @@ export function AccountCreationWizard() {
           <p className="mb-4 text-sm leading-relaxed text-text-1">Registering a {s.orgType} workspace.</p>
           {account?.accountType === 'individual' && (
             <div className="mb-4 flex items-center gap-3 rounded-lg border border-success bg-surface-sunken p-3">
-              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">
+              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">
                 {account.legalName
                   .split(' ')
                   .map((p) => p[0])
@@ -808,7 +808,7 @@ function ProfileSetupStep({
         </label>
         <div className="flex items-center gap-3.5 bg-surface p-4">
           <label
-            className="-mt-9 flex h-16 w-16 flex-none cursor-pointer items-center justify-center rounded-full border-4 border-surface bg-accent bg-cover bg-center text-white shadow"
+            className="-mt-9 flex h-16 w-16 flex-none cursor-pointer items-center justify-center rounded-full border-4 border-surface bg-accent-solid bg-cover bg-center text-white shadow"
             style={s.profilePhoto ? { backgroundImage: `url(${s.profilePhoto})` } : undefined}
           >
             {!s.profilePhoto && <span className="text-[9px] font-medium leading-tight">Add photo</span>}
@@ -936,7 +936,7 @@ function OrgDoneStep({ orgType }: { orgType: OrganisationType }) {
         Your {orgType} workspace request is in. A PROFILE team member confirms your organisation's domain before
         the workspace goes live — this usually takes 2–5 business days.
       </p>
-      <Link to={workspacePath} className="inline-flex min-h-[44px] items-center rounded-lg bg-accent px-5 text-sm font-semibold text-white">
+      <Link to={workspacePath} className="inline-flex min-h-[44px] items-center rounded-lg bg-accent-solid px-5 text-sm font-semibold text-white">
         Go to your workspace
       </Link>
     </div>

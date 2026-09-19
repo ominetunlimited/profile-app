@@ -424,7 +424,7 @@ function PhotoCardModern({ cv }: { cv: CvData }) {
   return (
     <div className="mx-auto w-full max-w-[780px] overflow-hidden bg-white text-gray-900 shadow-lg">
       <div className="flex items-center gap-4 bg-gray-100 px-9 py-7">
-        <div className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-accent text-xl font-bold text-white">
+        <div className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-accent-solid text-xl font-bold text-white">
           {cv.name.slice(0, 1).toUpperCase()}
         </div>
         <div>

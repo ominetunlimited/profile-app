@@ -175,7 +175,7 @@ export function OnboardingPage() {
                   >
                     <span
                       className={`mt-0.5 flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border text-[10.5px] font-semibold ${
-                        done ? 'border-trust bg-trust text-[#04222B]' : active ? 'border-accent bg-accent text-white' : 'border-border-strong text-text-2'
+                        done ? 'border-trust bg-trust text-[#04222B]' : active ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-text-2'
                       }`}
                     >
                       {done ? '✓' : i + 1}
@@ -509,7 +509,7 @@ export function OnboardingPage() {
                         Ask PROFILE Advisor what your recorded evidence is missing for the roles you're targeting —
                         grounded in your real records, never a guess.
                       </p>
-                      <span className="inline-block rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white">Ask PROFILE Advisor</span>
+                      <span className="inline-block rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white">Ask PROFILE Advisor</span>
                     </a>
                   </div>
 
@@ -543,7 +543,7 @@ export function OnboardingPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <button onClick={() => navigate('/home')} className="inline-flex min-h-[44px] items-center rounded-lg bg-accent px-4.5 text-sm font-semibold text-white">
+                    <button onClick={() => navigate('/home')} className="inline-flex min-h-[44px] items-center rounded-lg bg-accent-solid px-4.5 text-sm font-semibold text-white">
                       Go to my PROFILE
                     </button>
                     <Button variant="secondary" onClick={back}>
@@ -558,7 +558,7 @@ export function OnboardingPage() {
               <div className="font-mono text-[10px] uppercase tracking-wide text-text-2">Your profile so far</div>
               <div className="rounded-xl border border-border bg-surface p-3.5">
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-full text-[15px] font-semibold text-white ${name.trim() ? 'bg-accent' : 'bg-border-strong'}`}>
+                  <span className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-full text-[15px] font-semibold text-white ${name.trim() ? 'bg-accent-solid' : 'bg-border-strong'}`}>
                     {initials || '—'}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -631,7 +631,7 @@ export function OnboardingPage() {
               <button onClick={() => setExitOpen(false)} className="rounded-lg border border-border-strong px-3.5 py-2 text-sm font-semibold text-text-0">
                 Keep going
               </button>
-              <button onClick={() => navigate('/home')} className="rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-white">
+              <button onClick={() => navigate('/home')} className="rounded-lg bg-accent-solid px-3.5 py-2 text-sm font-semibold text-white">
                 Go to Home
               </button>
             </div>

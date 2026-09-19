@@ -66,7 +66,7 @@ export function RequireInternalAccessGate({ children }: { children: ReactNode })
           className="mb-2 w-full rounded-lg border border-border bg-surface-sunken px-3 py-2 text-sm text-text-0"
         />
         {error && <p className="mb-2 text-sm text-danger">Incorrect passphrase.</p>}
-        <button type="submit" className="w-full rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-white">
+        <button type="submit" className="w-full rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white">
           Unlock
         </button>
       </form>

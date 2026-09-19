@@ -9,6 +9,7 @@ import { listComments, postComment } from '@/app/commentStore'
 import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
+import { UserAvatar } from './UserAvatar'
 import { AttributionSection } from './AttributionSection'
 import { IconCheck, IconHammer, IconLightbulb, IconLink, IconMedal, IconMegaphone, IconMessage, IconSeedling, IconThumbsUp, IconTool, type IconProps } from './icons'
 
@@ -103,9 +104,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
     <article className="ds-card-hover rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         <AuthorLink className="flex-none">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">
-            {authorName.slice(0, 1).toUpperCase()}
-          </span>
+          <UserAvatar ownerEmail={activity.ownerEmail} name={authorName} size={36} />
         </AuthorLink>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -273,10 +272,14 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
             <div className="mb-2 flex flex-col gap-2">
               {comments.map((c) => {
                 const commentAuthor = findAccountByEmail(c.authorEmail)
+                const commentAuthorName = commentAuthor?.legalName ?? 'Someone'
                 return (
-                  <div key={c.id} className="rounded-lg bg-surface-sunken px-3 py-2 text-sm">
-                    <span className="font-semibold text-text-0">{commentAuthor?.legalName ?? 'Someone'}</span>{' '}
-                    <span className="text-text-1">{c.text}</span>
+                  <div key={c.id} className="flex items-start gap-2 rounded-lg bg-surface-sunken px-3 py-2 text-sm">
+                    <UserAvatar ownerEmail={c.authorEmail} name={commentAuthorName} size={24} className="mt-0.5" />
+                    <span>
+                      <span className="font-semibold text-text-0">{commentAuthorName}</span>{' '}
+                      <span className="text-text-1">{c.text}</span>
+                    </span>
                   </div>
                 )
               })}

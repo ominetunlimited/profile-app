@@ -25,7 +25,7 @@ export function RootErrorBoundary() {
       </p>
       <p className="max-w-full overflow-x-auto rounded-lg bg-surface-sunken px-3 py-2 font-mono text-xs text-text-2">{message}</p>
       <div className="mt-2 flex gap-2">
-        <button onClick={() => window.location.reload()} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+        <button onClick={() => window.location.reload()} className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white">
           Reload page
         </button>
         <Link to="/" className="rounded-lg border border-border-strong px-4 py-2 text-sm font-semibold text-text-0">

@@ -43,7 +43,7 @@ export function JobDetailPage() {
       <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-surface p-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">{orgDisplayName(job.orgEmail).slice(0, 1)}</span>
+            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent-solid text-sm font-semibold text-white">{orgDisplayName(job.orgEmail).slice(0, 1)}</span>
             <div>
               {orgUsername ? (
                 <Link to={`/profile/${orgUsername}`} className="font-semibold text-text-0 hover:text-accent">
@@ -92,7 +92,7 @@ export function JobDetailPage() {
               </Link>
             </div>
           ) : (
-            <Link to={`/apply/${job.id}`} className="inline-block rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white">
+            <Link to={`/apply/${job.id}`} className="inline-block rounded-lg bg-accent-solid px-5 py-3 text-sm font-semibold text-white">
               Apply With PROFILE
             </Link>
           )

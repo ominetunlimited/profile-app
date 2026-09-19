@@ -107,7 +107,7 @@ export function ProfilePage() {
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-10 flex flex-wrap items-end gap-4">
-            <div className="flex h-20 w-20 flex-none items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-accent text-xl font-semibold text-white">
+            <div className="flex h-20 w-20 flex-none items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-accent-solid text-xl font-semibold text-white">
               {media.avatarDataUrl ? <img src={media.avatarDataUrl} alt="" className="h-full w-full object-cover" /> : initials}
             </div>
             <div className="min-w-0 flex-1 pb-1">
@@ -403,7 +403,7 @@ function CvPortfolioTab({
                       })
                       forceRefresh((n) => n + 1)
                     }}
-                    className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                    className="rounded-lg bg-accent-solid px-4 py-2 text-xs font-semibold text-white disabled:opacity-40"
                   >
                     Request CV
                   </button>
@@ -458,7 +458,7 @@ function FollowButton({ viewerEmail, orgEmail }: { viewerEmail: string; orgEmail
         else followOrg(viewerEmail, orgEmail)
         setFollowing(!following)
       }}
-      className={`rounded-lg px-3 py-2 text-xs font-semibold ${following ? 'border border-border-strong text-text-0' : 'bg-accent text-white'}`}
+      className={`rounded-lg px-3 py-2 text-xs font-semibold ${following ? 'border border-border-strong text-text-0' : 'bg-accent-solid text-white'}`}
     >
       {following ? 'Following' : 'Follow'}
     </button>
@@ -483,7 +483,7 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
           acceptConnectionRequest(viewerEmail, otherEmail)
           setState(relationshipState(viewerEmail, otherEmail))
         }}
-        className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white"
+        className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"
       >
         Accept request
       </button>
@@ -495,7 +495,7 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
         sendConnectionRequest(viewerEmail, otherEmail)
         setState(relationshipState(viewerEmail, otherEmail))
       }}
-      className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white"
+      className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"
     >
       Connect
     </button>

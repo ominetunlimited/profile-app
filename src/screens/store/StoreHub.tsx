@@ -114,7 +114,7 @@ export function StoreHub() {
                             else publishStoreItem(item.id)
                             refresh()
                           }}
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${item.status === 'published' ? 'border border-border-strong text-text-1' : 'bg-accent text-white'}`}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${item.status === 'published' ? 'border border-border-strong text-text-1' : 'bg-accent-solid text-white'}`}
                         >
                           {item.status === 'published' ? 'Unpublish' : 'Publish'}
                         </button>

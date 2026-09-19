@@ -132,7 +132,7 @@ export function AdsCentrePage() {
                       activateCampaign(c.id)
                       refresh()
                     }}
-                    className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white"
+                    className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
                   >
                     Confirm payment (${c.estimatedCostUsd}) &amp; activate
                   </button>

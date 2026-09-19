@@ -70,7 +70,7 @@ export function AdminManagement() {
           <button
             onClick={addAdmin}
             disabled={!email.trim() || !label.trim() || scopes.length === 0}
-            className="mt-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+            className="mt-2 rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
           >
             Add Admin
           </button>

@@ -43,7 +43,7 @@ export function FeedbackCentre() {
               className="min-h-[44px] rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text-0 outline-none focus-visible:border-accent"
             />
           </Field>
-          <button onClick={send} disabled={!message.trim()} className="self-start rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
+          <button onClick={send} disabled={!message.trim()} className="self-start rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
             Send feedback
           </button>
         </div>

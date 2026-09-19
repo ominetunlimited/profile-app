@@ -48,7 +48,7 @@ export function ConnectionsPage() {
                         acceptConnectionRequest(owner, otherEmail(r))
                         refresh()
                       }}
-                      className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white"
+                      className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
                     >
                       Accept
                     </button>
@@ -107,7 +107,7 @@ function PersonRow({ email, children }: { email: string; children?: ReactNode })
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">{name.slice(0, 1).toUpperCase()}</span>
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">{name.slice(0, 1).toUpperCase()}</span>
       <div className="min-w-0 flex-1">
         {username ? (
           <Link to={`/profile/${username}`} className="truncate text-sm font-semibold text-text-0 hover:text-accent">
