@@ -166,7 +166,11 @@ export function VerificationReview() {
                       placeholder="Optional unless rejecting"
                       className={`resize-y rounded-lg border bg-surface px-3 py-2.5 text-sm text-text-0 outline-none ${noteError ? 'border-danger' : 'border-border-strong focus-visible:border-accent'}`}
                     />
-                    {noteError && <span className="text-[11px] font-medium text-danger">A note is required before rejecting.</span>}
+                    {noteError && (
+                      <span role="alert" aria-live="polite" className="text-[11px] font-medium text-danger">
+                        A note is required before rejecting.
+                      </span>
+                    )}
                   </label>
 
                   <div className="flex flex-wrap gap-2">

@@ -254,7 +254,7 @@ export function InstitutionWorkspace() {
                   setAuditLog(listAuditLogFor(owner))
                   setInvitesSent(true)
                 }}
-                className="rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
               >
                 Send invites
               </button>
@@ -312,7 +312,7 @@ export function InstitutionWorkspace() {
       )}
 
       {tab === 'settings' && (
-        <Link to="/settings?tab=organisation" className="inline-flex h-[42px] items-center rounded-lg bg-accent px-4 text-sm font-semibold text-white">
+        <Link to="/settings?tab=organisation" className="inline-flex h-[42px] items-center rounded-lg bg-accent-solid px-4 text-sm font-semibold text-white">
           Open workspace settings →
         </Link>
       )}

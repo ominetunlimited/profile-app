@@ -19,6 +19,12 @@ export default {
           2: 'var(--text-2)',
         },
         accent: 'var(--accent)',
+        // Accessibility spot-check gap #2 — dark mode's --accent is a
+        // lighter blue tuned for text/link legibility against a dark page
+        // background; that same value only reaches ~3.2:1 for white text
+        // on a solid button fill, short of WCAG AA. A fixed, theme-
+        // invariant shade for solid-fill + white-text contexts specifically.
+        'accent-solid': 'var(--accent-solid)',
         trust: 'var(--trust)',
         gold: 'var(--gold)',
         success: 'var(--success)',

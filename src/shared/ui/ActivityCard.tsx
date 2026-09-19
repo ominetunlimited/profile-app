@@ -103,7 +103,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
     <article className="ds-card-hover rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         <AuthorLink className="flex-none">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">
             {authorName.slice(0, 1).toUpperCase()}
           </span>
         </AuthorLink>
@@ -294,7 +294,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
                 aria-label="Write a comment"
                 className="min-h-[36px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
               />
-              <button onClick={submitComment} className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white">
+              <button onClick={submitComment} className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white">
                 Post
               </button>
             </div>

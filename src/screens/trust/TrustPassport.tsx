@@ -111,7 +111,7 @@ export function TrustPassport() {
               </div>
               <div className="p-4">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <span className="flex h-[46px] w-[46px] flex-none items-center justify-center rounded-full bg-accent text-base font-semibold text-white">{initials}</span>
+                  <span className="flex h-[46px] w-[46px] flex-none items-center justify-center rounded-full bg-accent-solid text-base font-semibold text-white">{initials}</span>
                   <div className="min-w-[140px] flex-1">
                     <div className="text-sm font-semibold text-text-0">{account?.legalName}</div>
                     <div className="text-xs text-text-1">{headline}</div>
@@ -419,7 +419,7 @@ function ShareModal({ onClose, onShare }: { onClose: () => void; onShare: (share
               <button
                 key={opt.value}
                 onClick={() => setAccessExpiry(opt.value)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${accessExpiry === opt.value ? 'bg-accent text-white' : 'border border-border-strong text-text-1'}`}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${accessExpiry === opt.value ? 'bg-accent-solid text-white' : 'border border-border-strong text-text-1'}`}
               >
                 {opt.label}
               </button>
@@ -436,7 +436,7 @@ function ShareModal({ onClose, onShare }: { onClose: () => void; onShare: (share
           <button
             disabled={!sharedWith.trim()}
             onClick={() => onShare(sharedWith.trim(), accessExpiry)}
-            className="rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-3.5 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
             Share passport
           </button>

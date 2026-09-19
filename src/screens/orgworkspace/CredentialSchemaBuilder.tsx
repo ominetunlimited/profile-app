@@ -307,7 +307,7 @@ export function CredentialSchemaBuilder() {
                         publishSchema(active.id)
                         refresh()
                       }}
-                      className="h-[38px] rounded-lg bg-accent px-4 text-[12.5px] font-semibold text-white"
+                      className="h-[38px] rounded-lg bg-accent-solid px-4 text-[12.5px] font-semibold text-white"
                     >
                       Publish changes
                     </button>

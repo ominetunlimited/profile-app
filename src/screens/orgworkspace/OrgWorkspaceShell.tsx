@@ -74,7 +74,7 @@ export function OrgWorkspaceShell({ title, navItems, children }: { title: string
             )
           })}
           <div className="mt-auto hidden items-center gap-2 border-t border-dashed border-border-strong pt-3 ps-2 sm:flex">
-            <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg bg-accent text-[10px] font-semibold text-white">{initials}</span>
+            <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg bg-accent-solid text-[10px] font-semibold text-white">{initials}</span>
             <span className="truncate text-[11.5px] text-text-1">
               {account.officialEmail} · {account.orgRole.replace(/_/g, ' ')}
             </span>

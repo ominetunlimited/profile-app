@@ -39,7 +39,12 @@ export const TRUST_WEIGHTS = {
 // README defines) — left as a literal hex per "never invent new tokens,"
 // flagged here rather than silently matched to an unrelated var.
 export const TRUST_TIERS = [
-  { range: [0, 199], tier: 'emerging', label: 'Emerging', color: 'var(--text-2)' },
+  // Accessibility spot-check gap #2 — this renders as a solid badge fill
+  // with white text (TrustPassport.tsx); --text-2 is tuned for small-text
+  // legibility, not as a background for overlaid white text, and fails
+  // 4.5:1 in dark mode once composited. --neutral-solid is fixed across
+  // both themes for exactly this kind of use, like --accent-solid.
+  { range: [0, 199], tier: 'emerging', label: 'Emerging', color: 'var(--neutral-solid)' },
   { range: [200, 399], tier: 'established', label: 'Established', color: 'var(--accent)' },
   { range: [400, 599], tier: 'trusted', label: 'Trusted', color: 'var(--trust)' },
   { range: [600, 799], tier: 'expert', label: 'Expert', color: '#003A8C' },

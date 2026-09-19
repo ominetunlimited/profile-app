@@ -217,7 +217,7 @@ export function RecruiterWorkflow() {
                       <button
                         key={s}
                         onClick={() => setSelectedSlot(s)}
-                        className={`rounded-lg border-[1.5px] px-3.5 py-2.5 text-xs font-semibold ${selectedSlot === s ? 'border-accent bg-accent text-white' : 'border-border-strong bg-surface text-text-1'}`}
+                        className={`rounded-lg border-[1.5px] px-3.5 py-2.5 text-xs font-semibold ${selectedSlot === s ? 'border-accent bg-accent-solid text-white' : 'border-border-strong bg-surface text-text-1'}`}
                       >
                         {s}
                       </button>
@@ -232,7 +232,7 @@ export function RecruiterWorkflow() {
                         setSelectedSlot(null)
                         refreshApplications()
                       }}
-                      className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-white disabled:opacity-50"
+                      className="h-10 rounded-lg bg-accent-solid px-4 text-sm font-semibold text-white disabled:opacity-50"
                     >
                       Confirm &amp; send invite
                     </button>

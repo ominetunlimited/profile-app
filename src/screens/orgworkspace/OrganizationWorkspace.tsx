@@ -147,7 +147,7 @@ export function OrganizationWorkspace() {
                   setAuditLog(listAuditLogFor(owner))
                   setInvitesSent(true)
                 }}
-                className="rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
               >
                 Send invites
               </button>

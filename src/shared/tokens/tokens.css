@@ -20,7 +20,12 @@
   --border-strong: #cbd5e1;
   --text-0: #1e293b;
   --text-1: #5b6b80;
-  --text-2: #8496a9;
+  /* Accessibility spot-check gap #2 (color contrast) — the handoff's
+     #8496a9 renders at ~3:1 against white/surface at the small sizes this
+     token is actually used at (labels, hints, timestamps), short of WCAG
+     AA's 4.5:1 for normal text. Darkened to a value that clears 4.5:1
+     (measured against white) while staying visibly lighter than --text-1. */
+  --text-2: #59697d;
   --accent: #0057d9;
   --trust: #0e7490;
   --gold: #8a6200;
@@ -29,6 +34,17 @@
   --danger: #c2181d;
 
   --focus: var(--accent);
+
+  /* Accessibility spot-check gap #2 — fixed across both themes (not
+     redefined under .dark below) specifically for solid-fill buttons with
+     white text; dark mode's own lighter --accent is correct for text/link/
+     icon uses but too light for that combination. #0057d9 + white clears
+     6.2:1 in both themes. */
+  --accent-solid: #0057d9;
+  /* Same fixed-across-themes fix, for the one neutral-gray solid-fill
+     usage (Trust Score's "Emerging" tier badge) — reuses light mode's own
+     --text-1 value, already verified well above 4.5:1 with white text. */
+  --neutral-solid: #5b6b80;
 
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -59,7 +75,9 @@
   --border-strong: rgba(255, 255, 255, 0.14);
   --text-0: rgba(255, 255, 255, 0.9);
   --text-1: rgba(255, 255, 255, 0.65);
-  --text-2: rgba(255, 255, 255, 0.4);
+  /* Same accessibility fix as light mode's --text-2 above — 0.4 opacity
+     measured at ~3.7:1 against --bg, short of 4.5:1. */
+  --text-2: rgba(255, 255, 255, 0.5);
   --accent: #4c8dff;
   --trust: #00e5ff;
   --gold: #f4b400;

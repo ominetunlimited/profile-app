@@ -351,7 +351,7 @@ export function AccountCreationWizard() {
             </Button>
           </div>
           {!individualValid && (
-            <p className="mt-3 text-xs text-danger">
+            <p role="alert" aria-live="polite" className="mt-3 text-xs text-danger">
               {(() => {
                 if (s.legalName.trim().length <= 1) return 'Enter your full name.'
                 if (!countryRec) return 'Select your country.'

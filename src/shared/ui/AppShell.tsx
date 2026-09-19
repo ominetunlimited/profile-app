@@ -65,6 +65,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-bg">
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6">
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
@@ -109,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 aria-label="Profile"
-                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-accent text-xs font-semibold text-white"
+                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-accent-solid text-xs font-semibold text-white"
               >
                 {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : displayName.slice(0, 1).toUpperCase()}
               </button>
@@ -154,7 +157,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      <main className="pb-16 sm:pb-0">{children}</main>
+      <main id="main" className="pb-16 sm:pb-0">
+        {children}
+      </main>
 
       {tabs.length > 0 && (
         <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur sm:hidden">
@@ -166,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={tab.to}
                 className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-text-1 ${tab.key === 'create' ? 'relative' : ''}`}
               >
-                <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white shadow-lg' : 'flex items-center justify-center'}>
+                <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent-solid text-white shadow-lg' : 'flex items-center justify-center'}>
                   <TabIcon size={tab.key === 'create' ? 22 : 20} />
                 </span>
                 {tab.key !== 'create' && tab.label}
