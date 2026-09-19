@@ -5,3 +5,7 @@ dist-ssr
 .env
 .env.local
 *.tsbuildinfo
+
+.vercel
+.env*
+!.env.local.example
