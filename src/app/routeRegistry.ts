@@ -111,6 +111,14 @@ export const routeRegistry: RouteEntry[] = [
     note: 'Same gap as /acceptable-use — required by §37.15, no canonical text drafted yet; content grounded in §27\'s real security architecture rather than invented.',
   },
   { path: '/auth', screen: 'Sign In / Account Creation', phase: 1, masterPromptRef: '§6.6, §7, §8', gate: { kind: 'public' } },
+  {
+    path: '/auth/reset-password',
+    screen: 'Password Reset Callback',
+    phase: 1,
+    masterPromptRef: '§7.3',
+    gate: { kind: 'public' },
+    note: 'Pipeline repair Phase A: the landing page for the real Supabase Auth recovery email link sent by AccountRecoveryFlow — not part of the Handoff/Master Prompt\'s original step list, added because real email-based recovery needs a real callback URL.',
+  },
   { path: '/onboarding', screen: 'Onboarding', phase: 1, masterPromptRef: '§8.8-8.10', gate: { kind: 'authenticated' } },
 
   // ---- Phase 2 — Core authenticated product ----

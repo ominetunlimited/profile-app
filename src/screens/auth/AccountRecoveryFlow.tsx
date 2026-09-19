@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthChrome } from './AuthChrome'
 import { Button } from '@/shared/ui/Button'
 import { Field, PasswordInput, TextInput } from '@/shared/ui/Field'
-import { emailIsRegistered, resetPassword } from '@/app/demoAccountStore'
+import { resetPassword } from '@/app/demoAccountStore'
+import { supabase } from '@/app/supabaseClient'
 import { passwordMeetsPolicy } from '@/app/accountTypes'
 
 type RecoveryMethod = 'email' | 'phone' | 'device' | 'identity'
-type Step = 'choose' | 'email-sent' | 'email-code' | 'email-new-password' | 'email-done'
+type Step = 'choose' | 'email-sent'
 
 /**
  * §7.3 Account Recovery Flows — previously a genuinely dead link: SignInForm's
@@ -16,17 +17,20 @@ type Step = 'choose' | 'email-sent' | 'email-code' | 'email-new-password' | 'ema
  * changed. All 4 paths are listed as real options; only path 1 (email reset
  * link) is fully implemented end-to-end — the other three are named honestly
  * with what they'd actually require (a phone/SMS backend, a real trusted-
- * device registry, and human admin review), matching this build's "no email
- * backend, so any 6-digit code works" pattern already established for MFA.
+ * device registry, and human admin review).
+ *
+ * Pipeline repair Phase A: this now sends a real Supabase Auth recovery
+ * email (`resetPassword` → `supabase.auth.resetPasswordForEmail`) instead of
+ * the old "any 6-digit code works" demo theater — that shortcut let anyone
+ * take over any account just by knowing its email, which is a real
+ * vulnerability once this is wired to a real backend. The link in that email
+ * lands on `/auth/reset-password` (`ResetPasswordCallback` below), which is
+ * where the new password is actually set.
  */
 export function AccountRecoveryFlow() {
-  const navigate = useNavigate()
   const [method, setMethod] = useState<RecoveryMethod | null>(null)
   const [step, setStep] = useState<Step>('choose')
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
 
   if (method === null) {
     return (
@@ -72,86 +76,122 @@ export function AccountRecoveryFlow() {
         <Field label="Email address">
           <TextInput value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </Field>
-        <Button className="mt-4 w-full" disabled={!email.trim()} onClick={() => setStep('email-sent')}>
-          Send reset code
-        </Button>
-      </AuthChrome>
-    )
-  }
-
-  if (step === 'email-sent') {
-    // Generic response regardless of whether the email is registered — never
-    // confirm/deny which emails exist, the same principle a real backend uses.
-    return (
-      <AuthChrome>
-        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Check your email</h1>
-        <p className="mb-5 text-sm text-text-1">
-          If an account exists for {email}, a 6-digit reset code was sent. No email backend exists in this demo — any
-          6-digit code works, same as sign-in's MFA step.
-        </p>
-        <Button className="w-full" onClick={() => setStep('email-code')}>
-          I have a code
-        </Button>
-      </AuthChrome>
-    )
-  }
-
-  if (step === 'email-code') {
-    return (
-      <AuthChrome>
-        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Enter your code</h1>
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={6}
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-          placeholder="000000"
-          className="mb-4 w-full rounded-lg border border-border-strong bg-surface py-3 text-center font-mono text-xl font-semibold tracking-[.3em] text-text-0 outline-none focus-visible:border-accent"
-        />
-        <Button className="w-full" disabled={!/^\d{6}$/.test(code)} onClick={() => setStep('email-new-password')}>
-          Verify code
-        </Button>
-      </AuthChrome>
-    )
-  }
-
-  if (step === 'email-new-password') {
-    const meetsPolicy = passwordMeetsPolicy(newPassword)
-    const match = newPassword === confirmPassword && newPassword.length > 0
-    return (
-      <AuthChrome>
-        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Set a new password</h1>
-        <div className="mb-3.5 flex flex-col gap-3.5">
-          <Field label="New password" hint="At least 8 characters, mixed case, a number, and a symbol." error={newPassword && !meetsPolicy ? 'Too weak.' : undefined}>
-            <PasswordInput showStrength value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-          </Field>
-          <Field label="Confirm new password" error={confirmPassword && !match ? "Passwords don't match." : undefined}>
-            <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-          </Field>
-        </div>
         <Button
-          className="w-full"
-          disabled={!meetsPolicy || !match}
-          onClick={() => {
-            resetPassword(email, newPassword)
-            setStep('email-done')
+          className="mt-4 w-full"
+          disabled={!email.trim()}
+          onClick={async () => {
+            await resetPassword(email)
+            setStep('email-sent')
           }}
         >
-          Reset password
+          Send reset link
         </Button>
+      </AuthChrome>
+    )
+  }
+
+  // Generic response regardless of whether the email is registered — never
+  // confirm/deny which emails exist, the same principle a real backend uses.
+  return (
+    <AuthChrome>
+      <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Check your email</h1>
+      <p className="mb-5 text-sm text-text-1">
+        If an account exists for {email}, a password reset link was sent — it may take a minute to arrive, and it's
+        worth checking spam. Open it on this device to set a new password.
+      </p>
+      <Link to="/auth" className="text-sm font-semibold text-accent">
+        ← Back to sign in
+      </Link>
+    </AuthChrome>
+  )
+}
+
+/**
+ * The far end of the real email link `resetPassword` sends. Supabase's
+ * client auto-detects the recovery token in the URL and fires a
+ * PASSWORD_RECOVERY auth event with a live session — this just waits for
+ * that, then calls `supabase.auth.updateUser` with the new password.
+ */
+export function ResetPasswordCallback() {
+  const navigate = useNavigate()
+  const [ready, setReady] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setReady(true)
+    })
+    // If the tab was already open when the link redirected here, the event
+    // may have already fired by the time this effect subscribes — a session
+    // being present is the fallback signal.
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  const meetsPolicy = passwordMeetsPolicy(newPassword)
+  const match = newPassword === confirmPassword && newPassword.length > 0
+
+  if (done) {
+    return (
+      <AuthChrome>
+        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Password reset</h1>
+        <p className="mb-5 text-sm text-text-1">Your password has been updated.</p>
+        <Button className="w-full" onClick={() => navigate('/auth')}>
+          Sign in
+        </Button>
+      </AuthChrome>
+    )
+  }
+
+  if (!ready) {
+    return (
+      <AuthChrome>
+        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Checking your reset link…</h1>
+        <p className="text-sm text-text-1">
+          If this doesn't update in a few seconds, the link may have expired —{' '}
+          <Link to="/auth?mode=recover" className="font-semibold text-accent">
+            request a new one
+          </Link>
+          .
+        </p>
       </AuthChrome>
     )
   }
 
   return (
     <AuthChrome>
-      <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Password reset</h1>
-      <p className="mb-5 text-sm text-text-1">
-        {emailIsRegistered(email) ? 'Your password has been updated.' : 'If that email had an account, its password has been updated.'}
-      </p>
-      <Button className="w-full" onClick={() => navigate('/auth')}>
-        Sign in
+      <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Set a new password</h1>
+      <div className="mb-3.5 flex flex-col gap-3.5">
+        <Field label="New password" hint="At least 8 characters, mixed case, a number, and a symbol." error={newPassword && !meetsPolicy ? 'Too weak.' : undefined}>
+          <PasswordInput showStrength value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+        </Field>
+        <Field label="Confirm new password" error={confirmPassword && !match ? "Passwords don't match." : undefined}>
+          <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+        </Field>
+      </div>
+      {error && (
+        <p role="alert" aria-live="polite" className="mb-3 text-xs text-danger">
+          {error}
+        </p>
+      )}
+      <Button
+        className="w-full"
+        disabled={!meetsPolicy || !match}
+        onClick={async () => {
+          const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+          if (updateError) {
+            setError(updateError.message)
+            return
+          }
+          setDone(true)
+        }}
+      >
+        Reset password
       </Button>
     </AuthChrome>
   )

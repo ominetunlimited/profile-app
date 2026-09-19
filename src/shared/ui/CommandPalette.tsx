@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
-import { listAllAccounts } from '@/app/demoAccountStore'
+import { listAllAccounts, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { TOOL_CATALOGUE, listAllProviders } from '@/app/toolCatalogue'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
 import { IconEnter, IconFactory, IconPerson, IconTool } from './icons'
@@ -108,6 +108,13 @@ export function CommandPalette() {
     })
   }, [account, staffRole, hub])
 
+  // Pipeline repair Phase A: `listAllAccounts()` reads a live cache backed by
+  // Supabase (see demoAccountStore.ts) instead of `localStorage`, so this
+  // memo must recompute whenever that cache changes — not just when
+  // account/staffRole do — or accounts created after this palette first
+  // mounted (including on another device, mid-session) would never appear.
+  const accountsCacheVersion = useAccountsCacheVersion()
+
   const people = useMemo<PersonResult[]>(() => {
     if (!account && !staffRole) return []
     return listAllAccounts()
@@ -127,7 +134,7 @@ export function CommandPalette() {
               : `@${username}${a.headline ? ` · ${a.headline}` : ''} · ${a.country}`,
         }
       })
-  }, [account, staffRole])
+  }, [account, staffRole, accountsCacheVersion])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()

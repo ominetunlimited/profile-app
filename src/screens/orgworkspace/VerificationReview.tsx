@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
-import { listAllOrganisations, setOrganisationRegistryLevel } from '@/app/demoAccountStore'
+import { listAllOrganisations, onAccountsChange, setOrganisationRegistryLevel } from '@/app/demoAccountStore'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type OrgRegistryLevel } from '@/app/accountTypes'
 
 const FREE_EMAIL_DOMAINS = new Set(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'aol.com', 'proton.me', 'protonmail.com'])
@@ -46,12 +46,19 @@ export function VerificationReview() {
     setOrgs(listAllOrganisations())
   }
 
-  function decide(email: string, level: OrgRegistryLevel) {
+  // Pipeline repair Phase A: `listAllOrganisations()` reads a live
+  // Supabase-backed cache (demoAccountStore.ts) that may still be loading,
+  // or may receive a Realtime push, after this screen's first render — this
+  // keeps the queue current instead of freezing at whatever the cache held
+  // at mount.
+  useEffect(() => onAccountsChange(refresh), [])
+
+  async function decide(email: string, level: OrgRegistryLevel) {
     if (level === 'rejected' && !note.trim()) {
       setNoteError(true)
       return
     }
-    setOrganisationRegistryLevel(email, level)
+    await setOrganisationRegistryLevel(email, level)
     setNoteError(false)
     setNote('')
     refresh()

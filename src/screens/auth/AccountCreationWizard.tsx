@@ -126,7 +126,7 @@ export function AccountCreationWizard() {
     passwordMeetsPolicy(s.orgPassword) &&
     s.orgConfirmPassword === s.orgPassword
 
-  function finalizeIndividualAccount() {
+  async function finalizeIndividualAccount() {
     const newAccount = {
       accountType: 'individual' as const,
       pathway: s.pathway!,
@@ -141,7 +141,7 @@ export function AccountCreationWizard() {
       email: s.email,
       country: s.country,
     }
-    saveDemoAccount(s.email, s.password, newAccount)
+    await saveDemoAccount(s.email, s.password, newAccount)
     // Bug fix: §8.8's profilePicture/coverPicture were captured into wizard
     // state and previewed, but never actually saved anywhere — completing
     // registration silently discarded them. Now persisted through the same
@@ -158,7 +158,7 @@ export function AccountCreationWizard() {
    * `orgFinalizeAfterIndividual`. New, not in the old §8.4.1 flow: that
    * individual auto-follows the organisation the moment the link completes.
    */
-  function finalizeOrgAccount(creatorEmail: string) {
+  async function finalizeOrgAccount(creatorEmail: string) {
     const newAccount = {
       accountType: 'organisation' as const,
       orgType: s.orgType!,
@@ -168,7 +168,7 @@ export function AccountCreationWizard() {
       registryLevel: 'user_submitted' as const,
       orgRole: 'super_admin' as const,
     }
-    saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
+    await saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
     if (creatorEmail) followOrg(creatorEmail, s.officialEmail)
     setAccount(newAccount)
   }
@@ -259,12 +259,12 @@ export function AccountCreationWizard() {
         <ConsentStep
           s={s}
           patch={patch}
-          onContinue={() => {
+          onContinue={async () => {
             // §2 override — if this browser is already signed in as an
             // individual, that's the identity link, exactly as before.
             // Otherwise defer to org-identity-choice, the new final step.
             if (account?.accountType === 'individual') {
-              finalizeOrgAccount(account.email)
+              await finalizeOrgAccount(account.email)
               patch({ step: 'org-done' })
             } else {
               patch({ step: 'org-identity-choice' })
@@ -374,14 +374,14 @@ export function AccountCreationWizard() {
           s={s}
           patch={patch}
           email={s.email}
-          onVerified={() => {
+          onVerified={async () => {
             // §2 override — this individual identity exists purely to link
             // to the organisation being registered; finalize both here
             // rather than sending them through goals/profile-setup, which
             // they can still fill in later from Settings.
             if (s.orgFinalizeAfterIndividual) {
-              finalizeIndividualAccount()
-              finalizeOrgAccount(s.email)
+              await finalizeIndividualAccount()
+              await finalizeOrgAccount(s.email)
               patch({ step: 'org-done' })
             } else {
               patch({ step: 'consent' })
@@ -427,8 +427,8 @@ export function AccountCreationWizard() {
         <ProfileSetupStep
           s={s}
           patch={patch}
-          onContinue={() => {
-            finalizeIndividualAccount()
+          onContinue={async () => {
+            await finalizeIndividualAccount()
             const branch = journeyBranchFor(s.careerStage)
             patch({ step: branch ? 'journey-setup' : 'done' })
           }}

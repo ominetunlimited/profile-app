@@ -20,6 +20,7 @@ import { HelpCentre } from '@/screens/public/HelpCentre'
 import { FaqLibrary } from '@/screens/public/FaqLibrary'
 import { LegalDocumentPage } from '@/screens/public/legal/LegalDocumentPage'
 import { AuthPage } from '@/screens/auth/AuthPage'
+import { ResetPasswordCallback } from '@/screens/auth/AccountRecoveryFlow'
 import { OnboardingPage } from '@/screens/onboarding/OnboardingPage'
 import { HomePage } from '@/screens/home/HomePage'
 import { ProfilePage } from '@/screens/profile/ProfilePage'
@@ -101,6 +102,8 @@ function elementFor(route: RouteEntry): ReactElement {
       return <FaqLibrary />
     case '/auth':
       return <AuthPage />
+    case '/auth/reset-password':
+      return <ResetPasswordCallback />
     case '/onboarding':
       return (
         <RequireAuthenticated>

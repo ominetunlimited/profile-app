@@ -90,11 +90,11 @@ export function ProfileTab() {
   }))
   const [saved, setSaved] = useState(false)
 
-  function save() {
+  async function save() {
     if (!account || account.accountType !== 'individual') return
     const updated = { ...account, ...form }
     setAccount(updated)
-    updateDemoAccount(account.email, updated)
+    await updateDemoAccount(account.email, updated)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -394,9 +394,9 @@ export function SecurityTab() {
   const [alertsEnabled, setAlertsEnabled] = useState(getSuspiciousLoginAlertsEnabled)
   const [history, setHistory] = useState(() => listLoginHistory(email))
 
-  function submitPasswordChange() {
+  async function submitPasswordChange() {
     if (!account) return
-    const ok = changePassword(email, currentPassword, newPassword)
+    const ok = await changePassword(email, currentPassword, newPassword)
     setPasswordMessage(ok ? 'Password updated.' : 'Current password is incorrect.')
     if (ok) {
       setCurrentPassword('')

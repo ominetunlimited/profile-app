@@ -43,12 +43,12 @@ function seedIfMissing(ownerEmail: string, entries: Parameters<typeof postActivi
  * time this browser ever seeded it — the exact bug that left the Institution
  * and Government fixtures permanently unreachable (no username) once seeded
  * before that field was added below, immune to any later code fix. */
-function registerOrRefresh(email: string, account: IndividualAccount | OrganisationAccount) {
-  if (!emailIsRegistered(email)) saveDemoAccount(email, DEMO_PASSWORD, account)
-  else updateDemoAccount(email, account)
+async function registerOrRefresh(email: string, account: IndividualAccount | OrganisationAccount) {
+  if (!emailIsRegistered(email)) await saveDemoAccount(email, DEMO_PASSWORD, account)
+  else await updateDemoAccount(email, account)
 }
 
-export function ensureOminiNfawaSeeded(): IndividualAccount {
+export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
   const account: IndividualAccount = {
     accountType: 'individual',
     pathway: 'hybrid',
@@ -61,7 +61,7 @@ export function ensureOminiNfawaSeeded(): IndividualAccount {
     city: 'Lagos',
   }
 
-  registerOrRefresh(OMINI_EMAIL, account)
+  await registerOrRefresh(OMINI_EMAIL, account)
 
   seedIfMissing(OMINI_EMAIL, [
     {
@@ -194,12 +194,12 @@ export function ensureOminiNfawaSeeded(): IndividualAccount {
   // include an org they chose to follow. ensureOminetDigitalSeeded() is
   // idempotent, so calling it here just guarantees the org account exists
   // to be followed, whichever demo button gets clicked first.
-  followOrg(OMINI_EMAIL, ensureOminetDigitalSeeded().officialEmail)
+  followOrg(OMINI_EMAIL, (await ensureOminetDigitalSeeded()).officialEmail)
 
   return account
 }
 
-export function ensureOminetDigitalSeeded(): OrganisationAccount {
+export async function ensureOminetDigitalSeeded(): Promise<OrganisationAccount> {
   const account: OrganisationAccount = {
     accountType: 'organisation',
     orgType: 'Company',
@@ -211,7 +211,7 @@ export function ensureOminetDigitalSeeded(): OrganisationAccount {
     orgRole: 'super_admin',
   }
 
-  registerOrRefresh(OMINET_DIGITAL_EMAIL, account)
+  await registerOrRefresh(OMINET_DIGITAL_EMAIL, account)
 
   seedIfMissing(OMINET_DIGITAL_EMAIL, [
     {
@@ -288,7 +288,7 @@ export function ensureOminetDigitalSeeded(): OrganisationAccount {
  * to-hub mapping, per §10.5's hard rule) — not part of the two named
  * product-demonstration accounts above.
  */
-export function ensureInstitutionFixtureSeeded(): OrganisationAccount {
+export async function ensureInstitutionFixtureSeeded(): Promise<OrganisationAccount> {
   const email = 'admin@lagosuniversity.test'
   const account: OrganisationAccount = {
     accountType: 'organisation',
@@ -304,11 +304,11 @@ export function ensureInstitutionFixtureSeeded(): OrganisationAccount {
     registryLevel: 'verified',
     orgRole: 'super_admin',
   }
-  registerOrRefresh(email, account)
+  await registerOrRefresh(email, account)
   return account
 }
 
-export function ensureGovernmentFixtureSeeded(): OrganisationAccount {
+export async function ensureGovernmentFixtureSeeded(): Promise<OrganisationAccount> {
   const email = 'admin@ministryoftest.test'
   const account: OrganisationAccount = {
     accountType: 'organisation',
@@ -320,6 +320,6 @@ export function ensureGovernmentFixtureSeeded(): OrganisationAccount {
     registryLevel: 'verified',
     orgRole: 'super_admin',
   }
-  registerOrRefresh(email, account)
+  await registerOrRefresh(email, account)
   return account
 }

@@ -21,8 +21,8 @@ export function SignInForm() {
   const [params] = useSearchParams()
   const returnTo = params.get('return') ? decodeURIComponent(params.get('return')!) : '/home'
 
-  function completeSignIn() {
-    const account = findDemoAccount(email, password)
+  async function completeSignIn() {
+    const account = await findDemoAccount(email, password)
     if (!account) {
       setError(true)
       return

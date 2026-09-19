@@ -11,9 +11,9 @@ import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/dem
  * ever existed as in-memory AccountContext state, never registered in
  * demoAccountStore.ts, so Search/`/profile/:username`/Connect/Follow from
  * any OTHER account could never find them at all. */
-function registerQuickSet(email: string, account: Account) {
-  if (!emailIsRegistered(email)) saveDemoAccount(email, 'quick-set', account)
-  else updateDemoAccount(email, account)
+async function registerQuickSet(email: string, account: Account) {
+  if (!emailIsRegistered(email)) await saveDemoAccount(email, 'Quick-set-9!', account)
+  else await updateDemoAccount(email, account)
 }
 
 const ORG_ADMIN_ROLES: OrgAdminRoleV3[] = ['super_admin', 'admin', 'verification_officer', 'hr_manager', 'credential_manager', 'moderator', 'compliance_officer']
@@ -57,8 +57,8 @@ export function AccountSwitcher() {
         <span className="text-text-2">PROFILE DEMO</span>
       <button
         className="rounded border border-accent px-2 py-1 font-semibold text-accent hover:bg-surface-sunken"
-        onClick={() => {
-          const seeded = ensureOminiNfawaSeeded()
+        onClick={async () => {
+          const seeded = await ensureOminiNfawaSeeded()
           setAccount(seeded)
           setStaffRole(null)
           navigate('/home')
@@ -68,8 +68,8 @@ export function AccountSwitcher() {
       </button>
       <button
         className="rounded border border-accent px-2 py-1 font-semibold text-accent hover:bg-surface-sunken"
-        onClick={() => {
-          const seeded = ensureOminetDigitalSeeded()
+        onClick={async () => {
+          const seeded = await ensureOminetDigitalSeeded()
           setAccount(seeded)
           setStaffRole(null)
           navigate('/home')
@@ -79,8 +79,8 @@ export function AccountSwitcher() {
       </button>
       <button
         className="rounded border border-border px-2 py-1 text-text-1 hover:border-accent"
-        onClick={() => {
-          setAccount(ensureInstitutionFixtureSeeded())
+        onClick={async () => {
+          setAccount(await ensureInstitutionFixtureSeeded())
           setStaffRole(null)
           navigate('/home')
         }}
@@ -89,8 +89,8 @@ export function AccountSwitcher() {
       </button>
       <button
         className="rounded border border-border px-2 py-1 text-text-1 hover:border-accent"
-        onClick={() => {
-          setAccount(ensureGovernmentFixtureSeeded())
+        onClick={async () => {
+          setAccount(await ensureGovernmentFixtureSeeded())
           setStaffRole(null)
           navigate('/home')
         }}
@@ -110,7 +110,7 @@ export function AccountSwitcher() {
       </button>
       <button
         className="rounded border border-border px-2 py-1 hover:border-accent"
-        onClick={() => {
+        onClick={async () => {
           const acct: Account = {
             accountType: 'individual',
             pathway: 'professional',
@@ -120,7 +120,7 @@ export function AccountSwitcher() {
             email: 'dev@example.com',
             country: 'Nigeria',
           }
-          registerQuickSet(acct.email, acct)
+          await registerQuickSet(acct.email, acct)
           setAccount(acct)
           setStaffRole(null)
         }}
@@ -130,7 +130,7 @@ export function AccountSwitcher() {
       <select
         className="rounded border border-border bg-surface px-2 py-1"
         value={isOrg ? account.orgType : ''}
-        onChange={(e) => {
+        onChange={async (e) => {
           const orgType = e.target.value as OrganisationType
           if (!orgType) return
           const acct: Account = {
@@ -143,7 +143,7 @@ export function AccountSwitcher() {
             registryLevel: 'verified',
             orgRole: 'super_admin',
           }
-          registerQuickSet(acct.officialEmail, acct)
+          await registerQuickSet(acct.officialEmail, acct)
           setAccount(acct)
           setStaffRole(null)
         }}
