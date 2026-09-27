@@ -4,10 +4,10 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { useAccount } from '@/app/AccountContext'
 import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account } from '@/app/accountTypes'
-import { listActivities, ownerKey } from '@/app/activityStore'
+import { listActivities, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
 import { pendingRequestsForOwner, respondToSelfTag } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { findAccountByEmail, findAccountByUsername } from '@/app/demoAccountStore'
+import { findAccountByEmail, findAccountByUsername, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
 import { buildCvData } from '@/app/careerData'
 import { publicDisplayName } from '@/app/privacyModeStore'
@@ -39,9 +39,17 @@ export function ProfilePage() {
 
   const isSelf = username === 'me' || (!!account && 'username' in account && account.username === username)
 
+  // Pipeline repair Phase A: the accounts cache backing findAccountByUsername
+  // loads asynchronously (and can receive a Realtime push) — without
+  // depending on this, a profile visited before the initial fetch resolves
+  // would render "not found" once and never recheck, since nothing else on
+  // this page would force a re-render afterward.
+  useAccountsCacheVersion()
+  useActivitiesCacheVersion()
+
   // §24.2 — viewing someone else: a real registered account (never
-  // fabricated), looked up by username from every account actually created
-  // on this browser (demoAccountStore.ts's listAllAccounts).
+  // fabricated), looked up by username from every account actually
+  // registered (demoAccountStore.ts's listAllAccounts, now cross-device).
   const otherAccount: Account | undefined = isSelf ? undefined : findAccountByUsername(username)
 
   if (!isSelf && !otherAccount) {

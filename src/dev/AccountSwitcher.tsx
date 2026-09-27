@@ -4,7 +4,10 @@ import { useAccount } from '@/app/AccountContext'
 import type { Account, OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
 import { ORGANISATION_TYPES } from '@/app/accountTypes'
 import { ensureGovernmentFixtureSeeded, ensureInstitutionFixtureSeeded, ensureOminetDigitalSeeded, ensureOminiNfawaSeeded } from './seedDemoData'
-import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/demoAccountStore'
+import { emailIsRegistered, ensureSignedInAs, saveDemoAccount, updateDemoAccount, waitForAccountsCacheReady } from '@/app/demoAccountStore'
+import { supabase } from '@/app/supabaseClient'
+
+const QUICK_SET_PASSWORD = 'Quick-set-9!'
 
 /** §24/§40's "same underlying data architecture, never fake the demo" rule
  * applies to this quick-set tool too — previously these two accounts only
@@ -12,8 +15,13 @@ import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/dem
  * demoAccountStore.ts, so Search/`/profile/:username`/Connect/Follow from
  * any OTHER account could never find them at all. */
 async function registerQuickSet(email: string, account: Account) {
-  if (!emailIsRegistered(email)) await saveDemoAccount(email, 'Quick-set-9!', account)
-  else await updateDemoAccount(email, account)
+  await waitForAccountsCacheReady()
+  if (!emailIsRegistered(email)) {
+    await saveDemoAccount(email, QUICK_SET_PASSWORD, account)
+  } else {
+    await ensureSignedInAs(email, QUICK_SET_PASSWORD)
+    await updateDemoAccount(email, account)
+  }
 }
 
 const ORG_ADMIN_ROLES: OrgAdminRoleV3[] = ['super_admin', 'admin', 'verification_officer', 'hr_manager', 'credential_manager', 'moderator', 'compliance_officer']
@@ -101,7 +109,8 @@ export function AccountSwitcher() {
       <span className="text-text-2">DEV ACCOUNT SWITCHER</span>
       <button
         className="rounded border border-border px-2 py-1 hover:border-accent"
-        onClick={() => {
+        onClick={async () => {
+          await supabase.auth.signOut()
           setAccount(null)
           setStaffRole(null)
         }}

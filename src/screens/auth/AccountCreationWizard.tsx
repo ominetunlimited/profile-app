@@ -90,6 +90,7 @@ export function AccountCreationWizard() {
   const [agreeToTerms, setAgreeToTerms] = useState(false)
   const { account, setAccount } = useAccount()
   const navigate = useNavigate()
+  const [wizardError, setWizardError] = useState<string | null>(null)
 
   const isOrgPath = s.accountKind === 'organisation'
   const stepOrder = isOrgPath ? ORG_STEP_ORDER : INDIVIDUAL_STEP_ORDER
@@ -126,7 +127,7 @@ export function AccountCreationWizard() {
     passwordMeetsPolicy(s.orgPassword) &&
     s.orgConfirmPassword === s.orgPassword
 
-  async function finalizeIndividualAccount() {
+  async function finalizeIndividualAccount(): Promise<boolean> {
     const newAccount = {
       accountType: 'individual' as const,
       pathway: s.pathway!,
@@ -141,7 +142,16 @@ export function AccountCreationWizard() {
       email: s.email,
       country: s.country,
     }
-    await saveDemoAccount(s.email, s.password, newAccount)
+    try {
+      await saveDemoAccount(s.email, s.password, newAccount)
+    } catch (err) {
+      // Real failure mode now that this hits a real backend (e.g. the email
+      // actually got registered a moment ago, on this device or another) —
+      // send them back to fix it instead of silently stalling mid-wizard.
+      setWizardError(err instanceof Error ? err.message : 'Could not create your account. Please try again.')
+      patch({ step: 'individual-info' })
+      return false
+    }
     // Bug fix: §8.8's profilePicture/coverPicture were captured into wizard
     // state and previewed, but never actually saved anywhere — completing
     // registration silently discarded them. Now persisted through the same
@@ -149,6 +159,8 @@ export function AccountCreationWizard() {
     if (s.profilePhoto) saveAvatar(s.email, s.profilePhoto)
     if (s.coverPhoto) saveCover(s.email, s.coverPhoto)
     setAccount(newAccount)
+    setWizardError(null)
+    return true
   }
 
   /**
@@ -158,7 +170,7 @@ export function AccountCreationWizard() {
    * `orgFinalizeAfterIndividual`. New, not in the old §8.4.1 flow: that
    * individual auto-follows the organisation the moment the link completes.
    */
-  async function finalizeOrgAccount(creatorEmail: string) {
+  async function finalizeOrgAccount(creatorEmail: string): Promise<boolean> {
     const newAccount = {
       accountType: 'organisation' as const,
       orgType: s.orgType!,
@@ -168,13 +180,26 @@ export function AccountCreationWizard() {
       registryLevel: 'user_submitted' as const,
       orgRole: 'super_admin' as const,
     }
-    await saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
+    try {
+      await saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
+    } catch (err) {
+      setWizardError(err instanceof Error ? err.message : 'Could not create the workspace. Please try again.')
+      patch({ step: 'org-info' })
+      return false
+    }
     if (creatorEmail) followOrg(creatorEmail, s.officialEmail)
     setAccount(newAccount)
+    setWizardError(null)
+    return true
   }
 
   return (
     <AuthChrome maxWidth={560} progress={progress}>
+      {wizardError && (
+        <div role="alert" aria-live="polite" className="mb-4 rounded-lg border border-danger bg-surface-sunken p-3 text-sm text-text-0">
+          {wizardError}
+        </div>
+      )}
       {s.step === 'account-type' && (
         <AccountTypeStep
           s={s}
@@ -264,7 +289,7 @@ export function AccountCreationWizard() {
             // individual, that's the identity link, exactly as before.
             // Otherwise defer to org-identity-choice, the new final step.
             if (account?.accountType === 'individual') {
-              await finalizeOrgAccount(account.email)
+              if (!(await finalizeOrgAccount(account.email))) return
               patch({ step: 'org-done' })
             } else {
               patch({ step: 'org-identity-choice' })
@@ -380,8 +405,8 @@ export function AccountCreationWizard() {
             // rather than sending them through goals/profile-setup, which
             // they can still fill in later from Settings.
             if (s.orgFinalizeAfterIndividual) {
-              await finalizeIndividualAccount()
-              await finalizeOrgAccount(s.email)
+              if (!(await finalizeIndividualAccount())) return
+              if (!(await finalizeOrgAccount(s.email))) return
               patch({ step: 'org-done' })
             } else {
               patch({ step: 'consent' })
@@ -428,7 +453,7 @@ export function AccountCreationWizard() {
           s={s}
           patch={patch}
           onContinue={async () => {
-            await finalizeIndividualAccount()
+            if (!(await finalizeIndividualAccount())) return
             const branch = journeyBranchFor(s.careerStage)
             patch({ step: branch ? 'journey-setup' : 'done' })
           }}

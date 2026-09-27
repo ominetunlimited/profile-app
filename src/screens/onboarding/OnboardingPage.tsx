@@ -99,9 +99,9 @@ export function OnboardingPage() {
     updateDemoAccount(account.email, updated)
   }
 
-  function saveRecord() {
+  async function saveRecord() {
     if (!owner || recordPosted) return
-    postActivity({
+    await postActivity({
       ownerEmail: owner,
       type: 'Project',
       title: work.trim(),

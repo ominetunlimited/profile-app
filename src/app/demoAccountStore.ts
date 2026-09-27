@@ -177,6 +177,26 @@ export function accountsCacheReady(): boolean {
 }
 
 /**
+ * For code that needs a trustworthy answer from `emailIsRegistered` before
+ * doing something that can't be undone cheaply (like attempting a signup) —
+ * without this, a caller running right after page load can read the cache
+ * before its first fetch resolves, see no accounts at all, and try to
+ * sign up an email that's actually already registered (a real 422 from
+ * Supabase, reproduced by the dev account-switcher's very first click).
+ */
+export function waitForAccountsCacheReady(): Promise<void> {
+  if (cacheReady) return Promise.resolve()
+  return new Promise((resolve) => {
+    const unsubscribe = onAccountsChange(() => {
+      if (cacheReady) {
+        unsubscribe()
+        resolve()
+      }
+    })
+  })
+}
+
+/**
  * The React-idiomatic way to consume the cache: a component that reads
  * `listAllAccounts()`/`findAccountByEmail()`/etc. inside a `useMemo` or
  * `useState` initializer only recomputes when ITS OWN dependencies change —
@@ -222,6 +242,26 @@ export async function findDemoAccount(email: string, password: string): Promise<
     }
   }
   return row ? rowToAccount(row) : null
+}
+
+/**
+ * For dev-only tooling (AccountSwitcher, seedDemoData) that sets the app's
+ * `AccountContext` directly instead of going through the real Sign In form —
+ * a real shortcut for exercising account states, but one that still needs a
+ * REAL Supabase session underneath, since RLS now enforces every write
+ * against `current_account_email()` (the authenticated caller), not
+ * whatever the UI merely displays as "signed in". Without this, switching to
+ * an already-registered dev account left the browser had no real session,
+ * so anything it tried to write (like seeding demo activities) was silently
+ * attempted as an anonymous caller and rejected by RLS. No-ops if already
+ * signed in as this exact email.
+ */
+export async function ensureSignedInAs(email: string, password: string): Promise<void> {
+  const { data } = await supabase.auth.getSession()
+  const currentEmail = data.session?.user?.email?.toLowerCase()
+  if (currentEmail === email.trim().toLowerCase()) return
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+  if (error) throw error
 }
 
 export function emailIsRegistered(email: string): boolean {

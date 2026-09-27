@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { useAccount } from '@/app/AccountContext'
-import { getActivityById, ownerKey } from '@/app/activityStore'
+import { getActivityById, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 
 /**
@@ -15,6 +15,10 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
 export function ActivityDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { account } = useAccount()
+  // Pipeline repair Phase A: a shared/notification link can land here before
+  // the activities cache's initial fetch resolves — without depending on
+  // this, that first render's "not found" would never recheck.
+  useActivitiesCacheVersion()
   const activity = id ? getActivityById(id) : undefined
 
   if (!activity) {

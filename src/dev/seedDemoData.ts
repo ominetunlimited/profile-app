@@ -1,5 +1,5 @@
 import type { IndividualAccount, OrganisationAccount } from '@/app/accountTypes'
-import { emailIsRegistered, saveDemoAccount, updateDemoAccount } from '@/app/demoAccountStore'
+import { emailIsRegistered, ensureSignedInAs, saveDemoAccount, updateDemoAccount, waitForAccountsCacheReady } from '@/app/demoAccountStore'
 import { postActivity, listActivities } from '@/app/activityStore'
 import { saveCvDetails, getCvDetails } from '@/app/cvDetailsStore'
 import { toggleMembership, isMember } from '@/app/communitiesStore'
@@ -32,9 +32,9 @@ export const DEMO_PASSWORD = 'DemoPass123!'
 export const OMINI_EMAIL = 'ominet@live.com'
 export const OMINET_DIGITAL_EMAIL = 'hello@ominetdigital.com'
 
-function seedIfMissing(ownerEmail: string, entries: Parameters<typeof postActivity>[0][]) {
+async function seedIfMissing(ownerEmail: string, entries: Parameters<typeof postActivity>[0][]) {
   if (listActivities(ownerEmail).length > 0) return
-  for (const entry of entries) postActivity(entry)
+  for (const entry of entries) await postActivity(entry)
 }
 
 /** First visit: register the account record. Every visit after: refresh the
@@ -44,8 +44,16 @@ function seedIfMissing(ownerEmail: string, entries: Parameters<typeof postActivi
  * and Government fixtures permanently unreachable (no username) once seeded
  * before that field was added below, immune to any later code fix. */
 async function registerOrRefresh(email: string, account: IndividualAccount | OrganisationAccount) {
-  if (!emailIsRegistered(email)) await saveDemoAccount(email, DEMO_PASSWORD, account)
-  else await updateDemoAccount(email, account)
+  await waitForAccountsCacheReady()
+  if (!emailIsRegistered(email)) {
+    await saveDemoAccount(email, DEMO_PASSWORD, account)
+  } else {
+    // A real session is required from here on — everything seeded below
+    // (activities, etc.) is an authenticated write RLS checks against
+    // current_account_email(), not just whatever AccountContext displays.
+    await ensureSignedInAs(email, DEMO_PASSWORD)
+    await updateDemoAccount(email, account)
+  }
 }
 
 export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
@@ -63,7 +71,7 @@ export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
 
   await registerOrRefresh(OMINI_EMAIL, account)
 
-  seedIfMissing(OMINI_EMAIL, [
+  await seedIfMissing(OMINI_EMAIL, [
     {
       ownerEmail: OMINI_EMAIL,
       type: 'Work Experience',
@@ -213,7 +221,7 @@ export async function ensureOminetDigitalSeeded(): Promise<OrganisationAccount> 
 
   await registerOrRefresh(OMINET_DIGITAL_EMAIL, account)
 
-  seedIfMissing(OMINET_DIGITAL_EMAIL, [
+  await seedIfMissing(OMINET_DIGITAL_EMAIL, [
     {
       ownerEmail: OMINET_DIGITAL_EMAIL,
       type: 'Project',

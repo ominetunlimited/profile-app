@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
@@ -8,7 +8,7 @@ import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
-import { listActivities, listFeedFor, ownerKey, postActivity } from '@/app/activityStore'
+import { listActivities, listFeedFor, onActivitiesChange, ownerKey, postActivity } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
@@ -57,6 +57,12 @@ export function HomePage() {
     setMyActivityCount(listActivities(owner).length)
     setFeed(listFeedFor(owner))
   }
+
+  // Pipeline repair Phase A: activityStore's cache loads asynchronously and
+  // can also receive a Realtime push (another device's post) — without this,
+  // myActivityCount/feed would freeze at whatever the cache held on mount,
+  // same class of bug useAccountsCacheVersion fixed for Search.
+  useEffect(() => onActivitiesChange(refresh), [owner])
 
   // Design handoff gap audit — PROFILE Home.dc.html's right sidebar
   // (Trust Score, Profile health, Matched opportunities, Verification in
@@ -347,8 +353,8 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
       <div className="flex gap-2">
         <Button
           disabled={!title.trim() || !description.trim()}
-          onClick={() => {
-            postActivity({
+          onClick={async () => {
+            await postActivity({
               ownerEmail: owner,
               type,
               title,

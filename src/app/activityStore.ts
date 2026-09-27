@@ -1,11 +1,22 @@
 /**
- * TEMPORARY client-only scaffolding (same pattern and same caveats as
- * `demoAccountStore.ts`) so Home's feed, the Record Work composer, and
- * Onboarding's first-activity step share one real, persisted list instead of
- * each faking its own local state. Replace wholesale with real API calls once
- * a backend exists — never extend this file into a permanent data layer.
+ * Pipeline repair Phase A — real Supabase-backed `public.activities` (RLS
+ * enforced), replacing the old `localStorage` scaffolding. This is the
+ * actual "content" S1's bug report was about: a post made on one device now
+ * exists in Postgres, not just that browser's own storage.
+ *
+ * Same pattern as `demoAccountStore.ts`: `postActivity` is a real network
+ * write and is `async`, but the read functions (`listActivities`,
+ * `getActivityById`, `listFeedFor`) stay synchronous — every screen that
+ * renders a feed or activity list calls them inline during render — backed
+ * by a live cache populated on load and kept current via Supabase Realtime.
+ * `useActivitiesCacheVersion()` lets a component that *memoizes* one of
+ * these results (instead of just calling it in the render body) know when
+ * to recompute — see HomePage.tsx's feed/count state for the load-bearing
+ * example (same class of bug `useAccountsCacheVersion` fixed for Search).
  */
+import { useSyncExternalStore } from 'react'
 import type { Account } from './accountTypes'
+import { supabase } from './supabaseClient'
 import { listFollowedOrgs } from './followStore'
 import { listConnectedEmails } from './connectionStore'
 import { recordToolReferences } from './providerReferenceStore'
@@ -41,39 +52,105 @@ export interface ActivityRecord {
   createdAt: string
 }
 
-const STORAGE_KEY = 'profile:demo-activities'
+interface ActivityRow {
+  id: string
+  owner_email: string
+  type: string
+  title: string
+  description: string
+  role: string | null
+  organisation: string | null
+  location: string | null
+  skills: string[] | null
+  tools: string[] | null
+  collaborators: string[] | null
+  cv_portfolio_include: boolean
+  visibility: 'public' | 'connections_only' | 'private'
+  created_at: string
+}
 
-/** Defends against records saved by an earlier version of this build before
- * skills/tools/collaborators existed on ActivityRecord (or a real user
- * leaving them blank) — every reader downstream (HomePage, CareerGrowthPage,
- * OnboardingPage, badgeStore, AnalyticsPage) does `.skills.length` etc.
- * directly, so this is the one place that needs to normalise rather than
- * every call site guarding separately. */
-function normalize(a: Partial<ActivityRecord> & Record<string, unknown>): ActivityRecord {
+function rowToRecord(r: ActivityRow): ActivityRecord {
   return {
-    ...a,
-    skills: Array.isArray(a.skills) ? a.skills : [],
-    tools: Array.isArray(a.tools) ? a.tools : [],
-    collaborators: Array.isArray(a.collaborators) ? a.collaborators : [],
-  } as ActivityRecord
-}
-
-function readAll(): ActivityRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed.map(normalize) : []
-  } catch {
-    return []
+    id: r.id,
+    ownerEmail: r.owner_email,
+    type: r.type,
+    title: r.title,
+    description: r.description,
+    role: r.role ?? undefined,
+    organisation: r.organisation ?? undefined,
+    location: r.location ?? undefined,
+    skills: r.skills ?? [],
+    tools: r.tools ?? [],
+    collaborators: r.collaborators ?? [],
+    cvPortfolioInclude: r.cv_portfolio_include,
+    visibility: r.visibility,
+    createdAt: r.created_at,
   }
 }
 
-function writeAll(records: ActivityRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
+function recordToRow(record: Omit<ActivityRecord, 'id' | 'createdAt'>): Omit<ActivityRow, 'id' | 'created_at'> {
+  return {
+    owner_email: record.ownerEmail,
+    type: record.type,
+    title: record.title,
+    description: record.description,
+    role: record.role ?? null,
+    organisation: record.organisation ?? null,
+    location: record.location ?? null,
+    skills: record.skills,
+    tools: record.tools,
+    collaborators: record.collaborators,
+    cv_portfolio_include: record.cvPortfolioInclude,
+    visibility: record.visibility,
   }
+}
+
+// --- Live cache, same pattern as demoAccountStore.ts -------------------
+let cache: ActivityRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCache() {
+  const { data } = await supabase.from('activities').select('*')
+  cache = data ?? []
+  notifyListeners()
+}
+
+function upsertCacheRow(row: ActivityRow) {
+  const idx = cache.findIndex((r) => r.id === row.id)
+  if (idx === -1) cache = [...cache, row]
+  else cache = [...cache.slice(0, idx), row, ...cache.slice(idx + 1)]
+  notifyListeners()
+}
+
+function removeCacheRow(id: string) {
+  cache = cache.filter((r) => r.id !== id)
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCache()
+  supabase
+    .channel('activities-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, (payload) => {
+      if (payload.eventType === 'DELETE') removeCacheRow((payload.old as ActivityRow).id)
+      else upsertCacheRow(payload.new as ActivityRow)
+    })
+    .subscribe()
+}
+
+export function onActivitiesChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useActivitiesCacheVersion(): number {
+  return useSyncExternalStore(onActivitiesChange, () => cacheVersion, () => cacheVersion)
 }
 
 export function ownerKey(account: Account | null): string {
@@ -82,14 +159,18 @@ export function ownerKey(account: Account | null): string {
 }
 
 export function listActivities(ownerEmail: string): ActivityRecord[] {
-  return readAll()
-    .filter((a) => a.ownerEmail === ownerEmail)
+  return cache
+    .filter((a) => a.owner_email === ownerEmail)
+    .map(rowToRecord)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
-export function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt'>): ActivityRecord {
-  const record: ActivityRecord = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
-  writeAll([...readAll(), record])
+export async function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt'>): Promise<ActivityRecord> {
+  const { data, error } = await supabase.from('activities').insert(recordToRow(input)).select().single()
+  if (error) throw error
+  const row = data as ActivityRow
+  upsertCacheRow(row)
+  const record = rowToRecord(row)
   // §1.4 Provider Notification: real, honest "used" logging for any tool
   // that resolves to the real catalogue (toolCatalogue.ts) — never a claim
   // of endorsement, and never invented for a tool with no known provider.
@@ -98,7 +179,8 @@ export function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt'>): A
 }
 
 export function getActivityById(id: string): ActivityRecord | undefined {
-  return readAll().find((a) => a.id === id)
+  const row = cache.find((a) => a.id === id)
+  return row ? rowToRecord(row) : undefined
 }
 
 /**
@@ -116,7 +198,8 @@ export function listFeedFor(ownerEmail: string): ActivityRecord[] {
   const connectedEmails = new Set(listConnectedEmails(ownerEmail).map((e) => e.toLowerCase()))
   const followedOrgs = new Set(listFollowedOrgs(ownerEmail).map((e) => e.toLowerCase()))
 
-  return readAll()
+  return cache
+    .map(rowToRecord)
     .filter((a) => {
       const authorEmail = a.ownerEmail.toLowerCase()
       if (authorEmail === own) return true
