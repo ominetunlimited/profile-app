@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { listApplicationsFor, withdrawApplication, type ApplicationStatus } from '@/app/applicationStore'
-import { getJobById, orgDisplayName } from '@/app/jobStore'
-import { useState } from 'react'
+import { listApplicationsFor, onApplicationsChange, withdrawApplication, type ApplicationStatus } from '@/app/applicationStore'
+import { getJobById, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
+import { useEffect, useState } from 'react'
 
 const STATUS_COLOR: Record<ApplicationStatus, string> = {
   submitted: 'text-text-1',
@@ -22,7 +22,14 @@ const STATUS_COLOR: Record<ApplicationStatus, string> = {
 export function ApplicationsPage() {
   const { account } = useAccount()
   const owner = ownerKey(account)
+  useJobsCacheVersion()
   const [applications, setApplications] = useState(() => listApplicationsFor(owner))
+
+  // Pipeline repair Phase A: the applications cache loads asynchronously
+  // (and can receive a Realtime push, e.g. a status change from the org) —
+  // without this, this list would freeze at whatever the cache held on
+  // mount.
+  useEffect(() => onApplicationsChange(() => setApplications(listApplicationsFor(owner))), [owner])
 
   return (
     <AppShell>
@@ -54,8 +61,8 @@ export function ApplicationsPage() {
                   </p>
                   {a.status !== 'withdrawn' && a.status !== 'rejected' && a.status !== 'offer' && (
                     <button
-                      onClick={() => {
-                        withdrawApplication(a.id, owner)
+                      onClick={async () => {
+                        await withdrawApplication(a.id, owner)
                         setApplications(listApplicationsFor(owner))
                       }}
                       className="text-xs font-semibold text-danger"

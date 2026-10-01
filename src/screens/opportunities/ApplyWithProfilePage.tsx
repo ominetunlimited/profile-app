@@ -6,8 +6,8 @@ import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { RequireIndividual } from '@/app/guards'
 import { ownerKey } from '@/app/activityStore'
-import { getJobById, orgDisplayName } from '@/app/jobStore'
-import { myApplicationFor, submitApplication } from '@/app/applicationStore'
+import { getJobById, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
+import { myApplicationFor, submitApplication, useApplicationsCacheVersion } from '@/app/applicationStore'
 import { buildCvData } from '@/app/careerData'
 import { buildCoverLetterDraft, COVER_LETTER_TONES } from '@/app/coverLetterEngine'
 import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
@@ -25,6 +25,11 @@ function ApplyInner() {
   const { jobId } = useParams<{ jobId: string }>()
   const { account } = useAccount()
   const navigate = useNavigate()
+  // Pipeline repair Phase A: jobs/applications caches load asynchronously —
+  // without depending on these, a direct link here could render "Job not
+  // found" once and never recheck.
+  useJobsCacheVersion()
+  useApplicationsCacheVersion()
   const job = jobId ? getJobById(jobId) : undefined
   const cv = buildCvData(account)
   const CvComponent = CV_TEMPLATES[0].Component
@@ -66,9 +71,9 @@ function ApplyInner() {
 
   const draft = coverLetter || buildCoverLetterDraft(cv, targetRole, targetOrg, tone)
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!account) return
-    submitApplication({ jobId: job!.id, applicantEmail: ownerKey(account), orgEmail: job!.orgEmail, coverLetter: draft })
+    await submitApplication({ jobId: job!.id, applicantEmail: ownerKey(account), orgEmail: job!.orgEmail, coverLetter: draft })
     setSubmitted(true)
   }
 

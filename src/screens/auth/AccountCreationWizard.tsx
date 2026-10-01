@@ -15,7 +15,7 @@ import {
   type Pathway,
 } from '@/app/accountTypes'
 import { useAccount } from '@/app/AccountContext'
-import { emailIsRegistered, findAccountByUsername, saveDemoAccount } from '@/app/demoAccountStore'
+import { captureSession, emailIsRegistered, ensureSignedInAs, findAccountByUsername, restoreSession, saveDemoAccount } from '@/app/demoAccountStore'
 import { resizeImage, saveAvatar, saveCover } from '@/app/mediaStore'
 import { followOrg } from '@/app/followStore'
 
@@ -180,6 +180,12 @@ export function AccountCreationWizard() {
       registryLevel: 'user_submitted' as const,
       orgRole: 'super_admin' as const,
     }
+    // saveDemoAccount's signUp below switches the active Supabase session to
+    // the new org — capture whoever is signed in right now (the human
+    // founder, if any) so followOrg can run as them afterward: RLS ties
+    // follows.follower_email to current_account_email(), and the founder's
+    // password isn't something this wizard necessarily still has on hand.
+    const creatorSession = await captureSession()
     try {
       await saveDemoAccount(s.officialEmail, s.orgPassword, newAccount)
     } catch (err) {
@@ -187,7 +193,13 @@ export function AccountCreationWizard() {
       patch({ step: 'org-info' })
       return false
     }
-    if (creatorEmail) followOrg(creatorEmail, s.officialEmail)
+    if (creatorEmail) {
+      await restoreSession(creatorSession)
+      await followOrg(creatorEmail, s.officialEmail)
+      // The active session must end up matching AccountContext's newAccount
+      // (the org) for every subsequent RLS-checked action in this session.
+      await ensureSignedInAs(s.officialEmail, s.orgPassword)
+    }
     setAccount(newAccount)
     setWizardError(null)
     return true

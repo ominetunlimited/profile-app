@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { listNotifications, markAllRead, markRead, type NotificationCategory } from '@/app/notificationStore'
+import { listNotifications, markAllRead, markRead, onNotificationsChange, type NotificationCategory } from '@/app/notificationStore'
 
 /** data-model.md Notification.category, verbatim. */
 const CATEGORIES: (NotificationCategory | 'all')[] = ['all', 'verification', 'messages', 'opportunities', 'community', 'security', 'marketing']
@@ -44,6 +44,11 @@ export function NotificationCentre() {
   const [tab, setTab] = useState<(typeof CATEGORIES)[number]>('all')
   const [items, setItems] = useState(() => listNotifications(owner))
 
+  // Pipeline repair Phase A: the notifications cache loads asynchronously
+  // (and receives a Realtime push for every new one) — without this, this
+  // list would freeze at whatever the cache held on mount.
+  useEffect(() => onNotificationsChange(() => setItems(listNotifications(owner))), [owner])
+
   const filtered = tab === 'all' ? items : items.filter((i) => i.category === tab)
 
   return (
@@ -54,8 +59,8 @@ export function NotificationCentre() {
           <div className="flex items-center gap-3">
             {items.some((i) => !i.read) && (
               <button
-                onClick={() => {
-                  markAllRead(owner)
+                onClick={async () => {
+                  await markAllRead(owner)
                   setItems(listNotifications(owner))
                 }}
                 className="text-xs font-semibold text-accent"
@@ -93,8 +98,8 @@ export function NotificationCentre() {
               return (
                 <button
                   key={n.id}
-                  onClick={() => {
-                    markRead(n.id)
+                  onClick={async () => {
+                    await markRead(n.id)
                     navigate(n.deepLink)
                   }}
                   className={`flex items-start gap-3 rounded-xl border p-3.5 text-left ${n.read ? 'border-border bg-surface' : 'border-border bg-surface-sunken'}`}

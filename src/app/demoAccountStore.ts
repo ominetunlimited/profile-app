@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 import type { Account, OrgRegistryLevel } from './accountTypes'
 
@@ -262,6 +263,24 @@ export async function ensureSignedInAs(email: string, password: string): Promise
   if (currentEmail === email.trim().toLowerCase()) return
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
   if (error) throw error
+}
+
+/**
+ * Snapshot the currently active session so it can be restored later via
+ * `restoreSession` — for a flow that has to briefly act as a *different*
+ * account mid-way through (e.g. AccountCreationWizard creating an
+ * organisation, then needing the human founder's own session back to call
+ * `followOrg`, which RLS ties to `current_account_email()`). Works without
+ * ever needing that account's password again, unlike `ensureSignedInAs`.
+ */
+export async function captureSession(): Promise<Session | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session
+}
+
+export async function restoreSession(session: Session | null): Promise<void> {
+  if (!session) return
+  await supabase.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token })
 }
 
 export function emailIsRegistered(email: string): boolean {

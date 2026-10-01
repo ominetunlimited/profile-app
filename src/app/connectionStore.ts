@@ -1,15 +1,16 @@
+/**
+ * Pipeline repair Phase A — real Supabase-backed `public.connections` (RLS:
+ * visible/updatable/deletable by either participant, insertable only by the
+ * requester), replacing the old `localStorage` scaffolding. Same cache +
+ * Realtime pattern as the other stores. This is what makes the Home feed's
+ * "who am I connected to" (activityStore.ts's listFeedFor) actually
+ * consistent across devices.
+ */
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
 import { findAccountByEmail } from './demoAccountStore'
 import { notify } from './notificationStore'
 
-/**
- * §24.1 ActionButtons names 'Connect' for individual-to-individual profile
- * actions — a real request/accept relationship, distinct from
- * followStore.ts's one-way organisation Follow. Modelled as a single
- * directional request record so "who requested" is always known (needed to
- * show the requester "Pending" and the recipient "Accept/Decline"), with a
- * canonical pair key so duplicate requests between the same two people are
- * structurally impossible.
- */
 export type ConnectionStatus = 'pending' | 'accepted'
 
 export interface ConnectionRecord {
@@ -21,31 +22,72 @@ export interface ConnectionRecord {
   respondedAt: string | null
 }
 
-const STORAGE_KEY = 'profile:demo-connections'
-
-function readAll(): ConnectionRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface ConnectionRow {
+  id: string
+  requester_email: string
+  recipient_email: string
+  status: ConnectionStatus
+  requested_at: string
+  responded_at: string | null
 }
 
-function writeAll(records: ConnectionRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+function rowToRecord(r: ConnectionRow): ConnectionRecord {
+  return { id: r.id, requesterEmail: r.requester_email, recipientEmail: r.recipient_email, status: r.status, requestedAt: r.requested_at, respondedAt: r.responded_at }
 }
 
-function findBetween(records: ConnectionRecord[], emailA: string, emailB: string): ConnectionRecord | undefined {
+// --- Live cache ---------------------------------------------------------
+let cache: ConnectionRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCache() {
+  const { data } = await supabase.from('connections').select('*')
+  cache = data ?? []
+  notifyListeners()
+}
+
+function upsertCacheRow(row: ConnectionRow) {
+  const idx = cache.findIndex((r) => r.id === row.id)
+  if (idx === -1) cache = [...cache, row]
+  else cache = [...cache.slice(0, idx), row, ...cache.slice(idx + 1)]
+  notifyListeners()
+}
+
+function removeCacheRow(id: string) {
+  cache = cache.filter((r) => r.id !== id)
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCache()
+  supabase
+    .channel('connections-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'connections' }, (payload) => {
+      if (payload.eventType === 'DELETE') removeCacheRow((payload.old as ConnectionRow).id)
+      else upsertCacheRow(payload.new as ConnectionRow)
+    })
+    .subscribe()
+}
+
+export function onConnectionsChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useConnectionsCacheVersion(): number {
+  return useSyncExternalStore(onConnectionsChange, () => cacheVersion, () => cacheVersion)
+}
+
+function findBetween(emailA: string, emailB: string): ConnectionRow | undefined {
   const a = emailA.toLowerCase()
   const b = emailB.toLowerCase()
-  return records.find(
-    (r) => (r.requesterEmail.toLowerCase() === a && r.recipientEmail.toLowerCase() === b) || (r.requesterEmail.toLowerCase() === b && r.recipientEmail.toLowerCase() === a)
+  return cache.find(
+    (r) => (r.requester_email.toLowerCase() === a && r.recipient_email.toLowerCase() === b) || (r.requester_email.toLowerCase() === b && r.recipient_email.toLowerCase() === a)
   )
 }
 
@@ -53,80 +95,68 @@ export type RelationshipState = 'none' | 'pending_sent' | 'pending_received' | '
 
 /** From `viewerEmail`'s point of view, looking at `otherEmail`. */
 export function relationshipState(viewerEmail: string, otherEmail: string): RelationshipState {
-  const record = findBetween(readAll(), viewerEmail, otherEmail)
+  const record = findBetween(viewerEmail, otherEmail)
   if (!record) return 'none'
   if (record.status === 'accepted') return 'connected'
-  return record.requesterEmail.toLowerCase() === viewerEmail.toLowerCase() ? 'pending_sent' : 'pending_received'
+  return record.requester_email.toLowerCase() === viewerEmail.toLowerCase() ? 'pending_sent' : 'pending_received'
 }
 
 /** No-op on a self-request or a duplicate — the caller only ever reaches
  * this from a 'none' state UI, but the guard is real, not just cosmetic. */
-export function sendConnectionRequest(requesterEmail: string, recipientEmail: string): void {
+export async function sendConnectionRequest(requesterEmail: string, recipientEmail: string): Promise<void> {
   if (requesterEmail.toLowerCase() === recipientEmail.toLowerCase()) return
-  const all = readAll()
-  if (findBetween(all, requesterEmail, recipientEmail)) return
-  const record: ConnectionRecord = {
-    id: crypto.randomUUID(),
-    requesterEmail,
-    recipientEmail,
-    status: 'pending',
-    requestedAt: new Date().toISOString(),
-    respondedAt: null,
-  }
-  writeAll([...all, record])
+  if (findBetween(requesterEmail, recipientEmail)) return
+  const { data, error } = await supabase.from('connections').insert({ requester_email: requesterEmail, recipient_email: recipientEmail }).select().single()
+  if (error) throw error
+  upsertCacheRow(data as ConnectionRow)
   const requester = findAccountByEmail(requesterEmail)
   notify({ recipientEmail, category: 'community', text: `${requester?.legalName ?? 'Someone'} sent you a connection request.`, deepLink: '/connections' })
 }
 
-export function acceptConnectionRequest(viewerEmail: string, otherEmail: string): void {
-  const all = readAll()
-  const record = findBetween(all, viewerEmail, otherEmail)
+export async function acceptConnectionRequest(viewerEmail: string, otherEmail: string): Promise<void> {
+  const record = findBetween(viewerEmail, otherEmail)
   if (!record || record.status === 'accepted') return
-  writeAll(all.map((r) => (r.id === record.id ? { ...r, status: 'accepted' as const, respondedAt: new Date().toISOString() } : r)))
+  const { data } = await supabase.from('connections').update({ status: 'accepted', responded_at: new Date().toISOString() }).eq('id', record.id).select().maybeSingle()
+  if (!data) return
+  upsertCacheRow(data as ConnectionRow)
   const accepter = findAccountByEmail(viewerEmail)
   const link = accepter && 'username' in accepter && accepter.username ? `/profile/${accepter.username}` : '/connections'
   notify({ recipientEmail: otherEmail, category: 'community', text: `${accepter?.legalName ?? 'Someone'} accepted your connection request.`, deepLink: link })
 }
 
-export function removeConnection(viewerEmail: string, otherEmail: string): void {
-  const all = readAll()
-  const record = findBetween(all, viewerEmail, otherEmail)
+export async function removeConnection(viewerEmail: string, otherEmail: string): Promise<void> {
+  const record = findBetween(viewerEmail, otherEmail)
   if (!record) return
-  writeAll(all.filter((r) => r.id !== record.id))
+  await supabase.from('connections').delete().eq('id', record.id)
+  removeCacheRow(record.id)
 }
 
 /** Every real connection record this account is party to, either side —
  * the Connections page's real source instead of a permanent empty state. */
 export function listConnectionRecordsFor(email: string): ConnectionRecord[] {
   const e = email.toLowerCase()
-  return readAll()
-    .filter((r) => r.requesterEmail.toLowerCase() === e || r.recipientEmail.toLowerCase() === e)
+  return cache
+    .filter((r) => r.requester_email.toLowerCase() === e || r.recipient_email.toLowerCase() === e)
+    .map(rowToRecord)
     .sort((a, b) => (b.respondedAt ?? b.requestedAt).localeCompare(a.respondedAt ?? a.requestedAt))
 }
 
 export function connectionCount(email: string): number {
   const e = email.toLowerCase()
-  return readAll().filter((r) => r.status === 'accepted' && (r.requesterEmail.toLowerCase() === e || r.recipientEmail.toLowerCase() === e)).length
+  return cache.filter((r) => r.status === 'accepted' && (r.requester_email.toLowerCase() === e || r.recipient_email.toLowerCase() === e)).length
 }
 
 /** Every email this account is connected to — the feed aggregator's real
  * source for "which individuals' public activity belongs in my Home feed". */
 export function listConnectedEmails(email: string): string[] {
   const e = email.toLowerCase()
-  return readAll()
-    .filter((r) => r.status === 'accepted' && (r.requesterEmail.toLowerCase() === e || r.recipientEmail.toLowerCase() === e))
-    .map((r) => (r.requesterEmail.toLowerCase() === e ? r.recipientEmail : r.requesterEmail))
+  return cache
+    .filter((r) => r.status === 'accepted' && (r.requester_email.toLowerCase() === e || r.recipient_email.toLowerCase() === e))
+    .map((r) => (r.requester_email.toLowerCase() === e ? r.recipient_email : r.requester_email))
 }
 
 /**
- * V9 Unified Ecosystem Patch §12 "Connections-in-Common" — genuinely new,
- * no prior equivalent anywhere in this build. `sharedConnections` is real,
- * computed by intersecting both people's real connection lists. `cities` is
- * real too, but limited to what this build actually has evidence for:
- * there is no OrgStaffRecord/staff-affiliation model anywhere yet (see
- * `OrganisationAccount.orgRole`'s own comment in accountTypes.ts), so a
- * "shared organisation/school" claim would be fabricated — omitted rather
- * than faked, same honesty rule as Trust Score and verification badges.
+ * V9 Unified Ecosystem Patch §12 "Connections-in-Common".
  */
 export interface ConnectionsInCommon {
   sharedConnections: string[]

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
@@ -17,8 +17,8 @@ import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplat
 import { createRequest, findRequest, listRequestsForOwner, respondToRequest } from '@/app/cvRequestStore'
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
-import { followOrg, followerCount, isFollowing, unfollowOrg } from '@/app/followStore'
-import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, type RelationshipState } from '@/app/connectionStore'
+import { followOrg, followerCount, isFollowing, unfollowOrg, useFollowsCacheVersion } from '@/app/followStore'
+import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, useConnectionsCacheVersion, type RelationshipState } from '@/app/connectionStore'
 import { getMentorshipPreference, menteeRequestState, sendMenteeRequest } from '@/app/mentorshipStore'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
@@ -46,6 +46,8 @@ export function ProfilePage() {
   // this page would force a re-render afterward.
   useAccountsCacheVersion()
   useActivitiesCacheVersion()
+  useFollowsCacheVersion()
+  useConnectionsCacheVersion()
 
   // §24.2 — viewing someone else: a real registered account (never
   // fabricated), looked up by username from every account actually
@@ -458,13 +460,18 @@ function BadgesRow({ ownerAccount }: { ownerAccount: Account }) {
 
 /** §4.2's org-notification table 'Org Follow' — one-way, no approval. */
 function FollowButton({ viewerEmail, orgEmail }: { viewerEmail: string; orgEmail: string }) {
+  // Pipeline repair Phase A: the follows cache loads asynchronously — this
+  // keeps the button's state in sync once it does, instead of freezing on
+  // whatever it read at first render.
+  const cacheVersion = useFollowsCacheVersion()
   const [following, setFollowing] = useState(() => isFollowing(viewerEmail, orgEmail))
+  useEffect(() => setFollowing(isFollowing(viewerEmail, orgEmail)), [cacheVersion, viewerEmail, orgEmail])
   return (
     <button
-      onClick={() => {
-        if (following) unfollowOrg(viewerEmail, orgEmail)
-        else followOrg(viewerEmail, orgEmail)
-        setFollowing(!following)
+      onClick={async () => {
+        if (following) await unfollowOrg(viewerEmail, orgEmail)
+        else await followOrg(viewerEmail, orgEmail)
+        setFollowing(isFollowing(viewerEmail, orgEmail))
       }}
       className={`rounded-lg px-3 py-2 text-xs font-semibold ${following ? 'border border-border-strong text-text-0' : 'bg-accent-solid text-white'}`}
     >
@@ -476,7 +483,11 @@ function FollowButton({ viewerEmail, orgEmail }: { viewerEmail: string; orgEmail
 /** §24.1 ActionButtons 'Connect' — a real request/accept relationship
  * (connectionStore.ts), distinct from Follow above. */
 function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; otherEmail: string }) {
+  // Pipeline repair Phase A: the connections cache loads asynchronously —
+  // this keeps the button's state in sync once it does.
+  const cacheVersion = useConnectionsCacheVersion()
   const [state, setState] = useState<RelationshipState>(() => relationshipState(viewerEmail, otherEmail))
+  useEffect(() => setState(relationshipState(viewerEmail, otherEmail)), [cacheVersion, viewerEmail, otherEmail])
 
   if (state === 'connected') {
     return <span className="rounded-lg border border-success px-3 py-2 text-xs font-semibold text-success">✓ Connected</span>
@@ -487,8 +498,8 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
   if (state === 'pending_received') {
     return (
       <button
-        onClick={() => {
-          acceptConnectionRequest(viewerEmail, otherEmail)
+        onClick={async () => {
+          await acceptConnectionRequest(viewerEmail, otherEmail)
           setState(relationshipState(viewerEmail, otherEmail))
         }}
         className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"
@@ -499,8 +510,8 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
   }
   return (
     <button
-      onClick={() => {
-        sendConnectionRequest(viewerEmail, otherEmail)
+      onClick={async () => {
+        await sendConnectionRequest(viewerEmail, otherEmail)
         setState(relationshipState(viewerEmail, otherEmail))
       }}
       className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"

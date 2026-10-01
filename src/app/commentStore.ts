@@ -1,11 +1,17 @@
+/**
+ * Pipeline repair Phase A — real Supabase-backed `public.comments` (RLS:
+ * visible to whoever can see the parent activity — public/owner/accepted
+ * connection, mirroring activities' own visibility rule). Same cache +
+ * Realtime pattern as activityStore.ts.
+ */
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
 import { getActivityById } from './activityStore'
 import { findAccountByEmail } from './demoAccountStore'
 import { notify } from './notificationStore'
 
 /**
- * §11.1's ActivityCard names a real <CommentSection /> in its Actions row —
- * previously unbuilt anywhere in this codebase. Real, persisted comments
- * per activity, same client-only scaffolding pattern as reactionStore.ts.
+ * §11.1's ActivityCard names a real <CommentSection /> in its Actions row.
  */
 export interface CommentRecord {
   id: string
@@ -15,39 +21,77 @@ export interface CommentRecord {
   createdAt: string
 }
 
-const STORAGE_KEY = 'profile:demo-comments'
-
-function readAll(): CommentRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface CommentRow {
+  id: string
+  activity_id: string
+  author_email: string
+  text: string
+  created_at: string
 }
 
-function writeAll(records: CommentRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+function rowToRecord(r: CommentRow): CommentRecord {
+  return { id: r.id, activityId: r.activity_id, authorEmail: r.author_email, text: r.text, createdAt: r.created_at }
+}
+
+// --- Live cache ---------------------------------------------------------
+let cache: CommentRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCache() {
+  const { data } = await supabase.from('comments').select('*')
+  cache = data ?? []
+  notifyListeners()
+}
+
+function upsertCacheRow(row: CommentRow) {
+  const idx = cache.findIndex((r) => r.id === row.id)
+  if (idx === -1) cache = [...cache, row]
+  else cache = [...cache.slice(0, idx), row, ...cache.slice(idx + 1)]
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCache()
+  supabase
+    .channel('comments-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, (payload) => {
+      if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as CommentRow)
+    })
+    .subscribe()
+}
+
+export function onCommentsChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useCommentsCacheVersion(): number {
+  return useSyncExternalStore(onCommentsChange, () => cacheVersion, () => cacheVersion)
 }
 
 export function listComments(activityId: string): CommentRecord[] {
-  return readAll()
-    .filter((c) => c.activityId === activityId)
+  return cache
+    .filter((c) => c.activity_id === activityId)
+    .map(rowToRecord)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
 }
 
 export function commentCount(activityId: string): number {
-  return readAll().filter((c) => c.activityId === activityId).length
+  return cache.filter((c) => c.activity_id === activityId).length
 }
 
-export function postComment(activityId: string, authorEmail: string, text: string): CommentRecord {
-  const record: CommentRecord = { id: crypto.randomUUID(), activityId, authorEmail, text, createdAt: new Date().toISOString() }
-  writeAll([...readAll(), record])
+export async function postComment(activityId: string, authorEmail: string, text: string): Promise<CommentRecord> {
+  const { data, error } = await supabase.from('comments').insert({ activity_id: activityId, author_email: authorEmail, text }).select().single()
+  if (error) throw error
+  const row = data as CommentRow
+  upsertCacheRow(row)
+  const record = rowToRecord(row)
 
   const activity = getActivityById(activityId)
   if (activity && activity.ownerEmail.toLowerCase() !== authorEmail.toLowerCase()) {

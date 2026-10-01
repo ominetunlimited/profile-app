@@ -1,3 +1,11 @@
+/**
+ * Pipeline repair Phase A — real Supabase-backed `public.applications` (RLS
+ * enforced: visible only to the applicant and the hiring org), replacing the
+ * old `localStorage` scaffolding. Same cache + Realtime pattern as
+ * jobStore.ts.
+ */
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
 import { notify } from './notificationStore'
 import { getJobById, orgDisplayName } from './jobStore'
 import { findAccountByEmail } from './demoAccountStore'
@@ -15,38 +23,96 @@ export interface Application {
   submittedAt: string
   status: ApplicationStatus
   /** Design handoff gap audit — PROFILE Recruiter Workflow.dc.html's
-   * Interview-stage cards show a scheduled slot as a pill; previously no
-   * field existed to hold one. */
+   * Interview-stage cards show a scheduled slot as a pill. */
   interviewSlot?: string
 }
 
-const STORAGE_KEY = 'profile:demo-applications'
+interface ApplicationRow {
+  id: string
+  job_id: string
+  applicant_email: string
+  org_email: string
+  cover_letter: string
+  status: ApplicationStatus
+  interview_slot: string | null
+  submitted_at: string
+}
 
-function readAll(): Application[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
+function rowToApplication(r: ApplicationRow): Application {
+  return {
+    id: r.id,
+    jobId: r.job_id,
+    applicantEmail: r.applicant_email,
+    orgEmail: r.org_email,
+    coverLetter: r.cover_letter,
+    submittedAt: r.submitted_at,
+    status: r.status,
+    interviewSlot: r.interview_slot ?? undefined,
   }
 }
 
-function writeAll(records: Application[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+// --- Live cache ---------------------------------------------------------
+let cache: ApplicationRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCache() {
+  const { data } = await supabase.from('applications').select('*')
+  cache = data ?? []
+  notifyListeners()
+}
+
+function upsertCacheRow(row: ApplicationRow) {
+  const idx = cache.findIndex((r) => r.id === row.id)
+  if (idx === -1) cache = [...cache, row]
+  else cache = [...cache.slice(0, idx), row, ...cache.slice(idx + 1)]
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCache()
+  supabase
+    .channel('applications-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, (payload) => {
+      if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as ApplicationRow)
+    })
+    .subscribe()
+}
+
+export function onApplicationsChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useApplicationsCacheVersion(): number {
+  return useSyncExternalStore(onApplicationsChange, () => cacheVersion, () => cacheVersion)
 }
 
 /** §6.1 Apply With PROFILE — one application per job per applicant; a
- * second submit is a no-op rather than a duplicate application. */
-export function submitApplication(input: { jobId: string; applicantEmail: string; orgEmail: string; coverLetter: string }): Application | undefined {
-  const all = readAll()
-  if (all.some((a) => a.jobId === input.jobId && a.applicantEmail.toLowerCase() === input.applicantEmail.toLowerCase())) return undefined
-  const record: Application = { ...input, id: crypto.randomUUID(), submittedAt: new Date().toISOString(), status: 'submitted' }
-  writeAll([...all, record])
+ * second submit is a no-op rather than a duplicate application (enforced by
+ * a real DB unique constraint now, not just an in-memory check). */
+export async function submitApplication(input: { jobId: string; applicantEmail: string; orgEmail: string; coverLetter: string }): Promise<Application | undefined> {
+  if (cache.some((a) => a.job_id === input.jobId && a.applicant_email.toLowerCase() === input.applicantEmail.toLowerCase())) return undefined
+  const { data, error } = await supabase
+    .from('applications')
+    .insert({ job_id: input.jobId, applicant_email: input.applicantEmail, org_email: input.orgEmail, cover_letter: input.coverLetter })
+    .select()
+    .maybeSingle()
+  if (error) {
+    // Unique-constraint race (two tabs submitting at once) — treat exactly
+    // like the pre-check above, a no-op, not a crash.
+    if (error.code === '23505') return undefined
+    throw error
+  }
+  if (!data) return undefined
+  const row = data as ApplicationRow
+  upsertCacheRow(row)
+  const record = rowToApplication(row)
 
   const applicant = findAccountByEmail(input.applicantEmail)
   const job = getJobById(input.jobId)
@@ -61,45 +127,47 @@ export function submitApplication(input: { jobId: string; applicantEmail: string
 
 export function listApplicationsFor(applicantEmail: string): Application[] {
   const e = applicantEmail.toLowerCase()
-  return readAll()
-    .filter((a) => a.applicantEmail.toLowerCase() === e)
+  return cache
+    .filter((a) => a.applicant_email.toLowerCase() === e)
+    .map(rowToApplication)
     .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
 }
 
 export function listApplicationsForJob(jobId: string): Application[] {
-  return readAll().filter((a) => a.jobId === jobId)
+  return cache.filter((a) => a.job_id === jobId).map(rowToApplication)
 }
 
 /** §9's free-tier hire cap — an 'offer' is the real signal of a hiring
  * decision made on this listing; there's no separate "mark as hired" step
  * in this build's pipeline, so counting offers is the honest source. */
 export function hiredCountForJob(jobId: string): number {
-  return readAll().filter((a) => a.jobId === jobId && a.status === 'offer').length
+  return cache.filter((a) => a.job_id === jobId && a.status === 'offer').length
 }
 
 export function listApplicationsForOrg(orgEmail: string): Application[] {
   const e = orgEmail.toLowerCase()
-  return readAll()
-    .filter((a) => a.orgEmail.toLowerCase() === e)
+  return cache
+    .filter((a) => a.org_email.toLowerCase() === e)
+    .map(rowToApplication)
     .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
 }
 
 export function myApplicationFor(jobId: string, applicantEmail: string): Application | undefined {
   const e = applicantEmail.toLowerCase()
-  return readAll().find((a) => a.jobId === jobId && a.applicantEmail.toLowerCase() === e)
+  const row = cache.find((a) => a.job_id === jobId && a.applicant_email.toLowerCase() === e)
+  return row ? rowToApplication(row) : undefined
 }
 
-export function updateApplicationStatus(id: string, status: ApplicationStatus): void {
-  const all = readAll()
-  const idx = all.findIndex((a) => a.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status }
-  writeAll(all)
-  const job = getJobById(all[idx].jobId)
+export async function updateApplicationStatus(id: string, status: ApplicationStatus): Promise<void> {
+  const { data } = await supabase.from('applications').update({ status }).eq('id', id).select().maybeSingle()
+  if (!data) return
+  const row = data as ApplicationRow
+  upsertCacheRow(row)
+  const job = getJobById(row.job_id)
   notify({
-    recipientEmail: all[idx].applicantEmail,
+    recipientEmail: row.applicant_email,
     category: 'opportunities',
-    text: `Your application for "${job?.title ?? 'a job'}" at ${orgDisplayName(all[idx].orgEmail)} is now "${status.replace(/_/g, ' ')}".`,
+    text: `Your application for "${job?.title ?? 'a job'}" at ${orgDisplayName(row.org_email)} is now "${status.replace(/_/g, ' ')}".`,
     deepLink: `/applications`,
   })
 }
@@ -110,29 +178,29 @@ export function updateApplicationStatus(id: string, status: ApplicationStatus): 
  * matching the mockup's own disclosure ("interview scheduling never
  * bypasses her notice or consent") instead of a fabricated "sent" toast.
  */
-export function scheduleInterview(id: string, orgEmail: string, slot: string): void {
-  const all = readAll()
-  const idx = all.findIndex((a) => a.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status: 'interview', interviewSlot: slot }
-  writeAll(all)
+export async function scheduleInterview(id: string, orgEmail: string, slot: string): Promise<void> {
+  const { data } = await supabase.from('applications').update({ status: 'interview', interview_slot: slot }).eq('id', id).select().maybeSingle()
+  if (!data) return
+  const application = rowToApplication(data as ApplicationRow)
+  upsertCacheRow(data as ApplicationRow)
 
-  const application = all[idx]
   const job = getJobById(application.jobId)
   notify({
     recipientEmail: application.applicantEmail,
     category: 'messages',
     text: `${orgDisplayName(orgEmail)} scheduled an interview for "${job?.title ?? 'your application'}" — ${slot}.`,
-    deepLink: `/messages`,
+    // Pipeline repair: a bare `/messages` landed on "No conversations yet"
+    // for the recipient, since they're not a conversation_participants row
+    // until they actually open this specific thread (see messageStore.ts's
+    // joinConversation) — the `?with=` param is what MessagingCommunities.tsx
+    // reads to open and self-register into the right conversation.
+    deepLink: `/messages?with=${encodeURIComponent(orgEmail)}`,
   })
   const conversationId = conversationIdFor(orgEmail, application.applicantEmail)
-  sendMessage(conversationId, orgEmail, `We'd like to schedule your interview for "${job?.title ?? 'the role'}" on ${slot}. Let us know if this works.`)
+  await sendMessage(conversationId, orgEmail, `We'd like to schedule your interview for "${job?.title ?? 'the role'}" on ${slot}. Let us know if this works.`)
 }
 
-export function withdrawApplication(id: string, applicantEmail: string): void {
-  const all = readAll()
-  const idx = all.findIndex((a) => a.id === id && a.applicantEmail.toLowerCase() === applicantEmail.toLowerCase())
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status: 'withdrawn' }
-  writeAll(all)
+export async function withdrawApplication(id: string, applicantEmail: string): Promise<void> {
+  const { data } = await supabase.from('applications').update({ status: 'withdrawn' }).eq('id', id).eq('applicant_email', applicantEmail).select().maybeSingle()
+  if (data) upsertCacheRow(data as ApplicationRow)
 }

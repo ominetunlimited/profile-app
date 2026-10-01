@@ -1,9 +1,9 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { acceptConnectionRequest, listConnectionRecordsFor, removeConnection, type ConnectionRecord } from '@/app/connectionStore'
+import { acceptConnectionRequest, listConnectionRecordsFor, onConnectionsChange, removeConnection, type ConnectionRecord } from '@/app/connectionStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 
 /**
@@ -21,6 +21,12 @@ export function ConnectionsPage() {
   function refresh() {
     setRecords(listConnectionRecordsFor(owner))
   }
+
+  // Pipeline repair Phase A: the connections cache loads asynchronously (and
+  // receives a Realtime push, e.g. someone accepting your request from
+  // another device) — without this, this list would freeze at whatever the
+  // cache held on mount.
+  useEffect(() => onConnectionsChange(refresh), [owner])
 
   const accepted = records.filter((r) => r.status === 'accepted')
   const receivedPending = records.filter((r) => r.status === 'pending' && r.recipientEmail.toLowerCase() === owner.toLowerCase())
@@ -44,8 +50,8 @@ export function ConnectionsPage() {
                 <PersonRow key={r.id} email={otherEmail(r)}>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        acceptConnectionRequest(owner, otherEmail(r))
+                      onClick={async () => {
+                        await acceptConnectionRequest(owner, otherEmail(r))
                         refresh()
                       }}
                       className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
@@ -53,8 +59,8 @@ export function ConnectionsPage() {
                       Accept
                     </button>
                     <button
-                      onClick={() => {
-                        removeConnection(owner, otherEmail(r))
+                      onClick={async () => {
+                        await removeConnection(owner, otherEmail(r))
                         refresh()
                       }}
                       className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-1"

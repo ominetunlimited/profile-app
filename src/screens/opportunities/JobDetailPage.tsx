@@ -2,8 +2,8 @@ import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { getJobById, orgDisplayName } from '@/app/jobStore'
-import { myApplicationFor } from '@/app/applicationStore'
+import { getJobById, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
+import { myApplicationFor, useApplicationsCacheVersion } from '@/app/applicationStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
@@ -16,6 +16,8 @@ import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { account } = useAccount()
+  useJobsCacheVersion()
+  useApplicationsCacheVersion()
   const job = id ? getJobById(id) : undefined
 
   if (!job) {

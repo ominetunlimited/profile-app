@@ -4,8 +4,8 @@ import type { Account } from '@/app/accountTypes'
 import type { ActivityRecord } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { getMyReaction, getReactionCounts, setMyReaction, REACTIONS, type ReactionType } from '@/app/reactionStore'
-import { listComments, postComment } from '@/app/commentStore'
+import { getMyReaction, getReactionCounts, onReactionsChange, setMyReaction, REACTIONS, type ReactionType } from '@/app/reactionStore'
+import { listComments, onCommentsChange, postComment } from '@/app/commentStore'
 import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
@@ -67,20 +67,35 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
     }
   }, [pickerOpen])
 
+  // Pipeline repair Phase A: reactions/comments caches load asynchronously
+  // (and can receive a Realtime push) — without this, a card rendered
+  // before the initial fetch resolves would freeze at 0 reactions/comments.
+  useEffect(() => {
+    return onReactionsChange(() => {
+      setMyReactionState(getMyReaction(activity.id, viewerEmail))
+      setCounts(getReactionCounts(activity.id))
+    })
+  }, [activity.id, viewerEmail])
+
+  useEffect(() => {
+    return onCommentsChange(() => setComments(listComments(activity.id)))
+  }, [activity.id])
+
   const activeReaction = REACTIONS.find((r) => r.type === myReaction)
   const totalReactions = Object.values(counts).reduce((sum, n) => sum + n, 0)
 
-  function react(type: ReactionType) {
-    setMyReaction(activity.id, viewerEmail, type)
+  async function react(type: ReactionType) {
+    setPickerOpen(false)
+    await setMyReaction(activity.id, viewerEmail, type)
     setMyReactionState(getMyReaction(activity.id, viewerEmail))
     setCounts(getReactionCounts(activity.id))
-    setPickerOpen(false)
   }
 
-  function submitComment() {
+  async function submitComment() {
     if (!commentDraft.trim() || !viewerEmail) return
-    postComment(activity.id, viewerEmail, commentDraft.trim())
+    const text = commentDraft.trim()
     setCommentDraft('')
+    await postComment(activity.id, viewerEmail, text)
     setComments(listComments(activity.id))
   }
 

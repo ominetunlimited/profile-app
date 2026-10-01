@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan } from '@/app/accountTypes'
 import { ownerKey } from '@/app/activityStore'
-import { postJob, listJobsByOrg, closeJob, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
-import { listApplicationsForJob, updateApplicationStatus, scheduleInterview, hiredCountForJob, type Application, type ApplicationStatus } from '@/app/applicationStore'
+import { postJob, listJobsByOrg, closeJob, onJobsChange, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
+import { listApplicationsForJob, updateApplicationStatus, scheduleInterview, hiredCountForJob, onApplicationsChange, type Application, type ApplicationStatus } from '@/app/applicationStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
@@ -66,6 +66,19 @@ export function RecruiterWorkflow() {
     setJobs(listJobsByOrg(owner))
   }
 
+  // Pipeline repair Phase A: jobs/applications caches load asynchronously
+  // (and receive Realtime pushes — a new application arriving live) —
+  // without this, the pipeline would freeze at whatever the cache held on
+  // mount.
+  useEffect(() => {
+    const unsub1 = onJobsChange(refreshApplications)
+    const unsub2 = onApplicationsChange(refreshApplications)
+    return () => {
+      unsub1()
+      unsub2()
+    }
+  }, [owner])
+
   const orgLabel = account?.accountType === 'organisation' ? account.legalName : 'Organisation'
 
   return (
@@ -122,8 +135,8 @@ export function RecruiterWorkflow() {
                 </span>
                 {selectedJob.status === 'open' && canManage && (
                   <button
-                    onClick={() => {
-                      closeJob(selectedJob.id)
+                    onClick={async () => {
+                      await closeJob(selectedJob.id)
                       setJobs(listJobsByOrg(owner))
                     }}
                     className="text-xs font-semibold text-danger"
@@ -172,12 +185,12 @@ export function RecruiterWorkflow() {
                                       <button
                                         disabled={atHireCap}
                                         title={atHireCap ? `Free tier cap reached — ${selectedJob.maxHires} hires on this listing` : undefined}
-                                        onClick={() => {
+                                        onClick={async () => {
                                           if (next === 'interview') {
                                             setSchedulingFor(a)
                                             setSelectedSlot(null)
                                           } else {
-                                            updateApplicationStatus(a.id, next)
+                                            await updateApplicationStatus(a.id, next)
                                             refreshApplications()
                                           }
                                         }}
@@ -187,8 +200,8 @@ export function RecruiterWorkflow() {
                                       </button>
                                     )}
                                     <button
-                                      onClick={() => {
-                                        updateApplicationStatus(a.id, 'rejected')
+                                      onClick={async () => {
+                                        await updateApplicationStatus(a.id, 'rejected')
                                         refreshApplications()
                                       }}
                                       className="font-semibold text-danger"
@@ -226,8 +239,8 @@ export function RecruiterWorkflow() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       disabled={!selectedSlot}
-                      onClick={() => {
-                        scheduleInterview(schedulingFor.id, owner, selectedSlot!)
+                      onClick={async () => {
+                        await scheduleInterview(schedulingFor.id, owner, selectedSlot!)
                         setSchedulingFor(null)
                         setSelectedSlot(null)
                         refreshApplications()
@@ -312,8 +325,8 @@ function PostJobForm({ orgEmail, onClose, onPosted }: { orgEmail: string; onClos
       <div className="flex gap-2">
         <Button
           disabled={!title.trim() || !description.trim() || !location.trim()}
-          onClick={() => {
-            postJob({
+          onClick={async () => {
+            await postJob({
               orgEmail,
               title,
               workType,

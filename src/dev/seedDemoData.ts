@@ -202,7 +202,13 @@ export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
   // include an org they chose to follow. ensureOminetDigitalSeeded() is
   // idempotent, so calling it here just guarantees the org account exists
   // to be followed, whichever demo button gets clicked first.
-  followOrg(OMINI_EMAIL, (await ensureOminetDigitalSeeded()).officialEmail)
+  const orgEmail = (await ensureOminetDigitalSeeded()).officialEmail
+  // ensureOminetDigitalSeeded() just switched the active Supabase session to
+  // Ominet Digital's (registerOrRefresh's ensureSignedInAs) — the follow
+  // insert below needs follower_email to match current_account_email(), so
+  // Omini's own session has to be restored first.
+  await ensureSignedInAs(OMINI_EMAIL, DEMO_PASSWORD)
+  await followOrg(OMINI_EMAIL, orgEmail)
 
   return account
 }

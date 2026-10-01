@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
-import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
+import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
 import { listActiveCampaignsForPlacement } from '@/app/adStore'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 
@@ -33,6 +33,7 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
   const [workType, setWorkType] = useState<(typeof WORK_TYPES)[number] | 'all'>('all')
   const [query, setQuery] = useState('')
   const [cluster, setCluster] = useState<CareerCluster | null>(pinnedCluster ?? null)
+  useJobsCacheVersion()
 
   // V9 Unified Ecosystem Patch §10 — an advertiser paying for the
   // 'opportunities' placement was previously charged for a surface that

@@ -4,7 +4,7 @@ import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
 import { ownerKey } from '@/app/activityStore'
 import { getProfileMedia } from '@/app/mediaStore'
-import { unreadCount } from '@/app/notificationStore'
+import { onNotificationsChange, unreadCount } from '@/app/notificationStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
@@ -35,6 +35,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hamburgerOpen, setHamburgerOpen] = useState(false)
   const { t } = useLanguage()
+  const [, forceNotificationsRerender] = useState(0)
+  // Pipeline repair Phase A: the notifications cache loads asynchronously
+  // (and receives a Realtime push for every new notification) — without
+  // this, the header's unread badge would freeze at whatever the cache held
+  // on mount.
+  useEffect(() => onNotificationsChange(() => forceNotificationsRerender((n) => n + 1)), [])
   const unread = account ? unreadCount(ownerKey(account)) : 0
 
   const displayName = account?.accountType === 'individual' ? account.legalName : account?.accountType === 'organisation' ? account.legalName : staffRole ? 'Staff' : 'Guest'

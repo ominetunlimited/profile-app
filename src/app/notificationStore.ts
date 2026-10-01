@@ -1,11 +1,16 @@
 /**
- * §10/§20 Notification Centre. Previously entirely hardcoded — two static
- * strings shown to every signed-in account regardless of what actually
- * happened. This is the real, generic store every other pipeline in this
- * patch (follow, connect, comment, attribution, provider reference) writes
- * into, so every notification traces back to a real event and deep-links
- * to the real entity involved — never "go to Home and search for it".
+ * Pipeline repair Phase A — real Supabase-backed `public.notifications`
+ * (RLS: any authenticated account can insert a notification for anyone —
+ * that's how a cross-user event like "X commented on your post" reaches its
+ * recipient — but only the recipient can ever read or mark their own read).
+ * Same cache + Realtime pattern as the other stores: `notify`/`markRead`/
+ * `markAllRead` are real async writes; `listNotifications`/`unreadCount`
+ * stay synchronous, backed by a live cache, since NotificationCentre and
+ * the header's unread badge call them inline during render.
  */
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
+
 export type NotificationCategory = 'verification' | 'messages' | 'opportunities' | 'community' | 'security' | 'marketing'
 
 export interface NotificationRecord {
@@ -18,37 +23,84 @@ export interface NotificationRecord {
   read: boolean
 }
 
-const STORAGE_KEY = 'profile:demo-notifications'
-
-function readAll(): NotificationRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface NotificationRow {
+  id: string
+  recipient_email: string
+  category: NotificationCategory
+  text: string
+  deep_link: string
+  created_at: string
+  read: boolean
 }
 
-function writeAll(records: NotificationRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+function rowToRecord(r: NotificationRow): NotificationRecord {
+  return { id: r.id, recipientEmail: r.recipient_email, category: r.category, text: r.text, deepLink: r.deep_link, createdAt: r.created_at, read: r.read }
 }
 
-export function notify(input: Omit<NotificationRecord, 'id' | 'createdAt' | 'read'>): void {
+// --- Live cache -----------------------------------------------------
+// RLS means this cache only ever contains the signed-in caller's own
+// notifications, regardless of the blanket select('*') below.
+let cache: NotificationRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCache() {
+  const { data } = await supabase.from('notifications').select('*')
+  cache = data ?? []
+  notifyListeners()
+}
+
+function upsertCacheRow(row: NotificationRow) {
+  const idx = cache.findIndex((r) => r.id === row.id)
+  if (idx === -1) cache = [...cache, row]
+  else cache = [...cache.slice(0, idx), row, ...cache.slice(idx + 1)]
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCache()
+  supabase
+    .channel('notifications-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, (payload) => {
+      if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as NotificationRow)
+    })
+    .subscribe()
+}
+
+export function onNotificationsChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useNotificationsCacheVersion(): number {
+  return useSyncExternalStore(onNotificationsChange, () => cacheVersion, () => cacheVersion)
+}
+
+export async function notify(input: Omit<NotificationRecord, 'id' | 'createdAt' | 'read'>): Promise<void> {
   // Never notify yourself about your own action (e.g. commenting on your own post).
   if (!input.recipientEmail) return
-  const record: NotificationRecord = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString(), read: false }
-  writeAll([...readAll(), record])
+  // Deliberately no `.select()` here: Postgres applies the SELECT RLS policy
+  // to an INSERT's RETURNING clause too, and the caller is almost always
+  // NOT the recipient (that's the whole point of a cross-user notification)
+  // — so a select-after-insert would fail every time with 0 rows visible to
+  // the actor. The recipient picks this row up through their own cache load
+  // or Realtime subscription, evaluated under their own session, not ours.
+  const { error } = await supabase
+    .from('notifications')
+    .insert({ recipient_email: input.recipientEmail, category: input.category, text: input.text, deep_link: input.deepLink })
+  if (error) throw error
 }
 
 export function listNotifications(email: string): NotificationRecord[] {
   const e = email.toLowerCase()
-  return readAll()
-    .filter((n) => n.recipientEmail.toLowerCase() === e)
+  return cache
+    .filter((n) => n.recipient_email.toLowerCase() === e)
+    .map(rowToRecord)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
@@ -56,15 +108,12 @@ export function unreadCount(email: string): number {
   return listNotifications(email).filter((n) => !n.read).length
 }
 
-export function markRead(id: string): void {
-  const all = readAll()
-  const idx = all.findIndex((n) => n.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], read: true }
-  writeAll(all)
+export async function markRead(id: string): Promise<void> {
+  const { data } = await supabase.from('notifications').update({ read: true }).eq('id', id).select().maybeSingle()
+  if (data) upsertCacheRow(data as NotificationRow)
 }
 
-export function markAllRead(email: string): void {
-  const e = email.toLowerCase()
-  writeAll(readAll().map((n) => (n.recipientEmail.toLowerCase() === e ? { ...n, read: true } : n)))
+export async function markAllRead(email: string): Promise<void> {
+  const { data } = await supabase.from('notifications').update({ read: true }).eq('recipient_email', email.toLowerCase()).eq('read', false).select()
+  for (const row of (data ?? []) as NotificationRow[]) upsertCacheRow(row)
 }

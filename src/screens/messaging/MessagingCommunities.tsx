@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { COMMUNITY_SEEDS, isMember, memberCount, toggleMembership } from '@/app/communitiesStore'
-import { conversationIdFor, listConversationsFor, listMessages, otherParticipant, sendMessage } from '@/app/messageStore'
+import { conversationIdFor, joinConversation, listConversationsFor, listMessages, onMessagesChange, otherParticipant, sendMessage } from '@/app/messageStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 
 const TABS = ['messages', 'communities'] as const
@@ -88,6 +88,11 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
 }
 
 function ConversationList({ ownerEmail, onOpen }: { ownerEmail: string; onOpen: (conversationId: string) => void }) {
+  const [, forceRender] = useState(0)
+  // Pipeline repair Phase A: the messages cache loads asynchronously (and
+  // can receive a Realtime push) — without this, a conversation list opened
+  // before the initial fetch resolves would freeze empty.
+  useEffect(() => onMessagesChange(() => forceRender((n) => n + 1)), [])
   const conversations = listConversationsFor(ownerEmail)
 
   if (conversations.length === 0) {
@@ -128,10 +133,19 @@ function ConversationThread({ ownerEmail, conversationId, onBack }: { ownerEmail
   const [draft, setDraft] = useState('')
   const otherEmail = otherParticipant(conversationId, ownerEmail)
 
-  function handleSend() {
+  useEffect(() => {
+    // Opening a thread is the real self-registration step for the recipient
+    // side of RLS (see messageStore.ts's joinConversation) — without this,
+    // a conversation someone else started would never become visible here.
+    joinConversation(conversationId, ownerEmail).then(() => setMessages(listMessages(conversationId)))
+    return onMessagesChange(() => setMessages(listMessages(conversationId)))
+  }, [conversationId, ownerEmail])
+
+  async function handleSend() {
     if (!draft.trim()) return
-    sendMessage(conversationId, ownerEmail, draft.trim())
+    const text = draft.trim()
     setDraft('')
+    await sendMessage(conversationId, ownerEmail, text)
     setMessages(listMessages(conversationId))
   }
 

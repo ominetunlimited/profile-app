@@ -1,13 +1,25 @@
 /**
- * Temporary client-only scaffolding, same caveats as demoAccountStore.ts.
+ * Pipeline repair Phase A — real Supabase-backed `public.reactions` (RLS:
+ * each row visible only to the user who made it) plus the public
+ * `public.reaction_counts` view (anonymised totals, security-definer, so it
+ * aggregates across every user regardless of caller — see
+ * supabase/migrations/0001_init.sql). `setMyReaction` is a real async
+ * write; `getMyReaction`/`getReactionCounts` stay synchronous, backed by two
+ * small live caches, since ActivityCard calls them inline for every
+ * activity in the feed.
  *
- * §11.2 SIX_REACTIONS — Phase 7 hardening: the Home activity feed previously
- * rendered three of the six reactions as inert `<span>` text with no click
- * handler at all (a §35 Activation Audit "static button, no handler"
- * violation). This makes them real: one reaction per user per activity,
- * changeable, publicly-visible totals — and explicitly never feeds Trust
- * Score or ranking, per §11.2's REACTION_RULES hard rule.
+ * One real limitation worth naming: Realtime's `postgres_changes` respects
+ * the same RLS as normal reads, so a subscription on `reactions` only ever
+ * delivers *your own* rows — another user's reaction doesn't push a live
+ * update to your `reaction_counts` cache the way an activity or message
+ * does. That's an inherent consequence of hiding who-reacted-what (§11.2
+ * never exposes identities, only totals), not a bug: counts still refresh
+ * correctly on next navigation/reload, and your own toggle updates
+ * instantly since that write refetches counts itself.
  */
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
+
 export type ReactionType = 'appreciate' | 'respect' | 'insightful' | 'support' | 'skilled' | 'well_explained'
 
 /** V9 Unified Ecosystem Patch §17 — `icon` names a component from
@@ -22,50 +34,85 @@ export const REACTIONS: { type: ReactionType; icon: 'thumbsUp' | 'medal' | 'ligh
   { type: 'well_explained', icon: 'megaphone', label: 'Well Explained' },
 ]
 
-interface ReactionState {
-  // activityId -> userEmail -> reaction (one per user per post, §11.2)
-  [activityId: string]: Record<string, ReactionType>
+const EMPTY_COUNTS: Record<ReactionType, number> = { appreciate: 0, respect: 0, insightful: 0, support: 0, skilled: 0, well_explained: 0 }
+
+interface ReactionRow {
+  target_type: 'activity' | 'comment'
+  target_id: string
+  user_email: string
+  reaction_type: ReactionType
 }
 
-const STORAGE_KEY = 'profile:demo-reactions'
-
-function readAll(): ReactionState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
+interface CountRow {
+  target_type: 'activity' | 'comment'
+  target_id: string
+  reaction_type: ReactionType
+  total: number
 }
 
-function writeAll(state: ReactionState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+// --- Live caches ---------------------------------------------------------
+// `myReactions` only ever contains the signed-in caller's own rows (all
+// `reactions` RLS ever allows); `counts` is the public aggregate view.
+let myReactions: ReactionRow[] = []
+let counts: CountRow[] = []
+let cacheVersion = 0
+const listeners = new Set<() => void>()
+
+function notifyListeners() {
+  cacheVersion++
+  listeners.forEach((fn) => fn())
+}
+
+async function loadCaches() {
+  const [{ data: mine }, { data: totals }] = await Promise.all([supabase.from('reactions').select('target_type,target_id,user_email,reaction_type'), supabase.from('reaction_counts').select('*')])
+  myReactions = mine ?? []
+  counts = totals ?? []
+  notifyListeners()
+}
+
+if (typeof window !== 'undefined') {
+  loadCaches()
+  supabase
+    .channel('reactions-cache')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, () => {
+      // Only our own rows ever arrive here (RLS-filtered Realtime) — a full
+      // reload is cheap and keeps `myReactions` correct across tabs/devices.
+      loadCaches()
+    })
+    .subscribe()
+}
+
+export function onReactionsChange(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+export function useReactionsCacheVersion(): number {
+  return useSyncExternalStore(onReactionsChange, () => cacheVersion, () => cacheVersion)
 }
 
 export function getMyReaction(activityId: string, userEmail: string): ReactionType | null {
-  return readAll()[activityId]?.[userEmail] ?? null
+  const row = myReactions.find((r) => r.target_type === 'activity' && r.target_id === activityId && r.user_email.toLowerCase() === userEmail.toLowerCase())
+  return row?.reaction_type ?? null
 }
 
 export function getReactionCounts(activityId: string): Record<ReactionType, number> {
-  const counts = { appreciate: 0, respect: 0, insightful: 0, support: 0, skilled: 0, well_explained: 0 }
-  const forActivity = readAll()[activityId] ?? {}
-  for (const reaction of Object.values(forActivity)) counts[reaction]++
-  return counts
+  const result = { ...EMPTY_COUNTS }
+  for (const row of counts) {
+    if (row.target_type === 'activity' && row.target_id === activityId) result[row.reaction_type] = row.total
+  }
+  return result
 }
 
 /** Toggling the currently-active reaction off is how "changeable" (§11.2) includes removal. */
-export function setMyReaction(activityId: string, userEmail: string, reaction: ReactionType): void {
-  const all = readAll()
-  const forActivity = { ...(all[activityId] ?? {}) }
-  if (forActivity[userEmail] === reaction) {
-    delete forActivity[userEmail]
+export async function setMyReaction(activityId: string, userEmail: string, reaction: ReactionType): Promise<void> {
+  const current = getMyReaction(activityId, userEmail)
+  if (current === reaction) {
+    await supabase.from('reactions').delete().eq('target_type', 'activity').eq('target_id', activityId).eq('user_email', userEmail)
   } else {
-    forActivity[userEmail] = reaction
+    await supabase
+      .from('reactions')
+      .upsert({ target_type: 'activity', target_id: activityId, user_email: userEmail, reaction_type: reaction }, { onConflict: 'target_type,target_id,user_email' })
   }
-  all[activityId] = forActivity
-  writeAll(all)
+  await loadCaches()
 }
