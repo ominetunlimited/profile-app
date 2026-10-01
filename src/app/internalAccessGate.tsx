@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
+import { useAdmin } from './AdminContext'
 
 /**
  * Patch (pre-Phase-7) B9: a *secondary* gate in front of the Owner/Internal
@@ -29,11 +30,15 @@ function unlock() {
 }
 
 export function RequireInternalAccessGate({ children }: { children: ReactNode }) {
+  const { admin } = useAdmin()
   const [unlocked, setUnlocked] = useState(isUnlocked)
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
 
-  if (unlocked) return <>{children}</>
+  // A real, server-verified platform admin has already passed a genuine
+  // second factor (their own Supabase password) — the demo passphrase below
+  // exists only to add friction for the old dev-only staffRole path.
+  if (admin || unlocked) return <>{children}</>
 
   function submit(e: FormEvent) {
     e.preventDefault()

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAccount } from './AccountContext'
+import { useAdmin } from './AdminContext'
 import type { OrgHubProfile } from './accountTypes'
 
 function Denied({ reason }: { reason: string }) {
@@ -52,15 +53,28 @@ export function RequireOrganisation({
   return <>{children}</>
 }
 
+/**
+ * Real Admin Centre: a signed-in, active `platform_admins` row (any role)
+ * satisfies this exactly like the old dev-only `staffRole` did — so every
+ * existing internal screen (Mission Control, Content Console, etc.) is
+ * reachable by a genuine admin in production now, not just via the
+ * dev-only AccountSwitcher. Both paths are checked independently; neither
+ * depends on the other.
+ */
 export function RequireStaff({ children }: { children: ReactNode }) {
   const { staffRole } = useAccount()
-  if (staffRole !== 'internal_staff' && staffRole !== 'owner') return <Denied reason="PROFILE staff only" />
+  const { admin, loading } = useAdmin()
+  if (loading) return null
+  if (staffRole !== 'internal_staff' && staffRole !== 'owner' && !admin) return <Denied reason="PROFILE staff only" />
   return <>{children}</>
 }
 
-/** B9: Owner-only surfaces (Admin Management) — a strict subset of RequireStaff. */
+/** B9: Owner-only surfaces (Admin Management) — a strict subset of RequireStaff.
+ * `super_administrator` is the real-admin equivalent of the dev-only 'owner'. */
 export function RequireOwner({ children }: { children: ReactNode }) {
   const { staffRole } = useAccount()
-  if (staffRole !== 'owner') return <Denied reason="PROFILE Owner only" />
+  const { admin, loading } = useAdmin()
+  if (loading) return null
+  if (staffRole !== 'owner' && admin?.role !== 'super_administrator') return <Denied reason="PROFILE Owner only" />
   return <>{children}</>
 }

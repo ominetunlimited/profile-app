@@ -50,6 +50,10 @@ import { StoreHub } from '@/screens/store/StoreHub'
 import { OwnerContentConsole } from '@/screens/internal/OwnerContentConsole'
 import { AdminManagement } from '@/screens/internal/AdminManagement'
 import { RequireInternalAccessGate } from './internalAccessGate'
+import { AdminLoginPage } from '@/screens/admin/AdminLoginPage'
+import { AdminShell, RequirePlatformAdmin } from '@/screens/admin/AdminShell'
+import { AdminDashboard } from '@/screens/admin/AdminDashboard'
+import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
 import { ActivityDetailPage } from '@/screens/home/ActivityDetailPage'
@@ -332,6 +336,51 @@ function elementFor(route: RouteEntry): ReactElement {
           </RequireInternalAccessGate>
         </RequireStaff>
       )
+    // Real Admin Centre — its own auth surface and shell, routed explicitly
+    // rather than through the generic gate switch below (RequirePlatformAdmin
+    // checks a live platform_admins row, not any account/staffRole gate).
+    case '/admin/login':
+      return <AdminLoginPage />
+    case '/admin':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminDashboard />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/admin/users':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminUsersRoles />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    // These three bring their own chrome (VerificationReview uses the
+    // consumer AppShell; OwnerContentConsole/MissionControl use InternalNav)
+    // — not wrapped in AdminShell here to avoid double-nesting navigation.
+    // A follow-up pass can rebuild them inside AdminShell's sidebar directly;
+    // for now this just closes the access gap (real admin auth reaches them
+    // in production, not only the dev-only staffRole path).
+    case '/admin/verification':
+      return (
+        <RequirePlatformAdmin>
+          <VerificationReview />
+        </RequirePlatformAdmin>
+      )
+    case '/admin/content':
+      return (
+        <RequirePlatformAdmin>
+          <OwnerContentConsole />
+        </RequirePlatformAdmin>
+      )
+    case '/admin/mission-control':
+      return (
+        <RequirePlatformAdmin>
+          <MissionControl />
+        </RequirePlatformAdmin>
+      )
     // Structural CV/Portfolio wall (§49.5) — routed explicitly, not via the
     // generic gate switch below, so the directory separation stays visible here.
     case '/career/cv/:template':
@@ -444,6 +493,15 @@ function elementFor(route: RouteEntry): ReactElement {
           <RequireInternalAccessGate>{shell}</RequireInternalAccessGate>
         </RequireStaff>
       )
+    case 'platform_admin':
+      // Every real '/admin/*' route has its own explicit case above and
+      // never reaches here — this exists only so the switch stays exhaustive
+      // if a future platform_admin route is registered without one.
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>{shell}</AdminShell>
+        </RequirePlatformAdmin>
+      )
   }
 }
 
@@ -456,7 +514,13 @@ function RootLayout() {
     <>
       <Outlet />
       <CommandPalette />
-      <AccountSwitcher />
+      {/* Security fix: this tool sets staffRole to 'owner'/'internal_staff'
+       * with one click and was previously mounted unconditionally, meaning
+       * anyone on the deployed production site could self-assign full
+       * internal access. import.meta.env.DEV is statically replaced by Vite
+       * at build time, so this is stripped from every production bundle,
+       * not just hidden behind a runtime flag. */}
+      {import.meta.env.DEV && <AccountSwitcher />}
     </>
   )
 }
