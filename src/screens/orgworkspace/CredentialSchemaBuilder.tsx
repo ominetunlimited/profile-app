@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAccount } from '@/app/AccountContext'
-import { canAccessInstitutionHubTools, orgRoleCan } from '@/app/accountTypes'
-import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { canAccessInstitutionHubTools, canAccessUniversityTools, orgRoleCan } from '@/app/accountTypes'
+import { OrgSubPageShell, HubAccessDenied, SectorAccessDenied } from './OrgWorkspaceShell'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import {
@@ -37,6 +37,12 @@ export function CredentialSchemaBuilder() {
 
   if (!account || !canAccessInstitutionHubTools(account)) {
     return <HubAccessDenied requiredHub="institutional_hub" />
+  }
+  // §34.2a — real for University/Polytechnic/College/School, not every
+  // institutional_hub org type (e.g. a Research Institute or Certification
+  // Authority shares the hub but not this specific tool).
+  if (!canAccessUniversityTools(account)) {
+    return <SectorAccessDenied toolName="Credential Schema Builder" />
   }
 
   const canEdit = orgRoleCan(account, 'editOrgProfile')

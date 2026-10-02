@@ -168,6 +168,30 @@ export function HubAccessDenied({ requiredHub }: { requiredHub: 'institutional_h
   )
 }
 
+/**
+ * §34.2a sector gating — a finer-grained denial than HubAccessDenied for a
+ * tool that's real for only part of institutional_hub (e.g. Credential
+ * Schema Builder / Institution Analytics are University/Polytechnic/
+ * College/School-specific per SECTOR_MODULE_VISIBILITY, not every
+ * institutional_hub org type). Shown only once hub+verified already passed
+ * — this is the next condition down, not a replacement for HubAccessDenied.
+ */
+export function SectorAccessDenied({ toolName }: { toolName: string }) {
+  const { account } = useAccount()
+  if (!account || account.accountType !== 'organisation') return null
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+        <h1 className="mb-3 text-lg font-semibold text-text-0">{toolName} isn't available for {account.orgType} accounts</h1>
+        <p className="text-sm text-text-1">
+          This tool is scoped to universities, polytechnics, colleges, and schools (§34.2a) — a {account.orgType.toLowerCase()} account's
+          institutional_hub access covers other tools, not this one.
+        </p>
+      </div>
+    </AppShell>
+  )
+}
+
 function Condition({ ok, label }: { ok: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-2 rounded-lg border p-2.5 ${ok ? 'border-success' : 'border-warning'}`}>

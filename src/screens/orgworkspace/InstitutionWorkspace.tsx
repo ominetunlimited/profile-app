@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
-import { canAccessInstitutionHubTools, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
+import { canAccessInstitutionHubTools, canAccessUniversityTools, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
 import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
@@ -84,10 +84,21 @@ export function InstitutionWorkspace() {
     URL.revokeObjectURL(url)
   }
 
+  // §34.2a/§10.4 — Analytics and Credential Schemas are university_or_school
+  // modules (institution_excellence_dashboard, bulk_student_ingestion), not
+  // every institutional_hub org type's; a Research Institute or
+  // Certification Authority never sees a link to a tool it can't open
+  // (§10.4's "absent, never shown disabled" rule), not just denied after
+  // clicking through.
+  const isUniversitySector = canAccessUniversityTools(account)
   const navItems: OrgNavItem[] = [
     { key: 'queue', label: TAB_LABEL.queue, active: tab === 'queue', onSelect: () => setTab('queue') },
-    { key: 'analytics', label: 'Analytics', active: false, to: '/institution/me/analytics' },
-    { key: 'schema', label: 'Credential schemas', active: false, to: '/institution/me/schemas' },
+    ...(isUniversitySector
+      ? [
+          { key: 'analytics', label: 'Analytics', active: false, to: '/institution/me/analytics' },
+          { key: 'schema', label: 'Credential schemas', active: false, to: '/institution/me/schemas' },
+        ]
+      : []),
     { key: 'compliance', label: TAB_LABEL.compliance, active: tab === 'compliance', onSelect: () => setTab('compliance') },
     { key: 'staff', label: TAB_LABEL.staff, active: tab === 'staff', onSelect: () => setTab('staff') },
     { key: 'records', label: TAB_LABEL.records, active: tab === 'records', onSelect: () => setTab('records') },

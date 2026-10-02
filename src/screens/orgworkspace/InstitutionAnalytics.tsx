@@ -1,6 +1,6 @@
 import { useAccount } from '@/app/AccountContext'
-import { canAccessInstitutionHubTools } from '@/app/accountTypes'
-import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { canAccessInstitutionHubTools, canAccessUniversityTools } from '@/app/accountTypes'
+import { OrgSubPageShell, HubAccessDenied, SectorAccessDenied } from './OrgWorkspaceShell'
 import { listSchemas } from '@/app/schemaStore'
 
 /** §23/§16 Institution Analytics — verification volume trends. Real counts
@@ -10,6 +10,11 @@ export function InstitutionAnalytics() {
   const { account } = useAccount()
   if (!account || !canAccessInstitutionHubTools(account)) {
     return <HubAccessDenied requiredHub="institutional_hub" />
+  }
+  // §34.2a — institution_excellence_dashboard is a university_or_school
+  // module, not every institutional_hub org type's.
+  if (!canAccessUniversityTools(account)) {
+    return <SectorAccessDenied toolName="Institution Analytics" />
   }
 
   const schemas = listSchemas(account.officialEmail)

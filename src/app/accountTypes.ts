@@ -292,6 +292,22 @@ export function canAccessInstitutionHubTools(account: Account): account is Organ
 }
 
 /**
+ * §34.2a `SECTOR_MODULE_VISIBILITY` — a finer-grained gate *within*
+ * institutional_hub. `canAccessInstitutionHubTools` alone treats every
+ * institutional_hub org type identically, but a Research Institute (sector
+ * `base`) or Certification Authority (sector `certification_authority`)
+ * isn't a University/Polytechnic/College/School (sector
+ * `university_or_school`) — §34.2a's module list for `university_or_school`
+ * (bulk_student_ingestion, academic_verification,
+ * institution_excellence_dashboard) is real only for that sector, not every
+ * institutional_hub member. Was pure dead data before this — sectorForOrgType
+ * was computed in AccountContext but never consumed by any screen or route.
+ */
+export function canAccessUniversityTools(account: Account): account is OrganisationAccount {
+  return canAccessInstitutionHubTools(account) && sectorForOrgType(account.orgType) === 'university_or_school'
+}
+
+/**
  * §3.3/§10.5 — government/regulatory console features render only for a verified
  * regulatory_console-hub account. One-directional: never for individual,
  * business_hub, or community_hub, regardless of trust score or plan tier.
