@@ -19,6 +19,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 
 export type ReactionType = 'appreciate' | 'respect' | 'insightful' | 'support' | 'skilled' | 'well_explained'
 
@@ -72,14 +73,16 @@ async function loadCaches() {
 
 if (typeof window !== 'undefined') {
   loadCaches()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('reactions-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, () => {
       // Only our own rows ever arrive here (RLS-filtered Realtime) — a full
       // reload is cheap and keeps `myReactions` correct across tabs/devices.
       loadCaches()
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onReactionsChange(fn: () => void): () => void {

@@ -6,6 +6,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import { notify } from './notificationStore'
 import { getJobById, orgDisplayName } from './jobStore'
 import { findAccountByEmail } from './demoAccountStore'
@@ -76,12 +77,14 @@ function upsertCacheRow(row: ApplicationRow) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('applications-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, (payload) => {
       if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as ApplicationRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onApplicationsChange(fn: () => void): () => void {

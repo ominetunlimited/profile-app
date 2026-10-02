@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/LanguageContext'
 import { ownerKey } from '@/app/activityStore'
 import { getProfileMedia } from '@/app/mediaStore'
 import { onNotificationsChange, unreadCount } from '@/app/notificationStore'
+import { onChatChange, setChatUser, unreadTotal } from '@/app/messageStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
@@ -42,6 +43,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   // on mount.
   useEffect(() => onNotificationsChange(() => forceNotificationsRerender((n) => n + 1)), [])
   const unread = account ? unreadCount(ownerKey(account)) : 0
+  // Live unread-messages badge: the chat store re-renders us on every Realtime push.
+  const [, forceChatRerender] = useState(0)
+  useEffect(() => onChatChange(() => forceChatRerender((n) => n + 1)), [])
+  useEffect(() => {
+    if (account) setChatUser(ownerKey(account))
+  }, [account])
+  const unreadMessages = account ? unreadTotal() : 0
 
   const displayName = account?.accountType === 'individual' ? account.legalName : account?.accountType === 'organisation' ? account.legalName : staffRole ? 'Staff' : 'Guest'
   const owner = account ? ownerKey(account) : ''
@@ -100,8 +108,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
               )}
             </Link>
-            <Link to="/messages" aria-label="Messages" className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
+            <Link to="/messages" aria-label={unreadMessages > 0 ? `Messages, ${unreadMessages} unread` : 'Messages'} className="relative hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
               <IconMessage size={18} />
+              {unreadMessages > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 font-mono text-[9px] font-bold text-white">
+                  {unreadMessages > 9 ? '9+' : unreadMessages}
+                </span>
+              )}
             </Link>
             <button
               type="button"

@@ -8,6 +8,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import { findAccountByEmail } from './demoAccountStore'
 import { notify } from './notificationStore'
 
@@ -65,13 +66,15 @@ function removeCacheRow(id: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('connections-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'connections' }, (payload) => {
       if (payload.eventType === 'DELETE') removeCacheRow((payload.old as ConnectionRow).id)
       else upsertCacheRow(payload.new as ConnectionRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onConnectionsChange(fn: () => void): () => void {

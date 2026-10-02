@@ -15,6 +15,8 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
+import { makeImageVariants } from './imageProcessing'
 
 export type MediaTargetType = 'activity' | 'credential'
 export type FileCategory = 'image' | 'video' | 'audio' | 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'epub' | 'other'
@@ -25,6 +27,10 @@ export interface MediaAsset {
   targetType: MediaTargetType
   targetId: string
   storagePath: string
+  previewPath: string | null
+  thumbPath: string | null
+  width: number | null
+  height: number | null
   fileName: string
   mimeType: string
   fileCategory: FileCategory
@@ -40,6 +46,10 @@ interface MediaAssetRow {
   target_type: MediaTargetType
   target_id: string
   storage_path: string
+  preview_path: string | null
+  thumb_path: string | null
+  width: number | null
+  height: number | null
   file_name: string
   mime_type: string
   file_category: FileCategory
@@ -56,6 +66,10 @@ function rowToAsset(r: MediaAssetRow): MediaAsset {
     targetType: r.target_type,
     targetId: r.target_id,
     storagePath: r.storage_path,
+    previewPath: r.preview_path ?? null,
+    thumbPath: r.thumb_path ?? null,
+    width: r.width ?? null,
+    height: r.height ?? null,
     fileName: r.file_name,
     mimeType: r.mime_type,
     fileCategory: r.file_category,
@@ -90,7 +104,7 @@ export const ACCEPTED_FILE_TYPES =
   'image/*,video/*,audio/*,application/pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.epub'
 export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024 // 50MB practical cap — see module header
 
-async function sha256Hex(file: File): Promise<string> {
+export async function sha256Hex(file: Blob): Promise<string> {
   const buffer = await file.arrayBuffer()
   const digest = await crypto.subtle.digest('SHA-256', buffer)
   return Array.from(new Uint8Array(digest))
@@ -138,13 +152,15 @@ function removeCacheRow(id: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('media-assets-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'media_assets' }, (payload) => {
       if (payload.eventType === 'DELETE') removeCacheRow((payload.old as MediaAssetRow).id)
       else upsertCacheRow(payload.new as MediaAssetRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onMediaAssetsChange(fn: () => void): () => void {
@@ -184,6 +200,29 @@ export async function uploadMediaAsset({ file, ownerEmail, targetType, targetId 
   const { error: uploadError } = await supabase.storage.from('activity-media').upload(storagePath, file, { contentType: file.type || 'application/octet-stream' })
   if (uploadError) throw uploadError
 
+  // Optimised viewing variants (feed must never load full-resolution originals).
+  let previewPath: string | null = null
+  let thumbPath: string | null = null
+  let width: number | null = null
+  let height: number | null = null
+  if (fileCategory === 'image') {
+    const variants = await makeImageVariants(file).catch(() => null)
+    if (variants) {
+      const p = `${storagePath}-preview`
+      const t = `${storagePath}-thumb`
+      const [up, ut] = await Promise.all([
+        supabase.storage.from('activity-media').upload(p, variants.preview, { contentType: variants.preview.type }),
+        supabase.storage.from('activity-media').upload(t, variants.thumb, { contentType: variants.thumb.type }),
+      ])
+      if (!up.error && !ut.error) {
+        previewPath = p
+        thumbPath = t
+      }
+      width = variants.width
+      height = variants.height
+    }
+  }
+
   const { data, error } = await supabase
     .from('media_assets')
     .insert({
@@ -192,6 +231,10 @@ export async function uploadMediaAsset({ file, ownerEmail, targetType, targetId 
       target_type: targetType,
       target_id: targetId,
       storage_path: storagePath,
+      preview_path: previewPath,
+      thumb_path: thumbPath,
+      width,
+      height,
       file_name: file.name,
       mime_type: file.type || 'application/octet-stream',
       file_category: fileCategory,
@@ -204,7 +247,7 @@ export async function uploadMediaAsset({ file, ownerEmail, targetType, targetId 
   if (error) {
     // Don't leave an orphaned file in Storage with no database row pointing
     // at it if the insert failed (e.g. a real duplicate copyright_id clash).
-    await supabase.storage.from('activity-media').remove([storagePath])
+    await supabase.storage.from('activity-media').remove([storagePath, ...(previewPath ? [previewPath] : []), ...(thumbPath ? [thumbPath] : [])])
     throw error
   }
   const row = data as MediaAssetRow
@@ -213,7 +256,7 @@ export async function uploadMediaAsset({ file, ownerEmail, targetType, targetId 
 }
 
 export async function deleteMediaAsset(asset: MediaAsset): Promise<void> {
-  await supabase.storage.from('activity-media').remove([asset.storagePath])
+  await supabase.storage.from('activity-media').remove([asset.storagePath, ...(asset.previewPath ? [asset.previewPath] : []), ...(asset.thumbPath ? [asset.thumbPath] : [])])
   await supabase.from('media_assets').delete().eq('id', asset.id)
   removeCacheRow(asset.id)
 }
@@ -223,11 +266,13 @@ export async function deleteMediaAsset(asset: MediaAsset): Promise<void> {
  * permanent public link. Cached in memory for the URL's lifetime so
  * re-rendering the same card doesn't re-sign on every paint.
  */
-export async function getSignedMediaUrl(asset: MediaAsset, expiresInSeconds = 3600): Promise<string | null> {
-  const cached = signedUrlCache.get(asset.id)
+export async function getSignedMediaUrl(asset: MediaAsset, expiresInSeconds = 3600, variant: 'original' | 'preview' | 'thumb' = 'original'): Promise<string | null> {
+  const path = variant === 'thumb' ? asset.thumbPath ?? asset.previewPath ?? asset.storagePath : variant === 'preview' ? asset.previewPath ?? asset.storagePath : asset.storagePath
+  const cacheKey = `${asset.id}:${path}`
+  const cached = signedUrlCache.get(cacheKey)
   if (cached && cached.expiresAt > Date.now() + 30_000) return cached.url
-  const { data, error } = await supabase.storage.from('activity-media').createSignedUrl(asset.storagePath, expiresInSeconds)
+  const { data, error } = await supabase.storage.from('activity-media').createSignedUrl(path, expiresInSeconds)
   if (error || !data) return null
-  signedUrlCache.set(asset.id, { url: data.signedUrl, expiresAt: Date.now() + expiresInSeconds * 1000 })
+  signedUrlCache.set(cacheKey, { url: data.signedUrl, expiresAt: Date.now() + expiresInSeconds * 1000 })
   return data.signedUrl
 }

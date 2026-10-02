@@ -6,6 +6,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import { getActivityById } from './activityStore'
 import { findAccountByEmail } from './demoAccountStore'
 import { notify } from './notificationStore'
@@ -58,12 +59,14 @@ function upsertCacheRow(row: CommentRow) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('comments-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, (payload) => {
       if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as CommentRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onCommentsChange(fn: () => void): () => void {

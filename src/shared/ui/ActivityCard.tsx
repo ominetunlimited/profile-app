@@ -14,7 +14,7 @@ import { UserAvatar } from './UserAvatar'
 import { AttributionSection } from './AttributionSection'
 import { IconCheck, IconHammer, IconLightbulb, IconLink, IconMedal, IconMegaphone, IconMessage, IconSeedling, IconThumbsUp, IconTool, type IconProps } from './icons'
 
-const REACTION_ICON: Record<ReactionType, ComponentType<IconProps>> = {
+export const REACTION_ICON: Record<ReactionType, ComponentType<IconProps>> = {
   appreciate: IconThumbsUp,
   respect: IconMedal,
   insightful: IconLightbulb,
@@ -356,9 +356,11 @@ function MediaGallery({ activityId }: { activityId: string }) {
 
 function MediaThumb({ asset }: { asset: MediaAsset }) {
   const [url, setUrl] = useState<string | null>(null)
+  const [viewing, setViewing] = useState<string | null>(null)
   useEffect(() => {
     let cancelled = false
-    getSignedMediaUrl(asset).then((signed) => {
+    // Images show the small thumbnail variant in the feed; the larger preview only loads on open.
+    getSignedMediaUrl(asset, 3600, asset.fileCategory === 'image' ? 'thumb' : 'original').then((signed) => {
       if (!cancelled) setUrl(signed)
     })
     return () => {
@@ -369,7 +371,25 @@ function MediaThumb({ asset }: { asset: MediaAsset }) {
   const loadingBox = <div className="h-28 animate-pulse rounded-lg bg-surface-sunken" title={asset.fileName} />
 
   if (asset.fileCategory === 'image') {
-    return url ? <img src={url} alt={asset.fileName} className="h-28 w-full rounded-lg border border-border object-cover" /> : loadingBox
+    return url ? (
+      <>
+        <button
+          type="button"
+          onClick={async () => setViewing(await getSignedMediaUrl(asset, 3600, 'preview'))}
+          aria-label={`View ${asset.fileName}`}
+          className="block h-28 w-full overflow-hidden rounded-lg border border-border"
+        >
+          <img src={url} alt={asset.fileName} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        </button>
+        {viewing && (
+          <div role="dialog" aria-modal="true" aria-label={asset.fileName} onClick={() => setViewing(null)} className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4">
+            <img src={viewing} alt={asset.fileName} className="max-h-full max-w-full object-contain" />
+          </div>
+        )}
+      </>
+    ) : (
+      loadingBox
+    )
   }
   if (asset.fileCategory === 'video') {
     return url ? <video src={url} controls className="h-28 w-full rounded-lg border border-border bg-black object-cover" /> : loadingBox

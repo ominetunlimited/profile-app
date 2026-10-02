@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import type { Account, OrgRegistryLevel } from './accountTypes'
 
 /**
@@ -155,13 +156,15 @@ function removeCacheRow(id: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('accounts-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'accounts' }, (payload) => {
       if (payload.eventType === 'DELETE') removeCacheRow((payload.old as AccountRow).id)
       else upsertCacheRow(payload.new as AccountRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 /** Lets a component re-render once the cache's first load lands, or a live

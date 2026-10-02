@@ -10,6 +10,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 
 export type NotificationCategory = 'verification' | 'messages' | 'opportunities' | 'community' | 'security' | 'marketing'
 
@@ -64,12 +65,14 @@ function upsertCacheRow(row: NotificationRow) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('notifications-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, (payload) => {
       if (payload.eventType !== 'DELETE') upsertCacheRow(payload.new as NotificationRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onNotificationsChange(fn: () => void): () => void {

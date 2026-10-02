@@ -17,6 +17,7 @@
 import { useSyncExternalStore } from 'react'
 import type { Account } from './accountTypes'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import { listFollowedOrgs } from './followStore'
 import { listConnectedEmails } from './connectionStore'
 import { recordToolReferences } from './providerReferenceStore'
@@ -135,13 +136,15 @@ function removeCacheRow(id: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('activities-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, (payload) => {
       if (payload.eventType === 'DELETE') removeCacheRow((payload.old as ActivityRow).id)
       else upsertCacheRow(payload.new as ActivityRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onActivitiesChange(fn: () => void): () => void {

@@ -7,6 +7,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import { findAccountByEmail } from './demoAccountStore'
 import { notify } from './notificationStore'
 
@@ -52,13 +53,15 @@ function removeCacheRow(followerEmail: string, orgEmail: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
-  supabase
+  joinRealtime(() =>
+    supabase
     .channel('follows-cache')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'follows' }, (payload) => {
       if (payload.eventType === 'DELETE') removeCacheRow((payload.old as FollowRow).follower_email, (payload.old as FollowRow).org_email)
       else upsertCacheRow(payload.new as FollowRow)
     })
-    .subscribe()
+    .subscribe(),
+  )
 }
 
 export function onFollowsChange(fn: () => void): () => void {

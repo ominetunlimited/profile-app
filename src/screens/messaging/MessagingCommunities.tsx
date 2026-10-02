@@ -4,14 +4,11 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { COMMUNITY_SEEDS, isMember, memberCount, toggleMembership } from '@/app/communitiesStore'
-import { conversationIdFor, joinConversation, listConversationsFor, listMessages, onMessagesChange, otherParticipant, sendMessage } from '@/app/messageStore'
-import { findAccountByEmail } from '@/app/demoAccountStore'
+import { conversationIdFor, setChatUser, startConversationWith } from '@/app/messageStore'
+import { ChatThread } from './ChatThread'
+import { ConversationList } from './ConversationList'
 
 const TABS = ['messages', 'communities'] as const
-
-function displayNameFor(email: string): string {
-  return findAccountByEmail(email)?.legalName ?? email
-}
 
 /** §20 Messaging System + §21.2 Communities & Groups — combined per the Handoff's
  * single screen; §10.4 also gives Communities its own top-level route
@@ -23,7 +20,20 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
   const [, forceRender] = useState(0)
   const [params] = useSearchParams()
   const withEmail = params.get('with')
-  const [openConversationId, setOpenConversationId] = useState<string | null>(() => (withEmail ? conversationIdFor(owner, withEmail) : null))
+  const [openConversationId, setOpenConversationId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setChatUser(owner)
+  }, [owner])
+
+  // `?with=` deep link (from a profile / notification): create the conversation
+  // atomically server-side (both participants), then open it.
+  useEffect(() => {
+    if (!withEmail || !owner) return
+    startConversationWith(withEmail)
+      .then((id) => setOpenConversationId(id))
+      .catch(() => setOpenConversationId(conversationIdFor(owner, withEmail)))
+  }, [withEmail, owner])
 
   return (
     <AppShell>
@@ -46,7 +56,7 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
 
         {tab === 'messages' &&
           (openConversationId ? (
-            <ConversationThread ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
+            <ChatThread ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
           ) : (
             <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
           ))}
@@ -84,109 +94,5 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
         )}
       </div>
     </AppShell>
-  )
-}
-
-function ConversationList({ ownerEmail, onOpen }: { ownerEmail: string; onOpen: (conversationId: string) => void }) {
-  const [, forceRender] = useState(0)
-  // Pipeline repair Phase A: the messages cache loads asynchronously (and
-  // can receive a Realtime push) — without this, a conversation list opened
-  // before the initial fetch resolves would freeze empty.
-  useEffect(() => onMessagesChange(() => forceRender((n) => n + 1)), [])
-  const conversations = listConversationsFor(ownerEmail)
-
-  if (conversations.length === 0) {
-    return (
-      <div>
-        <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-          No conversations yet. Message someone from their profile to start a real thread.
-        </div>
-        <p className="mt-4 text-center text-xs text-text-2">Hiring · Collaboration · Verification · Partnership · Consulting · Marketplace threads all live here once started.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      {conversations.map((c) => (
-        <button
-          key={c.conversationId}
-          onClick={() => onOpen(c.conversationId)}
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 text-left hover:border-accent"
-        >
-          <div className="min-w-0 flex-1">
-            <div className="font-semibold text-text-0">{displayNameFor(c.otherEmail)}</div>
-            <p className="truncate text-sm text-text-1">
-              {c.lastMessage.senderEmail === ownerEmail ? 'You: ' : ''}
-              {c.lastMessage.text}
-            </p>
-          </div>
-          <span className="flex-none text-xs text-text-2">{new Date(c.lastMessage.sentAt).toLocaleDateString()}</span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function ConversationThread({ ownerEmail, conversationId, onBack }: { ownerEmail: string; conversationId: string; onBack: () => void }) {
-  const [messages, setMessages] = useState(() => listMessages(conversationId))
-  const [draft, setDraft] = useState('')
-  const otherEmail = otherParticipant(conversationId, ownerEmail)
-
-  useEffect(() => {
-    // Opening a thread is the real self-registration step for the recipient
-    // side of RLS (see messageStore.ts's joinConversation) — without this,
-    // a conversation someone else started would never become visible here.
-    joinConversation(conversationId, ownerEmail).then(() => setMessages(listMessages(conversationId)))
-    return onMessagesChange(() => setMessages(listMessages(conversationId)))
-  }, [conversationId, ownerEmail])
-
-  async function handleSend() {
-    if (!draft.trim()) return
-    const text = draft.trim()
-    setDraft('')
-    await sendMessage(conversationId, ownerEmail, text)
-    setMessages(listMessages(conversationId))
-  }
-
-  return (
-    <div className="flex h-[65vh] flex-col rounded-xl border border-border bg-surface">
-      <div className="flex items-center gap-2 border-b border-border p-3">
-        <button onClick={onBack} className="text-sm font-semibold text-accent">
-          ←
-        </button>
-        <span className="font-semibold text-text-0">{displayNameFor(otherEmail)}</span>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        {messages.length === 0 ? (
-          <p className="text-center text-sm text-text-1">Say hello — this is a real, private thread between you two.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {messages.map((m) => {
-              const mine = m.senderEmail.toLowerCase() === ownerEmail.toLowerCase()
-              return (
-                <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${mine ? 'ml-auto bg-accent-solid text-white' : 'bg-surface-sunken text-text-0'}`}>
-                  {m.text}
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-      <div className="flex gap-2 border-t border-border p-3">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSend()
-          }}
-          placeholder="Type a message…"
-          className="min-h-[42px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
-        />
-        <button onClick={handleSend} className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white">
-          Send
-        </button>
-      </div>
-    </div>
   )
 }
