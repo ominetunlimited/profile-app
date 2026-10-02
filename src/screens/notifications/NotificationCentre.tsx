@@ -5,31 +5,46 @@ import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { listNotifications, markAllRead, markRead, onNotificationsChange, type NotificationCategory } from '@/app/notificationStore'
 
-/** data-model.md Notification.category, verbatim. */
-const CATEGORIES: (NotificationCategory | 'all')[] = ['all', 'verification', 'messages', 'opportunities', 'community', 'security', 'marketing']
-// Design handoff gap audit: CSS `capitalize` on the raw category key only
-// uppercases its first letter — real Title Case display labels instead.
+const CATEGORIES: (NotificationCategory | 'all')[] = ['all', 'social', 'messages', 'professional', 'opportunities', 'verification', 'profile', 'community', 'career', 'security', 'system', 'marketing']
+// Real Title Case display labels instead of CSS `capitalize` on raw keys.
 const CATEGORY_LABEL: Record<(typeof CATEGORIES)[number], string> = {
   all: 'All',
-  verification: 'Verification',
+  social: 'Social',
   messages: 'Messages',
+  professional: 'Network',
   opportunities: 'Opportunities',
+  verification: 'Verification',
+  profile: 'Profile',
   community: 'Community',
+  career: 'Career',
   security: 'Security',
-  marketing: 'Marketing',
+  system: 'System',
+  marketing: 'News',
 }
 
 /** PROFILE Notification Centre.dc.html's row layout uses a colored icon
- * square per notification, not a plain text badge — its own 6 example rows
- * don't map 1:1 onto this build's real category enum, so glyphs/tones are
- * chosen per real category rather than copied verbatim. */
+ * square per notification, not a plain text badge — glyphs/tones are chosen
+ * per real category. */
 const CATEGORY_GLYPH: Record<NotificationCategory, { glyph: string; bg: string; ink: string }> = {
-  verification: { glyph: '✓', bg: 'bg-trust-soft', ink: 'text-trust' },
+  social: { glyph: '♥', bg: 'bg-accent-soft', ink: 'text-accent' },
   messages: { glyph: '@', bg: 'bg-accent-soft', ink: 'text-accent' },
+  professional: { glyph: '◍', bg: 'bg-trust-soft', ink: 'text-trust' },
   opportunities: { glyph: '!', bg: 'bg-success-soft', ink: 'text-success' },
+  verification: { glyph: '✓', bg: 'bg-trust-soft', ink: 'text-trust' },
+  profile: { glyph: '◉', bg: 'bg-surface-sunken', ink: 'text-text-1' },
   community: { glyph: '◍', bg: 'bg-accent-soft', ink: 'text-accent' },
+  career: { glyph: '↗', bg: 'bg-success-soft', ink: 'text-success' },
   security: { glyph: '!', bg: 'bg-warning-soft', ink: 'text-warning' },
+  system: { glyph: 'i', bg: 'bg-warning-soft', ink: 'text-warning' },
   marketing: { glyph: '✎', bg: 'bg-surface-sunken', ink: 'text-text-1' },
+}
+
+function timeAgo(iso: string): string {
+  const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+  if (s < 60) return 'just now'
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
+  return new Date(iso).toLocaleDateString()
 }
 
 /** §10, §20 Notification Centre — full-width inbox, real events only
@@ -50,6 +65,7 @@ export function NotificationCentre() {
   useEffect(() => onNotificationsChange(() => setItems(listNotifications(owner))), [owner])
 
   const filtered = tab === 'all' ? items : items.filter((i) => i.category === tab)
+  const unreadByCategory = (c: (typeof CATEGORIES)[number]) => items.filter((i) => !i.read && (c === 'all' || i.category === c)).length
 
   return (
     <AppShell>
@@ -83,13 +99,13 @@ export function NotificationCentre() {
               }`}
             >
               {CATEGORY_LABEL[c]}
+              {unreadByCategory(c) > 0 && <span className="ms-1.5 rounded-full bg-accent-solid px-1.5 text-[10px] font-bold text-white">{unreadByCategory(c)}</span>}
             </button>
           ))}
         </div>
         {filtered.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-            Nothing here yet — real notifications appear as people follow, connect, comment, credit you, or reference
-            work you're associated with.
+            Nothing here yet — notifications appear as people react, comment, repost, message, follow or connect with you.
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -108,7 +124,7 @@ export function NotificationCentre() {
                   <span className="min-w-0 flex-1">
                     <span className={`block text-sm text-text-0 ${n.read ? 'font-normal' : 'font-semibold'}`}>{n.text}</span>
                     <span className="mt-0.5 block text-xs text-text-2">
-                      {new Date(n.createdAt).toLocaleDateString()} · {CATEGORY_LABEL[n.category]}
+                      {timeAgo(n.createdAt)} · {CATEGORY_LABEL[n.category]}{n.groupCount > 1 ? ` · ${n.groupCount} people` : ''}
                     </span>
                   </span>
                   {!n.read && <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-accent" />}

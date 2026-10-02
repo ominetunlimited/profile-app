@@ -1,4 +1,4 @@
-import { notify } from './notificationStore'
+import { emitEvent } from './eventBus'
 
 /**
  * §11.3 Self-Tag System. Real request/approval pipeline. Scope note: once
@@ -47,12 +47,7 @@ export function requestSelfTag(input: { requesterEmail: string; requesterName: s
   if (all.some((r) => r.requesterEmail === input.requesterEmail && r.activityId === input.activityId)) return
   all.push({ id: `tag-${Date.now()}`, ...input, status: 'requested', requestedAt: new Date().toISOString() })
   writeAll(all)
-  notify({
-    recipientEmail: input.activityOwnerEmail,
-    category: 'community',
-    text: `${input.requesterName} wants to be tagged as "${input.role}" on "${input.activityTitle}".`,
-    deepLink: `/activity/${input.activityId}`,
-  })
+  void emitEvent('tag_request', input.activityOwnerEmail, { deepLink: `/activity/${input.activityId}`, targetType: 'activity', targetId: input.activityId, vars: { role: input.role } })
 }
 
 export function myRequestFor(requesterEmail: string, activityId: string): SelfTagRequest | undefined {
@@ -73,10 +68,5 @@ export function respondToSelfTag(id: string, status: 'approved' | 'rejected'): v
   if (idx === -1) return
   all[idx] = { ...all[idx], status }
   writeAll(all)
-  notify({
-    recipientEmail: all[idx].requesterEmail,
-    category: 'community',
-    text: `Your tag request on "${all[idx].activityTitle}" was ${status}.`,
-    deepLink: `/activity/${all[idx].activityId}`,
-  })
+  void emitEvent('tag_response', all[idx].requesterEmail, { deepLink: `/activity/${all[idx].activityId}`, targetType: 'activity', targetId: all[idx].activityId, vars: { detail: status } })
 }

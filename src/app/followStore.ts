@@ -8,8 +8,6 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
-import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
 
 export interface FollowRecord {
   followerEmail: string
@@ -85,10 +83,6 @@ export async function followOrg(followerEmail: string, orgEmail: string): Promis
   const { data, error } = await supabase.from('follows').insert({ follower_email: followerEmail, org_email: orgEmail }).select().single()
   if (error) throw error
   upsertCacheRow(data as FollowRow)
-  // §4.2's own notification table: 'follow.event → org.followerAlert'.
-  const follower = findAccountByEmail(followerEmail)
-  const link = follower && 'username' in follower && follower.username ? `/profile/${follower.username}` : '/notifications'
-  notify({ recipientEmail: orgEmail, category: 'community', text: `${follower?.legalName ?? 'Someone'} started following your organisation.`, deepLink: link })
 }
 
 export async function unfollowOrg(followerEmail: string, orgEmail: string): Promise<void> {

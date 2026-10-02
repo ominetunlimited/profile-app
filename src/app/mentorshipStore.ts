@@ -1,5 +1,4 @@
-import { notify } from './notificationStore'
-import { findAccountByEmail } from './demoAccountStore'
+import { emitEvent } from './eventBus'
 
 /**
  * V9 Unified Ecosystem Patch §5 — "Open to mentoring" already existed as a
@@ -106,8 +105,7 @@ export function sendMenteeRequest(menteeEmail: string, mentorEmail: string, mess
     respondedAt: null,
   }
   writeRequests([...readRequests(), record])
-  const mentee = findAccountByEmail(menteeEmail)
-  notify({ recipientEmail: mentorEmail, category: 'community', text: `${mentee?.legalName ?? 'Someone'} requested mentorship from you.`, deepLink: '/connections' })
+  void emitEvent('mentorship_request', mentorEmail, { deepLink: '/connections' })
 }
 
 export function respondToMenteeRequest(id: string, status: 'accepted' | 'declined'): void {
@@ -116,13 +114,7 @@ export function respondToMenteeRequest(id: string, status: 'accepted' | 'decline
   if (idx === -1) return
   all[idx] = { ...all[idx], status, respondedAt: new Date().toISOString() }
   writeRequests(all)
-  const mentor = findAccountByEmail(all[idx].mentorEmail)
-  notify({
-    recipientEmail: all[idx].menteeEmail,
-    category: 'community',
-    text: `${mentor?.legalName ?? 'Your requested mentor'} ${status} your mentorship request.`,
-    deepLink: '/connections',
-  })
+  void emitEvent('mentorship_response', all[idx].menteeEmail, { deepLink: '/connections', vars: { detail: status } })
 }
 
 export function listMenteeRequestsForMentor(mentorEmail: string): MenteeRequest[] {

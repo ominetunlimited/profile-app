@@ -12,8 +12,6 @@ import { joinRealtime } from './realtimeAuth'
 import { getActivityById } from './activityStore'
 import { getJobById } from './jobStore'
 import { getCampaignById } from './adStore'
-import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
 import { listConnectedEmails } from './connectionStore'
 import { listFollowedOrgs } from './followStore'
 
@@ -166,9 +164,6 @@ export function targetLink(type: SocialTargetType, id: string): string {
   }
   return '/home'
 }
-function nameOf(email: string): string {
-  return findAccountByEmail(email)?.legalName ?? 'Someone'
-}
 
 // --- Reposts -------------------------------------------------------------
 export function listReposts(): RepostRecord[] {
@@ -228,14 +223,6 @@ export async function repostTarget(input: { me: string; type: SocialTargetType; 
   reposts = [row, ...reposts.filter((r) => r.id !== row.id)]
   bump()
   scheduleReload()
-  if (author.toLowerCase() !== input.me.toLowerCase()) {
-    void notify({
-      recipientEmail: author,
-      category: 'community',
-      text: `${nameOf(input.me)} ${commentary ? 'reposted with a comment:' : 'reposted'} "${targetTitle(type, id)}".`,
-      deepLink: targetLink(type, id),
-    })
-  }
   return rowToRepost(row)
 }
 
@@ -301,15 +288,6 @@ export async function toggleEndorsement(me: string, type: SocialTargetType, id: 
     throw error
   }
   scheduleReload()
-  const author = targetAuthor(type, id)
-  if (author && author.toLowerCase() !== me.toLowerCase()) {
-    void notify({
-      recipientEmail: author,
-      category: 'community',
-      text: `${nameOf(me)} recommended "${targetTitle(type, id)}".`,
-      deepLink: targetLink(type, id),
-    })
-  }
 }
 
 // --- Counts --------------------------------------------------------------

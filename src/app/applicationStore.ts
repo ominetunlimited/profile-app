@@ -7,9 +7,8 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
-import { notify } from './notificationStore'
-import { getJobById, orgDisplayName } from './jobStore'
-import { findAccountByEmail } from './demoAccountStore'
+import { emitEvent } from './eventBus'
+import { getJobById } from './jobStore'
 import { conversationIdFor, sendMessage } from './messageStore'
 
 /** §6.4 Application status, verbatim. */
@@ -117,14 +116,7 @@ export async function submitApplication(input: { jobId: string; applicantEmail: 
   upsertCacheRow(row)
   const record = rowToApplication(row)
 
-  const applicant = findAccountByEmail(input.applicantEmail)
-  const job = getJobById(input.jobId)
-  notify({
-    recipientEmail: input.orgEmail,
-    category: 'opportunities',
-    text: `${applicant?.legalName ?? 'Someone'} applied with PROFILE for "${job?.title ?? 'your job listing'}".`,
-    deepLink: `/org/recruiter`,
-  })
+  void emitEvent('application_received', input.orgEmail, { deepLink: '/org/recruiter', targetType: 'job', targetId: input.jobId })
   return record
 }
 
@@ -166,13 +158,7 @@ export async function updateApplicationStatus(id: string, status: ApplicationSta
   if (!data) return
   const row = data as ApplicationRow
   upsertCacheRow(row)
-  const job = getJobById(row.job_id)
-  notify({
-    recipientEmail: row.applicant_email,
-    category: 'opportunities',
-    text: `Your application for "${job?.title ?? 'a job'}" at ${orgDisplayName(row.org_email)} is now "${status.replace(/_/g, ' ')}".`,
-    deepLink: `/applications`,
-  })
+  void emitEvent('application_status', row.applicant_email, { deepLink: '/applications', targetType: 'job', targetId: row.job_id, vars: { detail: status.replace(/_/g, ' ') } })
 }
 
 /**
@@ -188,16 +174,11 @@ export async function scheduleInterview(id: string, orgEmail: string, slot: stri
   upsertCacheRow(data as ApplicationRow)
 
   const job = getJobById(application.jobId)
-  notify({
-    recipientEmail: application.applicantEmail,
-    category: 'messages',
-    text: `${orgDisplayName(orgEmail)} scheduled an interview for "${job?.title ?? 'your application'}" — ${slot}.`,
-    // Pipeline repair: a bare `/messages` landed on "No conversations yet"
-    // for the recipient, since they're not a conversation_participants row
-    // until they actually open this specific thread (see messageStore.ts's
-    // joinConversation) — the `?with=` param is what MessagingCommunities.tsx
-    // reads to open and self-register into the right conversation.
+  void emitEvent('interview_scheduled', application.applicantEmail, {
     deepLink: `/messages?with=${encodeURIComponent(orgEmail)}`,
+    targetType: 'job',
+    targetId: application.jobId,
+    vars: { detail: slot },
   })
   const conversationId = conversationIdFor(orgEmail, application.applicantEmail)
   await sendMessage(conversationId, orgEmail, `We'd like to schedule your interview for "${job?.title ?? 'the role'}" on ${slot}. Let us know if this works.`)

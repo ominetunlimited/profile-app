@@ -20,9 +20,6 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
-import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
-import { targetAuthor, targetLink, targetTitle } from './socialStore'
 
 export type ReactionType = 'appreciate' | 'respect' | 'insightful' | 'support' | 'skilled' | 'well_explained'
 
@@ -122,15 +119,7 @@ export async function setMyReaction(targetType: ReactionTargetType, targetId: st
       .from('reactions')
       .upsert({ target_type: targetType, target_id: targetId, user_email: userEmail, reaction_type: reaction }, { onConflict: 'target_type,target_id,user_email' })
     if (error) throw error
-    // First reaction (not a change of mind) → tell the content's author.
-    if (!current && targetType !== 'comment') {
-      const author = targetAuthor(targetType, targetId)
-      if (author && author.toLowerCase() !== userEmail.toLowerCase()) {
-        const who = findAccountByEmail(userEmail)?.legalName ?? 'Someone'
-        const label = REACTIONS.find((r) => r.type === reaction)?.label ?? 'reacted to'
-        void notify({ recipientEmail: author, category: 'community', text: `${who} marked "${targetTitle(targetType, targetId)}" as ${label}.`, deepLink: targetLink(targetType, targetId) })
-      }
-    }
+    // The author is notified by the trg_notify_reaction trigger (first reaction only).
   }
   await loadCaches()
 }

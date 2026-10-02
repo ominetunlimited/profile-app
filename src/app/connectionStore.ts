@@ -10,7 +10,6 @@ import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
 import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
 
 export type ConnectionStatus = 'pending' | 'accepted'
 
@@ -112,8 +111,6 @@ export async function sendConnectionRequest(requesterEmail: string, recipientEma
   const { data, error } = await supabase.from('connections').insert({ requester_email: requesterEmail, recipient_email: recipientEmail }).select().single()
   if (error) throw error
   upsertCacheRow(data as ConnectionRow)
-  const requester = findAccountByEmail(requesterEmail)
-  notify({ recipientEmail, category: 'community', text: `${requester?.legalName ?? 'Someone'} sent you a connection request.`, deepLink: '/connections' })
 }
 
 export async function acceptConnectionRequest(viewerEmail: string, otherEmail: string): Promise<void> {
@@ -122,9 +119,6 @@ export async function acceptConnectionRequest(viewerEmail: string, otherEmail: s
   const { data } = await supabase.from('connections').update({ status: 'accepted', responded_at: new Date().toISOString() }).eq('id', record.id).select().maybeSingle()
   if (!data) return
   upsertCacheRow(data as ConnectionRow)
-  const accepter = findAccountByEmail(viewerEmail)
-  const link = accepter && 'username' in accepter && accepter.username ? `/profile/${accepter.username}` : '/connections'
-  notify({ recipientEmail: otherEmail, category: 'community', text: `${accepter?.legalName ?? 'Someone'} accepted your connection request.`, deepLink: link })
 }
 
 export async function removeConnection(viewerEmail: string, otherEmail: string): Promise<void> {

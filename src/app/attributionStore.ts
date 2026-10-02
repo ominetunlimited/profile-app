@@ -1,5 +1,5 @@
 import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
+import { emitEvent } from './eventBus'
 
 /**
  * §2 Activity Attribution and Self-Tagging. Distinct from selfTagStore.ts:
@@ -77,13 +77,7 @@ export function addAttribution(input: {
   writeAll([...readAll(), record])
 
   if (record.subjectEmail && record.subjectEmail.toLowerCase() !== input.taggedBy.toLowerCase()) {
-    const tagger = findAccountByEmail(input.taggedBy)
-    notify({
-      recipientEmail: record.subjectEmail,
-      category: 'community',
-      text: `${tagger?.legalName ?? 'Someone'} credited you as "${input.role}" on an activity.`,
-      deepLink: `/activity/${input.activityId}`,
-    })
+    void emitEvent('credit', record.subjectEmail, { deepLink: `/activity/${input.activityId}`, targetType: 'activity', targetId: input.activityId, vars: { role: input.role } })
   }
   return record
 }
@@ -105,12 +99,7 @@ export function disputeAttribution(id: string, requesterEmail: string): void {
   if (record.subjectEmail?.toLowerCase() !== requesterEmail.toLowerCase()) return
   all[idx] = { ...record, status: 'disputed' }
   writeAll(all)
-  notify({
-    recipientEmail: record.taggedBy,
-    category: 'community',
-    text: `${findAccountByEmail(requesterEmail)?.legalName ?? 'Someone'} disputed the "${record.role}" credit you gave them.`,
-    deepLink: `/activity/${record.activityId}`,
-  })
+  void emitEvent('credit_dispute', record.taggedBy, { deepLink: `/activity/${record.activityId}`, targetType: 'activity', targetId: record.activityId, vars: { role: record.role } })
 }
 
 export function removeAttribution(id: string, requesterEmail: string): void {

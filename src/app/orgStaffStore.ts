@@ -1,4 +1,4 @@
-import { notify } from './notificationStore'
+import { emitEvent } from './eventBus'
 import type { OrgAdminRoleV3 } from './accountTypes'
 
 /**
@@ -64,7 +64,7 @@ export function listStaffFor(orgEmail: string): OrgStaffRecord[] {
 /** Bulk-invites a comma-separated list of emails into one role at once —
  * skips any email already on the roster rather than duplicating it, and
  * stops at MAX_STAFF total. */
-export function inviteStaffBulk(orgEmail: string, orgName: string, emailsInput: string, role: OrgAdminRoleV3): OrgStaffRecord[] {
+export function inviteStaffBulk(orgEmail: string, _orgName: string, emailsInput: string, role: OrgAdminRoleV3): OrgStaffRecord[] {
   const all = readAll()
   const existing = listStaffFor(orgEmail)
   const existingEmails = new Set(existing.map((r) => r.staffEmail.toLowerCase()))
@@ -88,7 +88,7 @@ export function inviteStaffBulk(orgEmail: string, orgName: string, emailsInput: 
 
   writeAll([...all, ...created])
   for (const record of created) {
-    notify({ recipientEmail: record.staffEmail, category: 'community', text: `${orgName} invited you to join their PROFILE workspace as ${role.replace(/_/g, ' ')}.`, deepLink: '/notifications' })
+    void emitEvent('staff_invite', record.staffEmail, { deepLink: '/notifications', vars: { role: role.replace(/_/g, ' ') } })
   }
   return created
 }

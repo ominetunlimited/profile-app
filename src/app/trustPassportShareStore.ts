@@ -1,4 +1,4 @@
-import { notify } from './notificationStore'
+import { emitEvent } from './eventBus'
 
 /**
  * §12.6 Trust Passport — design handoff gap audit: PROFILE Profile &
@@ -75,7 +75,7 @@ export function revokePassportShare(id: string, ownerEmail: string): void {
   if (idx === -1) return
   all[idx] = { ...all[idx], revoked: true }
   writeAll(all)
-  notify({ recipientEmail: ownerEmail, category: 'security', text: `You revoked ${all[idx].sharedWith}'s access to your Trust Passport.`, deepLink: '/trust-passport' })
+  void emitEvent('passport_revoked', ownerEmail, { deepLink: '/trust-passport', vars: { detail: all[idx].sharedWith } })
 }
 
 /** A stable, deterministic, non-fabricated display id — this build has no

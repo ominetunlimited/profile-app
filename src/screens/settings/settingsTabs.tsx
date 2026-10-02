@@ -12,6 +12,7 @@ import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
 import { getSuspiciousLoginAlertsEnabled, listLoginHistory, setSuspiciousLoginAlertsEnabled } from '@/app/sessionStore'
 import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
 import { getMentorshipPreference, setMentorshipPreference } from '@/app/mentorshipStore'
+import { getPreference, PREFERENCE_CATEGORIES, setPreference, useNotificationsCacheVersion, type NotificationCategory } from '@/app/notificationStore'
 import { Field, PasswordInput, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
 import { ImageUploadField } from '@/shared/ui/ImageUploadField'
@@ -218,30 +219,64 @@ export function PrivacyTab() {
   )
 }
 
-/** §25 SETTINGS_TABS.Notifications */
+/** §25 SETTINGS_TABS.Notifications — real, persisted per-category preferences
+ * (public.notification_preferences) that the server-side engine consults before
+ * delivering anything. Security/system notices are locked on. Email and push
+ * are stored as preferences but no delivery provider is configured on this
+ * deployment, so those switches say so instead of pretending to send. */
 export function NotificationsTab() {
-  const categories = [
-    'Tags',
-    'Verifications',
-    'Reactions',
-    'Connections',
-    'Job matches',
-    'Reviews',
-    'System',
-    'Messages',
-    'Trust updates',
-    'Recruiters',
-    'Job applications',
-    'Institution requests',
-    'Marketplace',
-    'Communities',
-    'Security alerts',
-  ]
+  const { account } = useAccount()
+  const owner = ownerKey(account)
+  useNotificationsCacheVersion()
+  const [error, setError] = useState<string | null>(null)
+
+  async function update(category: NotificationCategory, patch: { inApp?: boolean; email?: boolean; push?: boolean }) {
+    setError(null)
+    try {
+      await setPreference(owner, category, patch)
+    } catch {
+      setError('Could not save that preference. Please try again.')
+    }
+  }
+
   return (
     <Section title="Notifications">
-      {categories.map((c) => (
-        <Toggle key={c} label={c} defaultChecked={c !== 'Marketplace'} />
-      ))}
+      <p className="mb-3 text-xs text-text-1">
+        Choose what reaches you inside PROFILE. Email and push delivery aren't configured on this deployment yet, so only in-app notifications are
+        sent today — your email/push choices are saved for when they are.
+      </p>
+      {error && (
+        <p role="alert" className="mb-2 text-xs text-danger">
+          {error}
+        </p>
+      )}
+      <div className="divide-y divide-border">
+        {PREFERENCE_CATEGORIES.map((c) => {
+          const pref = getPreference(c.category)
+          return (
+            <div key={c.category} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+              <div className="min-w-[200px] flex-1">
+                <div className="text-sm font-medium text-text-0">{c.label}</div>
+                <div className="text-xs text-text-2">{c.description}</div>
+              </div>
+              <div className="flex items-center gap-4 text-xs">
+                <label className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={pref.inApp} disabled={c.locked} onChange={(e) => void update(c.category, { inApp: e.target.checked })} aria-label={`${c.label}: in-app`} />
+                  In-app
+                </label>
+                <label className="flex items-center gap-1.5 text-text-2" title="Email delivery isn't configured on this deployment">
+                  <input type="checkbox" checked={pref.email} onChange={(e) => void update(c.category, { email: e.target.checked })} aria-label={`${c.label}: email`} />
+                  Email
+                </label>
+                <label className="flex items-center gap-1.5 text-text-2" title="Push delivery isn't configured on this deployment">
+                  <input type="checkbox" checked={pref.push} onChange={(e) => void update(c.category, { push: e.target.checked })} aria-label={`${c.label}: push`} />
+                  Push
+                </label>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </Section>
   )
 }

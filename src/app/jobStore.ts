@@ -8,9 +8,7 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
-import { notify } from './notificationStore'
 import { findAccountByEmail } from './demoAccountStore'
-import { listFollowersOf } from './followStore'
 
 /** §18.2 JOB_LISTING_FIELDS — the real listing an org actually posts. */
 export interface JobListing {
@@ -156,13 +154,7 @@ export async function postJob(input: Omit<JobListing, 'id' | 'createdAt' | 'stat
   upsertCacheRow(row)
   const record = rowToListing(row)
 
-  // §14/§4.2's org-notification pattern extended outward: real followers of
-  // this org (followStore.ts) are told a real job went live, not a blast to
-  // every account on the browser.
-  const orgName = orgDisplayName(input.orgEmail)
-  for (const followerEmail of listFollowersOf(input.orgEmail)) {
-    notify({ recipientEmail: followerEmail, category: 'opportunities', text: `${orgName} posted a new opportunity: ${input.title}.`, deepLink: `/job/${record.id}` })
-  }
+  // Followers are told by the trg_notify_job database trigger (migration 0009).
   return record
 }
 

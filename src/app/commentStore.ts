@@ -8,9 +8,7 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
-import { findAccountByEmail } from './demoAccountStore'
-import { notify } from './notificationStore'
-import { targetAuthor, targetLink, targetTitle, type SocialTargetType } from './socialStore'
+import type { SocialTargetType } from './socialStore'
 
 export interface CommentRecord {
   id: string
@@ -125,22 +123,7 @@ export async function postCommentOn(type: SocialTargetType, id: string, authorEm
   const row = data as CommentRow
   upsertCacheRow(row)
 
-  const commenter = findAccountByEmail(authorEmail)?.legalName ?? 'Someone'
-  const title = targetTitle(type, id)
-  const link = targetLink(type, id)
-  const notified = new Set<string>([authorEmail.toLowerCase()])
-  // Reply → tell the person being replied to; always tell the content's author.
-  if (parentId) {
-    const parent = cache.find((c) => c.id === parentId)
-    if (parent && !notified.has(parent.author_email.toLowerCase())) {
-      notified.add(parent.author_email.toLowerCase())
-      void notify({ recipientEmail: parent.author_email, category: 'community', text: `${commenter} replied to your comment on "${title}".`, deepLink: link })
-    }
-  }
-  const author = targetAuthor(type, id)
-  if (author && !notified.has(author.toLowerCase())) {
-    void notify({ recipientEmail: author, category: 'community', text: `${commenter} commented on "${title}".`, deepLink: link })
-  }
+  // Reply / mention / comment notifications come from the trg_notify_comment trigger.
   return rowToRecord(row)
 }
 
