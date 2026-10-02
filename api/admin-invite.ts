@@ -22,8 +22,18 @@ interface ApiResponse {
  */
 const PLATFORM_ROLES = ['super_administrator', 'admin', 'moderator', 'customer_support', 'compliance_officer', 'verification_officer']
 
-const url = process.env.SUPABASE_URL
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+// NOT process.env.SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY — this Vercel
+// project has a native Supabase integration that auto-provisioned its own,
+// separate, unused Supabase project under those exact names. Using them
+// here validated every JWT against the wrong project's auth server and
+// silently rejected every real admin session with "Invalid or expired
+// session" (found via a temporary diagnostic endpoint, since
+// `vercel env ls` can't read Sensitive values back to confirm this any
+// other way). VITE_SUPABASE_URL is the real, already-public project URL;
+// SUPABASE_ADMIN_SERVICE_ROLE_KEY is a dedicated var this file alone uses,
+// set to that same real project's service_role key.
+const url = process.env.VITE_SUPABASE_URL
+const serviceRoleKey = process.env.SUPABASE_ADMIN_SERVICE_ROLE_KEY
 const adminClient = url && serviceRoleKey ? createClient(url, serviceRoleKey) : null
 
 function generateTemporaryPassword(): string {
