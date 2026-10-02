@@ -1,27 +1,17 @@
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Account } from '@/app/accountTypes'
 import type { ActivityRecord } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { getMyReaction, getReactionCounts, onReactionsChange, setMyReaction, REACTIONS, type ReactionType } from '@/app/reactionStore'
-import { listComments, onCommentsChange, postComment } from '@/app/commentStore'
 import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
 import { getSignedMediaUrl, listMediaFor, useMediaAssetsCacheVersion, type FileCategory, type MediaAsset } from '@/app/mediaAssetStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
 import { UserAvatar } from './UserAvatar'
 import { AttributionSection } from './AttributionSection'
-import { IconCheck, IconHammer, IconLightbulb, IconLink, IconMedal, IconMegaphone, IconMessage, IconSeedling, IconThumbsUp, IconTool, type IconProps } from './icons'
-
-export const REACTION_ICON: Record<ReactionType, ComponentType<IconProps>> = {
-  appreciate: IconThumbsUp,
-  respect: IconMedal,
-  insightful: IconLightbulb,
-  support: IconSeedling,
-  skilled: IconHammer,
-  well_explained: IconMegaphone,
-}
+import { ActionBar } from './ActionBar'
+import { IconCheck, IconTool } from './icons'
 
 /**
  * §11.1 ActivityCard, unified — previously HomePage.tsx had its own
@@ -40,72 +30,9 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
   const authorTrust = computeTrustScore(author ?? null)
   const isSelf = activity.ownerEmail.toLowerCase() === viewerEmail.toLowerCase()
 
-  const [myReaction, setMyReactionState] = useState(() => getMyReaction(activity.id, viewerEmail))
-  const [counts, setCounts] = useState(() => getReactionCounts(activity.id))
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const [commentsOpen, setCommentsOpen] = useState(false)
-  const [comments, setComments] = useState(() => listComments(activity.id))
-  const [commentDraft, setCommentDraft] = useState('')
-  const [copied, setCopied] = useState(false)
   const [tagRole, setTagRole] = useState('')
   const [showTagInput, setShowTagInput] = useState(false)
   const [tagRequest, setTagRequest] = useState(() => (viewerEmail && !isSelf ? myRequestFor(viewerEmail, activity.id) : undefined))
-  const reactionWrapRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!pickerOpen) return
-    function onOutside(e: MouseEvent) {
-      if (reactionWrapRef.current && !reactionWrapRef.current.contains(e.target as Node)) setPickerOpen(false)
-    }
-    function onEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') setPickerOpen(false)
-    }
-    document.addEventListener('mousedown', onOutside)
-    document.addEventListener('keydown', onEscape)
-    return () => {
-      document.removeEventListener('mousedown', onOutside)
-      document.removeEventListener('keydown', onEscape)
-    }
-  }, [pickerOpen])
-
-  // Pipeline repair Phase A: reactions/comments caches load asynchronously
-  // (and can receive a Realtime push) — without this, a card rendered
-  // before the initial fetch resolves would freeze at 0 reactions/comments.
-  useEffect(() => {
-    return onReactionsChange(() => {
-      setMyReactionState(getMyReaction(activity.id, viewerEmail))
-      setCounts(getReactionCounts(activity.id))
-    })
-  }, [activity.id, viewerEmail])
-
-  useEffect(() => {
-    return onCommentsChange(() => setComments(listComments(activity.id)))
-  }, [activity.id])
-
-  const activeReaction = REACTIONS.find((r) => r.type === myReaction)
-  const totalReactions = Object.values(counts).reduce((sum, n) => sum + n, 0)
-
-  async function react(type: ReactionType) {
-    setPickerOpen(false)
-    await setMyReaction(activity.id, viewerEmail, type)
-    setMyReactionState(getMyReaction(activity.id, viewerEmail))
-    setCounts(getReactionCounts(activity.id))
-  }
-
-  async function submitComment() {
-    if (!commentDraft.trim() || !viewerEmail) return
-    const text = commentDraft.trim()
-    setCommentDraft('')
-    await postComment(activity.id, viewerEmail, text)
-    setComments(listComments(activity.id))
-  }
-
-  function share() {
-    const url = `${window.location.origin}/activity/${activity.id}`
-    navigator.clipboard?.writeText(url).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
 
   const AuthorLink = ({ children, className }: { children: ReactNode; className?: string }) =>
     authorUsername ? (
@@ -225,102 +152,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
         </div>
       )}
 
-      <div className="relative flex items-center gap-1 border-t border-border pt-2 text-text-2">
-        <div className="relative" ref={reactionWrapRef}>
-          <button
-            onClick={() => setPickerOpen((v) => !v)}
-            aria-label={activeReaction ? `Your reaction: ${activeReaction.label}. Change reaction` : 'React'}
-            aria-expanded={pickerOpen}
-            className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken ${activeReaction ? 'text-accent' : 'text-text-2'}`}
-          >
-            {(() => {
-              const ActiveIcon = REACTION_ICON[activeReaction?.type ?? 'appreciate']
-              return <ActiveIcon size={16} />
-            })()}
-            <span className="hidden sm:inline">{activeReaction?.label ?? 'React'}</span>
-            {totalReactions > 0 && <span className="text-[11px]">{totalReactions}</span>}
-          </button>
-          {pickerOpen && (
-            <div
-              role="menu"
-              aria-label="Choose a reaction"
-              className="absolute bottom-full left-0 z-10 mb-1 flex gap-0.5 rounded-full border border-border-strong bg-surface p-1 shadow-lg"
-            >
-              {REACTIONS.map((r) => {
-                const ReactionIcon = REACTION_ICON[r.type]
-                return (
-                  <button
-                    key={r.type}
-                    role="menuitemradio"
-                    aria-checked={myReaction === r.type}
-                    aria-label={r.label}
-                    title={r.label}
-                    onClick={() => react(r.type)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full hover:scale-110 hover:bg-surface-sunken ${myReaction === r.type ? 'bg-surface-sunken text-accent' : ''}`}
-                  >
-                    <ReactionIcon size={18} />
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        <button
-          onClick={() => setCommentsOpen((v) => !v)}
-          aria-expanded={commentsOpen}
-          aria-label="Comment"
-          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken"
-        >
-          <IconMessage size={16} />
-          <span className="hidden sm:inline">Comment</span>
-          {comments.length > 0 && <span className="text-[11px]">{comments.length}</span>}
-        </button>
-
-        <button onClick={share} aria-label="Copy link to this activity" className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-surface-sunken">
-          <IconLink size={16} />
-          <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
-        </button>
-      </div>
-
-      {commentsOpen && (
-        <div className="mt-2 border-t border-border pt-2">
-          {comments.length > 0 && (
-            <div className="mb-2 flex flex-col gap-2">
-              {comments.map((c) => {
-                const commentAuthor = findAccountByEmail(c.authorEmail)
-                const commentAuthorName = commentAuthor?.legalName ?? 'Someone'
-                return (
-                  <div key={c.id} className="flex items-start gap-2 rounded-lg bg-surface-sunken px-3 py-2 text-sm">
-                    <UserAvatar ownerEmail={c.authorEmail} name={commentAuthorName} size={24} className="mt-0.5" />
-                    <span>
-                      <span className="font-semibold text-text-0">{commentAuthorName}</span>{' '}
-                      <span className="text-text-1">{c.text}</span>
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-          {viewerAccount && (
-            <div className="flex gap-2">
-              <input
-                value={commentDraft}
-                onChange={(e) => setCommentDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') submitComment()
-                }}
-                placeholder="Write a comment…"
-                aria-label="Write a comment"
-                className="min-h-[36px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
-              />
-              <button onClick={submitComment} className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white">
-                Post
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      <ActionBar target={{ type: 'activity', id: activity.id }} viewerEmail={viewerEmail} viewerAccount={viewerAccount} authorEmail={activity.ownerEmail} />
     </article>
   )
 }

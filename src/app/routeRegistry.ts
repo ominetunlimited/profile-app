@@ -367,6 +367,14 @@ export const routeRegistry: RouteEntry[] = [
     note: 'Review profile → cover letter (reuses coverLetterEngine.ts, the same logic CoverLetterPage.tsx uses) → review → submit.',
   },
   {
+    path: '/saved',
+    screen: 'Saved',
+    phase: 2,
+    masterPromptRef: 'Social actions patch (bookmark)',
+    gate: { kind: 'authenticated' },
+    note: 'Real bookmarks (public.bookmarks, RLS: own rows only) across activities, jobs, adverts and reposts.',
+  },
+  {
     path: '/applications',
     screen: 'Applications',
     phase: 2,

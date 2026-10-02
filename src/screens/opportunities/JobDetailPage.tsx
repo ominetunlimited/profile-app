@@ -7,6 +7,7 @@ import { myApplicationFor, useApplicationsCacheVersion } from '@/app/application
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
+import { ActionBar } from '@/shared/ui/ActionBar'
 
 /**
  * §6 Job Adverts and Apply With PROFILE — a real detail page, not just the
@@ -58,6 +59,10 @@ export function JobDetailPage() {
             </div>
           </div>
           <TrustScoreRing trust={orgTrust} size={40} />
+        </div>
+
+        <div className="mb-4 rounded-xl border border-border bg-surface px-4 pb-3">
+          <ActionBar target={{ type: 'job', id: job.id }} viewerEmail={ownerKey(account)} viewerAccount={account} authorEmail={job.orgEmail} />
         </div>
 
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">{job.title}</h1>

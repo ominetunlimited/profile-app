@@ -5,11 +5,13 @@ import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
+import { RepostCard } from '@/shared/ui/RepostCard'
+import { listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, listFeedFor, onActivitiesChange, ownerKey, postActivity } from '@/app/activityStore'
-import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
 import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
@@ -42,9 +44,17 @@ export function HomePage() {
   const [myActivityCount, setMyActivityCount] = useState(() => listActivities(owner).length)
   const [feed, setFeed] = useState(() => listFeedFor(owner))
   const [composerOpen, setComposerOpen] = useState(false)
+  useCampaignsCacheVersion()
+  useSocialCacheVersion()
   // §7.1 Feed Ad Position — real active campaigns for this placement only,
   // never fabricated to look populated.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('home_feed')
+  // Activities + reposts (own, and from people/orgs this account connects with
+  // or follows) in one chronological stream.
+  const feedItems = [
+    ...feed.map((activity) => ({ kind: 'activity' as const, activity, at: activity.createdAt })),
+    ...listFeedRepostsFor(owner).map((repost) => ({ kind: 'repost' as const, repost, at: repost.createdAt })),
+  ].sort((a, b) => b.at.localeCompare(a.at))
 
   const name = account?.accountType === 'individual' ? account.legalName.split(' ')[0] : account?.accountType === 'organisation' ? account.legalName : ''
 
@@ -149,7 +159,7 @@ export function HomePage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {feed.length === 0 ? (
+            {feedItems.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
                 <p className="mb-3">
                   {myActivityCount === 0
@@ -162,13 +172,17 @@ export function HomePage() {
                 </div>
               </div>
             ) : (
-              feed.map((a, i) => (
-                <div key={a.id} className="flex flex-col gap-4">
-                  <ActivityCard activity={a} viewerAccount={account} viewerEmail={owner} />
+              feedItems.map((item, i) => (
+                <div key={item.kind === 'repost' ? `r-${item.repost.id}` : item.activity.id} className="flex flex-col gap-4">
+                  {item.kind === 'repost' ? (
+                    <RepostCard repost={item.repost} viewerAccount={account} viewerEmail={owner} />
+                  ) : (
+                    <ActivityCard activity={item.activity} viewerAccount={account} viewerEmail={owner} />
+                  )}
                   {/* Every 4th item, never the very first — a real, labelled,
                       inline feed item, never an overlay (§7's hard rule). */}
                   {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
-                    <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} />
+                    <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} viewerAccount={account} viewerEmail={owner} />
                   )}
                 </div>
               ))

@@ -4,7 +4,7 @@ import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
 import { listAllAccounts, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { TOOL_CATALOGUE, listAllProviders } from '@/app/toolCatalogue'
-import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { IconEnter, IconFactory, IconPerson, IconTool } from './icons'
 
 interface PersonResult {
@@ -165,10 +165,11 @@ export function CommandPalette() {
   // render it on; this modal is the closest real search surface this build
   // has, so a sponsored result appears here, clearly labelled, only while
   // an actual query is typed (never mixed into the empty-state route list).
+  const adsVersion = useCampaignsCacheVersion()
   const sponsoredResult = useMemo(() => {
     if (!query.trim()) return null
     return listActiveCampaignsForPlacement('search')[0] ?? null
-  }, [query])
+  }, [query, adsVersion])
 
   if (!open) return null
 

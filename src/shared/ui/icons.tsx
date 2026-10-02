@@ -319,3 +319,40 @@ export function IconGear({ size = 20, className }: IconProps) {
     </svg>
   )
 }
+
+export function IconRepost({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4 12V9a3 3 0 0 1 3-3h11" />
+      <path d="M15 3l3 3-3 3" />
+      <path d="M20 12v3a3 3 0 0 1-3 3H6" />
+      <path d="M9 21l-3-3 3-3" />
+    </svg>
+  )
+}
+
+export function IconBookmark({ size = 20, className, filled }: IconProps & { filled?: boolean }) {
+  return (
+    <svg {...base(size)} className={className} fill={filled ? 'currentColor' : 'none'}>
+      <path d="M6 4h12v16l-6-4-6 4V4Z" />
+    </svg>
+  )
+}
+
+export function IconShare({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M12 15V4" />
+      <path d="M8 8l4-4 4 4" />
+      <path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+    </svg>
+  )
+}
+
+export function IconStar({ size = 20, className, filled }: IconProps & { filled?: boolean }) {
+  return (
+    <svg {...base(size)} className={className} fill={filled ? 'currentColor' : 'none'}>
+      <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.9L12 3.5Z" />
+    </svg>
+  )
+}

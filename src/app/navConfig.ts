@@ -102,6 +102,7 @@ export function hamburgerGroups({ account, staffRole }: NavContext): NavGroup[] 
     { key: 'analytics', label: 'Analytics', to: '/analytics', show: isIndividual },
     { key: 'career-growth', label: 'Career Growth', to: '/career-growth', show: isIndividual },
     { key: 'applications', label: 'Applications', to: '/applications', show: isIndividual },
+    { key: 'saved', label: 'Saved', to: '/saved', show: !!account },
     { key: 'learning', label: 'Learning Center', to: '/learn', show: !!account },
     { key: 'communities', label: 'Communities', to: '/communities', show: !!account },
     { key: 'collaboration', label: 'Collaboration Hub', to: '/collaboration', show: !!account },

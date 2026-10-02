@@ -43,6 +43,7 @@ import { CredentialSchemaBuilder } from '@/screens/orgworkspace/CredentialSchema
 import { InstitutionAnalytics } from '@/screens/orgworkspace/InstitutionAnalytics'
 import { GovernmentAnalytics } from '@/screens/orgworkspace/GovernmentAnalytics'
 import { EnterpriseIntegrations } from '@/screens/orgworkspace/EnterpriseIntegrations'
+import { SavedPage } from '@/screens/more/SavedPage'
 import { RecruiterWorkflow } from '@/screens/orgworkspace/RecruiterWorkflow'
 import { MissionControl } from '@/screens/internal/MissionControl'
 import { AIDecisionLog } from '@/screens/internal/AIDecisionLog'
@@ -235,6 +236,12 @@ function elementFor(route: RouteEntry): ReactElement {
         <RequireIndividual>
           <ApplyWithProfilePage />
         </RequireIndividual>
+      )
+    case '/saved':
+      return (
+        <RequireAuthenticated>
+          <SavedPage />
+        </RequireAuthenticated>
       )
     case '/applications':
       return (

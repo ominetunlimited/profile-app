@@ -20,6 +20,9 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
+import { findAccountByEmail } from './demoAccountStore'
+import { notify } from './notificationStore'
+import { targetAuthor, targetLink, targetTitle } from './socialStore'
 
 export type ReactionType = 'appreciate' | 'respect' | 'insightful' | 'support' | 'skilled' | 'well_explained'
 
@@ -37,15 +40,17 @@ export const REACTIONS: { type: ReactionType; icon: 'thumbsUp' | 'medal' | 'ligh
 
 const EMPTY_COUNTS: Record<ReactionType, number> = { appreciate: 0, respect: 0, insightful: 0, support: 0, skilled: 0, well_explained: 0 }
 
+export type ReactionTargetType = 'activity' | 'comment' | 'job' | 'advert' | 'repost'
+
 interface ReactionRow {
-  target_type: 'activity' | 'comment'
+  target_type: ReactionTargetType
   target_id: string
   user_email: string
   reaction_type: ReactionType
 }
 
 interface CountRow {
-  target_type: 'activity' | 'comment'
+  target_type: ReactionTargetType
   target_id: string
   reaction_type: ReactionType
   total: number
@@ -94,28 +99,38 @@ export function useReactionsCacheVersion(): number {
   return useSyncExternalStore(onReactionsChange, () => cacheVersion, () => cacheVersion)
 }
 
-export function getMyReaction(activityId: string, userEmail: string): ReactionType | null {
-  const row = myReactions.find((r) => r.target_type === 'activity' && r.target_id === activityId && r.user_email.toLowerCase() === userEmail.toLowerCase())
+export function getMyReaction(targetType: ReactionTargetType, targetId: string, userEmail: string): ReactionType | null {
+  const row = myReactions.find((r) => r.target_type === targetType && r.target_id === targetId && r.user_email.toLowerCase() === userEmail.toLowerCase())
   return row?.reaction_type ?? null
 }
 
-export function getReactionCounts(activityId: string): Record<ReactionType, number> {
+export function getReactionCounts(targetType: ReactionTargetType, targetId: string): Record<ReactionType, number> {
   const result = { ...EMPTY_COUNTS }
   for (const row of counts) {
-    if (row.target_type === 'activity' && row.target_id === activityId) result[row.reaction_type] = row.total
+    if (row.target_type === targetType && row.target_id === targetId) result[row.reaction_type] = row.total
   }
   return result
 }
 
 /** Toggling the currently-active reaction off is how "changeable" (§11.2) includes removal. */
-export async function setMyReaction(activityId: string, userEmail: string, reaction: ReactionType): Promise<void> {
-  const current = getMyReaction(activityId, userEmail)
+export async function setMyReaction(targetType: ReactionTargetType, targetId: string, userEmail: string, reaction: ReactionType): Promise<void> {
+  const current = getMyReaction(targetType, targetId, userEmail)
   if (current === reaction) {
-    await supabase.from('reactions').delete().eq('target_type', 'activity').eq('target_id', activityId).eq('user_email', userEmail)
+    await supabase.from('reactions').delete().eq('target_type', targetType).eq('target_id', targetId).eq('user_email', userEmail)
   } else {
-    await supabase
+    const { error } = await supabase
       .from('reactions')
-      .upsert({ target_type: 'activity', target_id: activityId, user_email: userEmail, reaction_type: reaction }, { onConflict: 'target_type,target_id,user_email' })
+      .upsert({ target_type: targetType, target_id: targetId, user_email: userEmail, reaction_type: reaction }, { onConflict: 'target_type,target_id,user_email' })
+    if (error) throw error
+    // First reaction (not a change of mind) → tell the content's author.
+    if (!current && targetType !== 'comment') {
+      const author = targetAuthor(targetType, targetId)
+      if (author && author.toLowerCase() !== userEmail.toLowerCase()) {
+        const who = findAccountByEmail(userEmail)?.legalName ?? 'Someone'
+        const label = REACTIONS.find((r) => r.type === reaction)?.label ?? 'reacted to'
+        void notify({ recipientEmail: author, category: 'community', text: `${who} marked "${targetTitle(targetType, targetId)}" as ${label}.`, deepLink: targetLink(targetType, targetId) })
+      }
+    }
   }
   await loadCaches()
 }

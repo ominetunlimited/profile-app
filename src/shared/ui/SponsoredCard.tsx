@@ -1,4 +1,6 @@
 import type { AdCampaign } from '@/app/adStore'
+import type { Account } from '@/app/accountTypes'
+import { ActionBar } from './ActionBar'
 
 /**
  * §7 Ad Placement Rules — a real feed item, inline in the list flow (never
@@ -6,7 +8,7 @@ import type { AdCampaign } from '@/app/adStore'
  * navigation), always carrying a real "Sponsored" label per §7's hard
  * "never trick the user into thinking an advert is organic activity" rule.
  */
-export function SponsoredCard({ campaign }: { campaign: AdCampaign }) {
+export function SponsoredCard({ campaign, viewerAccount = null, viewerEmail = '' }: { campaign: AdCampaign; viewerAccount?: Account | null; viewerEmail?: string }) {
   return (
     <article className="rounded-xl border border-dashed border-accent/50 bg-surface p-4">
       <div className="mb-2 flex items-center gap-2 text-xs text-text-2">
@@ -15,9 +17,10 @@ export function SponsoredCard({ campaign }: { campaign: AdCampaign }) {
       </div>
       <h2 className="mb-1 font-semibold text-text-0">{campaign.title}</h2>
       <p className="mb-3 text-sm text-text-1">{campaign.description}</p>
-      <a href={campaign.destination} className="text-xs font-semibold text-accent">
+      <a href={campaign.destination} className="mb-2 inline-block text-xs font-semibold text-accent">
         Learn more →
       </a>
+      {viewerEmail && <ActionBar target={{ type: 'advert', id: campaign.id }} viewerEmail={viewerEmail} viewerAccount={viewerAccount} authorEmail={campaign.advertiserEmail} />}
     </article>
   )
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
-import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
+import { JobCard } from '@/shared/ui/JobCard'
+import { useAccount } from '@/app/AccountContext'
+import { ownerKey } from '@/app/activityStore'
 
 /** §18.2 JOB_LISTING_FIELDS.types */
 const WORK_TYPES = ['remote', 'hybrid', 'on_site'] as const
@@ -34,6 +36,8 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
   const [query, setQuery] = useState('')
   const [cluster, setCluster] = useState<CareerCluster | null>(pinnedCluster ?? null)
   useJobsCacheVersion()
+  useCampaignsCacheVersion()
+  const { account } = useAccount()
 
   // V9 Unified Ecosystem Patch §10 — an advertiser paying for the
   // 'opportunities' placement was previously charged for a surface that
@@ -94,7 +98,7 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
 
         {sponsoredCampaigns[0] && (
           <div className="mb-2">
-            <SponsoredCard campaign={sponsoredCampaigns[0]} />
+            <SponsoredCard campaign={sponsoredCampaigns[0]} viewerAccount={account} viewerEmail={ownerKey(account)} />
           </div>
         )}
 
@@ -105,16 +109,7 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
         ) : (
           <div className="flex flex-col gap-2">
             {jobs.map((j) => (
-              <Link key={j.id} to={`/job/${j.id}`} className="ds-card-hover rounded-xl border border-border bg-surface p-4 hover:border-accent">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-text-0">{j.title}</span>
-                  <span className="rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-2">{j.workType.replace('_', ' ')}</span>
-                </div>
-                <p className="mb-1.5 text-xs text-text-2">
-                  {orgDisplayName(j.orgEmail)} · {j.location}
-                </p>
-                <p className="line-clamp-2 text-sm text-text-1">{j.description}</p>
-              </Link>
+              <JobCard key={j.id} job={j} viewerAccount={account} viewerEmail={ownerKey(account)} />
             ))}
           </div>
         )}

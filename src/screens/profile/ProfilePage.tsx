@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
+import { RepostCard } from '@/shared/ui/RepostCard'
+import { listRepostsBy, useSocialCacheVersion } from '@/app/socialStore'
 import { useAccount } from '@/app/AccountContext'
 import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account } from '@/app/accountTypes'
 import { listActivities, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
@@ -99,6 +101,10 @@ export function ProfilePage() {
     return true
   })
   const activityCount = activities.length
+  useSocialCacheVersion()
+  // Reposts live on the reposter's profile too (RLS already hides private /
+  // connections-only reposts from people who shouldn't see them).
+  const profileReposts = listRepostsBy(targetKey).filter((r) => isSelf || r.visibility !== 'private')
   const trustScore = computeTrustScore(viewed)
   const media = getProfileMedia(viewerEmail)
 
@@ -251,6 +257,16 @@ export function ProfilePage() {
                   </div>
                 )}
               </div>
+              {profileReposts.length > 0 && (
+                <div>
+                  <h2 className="mb-2 font-semibold text-text-0">Reposts</h2>
+                  <div className="flex flex-col gap-2">
+                    {profileReposts.slice(0, 5).map((r) => (
+                      <RepostCard key={r.id} repost={r} viewerAccount={account} viewerEmail={ownerKey(account)} />
+                    ))}
+                  </div>
+                </div>
+              )}
               {isSelf && <SelfTagRequestsPanel ownerEmail={ownerKey(viewed)} />}
               <EmptySection title="Verification status" body="No verification requests submitted yet — start from the Trust Centre." action={isSelf ? { label: 'Go to Trust Centre', to: '/trust-passport' } : undefined} />
             </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { deleteMessage, getAttachments, getReactions, retrySend, discardFailed, toggleMessageReaction, type ChatMessage } from '@/app/messageStore'
 import { REACTIONS } from '@/app/reactionStore'
-import { REACTION_ICON } from '@/shared/ui/ActivityCard'
+import { REACTION_ICON } from '@/shared/ui/reactionIcons'
 import { RichText } from './richText'
 import { AttachmentView } from './AttachmentView'
 

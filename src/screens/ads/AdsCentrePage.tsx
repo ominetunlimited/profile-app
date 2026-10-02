@@ -12,6 +12,7 @@ import {
   endCampaign,
   estimateCost,
   listCampaignsFor,
+  onCampaignsChange,
   PRICE_PER_PLACEMENT_PER_DAY_USD,
   type AdCampaign,
   type AdPlacement,
@@ -74,6 +75,8 @@ export function AdsCentrePage() {
   const owner = ownerKey(account)
   const [campaigns, setCampaigns] = useState<AdCampaign[]>(() => listCampaignsFor(owner))
   const [creating, setCreating] = useState(false)
+  // Campaigns now live in Supabase (cache loads async + Realtime pushes) — re-render on change.
+  useEffect(() => onCampaignsChange(() => setCampaigns(listCampaignsFor(owner))), [owner])
 
   function refresh() {
     setCampaigns(listCampaignsFor(owner))
@@ -128,8 +131,8 @@ export function AdsCentrePage() {
                 </p>
                 {c.status === 'draft' && (
                   <button
-                    onClick={() => {
-                      activateCampaign(c.id)
+                    onClick={async () => {
+                      await activateCampaign(c.id)
                       refresh()
                     }}
                     className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
@@ -138,7 +141,7 @@ export function AdsCentrePage() {
                   </button>
                 )}
                 {c.status === 'active' && (
-                  <button onClick={() => { endCampaign(c.id); refresh() }} className="text-xs font-semibold text-danger">
+                  <button onClick={async () => { await endCampaign(c.id); refresh() }} className="text-xs font-semibold text-danger">
                     End campaign
                   </button>
                 )}
@@ -224,8 +227,8 @@ function CreateCampaignForm({ advertiserEmail, advertiserCountry, onClose, onCre
       <div className="flex gap-2">
         <Button
           disabled={!title.trim() || !description.trim() || placements.length === 0}
-          onClick={() => {
-            createCampaign({ advertiserEmail, adType, title, description, destination: destination || '/opportunities', placements, durationDays })
+          onClick={async () => {
+            await createCampaign({ advertiserEmail, adType, title, description, destination: destination || '/opportunities', placements, durationDays })
             onCreated()
           }}
         >

@@ -9,7 +9,7 @@ import { getCommerceSettings } from '@/app/commerceStore'
 import { createStoreItem, listAllPublishedItems, listItemsForOwner, publishStoreItem, unpublishStoreItem, type StoreItem, type StoreItemType } from '@/app/storeItemStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { resizeImage } from '@/app/mediaStore'
-import { listActiveCampaignsForPlacement } from '@/app/adStore'
+import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 
 const CATEGORIES = ['Design', 'Development', 'Writing', 'Marketing', 'Education', 'Consulting', 'Photography', 'Video', 'Other']
@@ -29,6 +29,7 @@ export function StoreHub() {
   const [myItems, setMyItems] = useState<StoreItem[]>(() => listItemsForOwner(owner))
   const [creating, setCreating] = useState(false)
   const marketItems = listAllPublishedItems()
+  useCampaignsCacheVersion()
   // V9 Unified Ecosystem Patch §10 — 'market_hub' was a selectable, billed
   // ad placement in AdsCentrePage that never actually rendered anywhere.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('market_hub')
@@ -47,7 +48,7 @@ export function StoreHub() {
           <p className="mb-4 text-sm text-text-1">Browse digital products and services listed by sellers on PROFILE.</p>
           {sponsoredCampaigns[0] && (
             <div className="mb-3">
-              <SponsoredCard campaign={sponsoredCampaigns[0]} />
+              <SponsoredCard campaign={sponsoredCampaigns[0]} viewerAccount={account} viewerEmail={owner} />
             </div>
           )}
           {marketItems.length === 0 ? (
