@@ -41,7 +41,17 @@ export interface VerificationRequest {
   moduleName: string
   identifierValue: string
   issuerName: string
+  /** @deprecated superseded by documentMediaAssetId — kept only so any
+   * already-submitted demo request (base64 data URL) still renders. Real
+   * submissions always leave this null and populate documentMediaAssetId
+   * instead (mediaAssetStore.ts's real Storage-backed pipeline, which
+   * actually supports PDFs — this field's old resizeImage-only path
+   * couldn't). */
   documentDataUrl: string | null
+  /** The real KYC-document capture: a public.media_assets row (target_type
+   * 'credential') holding the actual file in Supabase Storage. */
+  documentMediaAssetId: string | null
+  documentCopyrightId: string | null
   status: VerificationStatus
   submittedAt: string
 }
@@ -78,8 +88,17 @@ export function submitVerificationRequest(input: {
   identifierValue: string
   issuerName: string
   documentDataUrl: string | null
+  documentMediaAssetId?: string | null
+  documentCopyrightId?: string | null
 }): VerificationRequest {
-  const request: VerificationRequest = { id: `vr-${Date.now()}`, ...input, status: 'submitted', submittedAt: new Date().toISOString() }
+  const request: VerificationRequest = {
+    id: `vr-${Date.now()}`,
+    documentMediaAssetId: null,
+    documentCopyrightId: null,
+    ...input,
+    status: 'submitted',
+    submittedAt: new Date().toISOString(),
+  }
   const all = readAll()
   all.push(request)
   writeAll(all)

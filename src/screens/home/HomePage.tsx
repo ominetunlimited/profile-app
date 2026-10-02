@@ -13,6 +13,7 @@ import { listActiveCampaignsForPlacement } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
 import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
+import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
 
 
 /** §11.4 POST_COMPOSER_TYPES, verbatim. */
@@ -299,6 +300,17 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
   const [collaboratorsInput, setCollaboratorsInput] = useState('')
   const [cvPortfolioInclude, setCvPortfolioInclude] = useState(true)
   const [visibility, setVisibility] = useState<'public' | 'connections_only' | 'private'>('public')
+  // Collapsed by default ("Add files" disclosure) — a composer with every
+  // field always visible, including a full file-upload UI, is exactly the
+  // "cluttered" layout this was asked to avoid.
+  const [filesOpen, setFilesOpen] = useState(false)
+  const [stagedFiles, setStagedFiles] = useState<File[]>([])
+  const [uploadState, setUploadState] = useState<{ posting: boolean; current: number; total: number; error: string | null }>({
+    posting: false,
+    current: 0,
+    total: 0,
+    error: null,
+  })
 
   return (
     <div className="flex flex-col gap-3">
@@ -350,36 +362,102 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
           </SelectInput>
         </span>
       </div>
+
+      <div className="rounded-lg border border-border-strong">
+        <button
+          type="button"
+          onClick={() => setFilesOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium text-text-0"
+        >
+          <span>
+            {filesOpen ? '▾' : '▸'} Add files {stagedFiles.length > 0 && <span className="text-text-2">({stagedFiles.length})</span>}
+          </span>
+          <span className="text-xs text-text-2">Images, video, audio, PDF, Word, PowerPoint, Excel, EPUB</span>
+        </button>
+        {filesOpen && (
+          <div className="border-t border-border-strong p-3">
+            <input
+              type="file"
+              multiple
+              accept={ACCEPTED_FILE_TYPES}
+              onChange={(e) => {
+                const picked = Array.from(e.target.files ?? [])
+                const tooBig = picked.filter((f) => f.size > MAX_FILE_SIZE_BYTES)
+                if (tooBig.length > 0) {
+                  setUploadState((s) => ({ ...s, error: `${tooBig.map((f) => f.name).join(', ')} exceeds the 50MB limit for this build.` }))
+                }
+                setStagedFiles((prev) => [...prev, ...picked.filter((f) => f.size <= MAX_FILE_SIZE_BYTES)])
+                e.target.value = ''
+              }}
+              className="mb-2.5 block w-full text-sm text-text-1"
+            />
+            {stagedFiles.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                {stagedFiles.map((f, i) => (
+                  <div key={`${f.name}-${i}`} className="flex items-center justify-between rounded-md bg-surface-sunken px-2.5 py-1.5 text-xs">
+                    <span className="min-w-0 flex-1 truncate text-text-0">
+                      {f.name} <span className="text-text-2">· {categorizeFile(f)} · {(f.size / (1024 * 1024)).toFixed(1)}MB</span>
+                    </span>
+                    <button type="button" onClick={() => setStagedFiles((prev) => prev.filter((_, idx) => idx !== i))} className="ml-2 flex-none font-semibold text-danger">
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="mt-2 text-[11px] text-text-2">
+              Each upload gets a real Copyright ID. Direct upload, no resumable transfer or virus scan yet — a 50MB
+              practical limit for this build, not the full spec's 20GB.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {uploadState.error && (
+        <p role="alert" aria-live="polite" className="text-xs text-danger">
+          {uploadState.error}
+        </p>
+      )}
+
       <div className="flex gap-2">
         <Button
-          disabled={!title.trim() || !description.trim()}
+          disabled={!title.trim() || !description.trim() || uploadState.posting}
           onClick={async () => {
-            await postActivity({
-              ownerEmail: owner,
-              type,
-              title,
-              description,
-              role: role || undefined,
-              location: location || undefined,
-              skills: skillsInput
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean),
-              tools: toolsInput
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean),
-              collaborators: collaboratorsInput
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean),
-              cvPortfolioInclude,
-              visibility,
-            })
-            onPosted()
+            setUploadState({ posting: true, current: 0, total: stagedFiles.length, error: null })
+            try {
+              const record = await postActivity({
+                ownerEmail: owner,
+                type,
+                title,
+                description,
+                role: role || undefined,
+                location: location || undefined,
+                skills: skillsInput
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                tools: toolsInput
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                collaborators: collaboratorsInput
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                cvPortfolioInclude,
+                visibility,
+              })
+              for (let i = 0; i < stagedFiles.length; i++) {
+                setUploadState((s) => ({ ...s, current: i + 1 }))
+                await uploadMediaAsset({ file: stagedFiles[i], ownerEmail: owner, targetType: 'activity', targetId: record.id })
+              }
+              onPosted()
+            } catch (err) {
+              setUploadState({ posting: false, current: 0, total: 0, error: err instanceof Error ? err.message : 'Could not post this activity. Please try again.' })
+            }
           }}
         >
-          Post
+          {uploadState.posting && uploadState.total > 0 ? `Uploading ${uploadState.current}/${uploadState.total}…` : 'Post'}
         </Button>
         <Button variant="secondary" onClick={onClose}>
           Cancel

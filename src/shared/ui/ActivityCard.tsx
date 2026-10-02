@@ -7,6 +7,7 @@ import { computeTrustScore } from '@/app/trustScore'
 import { getMyReaction, getReactionCounts, onReactionsChange, setMyReaction, REACTIONS, type ReactionType } from '@/app/reactionStore'
 import { listComments, onCommentsChange, postComment } from '@/app/commentStore'
 import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
+import { getSignedMediaUrl, listMediaFor, useMediaAssetsCacheVersion, type FileCategory, type MediaAsset } from '@/app/mediaAssetStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
 import { UserAvatar } from './UserAvatar'
@@ -143,6 +144,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
       </Link>
       {activity.description && <p className="mb-2 text-sm text-text-1">{activity.description}</p>}
       {activity.role && <p className="mb-2 text-xs text-text-2">Role: {activity.role}{activity.location ? ` · ${activity.location}` : ''}</p>}
+      <MediaGallery activityId={activity.id} />
       {activity.skills.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
           {activity.skills.map((s) => (
@@ -320,5 +322,75 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
         </div>
       )}
     </article>
+  )
+}
+
+const FILE_CATEGORY_LABEL: Record<FileCategory, string> = {
+  image: 'Image',
+  video: 'Video',
+  audio: 'Audio',
+  pdf: 'PDF',
+  docx: 'Word',
+  pptx: 'PowerPoint',
+  xlsx: 'Excel',
+  epub: 'EPUB',
+  other: 'File',
+}
+
+/** Real attachments from the Composer's "Add files" (mediaAssetStore.ts) —
+ * inline for image/video/audio, a signed-URL view/download link for
+ * documents. Reacts to the live media cache so an upload that's still in
+ * flight when this card first renders appears without a reload. */
+function MediaGallery({ activityId }: { activityId: string }) {
+  useMediaAssetsCacheVersion()
+  const assets = listMediaFor('activity', activityId)
+  if (assets.length === 0) return null
+  return (
+    <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {assets.map((asset) => (
+        <MediaThumb key={asset.id} asset={asset} />
+      ))}
+    </div>
+  )
+}
+
+function MediaThumb({ asset }: { asset: MediaAsset }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getSignedMediaUrl(asset).then((signed) => {
+      if (!cancelled) setUrl(signed)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [asset.id])
+
+  const loadingBox = <div className="h-28 animate-pulse rounded-lg bg-surface-sunken" title={asset.fileName} />
+
+  if (asset.fileCategory === 'image') {
+    return url ? <img src={url} alt={asset.fileName} className="h-28 w-full rounded-lg border border-border object-cover" /> : loadingBox
+  }
+  if (asset.fileCategory === 'video') {
+    return url ? <video src={url} controls className="h-28 w-full rounded-lg border border-border bg-black object-cover" /> : loadingBox
+  }
+  if (asset.fileCategory === 'audio') {
+    return (
+      <div className="col-span-2 rounded-lg border border-border bg-surface-sunken p-2 sm:col-span-3">
+        <audio src={url ?? undefined} controls className="w-full" />
+      </div>
+    )
+  }
+  return (
+    <a
+      href={url ?? '#'}
+      target="_blank"
+      rel="noreferrer"
+      title={asset.copyrightId}
+      className="flex h-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-sunken p-2 text-center text-xs hover:border-accent"
+    >
+      <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-2">{FILE_CATEGORY_LABEL[asset.fileCategory]}</span>
+      <span className="line-clamp-2 break-all text-text-0">{asset.fileName}</span>
+    </a>
   )
 }

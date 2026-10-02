@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/Button'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { resizeImage } from '@/app/mediaStore'
+import { uploadMediaAsset, type MediaAsset } from '@/app/mediaAssetStore'
 import {
   computeTrustScore,
   TRUST_DIMENSION_LABELS,
@@ -306,7 +306,9 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
   const [moduleKey, setModuleKey] = useState<VerificationModuleKey>('identity')
   const [identifierValue, setIdentifierValue] = useState('')
   const [issuerName, setIssuerName] = useState('')
-  const [documentDataUrl, setDocumentDataUrl] = useState<string | null>(null)
+  const [document, setDocument] = useState<MediaAsset | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const selectedModule = VERIFICATION_MODULES.find((m) => m.key === moduleKey)!
 
   return (
@@ -326,26 +328,52 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
       <Field label="Issuing institution / authority" hint="Resolves against real registered organisations on PROFILE where one matches — free text otherwise">
         <EntityAutocomplete value={issuerName} onChange={setIssuerName} fieldContext="tag_institution" multi={false} placeholder="e.g. University of Lagos" />
       </Field>
-      <Field label="Supporting document (optional)">
+      <Field label="Supporting document (optional)" error={uploadError ?? undefined}>
         <input
           type="file"
           accept="image/*,application/pdf"
-          onChange={(e) => {
+          disabled={uploading}
+          onChange={async (e) => {
             const file = e.target.files?.[0]
+            e.target.value = ''
             if (!file) return
-            if (file.type === 'application/pdf') return // resizeImage only handles images; PDF storage needs a real file backend
-            resizeImage(file, 1600).then(setDocumentDataUrl)
+            setUploadError(null)
+            setUploading(true)
+            try {
+              // Real KYC document capture — Supabase Storage, not the old
+              // resizeImage-only path that silently dropped every PDF.
+              // target_id is a fresh id; it doesn't need to match the
+              // verification request's own id, only to be a stable key this
+              // asset is filed under.
+              const asset = await uploadMediaAsset({ file, ownerEmail: owner, targetType: 'credential', targetId: crypto.randomUUID() })
+              setDocument(asset)
+            } catch (err) {
+              setUploadError(err instanceof Error ? err.message : 'Could not upload this document.')
+            } finally {
+              setUploading(false)
+            }
           }}
           className="text-xs text-text-1"
         />
+        {uploading && <p className="mt-1 text-xs text-text-2">Uploading…</p>}
+        {document && !uploading && <p className="mt-1 text-xs text-success">Uploaded — {document.copyrightId}</p>}
       </Field>
       <Button
-        disabled={!identifierValue.trim() || !issuerName.trim()}
+        disabled={!identifierValue.trim() || !issuerName.trim() || uploading}
         onClick={() => {
-          submitVerificationRequest({ ownerEmail: owner, moduleKey, moduleName: selectedModule.name, identifierValue, issuerName, documentDataUrl })
+          submitVerificationRequest({
+            ownerEmail: owner,
+            moduleKey,
+            moduleName: selectedModule.name,
+            identifierValue,
+            issuerName,
+            documentDataUrl: null,
+            documentMediaAssetId: document?.id ?? null,
+            documentCopyrightId: document?.copyrightId ?? null,
+          })
           setIdentifierValue('')
           setIssuerName('')
-          setDocumentDataUrl(null)
+          setDocument(null)
           onSubmitted()
         }}
       >
@@ -366,6 +394,7 @@ function VerificationRequestCard({ request }: { request: VerificationRequest }) 
       </div>
       <p className="mb-3 text-xs text-text-1">
         {request.identifierValue} · {request.issuerName}
+        {request.documentCopyrightId && <span className="ml-1.5 text-text-2">· 📎 {request.documentCopyrightId}</span>}
       </p>
       {isRejected ? (
         <p className="text-xs text-danger">Rejected — appeal available.</p>
