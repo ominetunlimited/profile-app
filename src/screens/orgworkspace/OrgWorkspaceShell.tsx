@@ -170,13 +170,16 @@ export function HubAccessDenied({ requiredHub }: { requiredHub: 'institutional_h
 
 /**
  * §34.2a sector gating — a finer-grained denial than HubAccessDenied for a
- * tool that's real for only part of institutional_hub (e.g. Credential
- * Schema Builder / Institution Analytics are University/Polytechnic/
- * College/School-specific per SECTOR_MODULE_VISIBILITY, not every
- * institutional_hub org type). Shown only once hub+verified already passed
- * — this is the next condition down, not a replacement for HubAccessDenied.
+ * tool that's real for only part of a shared hub (e.g. Credential Schema
+ * Builder / Institution Analytics are University/Polytechnic/College/
+ * School-specific within institutional_hub; Recruiter Hub is company-sector
+ * only within business_hub; Licence confirmations is regulatory_body-only
+ * within regulatory_console). Shown only once hub(+verified, where that
+ * applies) already passed — this is the next condition down, not a
+ * replacement for HubAccessDenied. `scopeDescription` names exactly which
+ * sector(s) the tool IS real for, since that differs per caller.
  */
-export function SectorAccessDenied({ toolName }: { toolName: string }) {
+export function SectorAccessDenied({ toolName, scopeDescription }: { toolName: string; scopeDescription: string }) {
   const { account } = useAccount()
   if (!account || account.accountType !== 'organisation') return null
   return (
@@ -184,8 +187,8 @@ export function SectorAccessDenied({ toolName }: { toolName: string }) {
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="mb-3 text-lg font-semibold text-text-0">{toolName} isn't available for {account.orgType} accounts</h1>
         <p className="text-sm text-text-1">
-          This tool is scoped to universities, polytechnics, colleges, and schools (§34.2a) — a {account.orgType.toLowerCase()} account's
-          institutional_hub access covers other tools, not this one.
+          This tool is scoped to {scopeDescription} (§34.2a) — a {account.orgType.toLowerCase()} account's hub access covers other
+          tools, not this one.
         </p>
       </div>
     </AppShell>

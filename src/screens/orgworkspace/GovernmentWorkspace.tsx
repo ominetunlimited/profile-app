@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
-import { canAccessGovernmentConsole, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
+import { canAccessGovernmentConsole, sectorForOrgType, orgRoleCan, type OrgAdminRoleV3 } from '@/app/accountTypes'
 import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
@@ -46,7 +46,15 @@ function statusDisplay(status: VerificationRequest['status']): { label: string; 
  * matching the gold banner's own "authorised licence category" wording. */
 export function GovernmentWorkspace() {
   const { account } = useAccount()
-  const [tab, setTab] = useState<(typeof TABS)[number]>('licences')
+  // §34.2a — "Licence confirmations"/"Compliance exports" only ever operate
+  // on moduleKey 'professional_licence', which is regulatory_body sector's
+  // module (Regulatory Authority/Licensing Board/Professional Council), not
+  // government_agency's (Government Ministry/Agency — whose own modules,
+  // country_adapter_tools/iotr/regulatory_licensing_workflows, have no
+  // screen built yet in this release). A government_agency account defaults
+  // to 'staff', the first tab real for every regulatory_console member.
+  const isLicenceSector = !!account && account.accountType === 'organisation' && sectorForOrgType(account.orgType) === 'regulatory_body'
+  const [tab, setTab] = useState<(typeof TABS)[number]>(isLicenceSector ? 'licences' : 'staff')
   const owner = account ? ownerKey(account) : ''
   const canAppointRoles = account ? orgRoleCan(account, 'appointRoles') : false
 
@@ -86,9 +94,13 @@ export function GovernmentWorkspace() {
   }
 
   const navItems: OrgNavItem[] = [
-    { key: 'licences', label: TAB_LABEL.licences, active: tab === 'licences', onSelect: () => setTab('licences') },
-    { key: 'analytics', label: 'Analytics', active: false, to: '/government/me/analytics' },
-    { key: 'compliance', label: TAB_LABEL.compliance, active: tab === 'compliance', onSelect: () => setTab('compliance') },
+    ...(isLicenceSector
+      ? [
+          { key: 'licences', label: TAB_LABEL.licences, active: tab === 'licences', onSelect: () => setTab('licences') },
+          { key: 'analytics', label: 'Analytics', active: false, to: '/government/me/analytics' },
+          { key: 'compliance', label: TAB_LABEL.compliance, active: tab === 'compliance', onSelect: () => setTab('compliance') },
+        ]
+      : []),
     { key: 'staff', label: TAB_LABEL.staff, active: tab === 'staff', onSelect: () => setTab('staff') },
     { key: 'audit', label: TAB_LABEL.audit, active: tab === 'audit', onSelect: () => setTab('audit') },
     { key: 'settings', label: TAB_LABEL.settings, active: tab === 'settings', onSelect: () => setTab('settings') },
@@ -96,13 +108,25 @@ export function GovernmentWorkspace() {
 
   return (
     <OrgWorkspaceShell title={TAB_LABEL[tab]} navItems={navItems}>
-      <div className="mb-6 flex gap-2 rounded-lg border border-gold bg-gold-soft p-3 text-sm text-text-0">
-        <span className="flex-none font-semibold text-gold">ⓘ</span>
-        <p>
-          Regulatory scope only. This workspace never accesses individual accounts directly — every action here
-          operates on records already submitted for confirmation within your authorised licence category.
-        </p>
-      </div>
+      {isLicenceSector ? (
+        <div className="mb-6 flex gap-2 rounded-lg border border-gold bg-gold-soft p-3 text-sm text-text-0">
+          <span className="flex-none font-semibold text-gold">ⓘ</span>
+          <p>
+            Regulatory scope only. This workspace never accesses individual accounts directly — every action here
+            operates on records already submitted for confirmation within your authorised licence category.
+          </p>
+        </div>
+      ) : (
+        <div className="mb-6 flex gap-2 rounded-lg border border-border-strong bg-surface-sunken p-3 text-sm text-text-1">
+          <span className="flex-none font-semibold text-text-2">ⓘ</span>
+          <p>
+            Licence confirmations, Compliance exports, and Analytics are scoped to regulatory authorities, licensing
+            boards, and professional councils (§34.2a). {account.legalName}'s own sector modules — country adapter
+            tools, IOTR, and regulatory licensing workflows — aren't built yet in this release. Staff, audit, and
+            settings below are available now.
+          </p>
+        </div>
+      )}
 
       {tab === 'licences' &&
         (requests.length === 0 ? (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
-import { orgRoleCan } from '@/app/accountTypes'
+import { orgRoleCan, canAccessRecruiterHub } from '@/app/accountTypes'
 import { ownerKey } from '@/app/activityStore'
 import { postJob, listJobsByOrg, closeJob, onJobsChange, FREE_TIER_MAX_HIRES, type JobListing } from '@/app/jobStore'
 import { listApplicationsForJob, updateApplicationStatus, scheduleInterview, hiredCountForJob, onApplicationsChange, type Application, type ApplicationStatus } from '@/app/applicationStore'
@@ -9,7 +9,7 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
-import { OrgSubPageShell } from './OrgWorkspaceShell'
+import { OrgSubPageShell, SectorAccessDenied } from './OrgWorkspaceShell'
 
 /** §18.3/§39 Recruiter Workflow — candidate pipeline, interview scheduling. */
 const KANBAN_PIPELINE: ApplicationStatus[] = ['submitted', 'under_review', 'shortlisted', 'interview', 'offer']
@@ -78,6 +78,15 @@ export function RecruiterWorkflow() {
       unsub2()
     }
   }, [owner])
+
+  // §34.2a — recruiter_hub (job posting/hiring pipeline) is `company` sector's
+  // module within business_hub, not `hospital`'s. The route-level guard only
+  // checks hub==='business_hub', so without this a Hospital account could
+  // reach this screen the same way a Research Institute could previously
+  // reach University-only tools.
+  if (!account || !canAccessRecruiterHub(account)) {
+    return <SectorAccessDenied toolName="Recruiter Hub" scopeDescription="companies, startups, recruitment agencies, and consulting firms" />
+  }
 
   const orgLabel = account?.accountType === 'organisation' ? account.legalName : 'Organisation'
 

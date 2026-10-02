@@ -1,5 +1,5 @@
 import type { Account } from './accountTypes'
-import { canAccessInstitutionHubTools, hubForOrgType, isCvEligible, isPortfolioEligible, orgRoleCan } from './accountTypes'
+import { canAccessInstitutionHubTools, canAccessRecruiterHub, hubForOrgType, isCvEligible, isPortfolioEligible, orgRoleCan } from './accountTypes'
 import type { StaffRole } from './AccountContext'
 
 /**
@@ -91,7 +91,6 @@ interface NavGroup {
 export function hamburgerGroups({ account, staffRole }: NavContext): NavGroup[] {
   const isIndividual = account?.accountType === 'individual'
   const isOrg = account?.accountType === 'organisation'
-  const hub = isOrg ? hubForOrgType(account.orgType) : null
   const canAdminOrg = isOrg && orgRoleCan(account, 'appointRoles')
 
   const core: NavItem[] = [
@@ -106,7 +105,7 @@ export function hamburgerGroups({ account, staffRole }: NavContext): NavGroup[] 
     { key: 'learning', label: 'Learning Center', to: '/learn', show: !!account },
     { key: 'communities', label: 'Communities', to: '/communities', show: !!account },
     { key: 'collaboration', label: 'Collaboration Hub', to: '/collaboration', show: !!account },
-    { key: 'recruiter-hub', label: 'Recruiter Hub', to: '/org/me/recruiter', show: hub === 'business_hub' },
+    { key: 'recruiter-hub', label: 'Recruiter Hub', to: '/org/me/recruiter', show: isOrg && canAccessRecruiterHub(account) },
     { key: 'institution-hub', label: 'Institution Hub', to: '/institution/me', show: !!account && isOrg && canAccessInstitutionHubTools(account) },
     { key: 'org-dashboard', label: 'Organisation Dashboard', to: isOrg ? orgHome(account) : '#', show: isOrg },
     { key: 'admin-centre', label: 'Admin Centre', to: canAdminOrg ? '/settings?tab=organisation' : '/mission-control', show: canAdminOrg || !!staffRole },

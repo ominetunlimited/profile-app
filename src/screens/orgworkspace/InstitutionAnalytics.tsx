@@ -14,7 +14,7 @@ export function InstitutionAnalytics() {
   // §34.2a — institution_excellence_dashboard is a university_or_school
   // module, not every institutional_hub org type's.
   if (!canAccessUniversityTools(account)) {
-    return <SectorAccessDenied toolName="Institution Analytics" />
+    return <SectorAccessDenied toolName="Institution Analytics" scopeDescription="universities, polytechnics, colleges, and schools" />
   }
 
   const schemas = listSchemas(account.officialEmail)

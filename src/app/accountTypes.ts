@@ -318,6 +318,33 @@ export function canAccessGovernmentConsole(account: Account): account is Organis
 }
 
 /**
+ * §34.2a sector gate within business_hub — `recruiter_hub` is `company`
+ * sector's module (Company/Startup/Recruitment Agency/Consulting Firm), not
+ * `hospital`'s (whose own modules are employment_verification/
+ * professional_licence_verification). RecruiterWorkflow had no sector check
+ * at all before this — only the route's own `hub==='business_hub'` guard —
+ * so a Hospital account could reach the job-posting/hiring pipeline meant
+ * for company-sector orgs.
+ */
+export function canAccessRecruiterHub(account: Account): account is OrganisationAccount {
+  return account.accountType === 'organisation' && hubForOrgType(account.orgType) === 'business_hub' && sectorForOrgType(account.orgType) === 'company'
+}
+
+/**
+ * §34.2a sector gate within regulatory_console — `professional_licence_verification`
+ * is `regulatory_body` sector's module (Regulatory Authority/Licensing
+ * Board/Professional Council), not `government_agency`'s (whose own modules
+ * are country_adapter_tools/iotr/regulatory_licensing_workflows — none of
+ * which have a built screen yet in this release). GovernmentWorkspace's
+ * "Licence confirmations" tab and GovernmentAnalytics both only ever operate
+ * on moduleKey 'professional_licence', so both are real only for
+ * regulatory_body, not every regulatory_console member.
+ */
+export function canAccessLicenceConfirmationTools(account: Account): account is OrganisationAccount {
+  return canAccessGovernmentConsole(account) && sectorForOrgType(account.orgType) === 'regulatory_body'
+}
+
+/**
  * §49.4/§49.5 hard rule — CV rendering must be structurally absent for
  * organisations. This is one-directional: individuals get a CV; organisations
  * never do, structurally, not just visually hidden.

@@ -1,13 +1,19 @@
 import { useAccount } from '@/app/AccountContext'
-import { canAccessGovernmentConsole } from '@/app/accountTypes'
-import { OrgSubPageShell, HubAccessDenied } from './OrgWorkspaceShell'
+import { canAccessGovernmentConsole, canAccessLicenceConfirmationTools } from '@/app/accountTypes'
+import { OrgSubPageShell, HubAccessDenied, SectorAccessDenied } from './OrgWorkspaceShell'
 
 /** §23/§16 Government Analytics — licence confirmation trends. Honest
- * zero-state, same principle as Institution Analytics. */
+ * zero-state, same principle as Institution Analytics. §34.2a: this is
+ * regulatory_body sector's view (it only ever tracks moduleKey
+ * 'professional_licence' trends), not government_agency's — see the
+ * identical split in GovernmentWorkspace.tsx. */
 export function GovernmentAnalytics() {
   const { account } = useAccount()
   if (!account || !canAccessGovernmentConsole(account)) {
     return <HubAccessDenied requiredHub="regulatory_console" />
+  }
+  if (!canAccessLicenceConfirmationTools(account)) {
+    return <SectorAccessDenied toolName="Government Analytics" scopeDescription="regulatory authorities, licensing boards, and professional councils" />
   }
 
   return (

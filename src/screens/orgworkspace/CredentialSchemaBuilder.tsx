@@ -42,7 +42,7 @@ export function CredentialSchemaBuilder() {
   // institutional_hub org type (e.g. a Research Institute or Certification
   // Authority shares the hub but not this specific tool).
   if (!canAccessUniversityTools(account)) {
-    return <SectorAccessDenied toolName="Credential Schema Builder" />
+    return <SectorAccessDenied toolName="Credential Schema Builder" scopeDescription="universities, polytechnics, colleges, and schools" />
   }
 
   const canEdit = orgRoleCan(account, 'editOrgProfile')
