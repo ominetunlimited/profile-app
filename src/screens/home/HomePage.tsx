@@ -6,6 +6,7 @@ import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { RepostCard } from '@/shared/ui/RepostCard'
+import { RecommendationsPanel } from '@/shared/ui/RecommendationsPanel'
 import { listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
@@ -158,6 +159,7 @@ export function HomePage() {
             <HomeMetric label="Profile views by verifiers" value={0} note="Recruiters and institutions only. Not a vanity count." link={{ to: '/notifications', label: 'Who viewed' }} />
           </div>
 
+          <RecommendationsPanel limit={3} className="mb-4 lg:hidden" />
           <div className="flex flex-col gap-4">
             {feedItems.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
@@ -197,6 +199,7 @@ export function HomePage() {
             that the sidebar becomes a horizontal set below the fold rather
             than disappearing. */}
         <aside className="hidden w-[280px] flex-none flex-col gap-3.5 lg:flex">
+          <RecommendationsPanel limit={5} />
           <div className="flex items-center gap-3.5 rounded-xl border border-border bg-surface p-4">
             <TrustScoreRing trust={trust} size={64} />
             <div className="min-w-0 flex-1">

@@ -3,22 +3,9 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { completeCourse, listEnrollments, startCourse } from '@/app/learningStore'
+import { ACADEMY_TOPICS, completeCourse, listEnrollments, startCourse } from '@/app/learningStore'
 import { getCvDetails, saveCvDetails } from '@/app/cvDetailsStore'
 
-/** §50.9.7 PROFILE_ACADEMY_TOPICS, verbatim. */
-const ACADEMY_TOPICS = [
-  'Building a professional profile',
-  'Creating an effective portfolio',
-  'CV and cover letter guidance',
-  'Interview preparation',
-  'Career planning',
-  'Business profile optimisation',
-  'Research presentation',
-  'Trade and artisan branding',
-  'Personal branding',
-  'Networking best practices',
-]
 
 const TABS = ['recommended', 'in-progress', 'completed'] as const
 

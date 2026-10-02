@@ -40,6 +40,20 @@ function writeAll(all: Record<string, CourseEnrollment[]>) {
   }
 }
 
+/** §50.9.7 PROFILE_ACADEMY_TOPICS, verbatim. */
+export const ACADEMY_TOPICS = [
+  'Building a professional profile',
+  'Creating an effective portfolio',
+  'CV and cover letter guidance',
+  'Interview preparation',
+  'Career planning',
+  'Business profile optimisation',
+  'Research presentation',
+  'Trade and artisan branding',
+  'Personal branding',
+  'Networking best practices',
+]
+
 export function listEnrollments(ownerEmail: string): CourseEnrollment[] {
   return readAll()[ownerEmail] ?? []
 }

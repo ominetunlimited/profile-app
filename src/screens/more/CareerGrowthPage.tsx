@@ -3,6 +3,7 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, ownerKey } from '@/app/activityStore'
 import { getCvDetails } from '@/app/cvDetailsStore'
+import { RecommendationsPanel } from '@/shared/ui/RecommendationsPanel'
 
 /**
  * §10.4 Hamburger Menu's "Career Growth" — a real synthesis view over
@@ -35,6 +36,8 @@ export function CareerGrowthPage() {
       <div className="mx-auto max-w-[760px] px-4 py-8 sm:px-6">
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Career Growth</h1>
         <p className="mb-6 text-sm text-text-1">One view across CV, Learning, and Opportunities — pulling from your real records, not a separate profile.</p>
+
+        <RecommendationsPanel limit={8} title="Recommended for your career" className="mb-8" />
 
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Next steps</h2>
