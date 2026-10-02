@@ -37,7 +37,7 @@ export const REACTIONS: { type: ReactionType; icon: 'thumbsUp' | 'medal' | 'ligh
 
 const EMPTY_COUNTS: Record<ReactionType, number> = { appreciate: 0, respect: 0, insightful: 0, support: 0, skilled: 0, well_explained: 0 }
 
-export type ReactionTargetType = 'activity' | 'comment' | 'job' | 'advert' | 'repost'
+export type ReactionTargetType = 'activity' | 'comment' | 'job' | 'advert' | 'repost' | 'community_post'
 
 interface ReactionRow {
   target_type: ReactionTargetType

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { COMMUNITY_SEEDS, isMember, memberCount, toggleMembership } from '@/app/communitiesStore'
 import { conversationIdFor, setChatUser, startConversationWith } from '@/app/messageStore'
 import { ChatThread } from './ChatThread'
 import { ConversationList } from './ConversationList'
+import { CommunityDirectory } from '@/screens/communities/CommunityDirectory'
 
 const TABS = ['messages', 'communities'] as const
 
@@ -17,7 +17,6 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
   const [tab, setTab] = useState<(typeof TABS)[number]>(initialTab ?? 'messages')
   const { account } = useAccount()
   const owner = ownerKey(account)
-  const [, forceRender] = useState(0)
   const [params] = useSearchParams()
   const withEmail = params.get('with')
   const [openConversationId, setOpenConversationId] = useState<string | null>(null)
@@ -61,37 +60,7 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
             <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
           ))}
 
-        {tab === 'communities' && (
-          <div className="flex flex-col gap-3">
-            {COMMUNITY_SEEDS.map((c) => {
-              const member = isMember(owner, c.id)
-              return (
-                <div key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/communities/${c.id}`} className="font-semibold text-text-0 hover:text-accent">
-                      {c.name}
-                    </Link>
-                    <div className="text-xs text-text-2">
-                      {c.type} · {memberCount(c.id)} member{memberCount(c.id) === 1 ? '' : 's'}
-                    </div>
-                    <p className="mt-1 text-sm text-text-1">{c.description}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      toggleMembership(owner, c.id)
-                      forceRender((n) => n + 1)
-                    }}
-                    className={`flex-none rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-                      member ? 'border-border-strong text-text-1' : 'border-accent text-accent'
-                    }`}
-                  >
-                    {member ? 'Leave' : 'Join'}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
+        {tab === 'communities' && <CommunityDirectory />}
       </div>
     </AppShell>
   )

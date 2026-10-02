@@ -9,6 +9,7 @@ const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin/users', label: 'Users & Roles', module: 'user_role_management' },
   { to: '/admin/verification', label: 'Verification Queue', module: 'verification_queue' },
   { to: '/admin/content', label: 'Content Moderation', module: 'content_moderation' },
+  { to: '/admin/communities', label: 'Communities', module: 'content_moderation' },
   { to: '/admin/mission-control', label: 'Mission Control', module: 'mission_control' },
 ]
 

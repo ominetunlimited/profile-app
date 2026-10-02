@@ -28,7 +28,7 @@ import { SettingsPage } from '@/screens/settings/SettingsPage'
 import { NotificationCentre } from '@/screens/notifications/NotificationCentre'
 import { OpportunityHub } from '@/screens/opportunities/OpportunityHub'
 import { MessagingCommunities } from '@/screens/messaging/MessagingCommunities'
-import { CommunityDetail } from '@/screens/messaging/CommunityDetail'
+import { CommunityDetail } from '@/screens/communities/CommunityDetail'
 import { DisputeAppeal } from '@/screens/disputes/DisputeAppeal'
 import { LearningPage } from '@/screens/learning/LearningPage'
 import { CoverLetterPage } from '@/screens/career/coverletter/CoverLetterPage'
@@ -55,6 +55,7 @@ import { AdminLoginPage } from '@/screens/admin/AdminLoginPage'
 import { AdminShell, RequirePlatformAdmin } from '@/screens/admin/AdminShell'
 import { AdminDashboard } from '@/screens/admin/AdminDashboard'
 import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
+import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
 import { ActivityDetailPage } from '@/screens/home/ActivityDetailPage'
@@ -380,6 +381,14 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequirePlatformAdmin>
           <OwnerContentConsole />
+        </RequirePlatformAdmin>
+      )
+    case '/admin/communities':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminCommunities />
+          </AdminShell>
         </RequirePlatformAdmin>
       )
     case '/admin/mission-control':

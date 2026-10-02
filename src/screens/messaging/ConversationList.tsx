@@ -18,7 +18,7 @@ export function ConversationList({ ownerEmail, onOpen }: { ownerEmail: string; o
   useChatVersion()
   const [showArchived, setShowArchived] = useState(false)
   const [search, setSearch] = useState('')
-  const all = listConversations().filter((c) => c.lastMessage !== null)
+  const all = listConversations().filter((c) => c.lastMessage !== null && !c.conversationId.startsWith('community:'))
   const archivedCount = all.filter((c) => c.archived).length
   const q = search.trim().toLowerCase()
   const conversations = all.filter((c) => c.archived === showArchived).filter((c) => !q || displayNameFor(c.otherEmail).toLowerCase().includes(q) || (c.lastMessage?.text ?? '').toLowerCase().includes(q))

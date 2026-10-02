@@ -362,7 +362,8 @@ export async function startConversationWith(otherEmail: string): Promise<string>
 }
 
 async function ensureConversation(conversationId: string, senderEmail: string) {
-  if (summaryFor(conversationId)) return
+  // Group chats (community:<id>) are created and populated server-side with the community.
+  if (conversationId.startsWith('community:') || summaryFor(conversationId)) return
   await startConversationWith(otherParticipant(conversationId, senderEmail))
 }
 

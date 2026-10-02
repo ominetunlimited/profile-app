@@ -16,6 +16,7 @@ import {
   toggleBookmark,
   toggleEndorsement,
   useSocialCacheVersion,
+  type ActionTargetType,
   type OriginalType,
   type RepostVisibility,
 } from '@/app/socialStore'
@@ -24,7 +25,7 @@ import { REACTION_ICON } from './reactionIcons'
 import { UserAvatar } from './UserAvatar'
 import { IconBookmark, IconMessage, IconRepost, IconShare, IconStar } from './icons'
 
-type ActionTarget = { type: OriginalType; id: string }
+type ActionTarget = { type: ActionTargetType; id: string }
 
 function useOutsideClose(open: boolean, close: () => void) {
   const ref = useRef<HTMLDivElement>(null)
@@ -101,7 +102,8 @@ export function ActionBar({
   const totalReactions = Object.values(getReactionCounts(type, id)).reduce((a, b) => a + b, 0)
   const engagement = getEngagement(type, id)
   const comments = Math.max(commentCountOn(type, id), engagement.comments)
-  const myRepost = signedIn ? getMyRepost(type, id, viewerEmail) : undefined
+  const canRepost = type !== 'community_post'
+  const myRepost = signedIn && canRepost ? getMyRepost(type, id, viewerEmail) : undefined
   const saved = signedIn && isBookmarked(viewerEmail, type, id)
   const recommended = signedIn && hasEndorsed(viewerEmail, type, id)
   const recommenders = endorsementsFor(type, id)
@@ -155,14 +157,15 @@ export function ActionBar({
           <span className="hidden sm:inline">Comment</span>
         </ActionButton>
 
+        {canRepost && (
         <div className="relative" ref={repostRef}>
           <ActionButton label={myRepost ? 'You reposted this' : 'Repost'} active={!!myRepost} count={engagement.reposts} expanded={repostOpen} onClick={() => signedIn && setRepostOpen((v) => !v)}>
             <IconRepost size={16} />
             <span className="hidden sm:inline">{myRepost ? 'Reposted' : 'Repost'}</span>
           </ActionButton>
-          {repostOpen && (
+          {repostOpen && canRepost && (
             <RepostMenu
-              target={target}
+              target={target as { type: OriginalType; id: string }}
               viewerEmail={viewerEmail}
               isOwn={isOwn}
               existing={myRepost}
@@ -171,6 +174,7 @@ export function ActionBar({
             />
           )}
         </div>
+        )}
 
         <div className="relative" ref={shareRef}>
           <ActionButton label="Share" expanded={shareOpen} onClick={() => setShareOpen((v) => !v)}>
@@ -391,7 +395,7 @@ function RecommendPopover({ onCancel, onConfirm }: { onCancel: () => void; onCon
   )
 }
 
-export function CommentThread({ type, id, viewerEmail, canComment }: { type: OriginalType; id: string; viewerEmail: string; canComment: boolean }) {
+export function CommentThread({ type, id, viewerEmail, canComment }: { type: ActionTargetType; id: string; viewerEmail: string; canComment: boolean }) {
   useCommentsCacheVersion()
   const all = listCommentsOn(type, id)
   const top = all.filter((c) => !c.parentId)

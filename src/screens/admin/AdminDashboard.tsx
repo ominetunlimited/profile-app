@@ -30,6 +30,12 @@ export function AdminDashboard() {
             <p className="text-sm text-text-1">News, blog, and announcement posts.</p>
           </Link>
         )}
+        {platformRoleCan(admin.role, 'content_moderation') && (
+          <Link to="/admin/communities" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Communities</div>
+            <p className="text-sm text-text-1">Oversee communities, suspend, and work the reports queue.</p>
+          </Link>
+        )}
         {platformRoleCan(admin.role, 'mission_control') && (
           <Link to="/admin/mission-control" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
             <div className="mb-1 font-semibold text-text-0">Mission Control</div>

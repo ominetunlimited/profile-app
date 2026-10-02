@@ -2,7 +2,6 @@ import type { IndividualAccount, OrganisationAccount } from '@/app/accountTypes'
 import { emailIsRegistered, ensureSignedInAs, saveDemoAccount, updateDemoAccount, waitForAccountsCacheReady } from '@/app/demoAccountStore'
 import { postActivity, listActivities } from '@/app/activityStore'
 import { saveCvDetails, getCvDetails } from '@/app/cvDetailsStore'
-import { toggleMembership, isMember } from '@/app/communitiesStore'
 import { createDraftTemplate, publishTemplate, listCreatorTemplates } from '@/app/creatorTemplateStore'
 import { setCommerceSettings, getCommerceSettings } from '@/app/commerceStore'
 import { saveOrgPortfolioConfig } from '@/app/organisationPortfolioStore'
@@ -185,10 +184,6 @@ export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
         projects: true, publications: true, volunteer: true, awards: true, affiliations: true, references: true,
       },
     })
-  }
-
-  for (const communityId of ['engineering-guild', 'mentorship-circle']) {
-    if (!isMember(OMINI_EMAIL, communityId)) toggleMembership(OMINI_EMAIL, communityId)
   }
 
   if (listCreatorTemplates(OMINI_EMAIL).length === 0) {

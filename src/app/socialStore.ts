@@ -12,11 +12,14 @@ import { joinRealtime } from './realtimeAuth'
 import { getActivityById } from './activityStore'
 import { getJobById } from './jobStore'
 import { getCampaignById } from './adStore'
+import { getCommunity, postById } from './communityStore'
 import { listConnectedEmails } from './connectionStore'
 import { listFollowedOrgs } from './followStore'
 
-export type SocialTargetType = 'activity' | 'job' | 'advert' | 'repost'
-export type OriginalType = Exclude<SocialTargetType, 'repost'>
+export type SocialTargetType = 'activity' | 'job' | 'advert' | 'repost' | 'community_post'
+export type OriginalType = Exclude<SocialTargetType, 'repost' | 'community_post'>
+/** Everything the shared ActionBar can act on (community posts can't be reposted out of their community). */
+export type ActionTargetType = OriginalType | 'community_post'
 export type RepostVisibility = 'public' | 'connections_only' | 'private'
 
 export interface RepostRecord {
@@ -145,6 +148,7 @@ export function targetAuthor(type: SocialTargetType, id: string): string | null 
   if (type === 'activity') return getActivityById(id)?.ownerEmail ?? null
   if (type === 'job') return getJobById(id)?.orgEmail ?? null
   if (type === 'advert') return getCampaignById(id)?.advertiserEmail ?? null
+  if (type === 'community_post') return postById(id)?.authorEmail ?? null
   const rp = reposts.find((r) => r.id === id)
   return rp?.reposter_email ?? null
 }
@@ -152,12 +156,18 @@ export function targetTitle(type: SocialTargetType, id: string): string {
   if (type === 'activity') return getActivityById(id)?.title ?? 'a post'
   if (type === 'job') return getJobById(id)?.title ?? 'a job'
   if (type === 'advert') return getCampaignById(id)?.title ?? 'an advert'
+  if (type === 'community_post') return postById(id)?.body.slice(0, 50) ?? 'a community post'
   const rp = reposts.find((r) => r.id === id)
   return rp ? targetTitle(rp.original_type, rp.original_id) : 'a post'
 }
 export function targetLink(type: SocialTargetType, id: string): string {
   if (type === 'activity') return `/activity/${id}`
   if (type === 'job') return `/job/${id}`
+  if (type === 'community_post') {
+    const post = postById(id)
+    const c = post ? getCommunity(post.communityId) : undefined
+    return c ? `/communities/${c.slug}?post=${id}` : '/communities'
+  }
   if (type === 'repost') {
     const rp = reposts.find((r) => r.id === id)
     return rp ? targetLink(rp.original_type, rp.original_id) : '/home'
@@ -203,6 +213,8 @@ export async function repostTarget(input: { me: string; type: SocialTargetType; 
     if (!rp) throw new Error('That post is no longer available.')
     type = rp.originalType
     id = rp.originalId
+  } else if (input.type === 'community_post') {
+    throw new Error("Community posts can't be reposted outside their community.")
   } else {
     type = input.type
     id = input.id

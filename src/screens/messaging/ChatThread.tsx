@@ -40,14 +40,15 @@ function dayLabel(iso: string): string {
   return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail: string; conversationId: string; onBack: () => void }) {
+export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle }: { ownerEmail: string; conversationId: string; onBack?: () => void; groupTitle?: string }) {
+  const isGroup = !!groupTitle
   useChatVersion()
-  const otherEmail = otherParticipant(conversationId, ownerEmail)
+  const otherEmail = isGroup ? '' : otherParticipant(conversationId, ownerEmail)
   const { typing, online, emitTyping } = useConversationChannel(conversationId, ownerEmail)
   const messages = listMessages(conversationId)
   const summary = summaryFor(conversationId)
-  const blocked = isBlockedByMe(otherEmail)
-  const otherOnline = online.includes(otherEmail.toLowerCase())
+  const blocked = !isGroup && isBlockedByMe(otherEmail)
+  const otherOnline = isGroup ? online.length > 0 : online.includes(otherEmail.toLowerCase())
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -88,7 +89,8 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
   }, [])
 
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages])
-  const typingNow = typing.includes(otherEmail.toLowerCase())
+  const typingNow = isGroup ? typing.length > 0 : typing.includes(otherEmail.toLowerCase())
+  const typingLabel = isGroup ? `${typing.map((e) => displayNameFor(e)).join(', ')} ${typing.length > 1 ? 'are' : 'is'} typing…` : `${displayNameFor(otherEmail)} is typing…`
 
   async function runSearch(q: string) {
     setQuery(q)
@@ -126,13 +128,15 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
   return (
     <div className="flex h-[70vh] flex-col rounded-xl border border-border bg-surface">
       <div className="flex items-center gap-2 border-b border-border p-3">
-        <button onClick={onBack} className="text-sm font-semibold text-accent" aria-label="Back to conversations">
-          ←
-        </button>
+        {onBack && (
+          <button onClick={onBack} className="text-sm font-semibold text-accent" aria-label="Back to conversations">
+            ←
+          </button>
+        )}
         <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-text-0">{displayNameFor(otherEmail)}</div>
+          <div className="truncate font-semibold text-text-0">{isGroup ? groupTitle : displayNameFor(otherEmail)}</div>
           <div className="h-4 text-[11px] text-text-2" aria-live="polite">
-            {typingNow ? <span className="text-accent">{displayNameFor(otherEmail)} is typing…</span> : otherOnline ? 'Online' : ''}
+            {typingNow ? <span className="text-accent">{typingLabel}</span> : otherOnline ? (isGroup ? `${online.length} online` : 'Online') : ''}
           </div>
         </div>
         {selectMode ? (
@@ -158,15 +162,19 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
                 <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void setMuted(conversationId, !summary?.muted); setMenuOpen(false) }}>
                   {summary?.muted ? 'Unmute notifications' : 'Mute notifications'}
                 </button>
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void setArchived(conversationId, !summary?.archived); setMenuOpen(false); onBack() }}>
+                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void setArchived(conversationId, !summary?.archived); setMenuOpen(false); onBack?.() }}>
                   {summary?.archived ? 'Unarchive' : 'Archive'}
                 </button>
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void (blocked ? unblockUser(otherEmail) : blockUser(otherEmail)); setMenuOpen(false) }}>
-                  {blocked ? 'Unblock' : 'Block'}
-                </button>
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left text-danger hover:bg-surface-sunken" onClick={() => { setReporting({ type: 'user', id: otherEmail }); setMenuOpen(false) }}>
-                  Report user
-                </button>
+                {!isGroup && (
+                  <>
+                    <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void (blocked ? unblockUser(otherEmail) : blockUser(otherEmail)); setMenuOpen(false) }}>
+                      {blocked ? 'Unblock' : 'Block'}
+                    </button>
+                    <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left text-danger hover:bg-surface-sunken" onClick={() => { setReporting({ type: 'user', id: otherEmail }); setMenuOpen(false) }}>
+                      Report user
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -211,7 +219,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
           </div>
         )}
         {messages.length === 0 ? (
-          <p className="text-center text-sm text-text-1">Say hello — this is a real, private thread between you two.</p>
+          <p className="text-center text-sm text-text-1">{isGroup ? 'No messages yet — start the conversation with the group.' : 'Say hello — this is a real, private thread between you two.'}</p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {messages.map((m) => {
@@ -225,7 +233,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
                     message={m}
                     ownerEmail={ownerEmail}
                     quoted={m.replyTo ? byId.get(m.replyTo) : undefined}
-                    otherLastReadAt={summary?.otherLastReadAt ?? null}
+                    otherLastReadAt={isGroup ? null : summary?.otherLastReadAt ?? null}
                     otherOnline={otherOnline}
                     selectMode={selectMode}
                     selected={selected.has(m.id)}
@@ -234,6 +242,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack }: { ownerEmail:
                     onForward={() => setForwarding([m])}
                     onReport={() => setReporting({ type: 'message', id: m.id })}
                     displayName={displayNameFor}
+                    showSender={isGroup}
                   />
                 </div>
               )
