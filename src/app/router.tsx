@@ -56,6 +56,8 @@ import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
 import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { AdminKyc } from '@/screens/admin/AdminKyc'
 import { AdminVerificationRequests } from '@/screens/admin/AdminVerificationRequests'
+import { AdminFeedback } from '@/screens/admin/AdminFeedback'
+import { SharedPassportPage } from '@/screens/public/SharedPassportPage'
 import { AdminDisputes } from '@/screens/admin/AdminDisputes'
 import { AdminMissionControl } from '@/screens/admin/AdminMissionControl'
 import { AdminAiDecisionLog } from '@/screens/admin/AdminAiDecisionLog'
@@ -381,6 +383,16 @@ function elementFor(route: RouteEntry): ReactElement {
           </AdminShell>
         </RequirePlatformAdmin>
       )
+    case '/admin/feedback':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminFeedback />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/passport/:id':
+      return <SharedPassportPage />
     case '/admin/data-requests':
       return (
         <RequirePlatformAdmin>

@@ -1,16 +1,7 @@
-/**
- * §4 Market Hub / Marketplace. Previously Create Store was an honest empty
- * surface with no real item schema at all. This is the real store-item
- * entity §4.3 asks for — scoped to what's honestly buildable without a
- * real file-storage/CDN backend (media is a client-side data URL via
- * mediaStore.ts's own resizeImage, same pattern as avatar/cover uploads,
- * disclosed as such — never "faked" beyond what that already-accepted
- * pattern does elsewhere in this build).
- *
- * §4.7's rule — a Store Item automatically becomes eligible for Portfolio
- * representation — is implemented by portfolioData.ts reading real
- * published items from this store directly, never a copied duplicate.
- */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+
+/** Marketplace items, stored on the server (public.store_items): you manage your own; published items are visible to people who can see your profile. */
 export type StoreItemType = 'digital_product' | 'service'
 
 export interface StoreItem {
@@ -27,66 +18,71 @@ export interface StoreItem {
   createdAt: string
 }
 
-const STORAGE_KEY = 'profile:demo-store-items'
-
-function readAll(): StoreItem[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  owner_email: string
+  title: string
+  short_description: string
+  full_description: string
+  category: string
+  type: StoreItemType
+  price_label: string
+  cover_image_data_url: string | null
+  status: 'draft' | 'published'
+  created_at: string
 }
 
-function writeAll(records: StoreItem[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const table = createServerTable<Row>('store_items', { orderBy: 'created_at' })
+export const useStoreItemsVersion = table.useVersion
+const toItem = (r: Row): StoreItem => ({
+  id: r.id,
+  ownerEmail: r.owner_email,
+  title: r.title,
+  shortDescription: r.short_description,
+  fullDescription: r.full_description,
+  category: r.category,
+  type: r.type,
+  priceLabel: r.price_label,
+  coverImageDataUrl: r.cover_image_data_url ?? undefined,
+  status: r.status,
+  createdAt: r.created_at,
+})
 
 export function createStoreItem(input: Omit<StoreItem, 'id' | 'createdAt' | 'status'>): StoreItem {
-  const record: StoreItem = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString(), status: 'draft' }
-  writeAll([...readAll(), record])
-  return record
+  const row: Row = {
+    id: crypto.randomUUID(),
+    owner_email: input.ownerEmail.toLowerCase(),
+    title: input.title,
+    short_description: input.shortDescription,
+    full_description: input.fullDescription,
+    category: input.category,
+    type: input.type,
+    price_label: input.priceLabel,
+    cover_image_data_url: input.coverImageDataUrl ?? null,
+    status: 'draft',
+    created_at: new Date().toISOString(),
+  }
+  table.set([row, ...table.rows()])
+  void persist(table, () => supabase.from('store_items').insert(row)).catch(() => undefined)
+  return toItem(row)
 }
 
-export function publishStoreItem(id: string): void {
-  const all = readAll()
-  const idx = all.findIndex((i) => i.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status: 'published' }
-  writeAll(all)
+function setStatus(id: string, status: 'draft' | 'published') {
+  table.set(table.rows().map((r) => (r.id === id ? { ...r, status } : r)))
+  void persist(table, () => supabase.from('store_items').update({ status }).eq('id', id)).catch(() => undefined)
 }
-
-export function unpublishStoreItem(id: string): void {
-  const all = readAll()
-  const idx = all.findIndex((i) => i.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status: 'draft' }
-  writeAll(all)
-}
+export const publishStoreItem = (id: string) => setStatus(id, 'published')
+export const unpublishStoreItem = (id: string) => setStatus(id, 'draft')
 
 export function listItemsForOwner(ownerEmail: string): StoreItem[] {
   const e = ownerEmail.toLowerCase()
-  return readAll()
-    .filter((i) => i.ownerEmail.toLowerCase() === e)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return table.rows().filter((i) => i.owner_email.toLowerCase() === e).map(toItem).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
-
-export function listPublishedItemsForOwner(ownerEmail: string): StoreItem[] {
-  return listItemsForOwner(ownerEmail).filter((i) => i.status === 'published')
-}
-
-/** Store Hub's real discovery source — every published item, any owner. */
+export const listPublishedItemsForOwner = (ownerEmail: string) => listItemsForOwner(ownerEmail).filter((i) => i.status === 'published')
 export function listAllPublishedItems(): StoreItem[] {
-  return readAll()
-    .filter((i) => i.status === 'published')
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return table.rows().filter((i) => i.status === 'published').map(toItem).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
-
 export function getStoreItem(id: string): StoreItem | undefined {
-  return readAll().find((i) => i.id === id)
+  const r = table.rows().find((i) => i.id === id)
+  return r ? toItem(r) : undefined
 }

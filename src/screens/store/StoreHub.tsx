@@ -5,8 +5,8 @@ import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { getCommerceSettings } from '@/app/commerceStore'
-import { createStoreItem, listAllPublishedItems, listItemsForOwner, publishStoreItem, unpublishStoreItem, type StoreItem, type StoreItemType } from '@/app/storeItemStore'
+import { getCommerceSettings, useCommerceVersion } from '@/app/commerceStore'
+import { createStoreItem, listAllPublishedItems, listItemsForOwner, publishStoreItem, unpublishStoreItem, type StoreItem, type StoreItemType, useStoreItemsVersion } from '@/app/storeItemStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { resizeImage } from '@/app/mediaStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
@@ -23,10 +23,12 @@ const CATEGORIES = ['Design', 'Development', 'Writing', 'Marketing', 'Education'
  * every published item on this browser.
  */
 export function StoreHub() {
+  useCommerceVersion()
   const { account } = useAccount()
   const owner = ownerKey(account)
   const { storeActivated, sellingActivated } = getCommerceSettings(owner)
-  const [myItems, setMyItems] = useState<StoreItem[]>(() => listItemsForOwner(owner))
+  useStoreItemsVersion()
+  const myItems = listItemsForOwner(owner)
   const [creating, setCreating] = useState(false)
   const marketItems = listAllPublishedItems()
   useCampaignsCacheVersion()
@@ -35,7 +37,6 @@ export function StoreHub() {
   const sponsoredCampaigns = listActiveCampaignsForPlacement('market_hub')
 
   function refresh() {
-    setMyItems(listItemsForOwner(owner))
   }
 
   return (

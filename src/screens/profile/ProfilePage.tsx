@@ -8,7 +8,7 @@ import { listRepostsBy, useSocialCacheVersion } from '@/app/socialStore'
 import { useAccount } from '@/app/AccountContext'
 import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account } from '@/app/accountTypes'
 import { listActivities, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
-import { pendingRequestsForOwner, respondToSelfTag } from '@/app/selfTagStore'
+import { pendingRequestsForOwner, respondToSelfTag, useSelfTagsVersion } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { findAccountByEmail, findAccountByUsername, getAccountVisibility, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
@@ -18,13 +18,13 @@ import { publicDisplayName } from '@/app/privacyModeStore'
 import { buildPortfolioData } from '@/app/portfolioData'
 import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
 import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplates'
-import { createRequest, findRequest, listRequestsForOwner, respondToRequest } from '@/app/cvRequestStore'
+import { createRequest, findRequest, listRequestsForOwner, respondToRequest, useCvRequestsVersion } from '@/app/cvRequestStore'
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { followOrg, followerCount, isFollowing, unfollowOrg, useFollowsCacheVersion } from '@/app/followStore'
 import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, useConnectionsCacheVersion, type RelationshipState } from '@/app/connectionStore'
 import { CareerStagePanel, JourneyPanel, SkillsByEvidencePanel, skillsByEvidence } from './EvidencePanels'
-import { getMentorshipPreference, menteeRequestState, sendMenteeRequest } from '@/app/mentorshipStore'
+import { getMentorshipPreference, menteeRequestState, sendMenteeRequest, useMenteeRequestsVersion, useMentorshipVersion } from '@/app/mentorshipStore'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
 type Tab = (typeof TABS)[number]
@@ -38,6 +38,8 @@ const TAB_LABEL: Record<Tab, string> = { overview: 'Overview', 'cv-portfolio': '
  * (no backend-issued profile URLs exist yet to link to instead).
  */
 export function ProfilePage() {
+  useCvRequestsVersion()
+  useMentorshipVersion()
   const { username } = useParams<{ username: string }>()
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
@@ -490,6 +492,7 @@ function FollowButton({ viewerEmail, orgEmail }: { viewerEmail: string; orgEmail
   // whatever it read at first render.
   const cacheVersion = useFollowsCacheVersion()
   const [following, setFollowing] = useState(() => isFollowing(viewerEmail, orgEmail))
+
   useEffect(() => setFollowing(isFollowing(viewerEmail, orgEmail)), [cacheVersion, viewerEmail, orgEmail])
   return (
     <button
@@ -512,6 +515,7 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
   // this keeps the button's state in sync once it does.
   const cacheVersion = useConnectionsCacheVersion()
   const [state, setState] = useState<RelationshipState>(() => relationshipState(viewerEmail, otherEmail))
+
   useEffect(() => setState(relationshipState(viewerEmail, otherEmail)), [cacheVersion, viewerEmail, otherEmail])
 
   if (state === 'connected') {
@@ -525,7 +529,6 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
       <button
         onClick={async () => {
           await acceptConnectionRequest(viewerEmail, otherEmail)
-          setState(relationshipState(viewerEmail, otherEmail))
         }}
         className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"
       >
@@ -537,7 +540,6 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
     <button
       onClick={async () => {
         await sendConnectionRequest(viewerEmail, otherEmail)
-        setState(relationshipState(viewerEmail, otherEmail))
       }}
       className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white"
     >
@@ -551,7 +553,8 @@ function ConnectButton({ viewerEmail, otherEmail }: { viewerEmail: string; other
  * not merge them into one request type" instruction. Only rendered on an
  * individual profile whose "Open to mentoring" setting is on. */
 function MenteeRequestButton({ menteeEmail, mentorEmail }: { menteeEmail: string; mentorEmail: string }) {
-  const [state, setState] = useState(() => menteeRequestState(menteeEmail, mentorEmail))
+  useMenteeRequestsVersion()
+  const state = menteeRequestState(menteeEmail, mentorEmail)
 
   if (state?.status === 'accepted') {
     return <span className="rounded-lg border border-success px-3 py-2 text-xs font-semibold text-success">✓ Mentor</span>
@@ -563,7 +566,6 @@ function MenteeRequestButton({ menteeEmail, mentorEmail }: { menteeEmail: string
     <button
       onClick={() => {
         sendMenteeRequest(menteeEmail, mentorEmail, 'I would like to request your mentorship.')
-        setState(menteeRequestState(menteeEmail, mentorEmail))
       }}
       className="rounded-lg border border-accent px-3 py-2 text-xs font-semibold text-accent"
     >
@@ -598,7 +600,8 @@ function InCommonRow({ viewerEmail, subjectEmail }: { viewerEmail: string; subje
 }
 
 function SelfTagRequestsPanel({ ownerEmail }: { ownerEmail: string }) {
-  const [pending, setPending] = useState(() => pendingRequestsForOwner(ownerEmail))
+  useSelfTagsVersion()
+  const pending = pendingRequestsForOwner(ownerEmail)
   if (pending.length === 0) return null
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -613,7 +616,6 @@ function SelfTagRequestsPanel({ ownerEmail }: { ownerEmail: string }) {
               <button
                 onClick={() => {
                   respondToSelfTag(r.id, 'approved')
-                  setPending(pendingRequestsForOwner(ownerEmail))
                 }}
                 className="text-xs font-semibold text-success"
               >
@@ -622,7 +624,6 @@ function SelfTagRequestsPanel({ ownerEmail }: { ownerEmail: string }) {
               <button
                 onClick={() => {
                   respondToSelfTag(r.id, 'rejected')
-                  setPending(pendingRequestsForOwner(ownerEmail))
                 }}
                 className="text-xs font-semibold text-danger"
               >

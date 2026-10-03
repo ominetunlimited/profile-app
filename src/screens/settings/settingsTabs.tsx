@@ -10,12 +10,12 @@ import { listActivities, ownerKey } from '@/app/activityStore'
 import { confirmTotpEnrollment, listTotpFactors, removeTotpFactor, startTotpEnrollment, type TotpEnrollment, type TotpFactor } from '@/app/mfaStore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
 import { KIND_LABEL as REQUEST_KIND_LABEL, listMyDataRequests, submitDataRequest, type DataRequest, type DataRequestKind } from '@/app/dataRequestStore'
-import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
+import { getCommerceSettings, setCommerceSettings, type CommerceSettings, useCommerceVersion } from '@/app/commerceStore'
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
 import { listLoginHistory } from '@/app/sessionStore'
 import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
-import { getMentorshipPreference, setMentorshipPreference } from '@/app/mentorshipStore'
+import { getMentorshipPreference, setMentorshipPreference, useMentorshipVersion } from '@/app/mentorshipStore'
 import { getPreference, PREFERENCE_CATEGORIES, setPreference, useNotificationsCacheVersion, type NotificationCategory } from '@/app/notificationStore'
 import { Field, PasswordInput, SelectInput, TextInput } from '@/shared/ui/Field'
 import { Button } from '@/shared/ui/Button'
@@ -229,6 +229,7 @@ export function PrivacyTab() {
   const owner = account ? ownerKey(account) : ''
   const [privacyMode, setPrivacyModeState] = useState(() => (owner ? getPrivacyMode(owner) : { legalNamePublicVisibility: 'public' as const }))
 
+
   return (
     <div className="flex flex-col gap-4">
       {account?.accountType === 'individual' && (
@@ -402,11 +403,11 @@ export function CareerJourneyTab() {
 export function CommerceTab() {
   const { account } = useAccount()
   const owner = ownerKey(account)
-  const [settings, setSettings] = useState(() => getCommerceSettings(owner))
+  useCommerceVersion()
+  const settings = getCommerceSettings(owner)
 
   function update(patch: Partial<CommerceSettings>) {
     const next = { ...settings, ...patch }
-    setSettings(next)
     setCommerceSettings(owner, next)
   }
 
@@ -452,7 +453,8 @@ export function AiAssistantTab() {
 export function MentorshipTab() {
   const { account } = useAccount()
   const owner = account ? ownerKey(account) : ''
-  const [pref, setPref] = useState(() => getMentorshipPreference(owner))
+  useMentorshipVersion()
+  const pref = getMentorshipPreference(owner)
 
   return (
     <Section title="Mentorship">
@@ -462,7 +464,6 @@ export function MentorshipTab() {
         checked={pref.openToMentoring}
         onChange={(next) => {
           setMentorshipPreference(owner, { openToMentoring: next })
-          setPref(getMentorshipPreference(owner))
         }}
       />
       {pref.openToMentoring && (
@@ -474,7 +475,6 @@ export function MentorshipTab() {
             onChange={(e) => {
               const menteeCapacity = Math.max(0, Number(e.target.value) || 0)
               setMentorshipPreference(owner, { menteeCapacity })
-              setPref(getMentorshipPreference(owner))
             }}
           />
         </Field>
@@ -500,6 +500,7 @@ export function SecurityTab() {
   const [newPassword, setNewPassword] = useState('')
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [history, setHistory] = useState(() => listLoginHistory(email))
+
 
   async function submitPasswordChange() {
     if (!account) return

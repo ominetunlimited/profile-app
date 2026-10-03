@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
-import { listOwnerContent } from '@/app/ownerContentStore'
+import { listOwnerContent, useOwnerContentVersion } from '@/app/ownerContentStore'
 
 const FEEDS = ['Blog', 'News'] as const
 
@@ -13,6 +13,7 @@ const FEEDS = ['Blog', 'News'] as const
  * empty state per §49.8 when nothing has actually been published.
  */
 export function BlogNews() {
+  useOwnerContentVersion()
   const [feed, setFeed] = useState<(typeof FEEDS)[number]>('Blog')
   const posts = listOwnerContent().filter((p) => p.status === 'published' && p.type === feed.toLowerCase())
 

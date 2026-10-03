@@ -1,41 +1,49 @@
-/** Temporary client-only scaffolding, same caveats as demoAccountStore.ts. */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+
+/** Feedback to the PROFILE team, stored on the server (public.feedback_items): you see your own; staff with review access see everyone's in the Admin Centre. */
+export type FeedbackCategory = 'bug' | 'idea' | 'praise' | 'other'
+export type FeedbackStatus = 'new' | 'seen' | 'resolved'
+
 export interface FeedbackEntry {
   id: string
   ownerEmail: string
-  category: 'bug' | 'idea' | 'praise' | 'other'
+  category: FeedbackCategory
   message: string
+  status: FeedbackStatus
   createdAt: string
 }
 
-const STORAGE_KEY = 'profile:demo-feedback'
-
-function readAll(): FeedbackEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  user_email: string
+  category: FeedbackCategory
+  message: string
+  status: FeedbackStatus
+  created_at: string
 }
 
-function writeAll(entries: FeedbackEntry[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const table = createServerTable<Row>('feedback_items', { orderBy: 'created_at' })
+export const useFeedbackVersion = table.useVersion
+const toEntry = (r: Row): FeedbackEntry => ({ id: r.id, ownerEmail: r.user_email, category: r.category, message: r.message, status: r.status, createdAt: r.created_at })
 
 export function listFeedback(ownerEmail: string): FeedbackEntry[] {
-  return readAll()
-    .filter((f) => f.ownerEmail === ownerEmail)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return table.rows().filter((f) => f.user_email.toLowerCase() === ownerEmail.toLowerCase()).map(toEntry).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
-export function submitFeedback(input: { ownerEmail: string; category: FeedbackEntry['category']; message: string }): FeedbackEntry {
-  const entry: FeedbackEntry = { id: `fb-${Date.now()}`, ...input, createdAt: new Date().toISOString() }
-  const all = readAll()
-  all.push(entry)
-  writeAll(all)
-  return entry
+/** Everything staff can see (the database returns all rows only to reviewers). */
+export function listAllFeedback(): FeedbackEntry[] {
+  return table.rows().map(toEntry).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export async function submitFeedback(input: { ownerEmail: string; category: FeedbackCategory; message: string }): Promise<FeedbackEntry> {
+  const row: Row = { id: crypto.randomUUID(), user_email: input.ownerEmail.toLowerCase(), category: input.category, message: input.message.trim(), status: 'new', created_at: new Date().toISOString() }
+  table.set([row, ...table.rows()])
+  await persist(table, () => supabase.from('feedback_items').insert({ id: row.id, user_email: row.user_email, category: row.category, message: row.message }))
+  return toEntry(row)
+}
+
+export async function setFeedbackStatus(id: string, status: FeedbackStatus): Promise<void> {
+  table.set(table.rows().map((r) => (r.id === id ? { ...r, status } : r)))
+  await persist(table, () => supabase.rpc('staff_set_feedback_status', { p_id: id, p_status: status }))
 }

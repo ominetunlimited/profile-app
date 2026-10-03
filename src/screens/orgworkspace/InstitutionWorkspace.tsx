@@ -6,7 +6,7 @@ import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorksp
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { listRequestsForIssuerEmail, setVerificationRequestStatus, useVerificationVersion, type VerificationRequest } from '@/app/verificationRequestStore'
-import { listSchemas } from '@/app/schemaStore'
+import { listSchemas, useSchemasVersion } from '@/app/schemaStore'
 import { StaffPanel } from './StaffPanel'
 import { listAuditLogFor, logOrgAction, useOrgAuditVersion } from '@/app/orgAuditLogStore'
 
@@ -41,6 +41,7 @@ const STATUS_TONE: Record<VerificationRequest['status'], string> = {
  * audit trail reuse the exact same real stores as Organization Workspace,
  * not a second parallel implementation. */
 export function InstitutionWorkspace() {
+  useSchemasVersion()
   const { account } = useAccount()
   const [tab, setTab] = useState<(typeof TABS)[number]>('queue')
   const owner = account ? ownerKey(account) : ''

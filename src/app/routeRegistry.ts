@@ -221,6 +221,8 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/admin/kyc', screen: 'Admin Identity (KYC) Review', gate: { kind: 'platform_admin' } },
   { path: '/admin/verification-requests', screen: 'Admin Unrouted Verification Requests', gate: { kind: 'platform_admin' } },
   { path: '/admin/disputes', screen: 'Admin Disputes & Appeals', gate: { kind: 'platform_admin' } },
+  { path: '/admin/feedback', screen: 'Admin Feedback', gate: { kind: 'platform_admin' } },
+  { path: '/passport/:id', screen: 'Shared Trust Passport', gate: { kind: 'public' } },
   { path: '/admin/data-requests', screen: 'Admin Data Requests', gate: { kind: 'platform_admin' } },
   { path: '/admin/content', screen: 'Admin Content Moderation', gate: { kind: 'platform_admin' } },
   { path: '/admin/communities', screen: 'Admin Communities', gate: { kind: 'platform_admin' } },

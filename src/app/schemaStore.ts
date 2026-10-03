@@ -1,6 +1,8 @@
-/** Temporary client-only scaffolding, same caveats as demoAccountStore.ts. */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+import { listRequestsForIssuerEmail } from './verificationRequestStore'
 
-/** §16.2 VerificationSchema / SchemaField, verbatim shape. */
+/** The record types an institution can confirm, stored on the server (public.verification_schemas). Published schemas are visible to everyone; drafts only to the institution's own administrators and credential managers. */
 export interface SchemaFieldRecord {
   name: string
   label: string
@@ -25,92 +27,66 @@ export interface VerificationSchemaRecord {
   createdAt: string
 }
 
-const STORAGE_KEY = 'profile:demo-verification-schemas'
 
-function readAll(): VerificationSchemaRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  institution_email: string
+  name: string
+  version: string
+  verification_type: VerificationType
+  fields: SchemaFieldRecord[]
+  evidence_required: string[]
+  status: 'draft' | 'published' | 'retired'
+  created_at: string
 }
 
-function writeAll(records: VerificationSchemaRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const table = createServerTable<Row>('verification_schemas', { orderBy: 'created_at', ascending: true })
+export const useSchemasVersion = table.useVersion
+const toRecord = (r: Row): VerificationSchemaRecord => ({ id: r.id, institutionEmail: r.institution_email, name: r.name, version: r.version, verificationType: r.verification_type, fields: r.fields, evidenceRequired: r.evidence_required, status: r.status, createdAt: r.created_at })
 
 export function listSchemas(institutionEmail: string): VerificationSchemaRecord[] {
-  return readAll().filter((s) => s.institutionEmail === institutionEmail)
+  return table.rows().filter((s) => s.institution_email.toLowerCase() === institutionEmail.toLowerCase()).map(toRecord)
 }
 
-export function createSchema(
-  institutionEmail: string,
-  name: string,
-  verificationType: VerificationType,
-  fields: SchemaFieldRecord[],
-  evidenceRequired: string[] = [],
-): VerificationSchemaRecord {
-  const record: VerificationSchemaRecord = {
-    id: crypto.randomUUID(),
-    institutionEmail,
-    name,
-    version: '1.0',
-    verificationType,
-    fields,
-    evidenceRequired,
-    status: 'draft',
-    createdAt: new Date().toISOString(),
-  }
-  writeAll([...readAll(), record])
-  return record
+function patch(id: string, change: Partial<Row>) {
+  table.set(table.rows().map((r) => (r.id === id ? { ...r, ...change } : r)))
+  void persist(table, () => supabase.from('verification_schemas').update(change).eq('id', id)).catch(() => undefined)
 }
 
-export function publishSchema(id: string) {
-  const all = readAll()
-  const idx = all.findIndex((s) => s.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status: 'published' }
-  writeAll(all)
+export function createSchema(institutionEmail: string, name: string, verificationType: VerificationType, fields: SchemaFieldRecord[], evidenceRequired: string[] = []): VerificationSchemaRecord {
+  const row: Row = { id: crypto.randomUUID(), institution_email: institutionEmail.toLowerCase(), name, version: '1.0', verification_type: verificationType, fields, evidence_required: evidenceRequired, status: 'draft', created_at: new Date().toISOString() }
+  table.set([...table.rows(), row])
+  void persist(table, () => supabase.from('verification_schemas').insert(row)).catch(() => undefined)
+  return toRecord(row)
 }
 
-/** Design handoff gap audit — the mockup's selected-schema detail panel
- * edits an already-created schema in place ("Add field" / "Publish
- * changes"), not just at creation time. */
-export function updateSchemaFields(id: string, fields: SchemaFieldRecord[]) {
-  const all = readAll()
-  const idx = all.findIndex((s) => s.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], fields }
-  writeAll(all)
-}
+export const publishSchema = (id: string) => patch(id, { status: 'published' })
+export const updateSchemaFields = (id: string, fields: SchemaFieldRecord[]) => patch(id, { fields })
 
 export function addEvidenceRequirement(id: string, evidence: string) {
-  const all = readAll()
-  const idx = all.findIndex((s) => s.id === id)
-  if (idx === -1) return
-  if (all[idx].evidenceRequired.includes(evidence)) return
-  all[idx] = { ...all[idx], evidenceRequired: [...all[idx].evidenceRequired, evidence] }
-  writeAll(all)
+  const r = table.rows().find((x) => x.id === id)
+  if (!r || r.evidence_required.includes(evidence)) return
+  patch(id, { evidence_required: [...r.evidence_required, evidence] })
 }
 
 export function removeEvidenceRequirement(id: string, evidence: string) {
-  const all = readAll()
-  const idx = all.findIndex((s) => s.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], evidenceRequired: all[idx].evidenceRequired.filter((e) => e !== evidence) }
-  writeAll(all)
+  const r = table.rows().find((x) => x.id === id)
+  if (!r) return
+  patch(id, { evidence_required: r.evidence_required.filter((e) => e !== evidence) })
 }
 
-/** Honestly always 0 — no submitted VerificationRequest references a
- * specific institution schema id anywhere in this build yet (requests use
- * the fixed VERIFICATION_MODULES taxonomy, not custom schemas), so there is
- * no real join to count from. Never fabricated to look busy, unlike the
- * mockup's illustrative 4820/612/88/3. */
-export function confirmedRecordCountForSchema(_schemaId: string): number {
-  return 0
+const MODULE_FOR_TYPE: Record<VerificationType, string> = {
+  academic_affiliation: 'academic',
+  academic: 'academic',
+  employment: 'employment',
+  professional_licence: 'professional_licence',
+  certification: 'certification',
+  custom: 'custom',
+}
+
+/** Records this institution has actually confirmed of the schema's kind. */
+export function confirmedRecordCountForSchema(schemaId: string): number {
+  const s = table.rows().find((x) => x.id === schemaId)
+  if (!s) return 0
+  return listRequestsForIssuerEmail(s.institution_email).filter((r) => r.status === 'verified' && r.moduleKey === MODULE_FOR_TYPE[s.verification_type]).length
 }

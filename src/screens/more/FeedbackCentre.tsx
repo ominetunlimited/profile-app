@@ -3,20 +3,27 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { Field, SelectInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { listFeedback, submitFeedback, type FeedbackEntry } from '@/app/feedbackStore'
+import { listFeedback, submitFeedback, type FeedbackEntry, useFeedbackVersion } from '@/app/feedbackStore'
 
 export function FeedbackCentre() {
   const { account, staffRole } = useAccount()
   const owner = account ? ownerKey(account) : staffRole ? 'staff' : 'guest'
-  const [entries, setEntries] = useState(() => listFeedback(owner))
+  useFeedbackVersion()
+  const entries = listFeedback(owner)
   const [category, setCategory] = useState<FeedbackEntry['category']>('idea')
   const [message, setMessage] = useState('')
 
-  function send() {
+  const [error, setError] = useState<string | null>(null)
+
+  async function send() {
     if (!message.trim()) return
-    submitFeedback({ ownerEmail: owner, category, message: message.trim() })
-    setMessage('')
-    setEntries(listFeedback(owner))
+    setError(null)
+    try {
+      await submitFeedback({ ownerEmail: owner, category, message: message.trim() })
+      setMessage('')
+    } catch {
+      setError("We couldn't send that. Check your connection and try again.")
+    }
   }
 
   return (
@@ -43,9 +50,10 @@ export function FeedbackCentre() {
               className="min-h-[44px] rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text-0 outline-none focus-visible:border-accent"
             />
           </Field>
-          <button onClick={send} disabled={!message.trim()} className="self-start rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
+          <button onClick={() => void send()} disabled={!message.trim()} className="self-start rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
             Send feedback
           </button>
+          {error && <p className="text-xs text-danger">{error}</p>}
         </div>
 
         <h2 className="mb-3 font-semibold text-text-0">Your submissions</h2>

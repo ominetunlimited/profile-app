@@ -4,7 +4,7 @@ import type { Account } from '@/app/accountTypes'
 import type { ActivityRecord } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { myRequestFor, requestSelfTag } from '@/app/selfTagStore'
+import { myRequestFor, requestSelfTag, useSelfTagsVersion } from '@/app/selfTagStore'
 import { getSignedMediaUrl, listMediaFor, useMediaAssetsCacheVersion, type FileCategory, type MediaAsset } from '@/app/mediaAssetStore'
 import { resolveTool } from '@/app/toolCatalogue'
 import { TrustScoreRing } from './TrustScoreRing'
@@ -32,7 +32,8 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
 
   const [tagRole, setTagRole] = useState('')
   const [showTagInput, setShowTagInput] = useState(false)
-  const [tagRequest, setTagRequest] = useState(() => (viewerEmail && !isSelf ? myRequestFor(viewerEmail, activity.id) : undefined))
+  useSelfTagsVersion()
+  const tagRequest = (viewerEmail && !isSelf ? myRequestFor(viewerEmail, activity.id) : undefined)
 
   const AuthorLink = ({ children, className }: { children: ReactNode; className?: string }) =>
     authorUsername ? (
@@ -137,7 +138,6 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
                     activityTitle: activity.title,
                     role: tagRole || 'Collaborator',
                   })
-                  setTagRequest(myRequestFor(viewerEmail, activity.id))
                 }}
                 className="text-xs font-semibold text-accent"
               >

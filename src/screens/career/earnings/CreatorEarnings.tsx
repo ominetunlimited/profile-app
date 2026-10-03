@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { listCreatorTemplates } from '@/app/creatorTemplateStore'
+import { listCreatorTemplates, useCreatorTemplatesVersion } from '@/app/creatorTemplateStore'
 
 /** §19/§38.20 Creator Earnings — real zero-state stats, not the Handoff's
  * illustrative ₦42,300 sample (build doc §49.8: never fabricate a number). */
 export function CreatorEarnings() {
+  useCreatorTemplatesVersion()
   const { account } = useAccount()
   const templates = listCreatorTemplates(ownerKey(account))
   const published = templates.filter((t) => t.status === 'published')

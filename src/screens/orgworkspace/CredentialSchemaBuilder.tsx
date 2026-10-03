@@ -14,6 +14,7 @@ import {
   updateSchemaFields,
   type SchemaFieldRecord,
   type VerificationType,
+  useSchemasVersion,
 } from '@/app/schemaStore'
 
 const VERIFICATION_TYPES: VerificationType[] = ['academic_affiliation', 'academic', 'employment', 'professional_licence', 'certification', 'custom']
@@ -47,8 +48,10 @@ export function CredentialSchemaBuilder() {
 
   const canEdit = orgRoleCan(account, 'editOrgProfile')
   const officialEmail = account.officialEmail
-  const [schemas, setSchemas] = useState(() => listSchemas(officialEmail))
-  const [activeId, setActiveId] = useState<string | null>(() => listSchemas(officialEmail)[0]?.id ?? null)
+  useSchemasVersion()
+  const schemas = listSchemas(officialEmail)
+  useSchemasVersion()
+  const activeId = listSchemas(officialEmail)[0]?.id ?? null
   const [creating, setCreating] = useState(schemas.length === 0)
   const [evidenceDraft, setEvidenceDraft] = useState('')
 
@@ -59,7 +62,6 @@ export function CredentialSchemaBuilder() {
   const active = schemas.find((s) => s.id === activeId) ?? null
 
   function refresh() {
-    setSchemas(listSchemas(officialEmail))
   }
 
   function addField() {
@@ -90,7 +92,6 @@ export function CredentialSchemaBuilder() {
             <button
               key={s.id}
               onClick={() => {
-                setActiveId(s.id)
                 setCreating(false)
               }}
               className={`rounded-lg border-[1.5px] px-3 py-2.5 text-left ${!creating && activeId === s.id ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
@@ -169,9 +170,8 @@ export function CredentialSchemaBuilder() {
                   <Button
                     disabled={!name.trim() || fields.length === 0}
                     onClick={() => {
-                      const created = createSchema(account.officialEmail, name, verificationType, fields)
+                      createSchema(account.officialEmail, name, verificationType, fields)
                       refresh()
-                      setActiveId(created.id)
                       setCreating(false)
                       setName('')
                       setFields([{ name: 'fullLegalName', label: 'Full legal name', type: 'text', required: true }])

@@ -1,14 +1,7 @@
-/**
- * Temporary client-only scaffolding, same caveats as demoAccountStore.ts.
- *
- * §4.6/§15.4 + explicit product direction: Portfolio is the public-facing
- * document (visible to any visitor, per §15.4's existing hard rule) — CV is
- * private, visible only to its owner. An organisation/recruiter impressed by
- * someone's public Portfolio requests their CV instead of it being open by
- * default; the individual approves or denies. This store is that real
- * request/response pipeline, distinct from — and not a substitute for — a
- * job Application, which carries its own CV snapshot directly (§4.9).
- */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+
+/** Requests to see someone's CV, stored on the server (public.cv_requests): the target sees them and decides. */
 export type CvRequestStatus = 'pending' | 'approved' | 'denied'
 
 export interface CvRequest {
@@ -22,55 +15,64 @@ export interface CvRequest {
   respondedAt: string | null
 }
 
-const STORAGE_KEY = 'profile:demo-cv-requests'
-
-function readAll(): CvRequest[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  requester_email: string
+  requester_name: string
+  target_email: string
+  target_username: string
+  status: CvRequestStatus
+  requested_at: string
+  responded_at: string | null
 }
 
-function writeAll(requests: CvRequest[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const table = createServerTable<Row>('cv_requests')
+export const useCvRequestsVersion = table.useVersion
+
+const toRequest = (r: Row): CvRequest => ({
+  id: r.id,
+  requesterEmail: r.requester_email,
+  requesterName: r.requester_name,
+  targetEmail: r.target_email,
+  targetUsername: r.target_username,
+  status: r.status,
+  requestedAt: r.requested_at,
+  respondedAt: r.responded_at,
+})
+const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
 
 export function listRequestsForOwner(targetEmail: string): CvRequest[] {
-  return readAll()
-    .filter((r) => r.targetEmail === targetEmail)
+  return table
+    .rows()
+    .filter((r) => same(r.target_email, targetEmail))
+    .map(toRequest)
     .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))
 }
 
 export function findRequest(requesterEmail: string, targetEmail: string): CvRequest | null {
-  return readAll().find((r) => r.requesterEmail === requesterEmail && r.targetEmail === targetEmail) ?? null
+  const r = table.rows().find((x) => same(x.requester_email, requesterEmail) && same(x.target_email, targetEmail))
+  return r ? toRequest(r) : null
 }
 
 export function createRequest(input: { requesterEmail: string; requesterName: string; targetEmail: string; targetUsername: string }): CvRequest {
-  const request: CvRequest = {
-    id: `cvreq-${Date.now()}`,
-    ...input,
+  const row: Row = {
+    id: crypto.randomUUID(),
+    requester_email: input.requesterEmail.toLowerCase(),
+    requester_name: input.requesterName,
+    target_email: input.targetEmail.toLowerCase(),
+    target_username: input.targetUsername,
     status: 'pending',
-    requestedAt: new Date().toISOString(),
-    respondedAt: null,
+    requested_at: new Date().toISOString(),
+    responded_at: null,
   }
-  const all = readAll()
-  all.push(request)
-  writeAll(all)
-  return request
+  table.set([...table.rows(), row])
+  void persist(table, () => supabase.from('cv_requests').insert({ id: row.id, requester_email: row.requester_email, requester_name: row.requester_name, target_email: row.target_email, target_username: row.target_username })).catch(() => undefined)
+  return toRequest(row)
 }
 
 export function respondToRequest(id: string, status: 'approved' | 'denied'): void {
-  const all = readAll()
-  const idx = all.findIndex((r) => r.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status, respondedAt: new Date().toISOString() }
-  writeAll(all)
+  table.set(table.rows().map((r) => (r.id === id ? { ...r, status, responded_at: new Date().toISOString() } : r)))
+  void persist(table, () => supabase.rpc('respond_cv_request', { p_id: id, p_status: status })).catch(() => undefined)
 }
 
 export function hasApprovedAccess(requesterEmail: string, targetEmail: string): boolean {

@@ -33,7 +33,7 @@ import {
   type VerificationModuleKey,
   type VerificationRequest,
 } from '@/app/verificationRequestStore'
-import { displayPid, listSharesFor, revokePassportShare, shareTrustPassport, type PassportAccessExpiry } from '@/app/trustPassportShareStore'
+import { displayPid, listSharesFor, opensFor, revokePassportShare, shareLink, shareTrustPassport, type PassportAccessExpiry, useSharesVersion } from '@/app/trustPassportShareStore'
 
 /**
  * §4.5 Trust Score Schema + §12.6 Trust Passport — the real, in-app,
@@ -54,7 +54,8 @@ export function TrustPassport() {
   const trust = computeTrustScore(account)
   useVerificationVersion()
   const requests = listVerificationRequests(owner)
-  const [shares, setShares] = useState(() => listSharesFor(owner))
+  useSharesVersion()
+  const shares = listSharesFor(owner)
   const [shareModalOpen, setShareModalOpen] = useState(false)
 
   const verifiedCount = requests.filter((r) => r.status === 'verified').length
@@ -176,14 +177,23 @@ export function TrustPassport() {
                     <div className="min-w-0 flex-1 basis-[120px]">
                       <div className="text-xs font-medium text-text-0">{s.sharedWith}</div>
                       <div className="text-[10.5px] text-text-1">
-                        Shared {new Date(s.sharedAt).toLocaleDateString()} · not yet opened ·{' '}
+                        Shared {new Date(s.sharedAt).toLocaleDateString()} ·{' '}
+                        {opensFor(s.id).count > 0
+                          ? `opened ${opensFor(s.id).count} time${opensFor(s.id).count === 1 ? '' : 's'}, last ${new Date(opensFor(s.id).last ?? s.sharedAt).toLocaleString()}`
+                          : 'not yet opened'}{' '}
+                        ·{' '}
                         {s.expiresAt ? `expires ${new Date(s.expiresAt).toLocaleDateString()}` : 'until revoked'}
                       </div>
                     </div>
                     <button
+                      onClick={() => void navigator.clipboard?.writeText(window.location.origin + shareLink(s.id))}
+                      className="flex-none rounded-lg border border-border-strong px-2.5 py-1 text-[11px] font-semibold text-text-0"
+                    >
+                      Copy link
+                    </button>
+                    <button
                       onClick={() => {
                         revokePassportShare(s.id, owner)
-                        setShares(listSharesFor(owner))
                       }}
                       className="flex-none rounded-lg border border-danger px-2.5 py-1 text-[11px] font-semibold text-danger"
                     >
@@ -209,7 +219,6 @@ export function TrustPassport() {
             onClose={() => setShareModalOpen(false)}
             onShare={(sharedWith, accessExpiry) => {
               shareTrustPassport(owner, sharedWith, accessExpiry)
-              setShares(listSharesFor(owner))
               setShareModalOpen(false)
             }}
           />

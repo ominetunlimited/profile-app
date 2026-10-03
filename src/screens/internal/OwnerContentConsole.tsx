@@ -8,6 +8,7 @@ import {
   publishOwnerContent,
   type OwnerContentAudience,
   type OwnerContentType,
+  useOwnerContentVersion,
 } from '@/app/ownerContentStore'
 
 const TYPES: OwnerContentType[] = ['news', 'blog', 'announcement']
@@ -23,7 +24,8 @@ const AUDIENCES: OwnerContentAudience[] = ['public', 'individual', 'organisation
  * the public page shows.
  */
 export function OwnerContentConsole() {
-  const [posts, setPosts] = useState(() => listOwnerContent())
+  useOwnerContentVersion()
+  const posts = listOwnerContent()
   const [type, setType] = useState<OwnerContentType>('news')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -34,7 +36,6 @@ export function OwnerContentConsole() {
   const [authorLabel, setAuthorLabel] = useState('')
 
   function refresh() {
-    setPosts(listOwnerContent())
   }
 
   function saveDraft() {

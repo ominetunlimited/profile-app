@@ -4,7 +4,7 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { buildPortfolioData } from '@/app/portfolioData'
-import { getOrgPortfolioConfig, saveOrgPortfolioConfig, ORG_PORTFOLIO_SECTIONS, type OrgPortfolioSection } from '@/app/organisationPortfolioStore'
+import { getOrgPortfolioConfig, saveOrgPortfolioConfig, ORG_PORTFOLIO_SECTIONS, type OrgPortfolioSection, useOrgPortfolioVersion } from '@/app/organisationPortfolioStore'
 import { PORTFOLIO_TEMPLATES } from './portfolioTemplates'
 
 /** §47.6 Portfolio Template Library — available to both account types
@@ -18,7 +18,8 @@ export function PortfolioTemplatesPage() {
   const pf = buildPortfolioData(account)
   const isOrg = account?.accountType === 'organisation'
   const owner = account ? ownerKey(account) : ''
-  const [orgConfig, setOrgConfig] = useState(() => (owner ? getOrgPortfolioConfig(owner) : null))
+  useOrgPortfolioVersion()
+  const orgConfig = (owner ? getOrgPortfolioConfig(owner) : null)
 
   const available = isOrg ? PORTFOLIO_TEMPLATES.filter((t) => t.id === 'organisation-company-showcase') : PORTFOLIO_TEMPLATES.filter((t) => t.id !== 'organisation-company-showcase')
 
@@ -30,7 +31,6 @@ export function PortfolioTemplatesPage() {
     if (!owner || !orgConfig) return
     const next = { enabledSections: { ...orgConfig.enabledSections, [section]: !orgConfig.enabledSections[section] } }
     saveOrgPortfolioConfig(owner, next)
-    setOrgConfig(next)
   }
 
   return (

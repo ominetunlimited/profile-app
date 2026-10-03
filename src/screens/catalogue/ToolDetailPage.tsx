@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { TOOL_CATALOGUE } from '@/app/toolCatalogue'
-import { listReferencesForTool } from '@/app/providerReferenceStore'
+import { listReferencesForTool, useProviderReferencesVersion } from '@/app/providerReferenceStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 
 /**
@@ -10,6 +10,7 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
  * fabricated "trending" metric.
  */
 export function ToolDetailPage() {
+  useProviderReferencesVersion()
   const { id } = useParams<{ id: string }>()
   const tool = TOOL_CATALOGUE.find((t) => t.id === id)
 

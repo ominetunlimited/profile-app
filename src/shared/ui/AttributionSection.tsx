@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { addAttribution, disputeAttribution, listAttributionsFor, removeAttribution, type AttributionRecord, type AttributionSubjectType } from '@/app/attributionStore'
+import { addAttribution, disputeAttribution, listAttributionsFor, removeAttribution, type AttributionRecord, type AttributionSubjectType, useAttributionsVersion } from '@/app/attributionStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { IconTag } from './icons'
 
@@ -21,7 +21,8 @@ const SUBJECT_TYPES: { value: AttributionSubjectType; label: string }[] = [
  * else's say-so alone.
  */
 export function AttributionSection({ activityId, activityOwnerEmail, isSelf, viewerEmail }: { activityId: string; activityOwnerEmail: string; isSelf: boolean; viewerEmail: string }) {
-  const [records, setRecords] = useState(() => listAttributionsFor(activityId))
+  useAttributionsVersion()
+  const records = listAttributionsFor(activityId)
   const [formOpen, setFormOpen] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [subjectType, setSubjectType] = useState<AttributionSubjectType>('person')
@@ -29,7 +30,6 @@ export function AttributionSection({ activityId, activityOwnerEmail, isSelf, vie
   const [role, setRole] = useState('')
 
   function refresh() {
-    setRecords(listAttributionsFor(activityId))
   }
 
   function submit() {

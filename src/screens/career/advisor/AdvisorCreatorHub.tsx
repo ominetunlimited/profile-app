@@ -4,7 +4,7 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey, listActivities } from '@/app/activityStore'
-import { createDraftTemplate, listCreatorTemplates } from '@/app/creatorTemplateStore'
+import { createDraftTemplate, listCreatorTemplates, useCreatorTemplatesVersion } from '@/app/creatorTemplateStore'
 import { buildCvData } from '@/app/careerData'
 import { buildPortfolioData } from '@/app/portfolioData'
 import { computeTrustScore } from '@/app/trustScore'
@@ -34,7 +34,8 @@ export function AdvisorCreatorHub() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('advisor')
   const { account } = useAccount()
   const owner = ownerKey(account)
-  const [templates, setTemplates] = useState(() => listCreatorTemplates(owner))
+  useCreatorTemplatesVersion()
+  const templates = listCreatorTemplates(owner)
   const [message, setMessage] = useState('')
   const [history, setHistory] = useState<AdvisorMessage[]>([])
   const [sending, setSending] = useState(false)
@@ -178,7 +179,6 @@ export function AdvisorCreatorHub() {
               <Button
                 onClick={() => {
                   createDraftTemplate(owner, `Untitled template ${templates.length + 1}`, 'cv')
-                  setTemplates(listCreatorTemplates(owner))
                 }}
               >
                 Start a new template

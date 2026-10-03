@@ -1,36 +1,7 @@
-/**
- * Temporary client-only scaffolding, same caveats as demoAccountStore.ts.
- *
- * Patch (pre-Phase-7) B6: OrganisationPortfolioConfigV1 — extends the
- * Organisation / Company Showcase template (portfolioTemplates.tsx) from a
- * fixed 4-block layout into a composable system with a toggleable section
- * map. The prior ad hoc sections (Programmes & initiatives, Staff
- * highlights, Community impact records, Partnerships & MoUs) are folded
- * into this named 12-section list per the patch's own canonical set —
- * `projects` covers programmes/initiatives, `team` covers staff highlights,
- * `clients_and_partners` covers partnerships/MoUs, and community-impact
- * content now lives under `about_us` rather than as its own toggle, since
- * the patch document (the newer, more specific instruction) doesn't name it
- * separately.
- *
- * Phase 7 audit finding (flagged, not silently resolved): §49.5 of the
- * Master Prompt separately defines `OrganisationPortfolioDocument` with its
- * own canonical section names — `about`, `programmesInitiatives`,
- * `staffHighlights`, `publications`, `communityImpact`, `partnerships`,
- * `activeJobListings`, `services`, `trustScore`, `verificationAuthorityStatus`
- * — which is the CONTENT schema (what data populates each section, typed
- * against real entities like ProgrammeEntry/StaffHighlightEntry). This file's
- * OrgPortfolioSection is a different, complementary concern: a visibility/
- * layout toggle map for the rendered template, closer to a page-builder
- * config than a data schema. The two naming sets don't line up 1:1 (this
- * list also has hero/team/testimonials/resources/careers/contact/footer with
- * no §49.5 equivalent, and §49.5's publications/activeJobListings/trustScore/
- * verificationAuthorityStatus have no toggle here yet). Reconciling them —
- * either by renaming this list to match §49.5 exactly or by building
- * OrganisationPortfolioDocument as the real backing content type each
- * section reads from — is real work, deliberately left for product
- * sign-off/a future pass rather than guessed at silently here.
- */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+
+/** Which sections an organisation shows on its public portfolio, stored on the server (public.org_portfolio_config) and readable by anyone who can see the organisation. */
 export type OrgPortfolioSection =
   | 'header'
   | 'hero'
@@ -70,34 +41,23 @@ function defaultConfig(): OrganisationPortfolioConfigV1 {
   return { enabledSections }
 }
 
-const STORAGE_KEY = 'profile:demo-org-portfolio-config'
 
-function readAll(): Record<string, OrganisationPortfolioConfigV1> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
+interface Row {
+  owner_email: string
+  enabled_sections: Partial<Record<OrgPortfolioSection, boolean>>
 }
 
-function writeAll(all: Record<string, OrganisationPortfolioConfigV1>) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const table = createServerTable<Row>('org_portfolio_config')
+export const useOrgPortfolioVersion = table.useVersion
 
 export function getOrgPortfolioConfig(ownerEmail: string): OrganisationPortfolioConfigV1 {
-  const found = readAll()[ownerEmail]
+  const found = table.rows().find((r) => r.owner_email.toLowerCase() === ownerEmail.toLowerCase())
   if (!found) return defaultConfig()
-  // Merge over defaults so a config saved before a new section existed still enables it.
-  return { enabledSections: { ...defaultConfig().enabledSections, ...found.enabledSections } }
+  return { enabledSections: { ...defaultConfig().enabledSections, ...found.enabled_sections } }
 }
 
 export function saveOrgPortfolioConfig(ownerEmail: string, config: OrganisationPortfolioConfigV1): void {
-  const all = readAll()
-  all[ownerEmail] = config
-  writeAll(all)
+  const row: Row = { owner_email: ownerEmail.toLowerCase(), enabled_sections: config.enabledSections }
+  table.set([...table.rows().filter((r) => r.owner_email.toLowerCase() !== row.owner_email), row])
+  void persist(table, () => supabase.from('org_portfolio_config').upsert(row, { onConflict: 'owner_email' })).catch(() => undefined)
 }

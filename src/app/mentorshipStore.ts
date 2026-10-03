@@ -1,57 +1,35 @@
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
 import { emitEvent } from './eventBus'
 
-/**
- * V9 Unified Ecosystem Patch §5 — "Open to mentoring" already existed as a
- * name in Settings' visibility-controls list and §50.9.8's relationship
- * model, but the actual Settings toggle rendered uncontrolled with no
- * store behind it (a real §35 dead-toggle violation, same class of bug as
- * OpportunityHub's previously-inert career-stage buttons). Real, local,
- * persisted state — same temporary-scaffolding pattern as every other
- * store in this build.
- *
- * MenteeRequest is deliberately a separate type/store from
- * connectionStore.ts's ConnectionRecord — the patch is explicit that a
- * mentee request must not be merged into the Connection Request flow.
- */
+/** Mentorship, stored on the server: your mentoring availability (visible to people who can see your profile) and mentee requests (visible to the two people involved). */
 export interface MentorshipPreference {
   ownerEmail: string
   openToMentoring: boolean
   menteeCapacity: number
 }
 
-const PREFS_KEY = 'profile:demo-mentorship-prefs'
-
-function readPrefs(): MentorshipPreference[] {
-  try {
-    const raw = localStorage.getItem(PREFS_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface PrefRow {
+  owner_email: string
+  open_to_mentoring: boolean
+  mentee_capacity: number
 }
 
-function writePrefs(records: MentorshipPreference[]) {
-  try {
-    localStorage.setItem(PREFS_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const prefs = createServerTable<PrefRow>('mentorship_prefs')
+export const useMentorshipVersion = prefs.useVersion
+const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
 
 export function getMentorshipPreference(ownerEmail: string): MentorshipPreference {
-  const e = ownerEmail.toLowerCase()
-  return readPrefs().find((p) => p.ownerEmail.toLowerCase() === e) ?? { ownerEmail, openToMentoring: false, menteeCapacity: 0 }
+  const r = prefs.rows().find((p) => same(p.owner_email, ownerEmail))
+  return r ? { ownerEmail, openToMentoring: r.open_to_mentoring, menteeCapacity: r.mentee_capacity } : { ownerEmail, openToMentoring: false, menteeCapacity: 0 }
 }
 
 export function setMentorshipPreference(ownerEmail: string, patch: Partial<Pick<MentorshipPreference, 'openToMentoring' | 'menteeCapacity'>>): void {
-  const all = readPrefs()
-  const e = ownerEmail.toLowerCase()
-  const idx = all.findIndex((p) => p.ownerEmail.toLowerCase() === e)
-  const current = idx === -1 ? { ownerEmail, openToMentoring: false, menteeCapacity: 0 } : all[idx]
+  const current = getMentorshipPreference(ownerEmail)
   const next = { ...current, ...patch }
-  if (idx === -1) writePrefs([...all, next])
-  else writePrefs(all.map((p, i) => (i === idx ? next : p)))
+  const row: PrefRow = { owner_email: ownerEmail.toLowerCase(), open_to_mentoring: next.openToMentoring, mentee_capacity: Math.max(0, Math.min(200, Math.round(next.menteeCapacity))) }
+  prefs.set([...prefs.rows().filter((p) => !same(p.owner_email, ownerEmail)), row])
+  void persist(prefs, () => supabase.from('mentorship_prefs').upsert(row, { onConflict: 'owner_email' })).catch(() => undefined)
 }
 
 export type MenteeRequestStatus = 'pending' | 'accepted' | 'declined'
@@ -66,60 +44,49 @@ export interface MenteeRequest {
   respondedAt: string | null
 }
 
-const REQUESTS_KEY = 'profile:demo-mentee-requests'
-
-function readRequests(): MenteeRequest[] {
-  try {
-    const raw = localStorage.getItem(REQUESTS_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface ReqRow {
+  id: string
+  mentee_email: string
+  mentor_email: string
+  message: string
+  status: MenteeRequestStatus
+  requested_at: string
+  responded_at: string | null
 }
 
-function writeRequests(records: MenteeRequest[]) {
-  try {
-    localStorage.setItem(REQUESTS_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
+const requests = createServerTable<ReqRow>('mentee_requests')
+export const useMenteeRequestsVersion = requests.useVersion
+
+const toRequest = (r: ReqRow): MenteeRequest => ({ id: r.id, menteeEmail: r.mentee_email, mentorEmail: r.mentor_email, message: r.message, status: r.status, requestedAt: r.requested_at, respondedAt: r.responded_at })
 
 export function menteeRequestState(menteeEmail: string, mentorEmail: string): MenteeRequest | undefined {
-  const m = menteeEmail.toLowerCase()
-  const t = mentorEmail.toLowerCase()
-  return readRequests().find((r) => r.menteeEmail.toLowerCase() === m && r.mentorEmail.toLowerCase() === t)
+  const r = requests.rows().find((x) => same(x.mentee_email, menteeEmail) && same(x.mentor_email, mentorEmail))
+  return r ? toRequest(r) : undefined
 }
 
 export function sendMenteeRequest(menteeEmail: string, mentorEmail: string, message: string): void {
-  if (menteeEmail.toLowerCase() === mentorEmail.toLowerCase()) return
-  if (menteeRequestState(menteeEmail, mentorEmail)) return
-  const record: MenteeRequest = {
-    id: crypto.randomUUID(),
-    menteeEmail,
-    mentorEmail,
-    message,
-    status: 'pending',
-    requestedAt: new Date().toISOString(),
-    respondedAt: null,
-  }
-  writeRequests([...readRequests(), record])
-  void emitEvent('mentorship_request', mentorEmail, { deepLink: '/connections' })
+  if (same(menteeEmail, mentorEmail) || menteeRequestState(menteeEmail, mentorEmail)) return
+  const row: ReqRow = { id: crypto.randomUUID(), mentee_email: menteeEmail.toLowerCase(), mentor_email: mentorEmail.toLowerCase(), message: message.slice(0, 1000), status: 'pending', requested_at: new Date().toISOString(), responded_at: null }
+  requests.set([...requests.rows(), row])
+  void persist(requests, () => supabase.from('mentee_requests').insert({ id: row.id, mentee_email: row.mentee_email, mentor_email: row.mentor_email, message: row.message }))
+    .then(() => emitEvent('mentorship_request', mentorEmail, { deepLink: '/connections' }))
+    .catch(() => undefined)
 }
 
 export function respondToMenteeRequest(id: string, status: 'accepted' | 'declined'): void {
-  const all = readRequests()
-  const idx = all.findIndex((r) => r.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status, respondedAt: new Date().toISOString() }
-  writeRequests(all)
-  void emitEvent('mentorship_response', all[idx].menteeEmail, { deepLink: '/connections', vars: { detail: status } })
+  const target = requests.rows().find((r) => r.id === id)
+  requests.set(requests.rows().map((r) => (r.id === id ? { ...r, status, responded_at: new Date().toISOString() } : r)))
+  void persist(requests, () => supabase.rpc('respond_mentee_request', { p_id: id, p_status: status }))
+    .then(() => {
+      if (target) void emitEvent('mentorship_response', target.mentee_email, { deepLink: '/connections', vars: { detail: status } })
+    })
+    .catch(() => undefined)
 }
 
 export function listMenteeRequestsForMentor(mentorEmail: string): MenteeRequest[] {
-  const e = mentorEmail.toLowerCase()
-  return readRequests()
-    .filter((r) => r.mentorEmail.toLowerCase() === e)
+  return requests
+    .rows()
+    .filter((r) => same(r.mentor_email, mentorEmail))
+    .map(toRequest)
     .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))
 }

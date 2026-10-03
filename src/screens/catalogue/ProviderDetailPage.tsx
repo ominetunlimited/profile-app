@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { getProvider, listToolsForProvider } from '@/app/toolCatalogue'
-import { referenceCountForTool } from '@/app/providerReferenceStore'
+import { referenceCountForTool, useProviderReferencesVersion } from '@/app/providerReferenceStore'
 
 /**
  * §1.3 Provider Entity. A provider account (a real, separate account type
@@ -11,6 +11,7 @@ import { referenceCountForTool } from '@/app/providerReferenceStore'
  * never claiming verification or endorsement it can't back up.
  */
 export function ProviderDetailPage() {
+  useProviderReferencesVersion()
   const { id } = useParams<{ id: string }>()
   const provider = id ? getProvider(id) : undefined
 

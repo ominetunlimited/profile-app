@@ -1,41 +1,29 @@
-/**
- * Temporary client-only scaffolding, same caveats as demoAccountStore.ts.
- * §38.6a CommerceSettings: `storeActivated`/`sellingActivated`, both off by
- * default, both toggled only through Settings — exactly the mechanism
- * behind Store Hub's "Create Store" section gate.
- */
+import { supabase } from './supabaseClient'
+import { createServerTable, persist } from './serverTable'
+
+/** Whether you have switched on your store and selling, saved on the server (public.commerce_settings, private to you). */
 export interface CommerceSettings {
   storeActivated: boolean
   sellingActivated: boolean
 }
 
-const STORAGE_KEY = 'profile:demo-commerce-settings'
-
-function readAll(): Record<string, CommerceSettings> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
+interface Row {
+  owner_email: string
+  store_activated: boolean
+  selling_activated: boolean
 }
 
-function writeAll(all: Record<string, CommerceSettings>) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
-
+const table = createServerTable<Row>('commerce_settings')
+export const useCommerceVersion = table.useVersion
 const DEFAULTS: CommerceSettings = { storeActivated: false, sellingActivated: false }
 
 export function getCommerceSettings(ownerEmail: string): CommerceSettings {
-  return readAll()[ownerEmail] ?? DEFAULTS
+  const r = table.rows().find((x) => x.owner_email.toLowerCase() === ownerEmail.toLowerCase())
+  return r ? { storeActivated: r.store_activated, sellingActivated: r.selling_activated } : DEFAULTS
 }
 
 export function setCommerceSettings(ownerEmail: string, settings: CommerceSettings): void {
-  const all = readAll()
-  all[ownerEmail] = settings
-  writeAll(all)
+  const row: Row = { owner_email: ownerEmail.toLowerCase(), store_activated: settings.storeActivated, selling_activated: settings.sellingActivated }
+  table.set([...table.rows().filter((x) => x.owner_email.toLowerCase() !== row.owner_email), row])
+  void persist(table, () => supabase.from('commerce_settings').upsert(row, { onConflict: 'owner_email' })).catch(() => undefined)
 }

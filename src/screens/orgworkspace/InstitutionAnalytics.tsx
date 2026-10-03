@@ -1,12 +1,13 @@
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools, canAccessUniversityTools } from '@/app/accountTypes'
 import { OrgSubPageShell, HubAccessDenied, SectorAccessDenied } from './OrgWorkspaceShell'
-import { listSchemas } from '@/app/schemaStore'
+import { listSchemas, useSchemasVersion } from '@/app/schemaStore'
 
 /** §23/§16 Institution Analytics — verification volume trends. Real counts
  * from this institution's own schema/queue state, never fabricated trend
  * lines (build doc §49.8). */
 export function InstitutionAnalytics() {
+  useSchemasVersion()
   const { account } = useAccount()
   if (!account || !canAccessInstitutionHubTools(account)) {
     return <HubAccessDenied requiredHub="institutional_hub" />
