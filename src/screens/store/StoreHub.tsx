@@ -53,7 +53,7 @@ export function StoreHub() {
           )}
           {marketItems.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-              No listings yet — this is a real, always-visible browse surface (§19), ready for sellers once any exist
+              No listings yet — this is a real, always-visible browse surface, ready for sellers once any exist
               in this build.
             </div>
           ) : (
@@ -73,7 +73,7 @@ export function StoreHub() {
               <Link to="/settings?tab=commerce" className="font-semibold text-accent">
                 Settings → Commerce &amp; Selling
               </Link>{' '}
-              to list digital products or services here (§38.6a).
+              to list digital products or services here.
             </div>
           ) : (
             <div className="flex flex-col gap-4">

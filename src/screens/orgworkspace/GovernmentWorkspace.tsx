@@ -121,7 +121,7 @@ export function GovernmentWorkspace() {
           <span className="flex-none font-semibold text-text-2">ⓘ</span>
           <p>
             Licence confirmations, Compliance exports, and Analytics are scoped to regulatory authorities, licensing
-            boards, and professional councils (§34.2a). {account.legalName}'s own sector modules — country adapter
+            boards, and professional councils. {account.legalName}'s own sector modules — country adapter
             tools, IOTR, and regulatory licensing workflows — aren't built yet in this release. Staff, audit, and
             settings below are available now.
           </p>
@@ -193,12 +193,12 @@ export function GovernmentWorkspace() {
       {tab === 'staff' && (
         <div>
           <p className="mb-4 text-sm text-text-1">
-            Up to {MAX_STAFF} staff members (§42.3 Rule 3). Roles use this build's real permission system — the role
+            Up to {MAX_STAFF} staff members. Roles use this build's real permission system — the role
             you grant is the role that actually gates what they can do.
           </p>
           {!canAppointRoles ? (
             <div className="rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
-              Appointing staff roles requires super_admin or admin (§42.2) — view only for your role.
+              Appointing staff roles requires super_admin or admin — view only for your role.
             </div>
           ) : (
             <div className="mb-3.5 flex flex-wrap gap-2">

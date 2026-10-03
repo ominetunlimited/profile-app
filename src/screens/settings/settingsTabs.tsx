@@ -170,7 +170,7 @@ export function PrivacyTab() {
   return (
     <div className="flex flex-col gap-4">
       {account?.accountType === 'individual' && (
-        <Section title="Private Professional Mode (§9.7)">
+        <Section title="Private Professional Mode">
           <p className="mb-2 text-xs text-text-1">
             For anyone whose primary occupation can't be publicly named. Turning this on never weakens your Verified
             Identity badge or Trust Score — it just stops disclosing which legal name was verified.
@@ -196,7 +196,7 @@ export function PrivacyTab() {
       </Section>
       <Section title="CV visibility">
         <p className="mb-2 text-xs text-text-1">
-          Unlike Portfolio (always visible to anyone who can view your profile — §15.4), your CV has a real
+          Unlike Portfolio, your CV has a real
           visibility preference.
         </p>
         <SelectInput defaultValue="public">
@@ -523,7 +523,7 @@ export function LanguageTab() {
         </Field>
         <p className="text-xs text-text-1">
           Full translation coverage is applied to primary navigation, the Public Hero, and this selector so far —
-          the mechanism (§30.1) is real and complete; extending it across every remaining screen is a mechanical
+          the mechanism is real and complete; extending it across every remaining screen is a mechanical
           follow-up now that this infrastructure exists, not a design gap.
         </p>
       </div>
@@ -706,7 +706,7 @@ export function OrganisationTab() {
       <Section title="Team & roles">
         <p className="text-sm text-text-1">
           No staff invited yet — inviting staff needs a real matching-email registration flow this build doesn't
-          have (§42.3: staff join via an accept-before-active OrgStaffRecord, not a standalone admin account).
+          have.
         </p>
       </Section>
       {hub === 'institutional_hub' && (
@@ -719,7 +719,7 @@ export function OrganisationTab() {
       )}
       <Section title="Billing">
         <p className="text-sm text-text-1">
-          Plan management, invoice history, and payout details render here once real billing (§38.6d) exists — no
+          Plan management, invoice history, and payout details render here once real billing exists — no
           fabricated invoices in the meantime.
         </p>
       </Section>

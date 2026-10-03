@@ -28,13 +28,12 @@ export function LegalDocumentPage({ path }: { path: string }) {
         </nav>
 
         <div className="mb-6 rounded-lg border border-warning bg-surface-sunken p-4 text-xs leading-relaxed text-text-1">
-          Founder-facing starting copy, written in PROFILE's brand voice. This requires review by qualified legal
-          counsel in each operating jurisdiction before publication — standard practice for any platform handling
-          identity documents and credential data, not a gap in this build.
+          This document is a working draft and is being reviewed by qualified legal counsel in each operating
+          jurisdiction before it is finalised.
           {doc.pendingDraft && (
             <span className="mt-1 block font-semibold text-warning">
-              This specific document has no canonical text in the Master Prompt yet — the content below is a
-              structural placeholder grounded in the spec, pending full drafting.
+              The full text of this document is still being drafted — the summary below describes how PROFILE
+              handles this area in the meantime.
             </span>
           )}
         </div>

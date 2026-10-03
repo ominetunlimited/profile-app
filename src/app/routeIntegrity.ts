@@ -32,8 +32,6 @@ export interface RouteHealthRow {
 export interface RouteIntegrityReport {
   total: number
   duplicatePaths: string[]
-  byPhase: Record<number, number>
-  flagged: RouteEntry[]
   rows: RouteHealthRow[]
   healthyCount: number
   needsAttentionCount: number
@@ -61,12 +59,6 @@ export function checkRouteIntegrity(routes: RouteEntry[] = routeRegistry): Route
   }
   const duplicatePaths = [...seen.entries()].filter(([, count]) => count > 1).map(([path]) => path)
 
-  const byPhase: Record<number, number> = {}
-  for (const r of routes) {
-    byPhase[r.phase] = (byPhase[r.phase] ?? 0) + 1
-  }
-
-  const flagged = routes.filter((r) => r.note)
 
   const rows: RouteHealthRow[] = routes.map((r) => {
     const implemented = !NOT_YET_IMPLEMENTED.has(r.path)
@@ -85,8 +77,6 @@ export function checkRouteIntegrity(routes: RouteEntry[] = routeRegistry): Route
   return {
     total: routes.length,
     duplicatePaths,
-    byPhase,
-    flagged,
     rows,
     healthyCount: rows.filter((r) => r.status === 'Healthy').length,
     needsAttentionCount: rows.filter((r) => r.status === 'Needs attention').length,

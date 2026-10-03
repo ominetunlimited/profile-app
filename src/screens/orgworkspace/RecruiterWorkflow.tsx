@@ -94,7 +94,7 @@ export function RecruiterWorkflow() {
     <OrgSubPageShell title={selectedJob ? `${selectedJob.title} — pipeline` : 'Recruiter Workflow'} back={{ to: '/org/me/talent', label: `${orgLabel} workspace` }}>
       {!canManage && (
         <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
-          Managing the hiring pipeline requires super_admin, admin, or hr_manager (§42.2) — view only for your role.
+          Managing the hiring pipeline requires super_admin, admin, or hr_manager — view only for your role.
         </div>
       )}
 
@@ -272,7 +272,7 @@ export function RecruiterWorkflow() {
         </>
       )}
 
-      <p className="mt-6 text-sm text-text-1">Candidates apply with their verified PROFILE, never a CV upload (§18.1).</p>
+      <p className="mt-6 text-sm text-text-1">Candidates apply with their verified PROFILE, never a CV upload.</p>
     </OrgSubPageShell>
   )
 }

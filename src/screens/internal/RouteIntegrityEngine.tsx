@@ -77,7 +77,7 @@ export function RouteIntegrityEngine() {
 
         {report.needsAttentionCount === 0 && report.brokenCount === 0 ? (
           <div className="mb-6 rounded-lg border-l-4 border-success bg-surface-sunken p-4 text-sm text-text-0">
-            No broken references. The Handoff's own flagged gap
+            No broken references. The one flagged route
             (<span className="font-mono text-xs">/mission-control/executive-copilots</span>) is registered, not
             dangling — it renders a "being finished" shell rather than a dead link.
           </div>
@@ -87,24 +87,11 @@ export function RouteIntegrityEngine() {
             .map((r) => (
               <div key={r.path} className="mb-3 rounded-lg border-l-4 border-warning bg-surface-sunken p-4 text-sm">
                 <p className="font-mono text-xs text-text-2">{r.path}</p>
-                <p className="mt-1 text-text-1">{routeRegistry.find((rr) => rr.path === r.path)?.note ?? 'Flagged for review.'}</p>
+                <p className="mt-1 text-text-1">This route is flagged for review.</p>
               </div>
             ))
         )}
 
-        <details className="rounded-xl border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-text-0">
-            All {report.flagged.length} documented design decisions (route renames, dual-purpose routes, discrepancy flags)
-          </summary>
-          <div className="mt-3 flex flex-col gap-3">
-            {report.flagged.map((route) => (
-              <div key={route.path} className="border-t border-border pt-3 first:border-0 first:pt-0">
-                <p className="font-mono text-xs text-text-2">{route.path}</p>
-                <p className="mt-1 text-xs text-text-1">{route.note}</p>
-              </div>
-            ))}
-          </div>
-        </details>
       </main>
     </div>
   )

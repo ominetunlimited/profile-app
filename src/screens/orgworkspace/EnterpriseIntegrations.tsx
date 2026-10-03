@@ -36,7 +36,7 @@ export function EnterpriseIntegrations() {
     <OrgSubPageShell title="Integrations" crumb={`${account?.legalName ?? 'Organisation'} · Enterprise workspace`}>
       {!canEdit && (
         <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
-          Managing SSO and API keys requires super_admin or admin (§42.2) — view only for your role.
+          Managing SSO and API keys requires super_admin or admin — view only for your role.
         </div>
       )}
 
@@ -60,7 +60,7 @@ export function EnterpriseIntegrations() {
               <span className="rounded-full bg-warning-soft px-2.5 py-1 text-[11px] font-semibold text-warning">Not connected</span>
             </div>
             <p className="mb-3.5 text-sm text-text-1">
-              Identity federation requires backend SAML/OIDC support this build doesn't have yet (§38.18) — staff
+              Identity federation requires backend SAML/OIDC support this build doesn't have yet — staff
               sign in with their own PROFILE credentials until it does.
             </p>
             <Button variant="secondary" disabled={!canEdit}>
@@ -121,7 +121,7 @@ export function EnterpriseIntegrations() {
             needs — talent search read-only, verification write, or full workspace access.
           </p>
           <p className="mt-2 text-xs text-text-2">
-            Real key issuance requires the VXI API backend (§16.7) — these are placeholders to exercise the UI, never
+            Real key issuance requires the VXI API backend — these are placeholders to exercise the UI, never
             presented as functioning credentials.
           </p>
         </div>

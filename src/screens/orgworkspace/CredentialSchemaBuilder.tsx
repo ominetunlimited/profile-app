@@ -80,7 +80,7 @@ export function CredentialSchemaBuilder() {
       </p>
       {!canEdit && (
         <div className="mb-5 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
-          Your role ({account.orgRole}) can't edit schemas (§42.2) — view only.
+          Your role ({account.orgRole}) can't edit schemas — view only.
         </div>
       )}
 
@@ -116,7 +116,7 @@ export function CredentialSchemaBuilder() {
                 <Field label="Schema name">
                   <TextInput disabled={!canEdit} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. University Degree Verification" />
                 </Field>
-                <Field label="Verification type" hint="A schema confirms exactly one precise claim — never silently upgraded (§4.4).">
+                <Field label="Verification type" hint="A schema confirms exactly one precise claim — never silently upgraded.">
                   <SelectInput disabled={!canEdit} value={verificationType} onChange={(e) => setVerificationType(e.target.value as VerificationType)}>
                     {VERIFICATION_TYPES.map((t) => (
                       <option key={t} value={t}>

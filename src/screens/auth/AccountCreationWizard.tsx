@@ -279,7 +279,7 @@ export function AccountCreationWizard() {
           </div>
           <div className="mb-5 rounded-lg border border-border bg-surface-sunken p-3.5 text-xs leading-relaxed text-text-1">
             A PROFILE team member confirms the domain before the workspace goes live — until then it's{' '}
-            <span className="font-mono font-semibold">user_submitted</span> (Awaiting Organisational Claim, §50.4 IOTR).
+            <span className="font-mono font-semibold">user_submitted</span>.
           </div>
           <div className="flex gap-2">
             <Button disabled={!orgValid} onClick={() => patch({ step: 'org-consent' })}>

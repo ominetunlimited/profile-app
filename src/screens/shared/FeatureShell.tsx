@@ -14,11 +14,9 @@ export function FeatureShell({ route }: { route: RouteEntry }) {
       transition={{ duration: 0.2 }}
       className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-3 px-6 text-center"
     >
-      <span className="rounded-full border border-border bg-surface-sunken px-3 py-1 font-mono text-xs text-text-2">
-        Phase {route.phase} · {route.masterPromptRef}
-      </span>
+      <span className="rounded-full border border-border bg-surface-sunken px-3 py-1 text-xs font-medium text-text-2">Coming soon</span>
       <h1 className="text-xl font-semibold text-text-0">{route.screen}</h1>
-      <p className="text-sm text-text-1">This screen is being finished. It's registered and reachable — just not built yet.</p>
+      <p className="text-sm text-text-1">We're still finishing this part of PROFILE. It will appear here when it's ready.</p>
     </motion.main>
   )
 }

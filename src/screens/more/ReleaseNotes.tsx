@@ -1,31 +1,32 @@
 import { AppShell } from '@/shared/ui/AppShell'
 
-/**
- * Real changelog reflecting this build's actual phase history — not
- * marketing copy. Each entry corresponds to a real, verifiable body of work
- * in this codebase's own build sequence.
- */
+/** What's new in PROFILE, newest first. */
 const RELEASES = [
   {
-    label: 'Design Recovery & Navigation Patch',
+    label: 'October 2026',
     items: [
-      'Account-aware navigation: top bar, Hamburger Menu, and mobile bottom tabs now surface every real screen in the build, not just five',
-      'Real PROFILE brand assets (wordmark, mark, monochrome) wired into the header, auth, and onboarding instead of plain text',
-      'Full 248-country/territory list with real ISO codes and calling codes, replacing a 15-country placeholder',
-      'Profile photo and cover image upload, with real preview/persistence',
-      'Global search across routes, people, and organisations',
-      'Accessibility settings (reduce motion, high contrast, text size, screen-reader mode) now actually apply',
+      'Real-time messaging: messages, typing indicators, reactions, replies, voice notes and file sharing arrive instantly',
+      'Repost with your own comment, save posts, recommend, and share across posts, jobs and adverts',
+      'Communities and groups you can create, moderate and chat in',
+      'Notifications that group related activity and respect your preferences',
+      'Personalised recommendations that explain why they were suggested',
+      'Camera capture, on-device document scanning, and identity verification reviewed by a person',
     ],
   },
-  { label: 'Phase 7 — Hardening & Activation Audit', items: ['Closed several "present but non-functional" gaps (Trust Score, Home reactions, onboarding checklist)', 'Portfolio Organisation composability', 'Owner/Internal secondary access gate'] },
-  { label: 'Pre-Phase-7 Patch', items: ['CV header & sub-schema fields (education, certifications, languages, references)', 'Store Hub', 'Owner Content Console', 'Owner role & scoped Admins'] },
-  { label: 'Phase 6 — Cross-Platform', items: ['i18n & RTL support (10 languages)', 'Command palette (Ctrl+K)', 'Mobile responsiveness fixes'] },
-  { label: 'Phase 5 — Owner / Internal Tools', items: ['Mission Control', 'AI Decision Log', 'Route Integrity Engine'] },
-  { label: 'Phase 4 — Organisation / Institution / Government', items: ['Organisation, Institution, and Government workspaces', 'Credential Schema Builder', 'Verification Review'] },
-  { label: 'Phase 3 — Career Engine', items: ['10 CV templates and 10 Portfolio templates', 'Cover Letter, Advisor & Creator Hub, Creator Marketplace & Earnings'] },
-  { label: 'Phase 2 — Core Individual Product', items: ['Home, Profile & Trust, Settings, Notifications, Opportunity Hub, Messaging, Communities, Disputes, Learning'] },
-  { label: 'Phase 1 — Public Site & Auth', items: ['Public marketing pages, full account-creation flow, onboarding'] },
-  { label: 'Phase 0 — Foundation', items: ['Route registry, AccountContext, design token system'] },
+  {
+    label: 'September 2026',
+    items: [
+      'Account-aware navigation across the top bar, menu and mobile tabs',
+      'PROFILE brand assets throughout the header, sign-in and onboarding',
+      'Full country and territory list with real calling codes',
+      'Profile photo and cover image upload',
+      'Global search across pages, people and organisations',
+      'Accessibility settings (reduce motion, high contrast, text size, screen-reader mode) that apply across the app',
+      'Ten languages with right-to-left support, and a Ctrl+K command palette',
+      'Organisation, institution and government workspaces, Credential Schema Builder and Verification Review',
+      'Ten CV templates and ten portfolio templates, Cover Letter, Advisor, Creator Hub and Marketplace',
+    ],
+  },
 ]
 
 export function ReleaseNotes() {

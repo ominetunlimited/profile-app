@@ -152,11 +152,11 @@ export function HomePage() {
           {/* Design handoff gap audit — PROFILE Home.dc.html's 3-metric row.
               Values are real (own activity/verification data), not the
               mockup's illustrative "14"/"72%"/"38" — this build has no
-              Career Readiness Engine (§50.9.2) or profile-view tracking
+              Career Readiness Engine or profile-view tracking
               yet, so those two stay honestly "—"/0 rather than invented. */}
           <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <HomeMetric label="Verified records" value={verifiedCount} note="Records confirmed by an institution or employer." link={{ to: '/trust-passport', label: 'View all records' }} />
-            <HomeMetric label="Career readiness" value="—" note="No Career Readiness Engine exists in this build yet (§50.9.2)." link={{ to: '/career-growth', label: "See what's missing" }} />
+            <HomeMetric label="Career readiness" value="—" note="No Career Readiness Engine exists in this build yet." link={{ to: '/career-growth', label: "See what's missing" }} />
             <HomeMetric label="Profile views by verifiers" value={0} note="Recruiters and institutions only. Not a vanity count." link={{ to: '/notifications', label: 'Who viewed' }} />
           </div>
 
@@ -183,7 +183,7 @@ export function HomePage() {
                     <ActivityCard activity={item.activity} viewerAccount={account} viewerEmail={owner} />
                   )}
                   {/* Every 4th item, never the very first — a real, labelled,
-                      inline feed item, never an overlay (§7's hard rule). */}
+                      inline feed item, never an overlay. */}
                   {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
                     <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} viewerAccount={account} viewerEmail={owner} />
                   )}
@@ -363,7 +363,7 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
       <Field label="Skills demonstrated (optional)" hint="Comma-separated — these are what CV/Portfolio Skills sections and Discover matching pull from">
         <EntityAutocomplete value={skillsInput} onChange={setSkillsInput} fieldContext="skills" placeholder="e.g. React, Figma, Contract negotiation" />
       </Field>
-      <Field label="Tools used (optional)" hint="Comma-separated — distinct from skills, feeds your CV's Tools section (§4.8)">
+      <Field label="Tools used (optional)" hint="Comma-separated — distinct from skills, feeds your CV's Tools section">
         <EntityAutocomplete value={toolsInput} onChange={setToolsInput} fieldContext="tools" placeholder="e.g. Figma, AutoCAD, Salesforce" />
       </Field>
       <Field label="Collaborators (optional)" hint="Comma-separated names — self-reported, not linked to their PROFILE account yet">

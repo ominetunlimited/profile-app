@@ -44,7 +44,7 @@ export function LearningPage() {
         <h1 className="mb-2 text-xl font-bold text-text-0">Learning</h1>
         <p className="mb-6 text-sm text-text-1">
           Completing a course really adds it to your CV's Certifications section. It does not add Trust Score points
-          yet — §13.2's course_completed signal needs a real verification pipeline this build doesn't have, so that
+          yet — the course-completion signal needs a real verification pipeline this build doesn't have, so that
           part stays honestly unclaimed rather than fabricated.
         </p>
 

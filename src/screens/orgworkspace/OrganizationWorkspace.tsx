@@ -82,7 +82,7 @@ export function OrganizationWorkspace() {
           {!canManageHiring && (
             <div className="mb-4 rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
               Your role ({account?.accountType === 'organisation' ? account.orgRole : ''}) doesn't include hiring
-              management (§42.2) — you can browse, but posting or pipeline actions are read-only for you.
+              management — you can browse, but posting or pipeline actions are read-only for you.
             </div>
           )}
           <input
@@ -115,12 +115,12 @@ export function OrganizationWorkspace() {
       {tab === 'staff' && (
         <div>
           <p className="mb-4 text-sm text-text-1">
-            Up to {MAX_STAFF} staff members (§42.3 Rule 3). Roles use this build's real permission system, not a
+            Up to {MAX_STAFF} staff members. Roles use this build's real permission system, not a
             separate label — the role you grant is the role that actually gates what they can do.
           </p>
           {!canAppointRoles ? (
             <div className="rounded-lg border border-warning bg-surface-sunken p-3 text-sm text-text-1">
-              Appointing staff roles requires super_admin or admin (§42.2) — view only for your role.
+              Appointing staff roles requires super_admin or admin — view only for your role.
             </div>
           ) : (
             <div className="mb-3.5 flex flex-wrap gap-2">

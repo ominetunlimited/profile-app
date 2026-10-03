@@ -94,7 +94,7 @@ export function AnalyticsPage() {
         </section>
 
         <section className="rounded-xl border border-border bg-surface p-4">
-          <h2 className="mb-2 font-semibold text-text-0">Trust Score breakdown (§13.2)</h2>
+          <h2 className="mb-2 font-semibold text-text-0">Trust Score breakdown</h2>
           <p className="mb-3 text-xs text-text-1">
             Every signal below requires real institutional/employer/client verification — none exist yet in this
             build, so each contributes 0. This is a real computation over real (currently absent) inputs, not a
@@ -131,7 +131,7 @@ function BusinessAnalytics() {
       <div className="mx-auto max-w-[820px] px-4 py-8 sm:px-6">
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Analytics</h1>
         <p className="mb-6 text-sm text-text-1">
-          §23.2's organisation metrics, computed for real over this build's real data — there is no hiring pipeline,
+          Organisation metrics, computed for real over this build's real data — there is no hiring pipeline,
           staff-verification, or job-board backend yet, so every metric below is honestly 0/empty rather than a
           fabricated chart. Each activates automatically once the underlying feature (recruiter pipeline, staff
           verification, job postings) is built.

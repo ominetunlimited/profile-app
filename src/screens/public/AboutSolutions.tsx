@@ -4,10 +4,10 @@ import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 
 const SUMMARY_PANELS = [
-  { title: 'Identity Infrastructure', body: 'Every user has an immutable PID (§9.2). Names are never the identity — evidence is.' },
-  { title: 'Trust Model', body: 'Trust Score (§13) is built entirely from verified signals, weighted and versioned, never from followers or likes.' },
-  { title: 'Security Model', body: 'Encryption at rest and in transit, MFA, RLS on every table, full audit logging (§37).' },
-  { title: 'Verification Exchange (VXI)', body: 'The routing layer connecting users to institutions, employers, and regulators (§16).' },
+  { title: 'Identity Infrastructure', body: 'Every user has an immutable PID. Names are never the identity — evidence is.' },
+  { title: 'Trust Model', body: 'Trust Score is built entirely from verified signals, weighted and versioned, never from followers or likes.' },
+  { title: 'Security Model', body: 'Encryption at rest and in transit, MFA, RLS on every table, full audit logging.' },
+  { title: 'Verification Exchange (VXI)', body: 'The routing layer connecting users to institutions, employers, and regulators.' },
 ]
 
 const USE_CASES = [
@@ -15,7 +15,7 @@ const USE_CASES = [
   { who: 'Organisations', what: 'Faster hiring, verified staff, reduced fraud exposure' },
   { who: 'Universities', what: 'Automated alumni/degree verification at scale, lower admin cost' },
   { who: 'Governments', what: 'Credential transparency, workforce intelligence, fraud reduction' },
-  { who: 'Enterprises', what: 'White-label trust infrastructure, private verification networks (§38.18)' },
+  { who: 'Enterprises', what: 'White-label trust infrastructure, private verification networks' },
 ]
 
 const ROADMAP = [

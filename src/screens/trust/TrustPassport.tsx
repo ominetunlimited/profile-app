@@ -86,8 +86,7 @@ export function TrustPassport() {
               <span className="text-xs capitalize text-text-2">{trust.confidenceLevel} confidence</span>
             </div>
             <p className="mb-2 text-sm text-text-1">
-              Every point here traces to a real, sourced signal — never a follower, like, or view count (§13.2's own
-              hard rule).
+              Every point here traces to a real, sourced signal — never a follower, like, or view count.
             </p>
             <Link to="/trust" className="text-xs font-semibold text-accent">
               How trust scoring works →
@@ -234,7 +233,7 @@ export function TrustPassport() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Calculation matrix (§13.2)</h2>
+          <h2 className="mb-3 font-semibold text-text-0">Calculation matrix</h2>
           <p className="mb-3 text-xs text-text-1">
             Every signal below needs a real verification to contribute. Identity counts once a PROFILE reviewer
             approves your documents; the others still have no verification source in this build, so they stay at 0
@@ -270,7 +269,7 @@ export function TrustPassport() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Verification Center (§12)</h2>
+          <h2 className="mb-3 font-semibold text-text-0">Verification Center</h2>
           <p className="mb-3 text-xs text-text-1">
             Submitting here creates a real, persisted request — it does not fabricate an approval. No institution
             reviewer is wired to these individual requests yet in this build, so a real submission honestly stays at
@@ -292,7 +291,7 @@ export function TrustPassport() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-semibold text-text-0">Signal log (§13.3)</h2>
+          <h2 className="mb-3 font-semibold text-text-0">Signal log</h2>
           {trust.signals.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-6 text-center text-sm text-text-1">
               Nothing has actually been verified yet — a submission above only starts the process. No institution

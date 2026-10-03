@@ -117,7 +117,7 @@ function ApplyInner() {
           <div>
             <p className="mb-3 text-sm text-text-1">
               This is exactly what {orgDisplayName(job.orgEmail)} will see — your verified profile and CV, never your
-              private data (§6.2).
+              private data.
             </p>
             <div className="mb-4 overflow-hidden rounded-xl bg-surface-sunken p-4">
               <CvComponent cv={cv} />

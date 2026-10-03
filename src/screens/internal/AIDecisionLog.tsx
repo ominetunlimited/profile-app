@@ -53,7 +53,7 @@ export function AIDecisionLog() {
           <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
             <p className="mb-1 font-semibold text-text-0">No AI decisions logged yet.</p>
             <p className="mx-auto max-w-md">
-              PROFILE Advisor (§48.11) logs a real entry here every time someone asks it a question — none has been
+              PROFILE Advisor logs a real entry here every time someone asks it a question — none has been
               asked yet on this deployment, or the deployment has no ANTHROPIC_API_KEY configured. Cover Letter
               drafts are template-assembled from your own records, not AI-generated, so they never log here — that's
               correct, not a gap.
@@ -86,7 +86,7 @@ export function AIDecisionLog() {
         )}
 
         <div className="mt-6 rounded-xl border-l-4 border-warning bg-warning-soft p-4">
-          <div className="mb-1.5 font-semibold text-text-0">Policy rule enforced automatically — §48.0 AI Principles</div>
+          <div className="mb-1.5 font-semibold text-text-0">Policy rule enforced automatically — AI Principles</div>
           <p className="text-xs leading-relaxed text-text-1">
             AI may generate, organise, and suggest — never fabricate experience, qualifications, or achievements. An
             inference is never silently converted into a verified fact. Every AI output is labelled as such, and the

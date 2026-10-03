@@ -32,8 +32,8 @@ export function DisputeReview() {
         <div className="font-mono text-[11px] uppercase tracking-widest text-text-2">Internal · Trust Intelligence</div>
         <h1 className="text-lg font-semibold">Dispute Review</h1>
         <p className="max-w-[74ch] text-sm text-text-1">
-          Every dispute a user has actually filed (§50.1), across every account on this browser — real records, real
-          status transitions, all documented and timestamped per §26/§28.4's enforcement rules.
+          Every dispute a user has actually filed, across every account on this browser — real records, real
+          status transitions, all documented and timestamped under the platform's enforcement rules.
         </p>
       </header>
 

@@ -71,7 +71,7 @@ export function OwnerContentConsole() {
         <div className="font-mono text-[11px] uppercase tracking-widest text-text-2">Internal · Content</div>
         <h1 className="text-lg font-semibold">Owner Content Console</h1>
         <p className="max-w-[74ch] text-sm text-text-1">
-          Draft, schedule, and publish news, blog posts, and announcements. Staff-only (§3.4).
+          Draft, schedule, and publish news, blog posts, and announcements. Staff-only.
         </p>
       </header>
 

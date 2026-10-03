@@ -158,7 +158,7 @@ export function HubAccessDenied({ requiredHub }: { requiredHub: 'institutional_h
         </h1>
         <div className="mx-auto mb-4 flex max-w-xs flex-col gap-2 text-left text-sm">
           <Condition ok={hubOk} label={`Organisation type maps to ${requiredHub}`} />
-          <Condition ok={verifiedOk} label="Registry status is 'verified' (§50.4 IOTR)" />
+          <Condition ok={verifiedOk} label="Registry status is 'verified'" />
         </div>
         <p className="text-sm text-text-1">
           {!verifiedOk && 'A PROFILE team member confirms your domain and registration before this unlocks — no shortcut, not even for admins.'}
@@ -187,7 +187,7 @@ export function SectorAccessDenied({ toolName, scopeDescription }: { toolName: s
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="mb-3 text-lg font-semibold text-text-0">{toolName} isn't available for {account.orgType} accounts</h1>
         <p className="text-sm text-text-1">
-          This tool is scoped to {scopeDescription} (§34.2a) — a {account.orgType.toLowerCase()} account's hub access covers other
+          This tool is scoped to {scopeDescription} — a {account.orgType.toLowerCase()} account's hub access covers other
           tools, not this one.
         </p>
       </div>

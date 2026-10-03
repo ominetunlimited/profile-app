@@ -38,7 +38,7 @@ export function InstitutionAnalytics() {
       </div>
       <p className="mb-6 text-xs text-text-2">{published.length} published schema{published.length === 1 ? '' : 's'} on this institution's account.</p>
       <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-        No verification volume yet — trends populate once bulk ingestion (§16.3) or individual verification requests
+        No verification volume yet — trends populate once bulk ingestion or individual verification requests
         start flowing through your published schemas.
       </div>
     </OrgSubPageShell>

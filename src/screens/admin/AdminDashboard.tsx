@@ -21,7 +21,7 @@ export function AdminDashboard() {
         {platformRoleCan(admin.role, 'verification_queue') && (
           <Link to="/admin/verification" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
             <div className="mb-1 font-semibold text-text-0">Verification Queue</div>
-            <p className="text-sm text-text-1">Review organisation verification claims (§50.4 IOTR).</p>
+            <p className="text-sm text-text-1">Review organisation verification claims.</p>
           </Link>
         )}
         {platformRoleCan(admin.role, 'verification_queue') && (

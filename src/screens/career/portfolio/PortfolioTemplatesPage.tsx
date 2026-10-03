@@ -79,7 +79,7 @@ export function PortfolioTemplatesPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <InfoCard title="Mandatory visibility" body="Unlike a CV, Portfolio has no visibility toggle — it's shown to anyone who can view this profile at all (§15.4)." />
+          <InfoCard title="Mandatory visibility" body="Unlike a CV, Portfolio has no visibility toggle — it's shown to anyone who can view this profile at all." />
           <InfoCard title="Same record set, different structure" body="Every template pulls from the same recorded activities — the difference is which facts a given audience needs first." />
         </div>
       </div>

@@ -87,8 +87,8 @@ export function AdsCentrePage() {
       <div className="mx-auto max-w-[800px] px-4 py-8 sm:px-6">
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Ads Centre</h1>
         <p className="mb-6 text-sm text-text-1">
-          Sponsored content is always clearly labelled and never covers an activity, comment, or navigation (§7.1's
-          hard rule) — it's inserted inline in the feed, at a controlled interval.
+          Sponsored content is always clearly labelled and never covers an activity, comment, or navigation —
+          it's inserted inline in the feed, at a controlled interval.
         </p>
 
         {!creating ? (
