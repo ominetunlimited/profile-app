@@ -1,4 +1,5 @@
 import type { Account } from './accountTypes'
+import { listMyKyc } from './kycStore'
 
 /**
  * §13.2 TRUST_WEIGHTS, verbatim. Phase 7 hardening: ProfilePage previously
@@ -128,23 +129,34 @@ const ZERO_DIMENSIONS: TrustDimensions = {
   contributionTrust: 0,
 }
 
-export function computeTrustScore(_account: Account | null): TrustScoreResult {
-  // No verified signal source exists yet in this build (no identity/employment/
-  // academic/licence verification pipeline, no institutional confirmation, no
-  // client review system) — so the real, honest total is 0 for every account
-  // today, the same way the AI Decision Log is honestly empty with no AI
-  // Gateway connected. This stays a real function call rather than a
-  // hardcoded literal at the display site so wiring in a real signal later
-  // means adding a term to this sum, not hunting down a magic number in a
-  // component.
-  const total = 0
+export function computeTrustScore(account: Account | null): TrustScoreResult {
+  // The only real signal source today is a HUMAN-approved identity (KYC)
+  // review (kycStore.ts) — it earns the identity_verification weight. Every
+  // other signal still has no verification pipeline behind it, so those stay
+  // honestly 0 rather than estimated, and nothing here ever fabricates points
+  // (no auto-approval, no vendor liveness pass).
+  const email = !account ? '' : account.accountType === 'individual' ? account.email : account.officialEmail
+  const signals: TrustSignalEntry[] = []
+  const dimensions: TrustDimensions = { ...ZERO_DIMENSIONS }
+  const approved = email ? listMyKyc(email).find((k) => k.status === 'approved') : undefined
+  if (approved) {
+    signals.push({
+      type: 'identity_verification',
+      weight: TRUST_WEIGHTS.identity_verification,
+      source: 'PROFILE reviewer — identity documents checked',
+      date: approved.reviewedAt ?? approved.createdAt,
+      verified: true,
+    })
+    dimensions.identityTrust = TRUST_WEIGHTS.identity_verification
+  }
+  const total = signals.reduce((sum, s) => sum + s.weight, 0)
   const tier = TRUST_TIERS.find((t) => total >= t.range[0] && total <= t.range[1]) ?? TRUST_TIERS[0]
   return {
     total,
     tier,
-    confidenceLevel: 'low',
-    dimensions: ZERO_DIMENSIONS,
-    signals: [],
+    confidenceLevel: approved ? 'moderate' : 'low',
+    dimensions,
+    signals,
     formulaVersion: '13.2-v1',
     lastCalculated: new Date().toISOString(),
   }

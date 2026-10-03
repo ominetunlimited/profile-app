@@ -152,6 +152,10 @@ function removeCacheRow(id: string) {
 
 if (typeof window !== 'undefined') {
   loadCache()
+  // A session that signs in after page load (e.g. platform staff) must see the rows RLS now allows.
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void loadCache()
+  })
   joinRealtime(() =>
     supabase
     .channel('media-assets-cache')
@@ -170,6 +174,21 @@ export function onMediaAssetsChange(fn: () => void): () => void {
 
 export function useMediaAssetsCacheVersion(): number {
   return useSyncExternalStore(onMediaAssetsChange, () => cacheVersion, () => cacheVersion)
+}
+
+/** Fetch one asset row on demand (RLS decides) and cache it — used where a viewer may not have it loaded yet. */
+export async function ensureMediaAsset(id: string): Promise<MediaAsset | undefined> {
+  const have = cache.find((r) => r.id === id)
+  if (have) return rowToAsset(have)
+  const { data } = await supabase.from('media_assets').select('*').eq('id', id).maybeSingle()
+  if (!data) return undefined
+  upsertCacheRow(data as MediaAssetRow)
+  return rowToAsset(data as MediaAssetRow)
+}
+
+export function getMediaAssetById(id: string): MediaAsset | undefined {
+  const row = cache.find((r) => r.id === id)
+  return row ? rowToAsset(row) : undefined
 }
 
 export function listMediaFor(targetType: MediaTargetType, targetId: string): MediaAsset[] {

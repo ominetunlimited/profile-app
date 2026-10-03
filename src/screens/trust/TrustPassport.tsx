@@ -8,6 +8,10 @@ import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { uploadMediaAsset, type MediaAsset } from '@/app/mediaAssetStore'
+import { useKycVersion } from '@/app/kycStore'
+import { extractDocumentFields, recognizeDocument, type ExtractedFields } from '@/app/ocr'
+import { CameraCapture } from '@/shared/ui/CameraCapture'
+import { KycFlow } from './KycFlow'
 import {
   computeTrustScore,
   TRUST_DIMENSION_LABELS,
@@ -41,6 +45,7 @@ import { displayPid, listSharesFor, revokePassportShare, shareTrustPassport, typ
 export function TrustPassport() {
   const { account } = useAccount()
   const owner = account ? ownerKey(account) : ''
+  useKycVersion() // re-score live when a reviewer decides your identity check
   const trust = computeTrustScore(account)
   const [requests, setRequests] = useState(() => listVerificationRequests(owner))
   const [shares, setShares] = useState(() => listSharesFor(owner))
@@ -60,6 +65,7 @@ export function TrustPassport() {
     identityTrust: [], academicTrust: [], professionalTrust: [], employmentTrust: [],
     marketplaceTrust: [], organisationalTrust: [], recruitmentTrust: [], contributionTrust: [],
   }
+  const earned = (signal: string) => trust.signals.filter((s) => s.type === signal && s.verified).reduce((n, s) => n + s.weight, 0)
   for (const [signal, dimension] of Object.entries(TRUST_DIMENSION_SIGNAL_MAP)) {
     dimensionSignals[dimension].push(signal)
   }
@@ -230,8 +236,9 @@ export function TrustPassport() {
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Calculation matrix (§13.2)</h2>
           <p className="mb-3 text-xs text-text-1">
-            Every signal below needs a real institutional/employer/client verification to contribute — none exist
-            yet in this build, so each is honestly 0 rather than estimated.
+            Every signal below needs a real verification to contribute. Identity counts once a PROFILE reviewer
+            approves your documents; the others still have no verification source in this build, so they stay at 0
+            rather than being estimated.
           </p>
           {(Object.keys(TRUST_DIMENSION_LABELS) as (keyof TrustDimensions)[]).map((dim) => (
             <div key={dim} className="mb-3">
@@ -240,7 +247,7 @@ export function TrustPassport() {
                 {dimensionSignals[dim].map((signal) => (
                   <div key={signal} className="flex items-center justify-between rounded-lg border border-border px-3 py-1.5 text-xs">
                     <span className="text-text-1">{signal.replace(/_/g, ' ')}</span>
-                    <span className="font-mono text-text-2">0 / {TRUST_WEIGHTS[signal as keyof typeof TRUST_WEIGHTS]}</span>
+                    <span className={`font-mono ${earned(signal) > 0 ? "font-semibold text-success" : "text-text-2"}`}>{earned(signal)} / {TRUST_WEIGHTS[signal as keyof typeof TRUST_WEIGHTS]}</span>
                   </div>
                 ))}
               </div>
@@ -269,6 +276,11 @@ export function TrustPassport() {
             reviewer is wired to these individual requests yet in this build, so a real submission honestly stays at
             "Submitted" rather than being auto-approved to look finished.
           </p>
+          {account?.accountType === 'individual' && (
+            <div className="mb-4">
+              <KycFlow />
+            </div>
+          )}
           <VerificationSubmitForm owner={owner} onSubmitted={() => setRequests(listVerificationRequests(owner))} />
           {requests.length > 0 && (
             <div className="mt-4 flex flex-col gap-3">
@@ -309,6 +321,8 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
   const [document, setDocument] = useState<MediaAsset | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [scanOpen, setScanOpen] = useState(false)
+  const [scan, setScan] = useState<{ running: boolean; progress: number; found: Partial<ExtractedFields> | null }>({ running: false, progress: 0, found: null })
   const selectedModule = VERIFICATION_MODULES.find((m) => m.key === moduleKey)!
 
   return (
@@ -328,6 +342,45 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
       <Field label="Issuing institution / authority" hint="Resolves against real registered organisations on PROFILE where one matches — free text otherwise">
         <EntityAutocomplete value={issuerName} onChange={setIssuerName} fieldContext="tag_institution" multi={false} placeholder="e.g. University of Lagos" />
       </Field>
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-border-strong bg-surface-sunken p-3">
+        <Button variant="secondary" onClick={() => setScanOpen(true)}>Scan a document</Button>
+        <span className="min-w-0 flex-1 text-xs text-text-1">
+          Photograph a certificate, licence or ID and we'll read the details on your device to fill this in — you check and edit them before submitting.
+        </span>
+      </div>
+      {scan.running && (
+        <p role="status" className="text-xs text-text-1">Reading your document on this device… {Math.round(scan.progress * 100)}%</p>
+      )}
+      {scan.found && !scan.running && (
+        <p className="text-xs text-text-1">
+          {scan.found.confidence === 'low' ? "We couldn't read much from that photo — please type the details in." : `We read${scan.found.idNumber ? ` number ${scan.found.idNumber}` : ''}${scan.found.issuer ? ` from ${scan.found.issuer}` : ''} — check the fields below.`}
+        </p>
+      )}
+      <CameraCapture
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        title="Scan a document"
+        hint="Lay it flat in good light and fit it inside the frame"
+        onCapture={async (file) => {
+          setScan({ running: true, progress: 0, found: null })
+          try {
+            const { text } = await recognizeDocument(file, (p) => setScan((s) => ({ ...s, progress: p.progress })))
+            const found = extractDocumentFields(text)
+            setScan({ running: false, progress: 1, found })
+            if (found.idNumber) setIdentifierValue(found.idNumber)
+            if (found.issuer) setIssuerName(found.issuer)
+            // Keep the photo as the supporting document (private bucket).
+            setUploading(true)
+            try {
+              setDocument(await uploadMediaAsset({ file, ownerEmail: owner, targetType: 'credential', targetId: crypto.randomUUID() }))
+            } finally {
+              setUploading(false)
+            }
+          } catch {
+            setScan({ running: false, progress: 0, found: { confidence: 'low' } as Partial<ExtractedFields> })
+          }
+        }}
+      />
       <Field label="Supporting document (optional)" error={uploadError ?? undefined}>
         <input
           type="file"

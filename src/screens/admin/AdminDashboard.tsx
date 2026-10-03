@@ -24,6 +24,12 @@ export function AdminDashboard() {
             <p className="text-sm text-text-1">Review organisation verification claims (§50.4 IOTR).</p>
           </Link>
         )}
+        {platformRoleCan(admin.role, 'verification_queue') && (
+          <Link to="/admin/kyc" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Identity (KYC)</div>
+            <p className="text-sm text-text-1">Review submitted ID documents and selfies.</p>
+          </Link>
+        )}
         {platformRoleCan(admin.role, 'content_moderation') && (
           <Link to="/admin/content" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
             <div className="mb-1 font-semibold text-text-0">Content Moderation</div>

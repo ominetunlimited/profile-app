@@ -319,6 +319,7 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/admin', screen: 'Admin Dashboard', phase: 7, masterPromptRef: '§26/§37.6', gate: { kind: 'platform_admin' } },
   { path: '/admin/users', screen: 'Admin Users & Roles', phase: 7, masterPromptRef: '§37.11 user_management_and_role_assignment', gate: { kind: 'platform_admin' } },
   { path: '/admin/verification', screen: 'Admin Verification Queue', phase: 7, masterPromptRef: '§26/§50.4', gate: { kind: 'platform_admin' } },
+  { path: '/admin/kyc', screen: 'Admin Identity (KYC) Review', phase: 7, masterPromptRef: '§12 identity verification', gate: { kind: 'platform_admin' } },
   { path: '/admin/content', screen: 'Admin Content Moderation', phase: 7, masterPromptRef: '§26 content_moderation', gate: { kind: 'platform_admin' } },
   { path: '/admin/communities', screen: 'Admin Communities', phase: 7, masterPromptRef: '§50.6 Community & Moderation', gate: { kind: 'platform_admin' } },
   { path: '/admin/mission-control', screen: 'Admin Mission Control', phase: 7, masterPromptRef: '§37.11 platform_health', gate: { kind: 'platform_admin' } },

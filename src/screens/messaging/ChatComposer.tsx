@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { sendMessage, type AttachmentInput, type ChatMessage } from '@/app/messageStore'
+import { CameraCapture } from '@/shared/ui/CameraCapture'
 import { CHAT_ACCEPT, CHAT_MAX_FILES_PER_MESSAGE, validateChatFile, type ChatFileCategory } from '@/app/fileValidation'
 
 const isCoarsePointer = () => typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
@@ -30,6 +31,7 @@ export function ChatComposer({
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState<string | null>(null)
+  const [cameraOpen, setCameraOpen] = useState(false)
   const [recording, setRecording] = useState<{ startedAt: number } | null>(null)
   const [elapsed, setElapsed] = useState(0)
   const textRef = useRef<HTMLTextAreaElement>(null)
@@ -227,6 +229,9 @@ export function ChatComposer({
                 }}
               />
             </label>
+            <button type="button" onClick={() => setCameraOpen(true)} aria-label="Take a photo" title="Take a photo" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg border border-border-strong text-lg text-text-1 hover:border-accent">
+              📷
+            </button>
             <button type="button" onClick={startRecording} aria-label="Record a voice message" title="Record a voice message" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg border border-border-strong text-lg text-text-1 hover:border-accent">
               🎤
             </button>
@@ -263,6 +268,7 @@ export function ChatComposer({
           </div>
         </>
       )}
+      <CameraCapture open={cameraOpen} onClose={() => setCameraOpen(false)} onCapture={(f) => void addFiles([f])} title="Take a photo" guide="none" />
     </div>
   )
 }

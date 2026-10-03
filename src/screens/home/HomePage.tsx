@@ -7,6 +7,7 @@ import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { RepostCard } from '@/shared/ui/RepostCard'
 import { RecommendationsPanel } from '@/shared/ui/RecommendationsPanel'
+import { CameraCapture } from '@/shared/ui/CameraCapture'
 import { listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
@@ -322,6 +323,7 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
   // "cluttered" layout this was asked to avoid.
   const [filesOpen, setFilesOpen] = useState(false)
   const [stagedFiles, setStagedFiles] = useState<File[]>([])
+  const [cameraOpen, setCameraOpen] = useState(false)
   const [uploadState, setUploadState] = useState<{ posting: boolean; current: number; total: number; error: string | null }>({
     posting: false,
     current: 0,
@@ -408,6 +410,10 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
               }}
               className="mb-2.5 block w-full text-sm text-text-1"
             />
+            <button type="button" onClick={() => setCameraOpen(true)} className="mb-2.5 rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0">
+              📷 Take a photo
+            </button>
+            <CameraCapture open={cameraOpen} onClose={() => setCameraOpen(false)} onCapture={(f) => setStagedFiles((prev) => [...prev, f])} title="Take a photo" guide="none" />
             {stagedFiles.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 {stagedFiles.map((f, i) => (
