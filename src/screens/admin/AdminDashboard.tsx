@@ -72,6 +72,12 @@ export function AdminDashboard() {
             <p className="text-sm text-text-1">Every AI output that touched a user, and whether it was reviewed.</p>
           </Link>
         )}
+        {platformRoleCan(admin.role, 'platform_settings') && (
+          <Link to="/admin/settings" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Support &amp; alerts</div>
+            <p className="text-sm text-text-1">Support email, phone and customer care number, and Telegram alerts for your team.</p>
+          </Link>
+        )}
         {platformRoleCan(admin.role, 'mission_control') && (
           <Link to="/admin/route-integrity" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
             <div className="mb-1 font-semibold text-text-0">Route integrity</div>

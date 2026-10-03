@@ -17,6 +17,7 @@ const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin/mission-control', label: 'Mission Control', module: 'mission_control' },
   { to: '/admin/ai-decision-log', label: 'AI decision log', module: 'mission_control' },
   { to: '/admin/route-integrity', label: 'Route integrity', module: 'mission_control' },
+  { to: '/admin/settings', label: 'Support & alerts', module: 'platform_settings' },
 ]
 
 /** Real gate for the whole `/admin/*` tree — checks the live

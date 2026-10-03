@@ -58,6 +58,7 @@ import { AdminVerificationRequests } from '@/screens/admin/AdminVerificationRequ
 import { AdminDisputes } from '@/screens/admin/AdminDisputes'
 import { AdminMissionControl } from '@/screens/admin/AdminMissionControl'
 import { AdminAiDecisionLog } from '@/screens/admin/AdminAiDecisionLog'
+import { AdminSettings } from '@/screens/admin/AdminSettings'
 import { AdminRouteIntegrity } from '@/screens/admin/AdminRouteIntegrity'
 import { AdminDataRequests } from '@/screens/admin/AdminDataRequests'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
@@ -416,6 +417,14 @@ function elementFor(route: RouteEntry): ReactElement {
         <RequirePlatformAdmin>
           <AdminShell>
             <AdminAiDecisionLog />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/admin/settings':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminSettings />
           </AdminShell>
         </RequirePlatformAdmin>
       )

@@ -61,11 +61,11 @@ function rowToAdmin(r: PlatformAdminRow): PlatformAdmin {
  * emphasis on one master admin), and verification/compliance roles scoped
  * to verification work rather than given blanket access.
  */
-export type AdminModule = 'user_role_management' | 'verification_queue' | 'content_moderation' | 'mission_control' | 'data_requests'
+export type AdminModule = 'user_role_management' | 'verification_queue' | 'content_moderation' | 'mission_control' | 'data_requests' | 'platform_settings'
 
 export const PLATFORM_PERMISSION_MATRIX: Record<PlatformRole, AdminModule[]> = {
-  super_administrator: ['user_role_management', 'verification_queue', 'content_moderation', 'mission_control', 'data_requests'],
-  admin: ['verification_queue', 'content_moderation', 'mission_control', 'data_requests'],
+  super_administrator: ['user_role_management', 'verification_queue', 'content_moderation', 'mission_control', 'data_requests', 'platform_settings'],
+  admin: ['verification_queue', 'content_moderation', 'mission_control', 'data_requests', 'platform_settings'],
   moderator: ['content_moderation'],
   customer_support: ['content_moderation'],
   compliance_officer: ['verification_queue', 'mission_control', 'data_requests'],

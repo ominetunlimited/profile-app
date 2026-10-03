@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { FAQ_ITEMS } from './legal/faqContent'
+import { usePlatformSettings } from '@/app/platformSettings'
 
 const ARTICLES = [
   { title: 'How does verification work?', body: 'An institution or employer confirms your record directly — PROFILE never verifies on their behalf.' },
@@ -27,6 +28,19 @@ const CATEGORIES = [
 /** Help Centre: search the articles, or browse by topic. */
 export function HelpCentre() {
   const [query, setQuery] = useState('')
+  const contact = usePlatformSettings()
+  const contactRows: [string, string, string | null][] = contact
+    ? [
+        ['Email', contact.support_email ?? '', contact.support_email ? `mailto:${contact.support_email}` : null],
+        ['Phone', contact.support_phone ?? '', contact.support_phone ? `tel:${contact.support_phone.replace(/\s+/g, '')}` : null],
+        ['Customer care', contact.customer_care_number ?? '', contact.customer_care_number ? `tel:${contact.customer_care_number.replace(/\s+/g, '')}` : null],
+        ['WhatsApp', contact.whatsapp_number ?? '', contact.whatsapp_number ? `https://wa.me/${contact.whatsapp_number.replace(/[^\d]/g, '')}` : null],
+        ['Hours', contact.support_hours ?? '', null],
+        ['Office', contact.support_address ?? '', null],
+        ['Service status', contact.status_page_url ?? '', contact.status_page_url],
+      ]
+    : []
+  const shownContact = contactRows.filter(([, v]) => v)
   const q = query.trim().toLowerCase()
   const results = q
     ? [
@@ -78,6 +92,28 @@ export function HelpCentre() {
               </button>
             ))}
           </div>
+        )}
+
+        {shownContact.length > 0 && (
+          <section className="mt-10 rounded-xl border border-border bg-surface p-5" aria-labelledby="contact-support">
+            <h2 id="contact-support" className="mb-3 text-[13px] font-semibold text-text-0">Still need help? Contact us</h2>
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+              {shownContact.map(([label, value, href]) => (
+                <div key={label}>
+                  <dt className="text-xs text-text-2">{label}</dt>
+                  <dd className="text-text-0">
+                    {href ? (
+                      <a href={href} className="font-medium text-accent" target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                        {value}
+                      </a>
+                    ) : (
+                      value
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         )}
 
         <p className="mt-10 text-center text-sm text-text-1">

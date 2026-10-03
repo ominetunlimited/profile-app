@@ -225,6 +225,7 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/admin/communities', screen: 'Admin Communities', gate: { kind: 'platform_admin' } },
   { path: '/admin/mission-control', screen: 'Admin Mission Control', gate: { kind: 'platform_admin' } },
   { path: '/admin/ai-decision-log', screen: 'Admin AI Decision Log', gate: { kind: 'platform_admin' } },
+  { path: '/admin/settings', screen: 'Admin Support & Notifications', gate: { kind: 'platform_admin' } },
   { path: '/admin/route-integrity', screen: 'Admin Route Integrity', gate: { kind: 'platform_admin' } },
 
   // ---- Design Recovery Patch —  Hamburger Menu destinations with no ----
