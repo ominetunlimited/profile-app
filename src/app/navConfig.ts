@@ -107,6 +107,7 @@ export function hamburgerGroups({ account, staffRole }: NavContext): NavGroup[] 
     { key: 'communities', label: 'Communities', to: '/communities', show: !!account },
     { key: 'collaboration', label: 'Collaboration Hub', to: '/collaboration', show: !!account },
     { key: 'verification-inbox', label: 'Verification inbox', to: '/verification-inbox', show: isOrg },
+    { key: 'workspaces', label: 'Workspaces & invitations', to: '/workspaces', show: !!account },
     { key: 'recruiter-hub', label: 'Recruiter Hub', to: '/org/me/recruiter', show: isOrg && canAccessRecruiterHub(account) },
     { key: 'institution-hub', label: 'Institution Hub', to: '/institution/me', show: !!account && isOrg && canAccessInstitutionHubTools(account) },
     { key: 'org-dashboard', label: 'Organisation Dashboard', to: isOrg ? orgHome(account) : '#', show: isOrg },

@@ -1,26 +1,15 @@
-import { emitEvent } from './eventBus'
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 import type { OrgAdminRoleV3 } from './accountTypes'
 
 /**
- * §42.1/§42.3 Organisation staff roster — design handoff gap audit:
- * Organization/Institution/Government Workspace mockups all show a real
- * "Staff & roles" bulk-invite UI + staff table; the real build only ever
- * said "inviting staff requires a matching-email registration flow not
- * yet built." This is that real, local, persisted roster.
- *
- * Deliberate substitution from the mockup, flagged rather than silently
- * copied: the mockup's own role dropdown (Viewer/Reviewer/Recruiter/
- * Admin) is a simplified, illustrative list that doesn't correspond to
- * anything the real permission system understands. This build already has
- * a real, working 7-role permission matrix (accountTypes.ts's
- * OrgAdminRoleV3 / orgRoleCan(), §42.1/§42.2) used throughout
- * RecruiterWorkflow, VerificationReview, EnterpriseIntegrations, etc. —
- * inviting staff into a role name that permission-checking code doesn't
- * recognise would be worse fidelity to the product's actual behavior than
- * using the real role vocabulary, so the invite form offers the real
- * roles instead of the mockup's four illustrative labels.
+ * Organisation staff roster and invitations, server-side (public.org_staff, RLS-enforced).
+ * An organisation administrator invites people by email and role; the invitation is delivered in-app (a notification plus the
+ * Workspaces page), and the person accepts or declines. Accepted staff act for the organisation through their own login, and
+ * what they may do is decided by the database per role. There is no email delivery on this deployment.
  */
-export type OrgStaffStatus = 'invited' | 'active'
+export type OrgStaffStatus = 'invited' | 'active' | 'declined' | 'revoked'
 
 export interface OrgStaffRecord {
   id: string
@@ -29,74 +18,20 @@ export interface OrgStaffRecord {
   role: OrgAdminRoleV3
   status: OrgStaffStatus
   invitedAt: string
+  respondedAt: string | null
 }
 
-const STORAGE_KEY = 'profile:demo-org-staff'
-/** §42.3 Rule 3 — the existing 20-role cap this build's Patch Set 4 work
- * already established as the real constraint for this roster. */
+interface Row {
+  id: string
+  org_email: string
+  staff_email: string
+  role: OrgAdminRoleV3
+  status: OrgStaffStatus
+  invited_at: string
+  responded_at: string | null
+}
+
 export const MAX_STAFF = 20
-
-function readAll(): OrgStaffRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function writeAll(records: OrgStaffRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
-}
-
-export function listStaffFor(orgEmail: string): OrgStaffRecord[] {
-  const e = orgEmail.toLowerCase()
-  return readAll()
-    .filter((r) => r.orgEmail.toLowerCase() === e)
-    .sort((a, b) => b.invitedAt.localeCompare(a.invitedAt))
-}
-
-/** Bulk-invites a comma-separated list of emails into one role at once —
- * skips any email already on the roster rather than duplicating it, and
- * stops at MAX_STAFF total. */
-export function inviteStaffBulk(orgEmail: string, _orgName: string, emailsInput: string, role: OrgAdminRoleV3): OrgStaffRecord[] {
-  const all = readAll()
-  const existing = listStaffFor(orgEmail)
-  const existingEmails = new Set(existing.map((r) => r.staffEmail.toLowerCase()))
-  const room = Math.max(0, MAX_STAFF - existing.length)
-
-  const emails = emailsInput
-    .split(',')
-    .map((e) => e.trim())
-    .filter(Boolean)
-    .filter((e) => !existingEmails.has(e.toLowerCase()))
-    .slice(0, room)
-
-  const created: OrgStaffRecord[] = emails.map((staffEmail) => ({
-    id: crypto.randomUUID(),
-    orgEmail,
-    staffEmail,
-    role,
-    status: 'invited',
-    invitedAt: new Date().toISOString(),
-  }))
-
-  writeAll([...all, ...created])
-  for (const record of created) {
-    void emitEvent('staff_invite', record.staffEmail, { deepLink: '/notifications', vars: { role: role.replace(/_/g, ' ') } })
-  }
-  return created
-}
-
-export function revokeStaff(id: string): void {
-  const all = readAll()
-  writeAll(all.filter((r) => r.id !== id))
-}
 
 export const ACCESS_LABEL: Record<OrgAdminRoleV3, string> = {
   super_admin: 'Full access',
@@ -106,4 +41,96 @@ export const ACCESS_LABEL: Record<OrgAdminRoleV3, string> = {
   credential_manager: 'Credential issuance only',
   moderator: 'Content moderation only',
   compliance_officer: 'Audit & compliance only',
+}
+
+const toRecord = (r: Row): OrgStaffRecord => ({ id: r.id, orgEmail: r.org_email, staffEmail: r.staff_email, role: r.role, status: r.status, invitedAt: r.invited_at, respondedAt: r.responded_at })
+
+let cache: Row[] = []
+let version = 0
+const listeners = new Set<() => void>()
+const notify = () => {
+  version++
+  listeners.forEach((fn) => fn())
+}
+
+async function load() {
+  const { data, error } = await supabase.from('org_staff').select('*')
+  if (!error) cache = (data as Row[]) ?? []
+  notify()
+}
+
+if (typeof window !== 'undefined') {
+  void load()
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void load()
+  })
+  joinRealtime(() =>
+    supabase
+      .channel('org-staff')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'org_staff' }, () => void load())
+      .subscribe(),
+  )
+}
+
+export function useOrgStaffVersion(): number {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn)
+      return () => listeners.delete(fn)
+    },
+    () => version,
+    () => version,
+  )
+}
+
+/** The roster an organisation administrator manages: people invited or active (history of declined/removed is kept in the audit trail). */
+export function listStaffFor(orgEmail: string): OrgStaffRecord[] {
+  const e = orgEmail.toLowerCase()
+  return cache
+    .filter((r) => r.org_email.toLowerCase() === e && (r.status === 'invited' || r.status === 'active'))
+    .map(toRecord)
+    .sort((a, b) => b.invitedAt.localeCompare(a.invitedAt))
+}
+
+export function listMyInvitations(myEmail: string): OrgStaffRecord[] {
+  const e = myEmail.toLowerCase()
+  return cache.filter((r) => r.staff_email === e && r.status === 'invited').map(toRecord)
+}
+
+export function listMyMemberships(myEmail: string): OrgStaffRecord[] {
+  const e = myEmail.toLowerCase()
+  return cache.filter((r) => r.staff_email === e && r.status === 'active').map(toRecord)
+}
+
+export interface InviteResult {
+  invited: string[]
+  skipped: string[]
+  invalid: string[]
+}
+
+/** Invites a comma-separated list of emails into one role. Skips anyone already on the roster, and stops at the staff limit. */
+export async function inviteStaffBulk(emailsInput: string, role: OrgAdminRoleV3): Promise<InviteResult> {
+  const emails = emailsInput
+    .split(/[,;\s]+/)
+    .map((e) => e.trim())
+    .filter(Boolean)
+  const { data, error } = await supabase.rpc('org_invite_staff', { p_emails: emails, p_role: role })
+  if (error) throw new Error(error.message)
+  await load()
+  return data as InviteResult
+}
+
+/** Removes someone from the roster (an administrator), or leaves (the person themselves). */
+export async function endMembership(id: string): Promise<void> {
+  const { error } = await supabase.rpc('org_end_membership', { p_id: id })
+  if (error) throw new Error(error.message)
+  await load()
+}
+
+export const revokeStaff = endMembership
+
+export async function respondToInvitation(id: string, accept: boolean): Promise<void> {
+  const { error } = await supabase.rpc('org_respond_invite', { p_id: id, p_accept: accept })
+  if (error) throw new Error(error.message)
+  await load()
 }

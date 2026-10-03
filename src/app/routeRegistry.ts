@@ -177,7 +177,8 @@ export const routeRegistry: RouteEntry[] = [
     screen: 'Enterprise Integrations',
     gate: { kind: 'organisation' },
   },
-  { path: '/verification-inbox', screen: 'Verification Inbox', gate: { kind: 'organisation' } },
+  { path: '/verification-inbox', screen: 'Verification Inbox', gate: { kind: 'authenticated' } },
+  { path: '/workspaces', screen: 'Workspaces & invitations', gate: { kind: 'authenticated' } },
   {
     path: '/org/:id/recruiter',
     screen: 'Recruiter Workflow',

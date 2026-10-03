@@ -43,6 +43,7 @@ import { GovernmentAnalytics } from '@/screens/orgworkspace/GovernmentAnalytics'
 import { EnterpriseIntegrations } from '@/screens/orgworkspace/EnterpriseIntegrations'
 import { SavedPage } from '@/screens/more/SavedPage'
 import { VerificationInbox } from '@/screens/orgworkspace/VerificationInbox'
+import { WorkspacesPage } from '@/screens/orgworkspace/WorkspacesPage'
 import { RecruiterWorkflow } from '@/screens/orgworkspace/RecruiterWorkflow'
 import { StoreHub } from '@/screens/store/StoreHub'
 import { OwnerContentConsole } from '@/screens/internal/OwnerContentConsole'
@@ -515,11 +516,9 @@ function elementFor(route: RouteEntry): ReactElement {
         </RequireOrganisation>
       )
     case '/verification-inbox':
-      return (
-        <RequireOrganisation>
-          <VerificationInbox />
-        </RequireOrganisation>
-      )
+      return <VerificationInbox />
+    case '/workspaces':
+      return <WorkspacesPage />
     case '/org/:id/recruiter':
       return (
         <RequireOrganisation hub="business_hub">

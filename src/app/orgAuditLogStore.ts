@@ -1,46 +1,76 @@
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
+
 /**
- * §42.2 Compliance/Audit trail — design handoff gap audit: Organization/
- * Institution/Government Workspace mockups all show a real "Compliance"
- * tab with an audit trail of real workspace actions. Real, local,
- * persisted log entries, appended from the actual real actions that
- * happen in this build (staff invited/revoked, verification requests
- * approved/rejected) rather than seeded to look busy.
+ * An organisation's audit trail, server-side (public.org_audit_log). Entries are appended by the database when the roster
+ * changes or a verification decision is made, and by the app for other workspace actions; only the organisation's
+ * administrators and compliance officers can read them.
  */
 export interface OrgAuditEntry {
   id: string
   orgEmail: string
+  actorEmail: string | null
   text: string
   at: string
 }
 
-const STORAGE_KEY = 'profile:demo-org-audit-log'
-
-function readAll(): OrgAuditEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  org_email: string
+  actor_email: string | null
+  text: string
+  at: string
 }
 
-function writeAll(records: OrgAuditEntry[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+let cache: Row[] = []
+let version = 0
+const listeners = new Set<() => void>()
+const notify = () => {
+  version++
+  listeners.forEach((fn) => fn())
 }
 
-export function logOrgAction(orgEmail: string, text: string): void {
-  const record: OrgAuditEntry = { id: crypto.randomUUID(), orgEmail, text, at: new Date().toISOString() }
-  writeAll([...readAll(), record])
+async function load() {
+  const { data, error } = await supabase.from('org_audit_log').select('*').order('at', { ascending: false }).limit(500)
+  if (!error) cache = (data as Row[]) ?? []
+  notify()
+}
+
+if (typeof window !== 'undefined') {
+  void load()
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void load()
+  })
+  joinRealtime(() =>
+    supabase
+      .channel('org-audit')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'org_audit_log' }, () => void load())
+      .subscribe(),
+  )
+}
+
+export function useOrgAuditVersion(): number {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn)
+      return () => listeners.delete(fn)
+    },
+    () => version,
+    () => version,
+  )
 }
 
 export function listAuditLogFor(orgEmail: string): OrgAuditEntry[] {
   const e = orgEmail.toLowerCase()
-  return readAll()
-    .filter((r) => r.orgEmail.toLowerCase() === e)
+  return cache
+    .filter((r) => r.org_email.toLowerCase() === e)
+    .map((r) => ({ id: r.id, orgEmail: r.org_email, actorEmail: r.actor_email, text: r.text, at: r.at }))
     .sort((a, b) => b.at.localeCompare(a.at))
+}
+
+/** Appends an entry for an action the database doesn't already record itself. */
+export async function logOrgAction(orgEmail: string, text: string): Promise<void> {
+  const { error } = await supabase.rpc('org_log_action', { p_org: orgEmail, p_text: text })
+  if (error) console.error('Audit log write failed:', error.message)
 }

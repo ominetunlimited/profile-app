@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { AppShell } from '@/shared/ui/AppShell'
+import { ownerKey } from '@/app/activityStore'
+import { listMyMemberships, useOrgStaffVersion } from '@/app/orgStaffStore'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Button } from '@/shared/ui/Button'
 import { useAccount } from '@/app/AccountContext'
-import { useAccountsCacheVersion } from '@/app/demoAccountStore'
+import { findAccountByEmail, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { ensureMediaAsset, getSignedMediaUrl, type MediaAsset } from '@/app/mediaAssetStore'
 import {
   fetchVerificationEvents,
@@ -65,7 +68,16 @@ export function VerificationInbox() {
   const { account } = useAccount()
   useVerificationVersion()
   useAccountsCacheVersion()
-  const org = account?.accountType === 'organisation' ? account : null
+  const [params] = useSearchParams()
+  useOrgStaffVersion()
+  const ownOrg = account?.accountType === 'organisation' ? account : null
+  // A staff member opens an organisation's inbox with ?org=<email>; the database still checks their role on every read and decision.
+  const staffOrgEmail = !ownOrg ? params.get('org')?.toLowerCase() : undefined
+  const membership = staffOrgEmail && account ? listMyMemberships(ownerKey(account)).find((m) => m.orgEmail === staffOrgEmail) : undefined
+  const staffOrg = membership ? findAccountByEmail(membership.orgEmail) : undefined
+  const org = ownOrg ?? (staffOrg?.accountType === 'organisation' ? staffOrg : null)
+  const asStaff = !ownOrg && !!org
+  const canDecide = !asStaff || ['admin', 'verification_officer', 'credential_manager', 'compliance_officer'].includes(membership?.role ?? '')
   const [filter, setFilter] = useState<'open' | 'decided' | 'all'>('open')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -90,7 +102,7 @@ export function VerificationInbox() {
   if (!org) {
     return (
       <div className="mx-auto max-w-lg p-10 text-center text-sm text-text-1">
-        The verification inbox is for organisation accounts. <Link to="/home" className="font-semibold text-accent">Back to Home</Link>
+        The verification inbox is for organisations and their staff. <Link to="/workspaces" className="font-semibold text-accent">See your workspaces</Link>
       </div>
     )
   }
@@ -117,10 +129,11 @@ export function VerificationInbox() {
   }
 
   return (
-    <OrgWorkspaceShell title="Verification inbox" navItems={navItems}>
+    <Shell asStaff={asStaff} navItems={navItems}>
       <div className="mx-auto max-w-[1000px] p-4 sm:p-6">
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Verification inbox</h1>
-        <p className="mb-4 text-sm text-text-1">Requests from people asking {org.legalName} to confirm a record. Each decision is recorded and the person is told.</p>
+        <p className="mb-4 text-sm text-text-1">Requests from people asking {org.legalName} to confirm a record. Each decision is recorded and the person is told.{asStaff && membership ? ` You're here as ${membership.role.replace(/_/g, ' ')}.` : ''}</p>
+        {!canDecide && <p className="mb-4 rounded-lg border border-warning bg-warning-soft p-3 text-xs text-text-0">Your role can read these requests but not decide them.</p>}
         {!vetted && (
           <p className="mb-4 rounded-lg border border-warning bg-warning-soft p-3 text-xs text-text-0">
             {org.legalName} hasn't been verified by PROFILE yet, so you can acknowledge and review requests but not confirm them. Confirmation unlocks once PROFILE verifies the organisation.
@@ -235,19 +248,19 @@ export function VerificationInbox() {
                     )}
                     <div className="flex flex-wrap gap-2">
                       {selected.status === 'submitted' && (
-                        <Button variant="secondary" disabled={busy} onClick={() => void decide('received')}>
+                        <Button variant="secondary" disabled={busy || !canDecide} onClick={() => void decide('received')}>
                           Acknowledge
                         </Button>
                       )}
                       {selected.status !== 'under_review' && (
-                        <Button variant="secondary" disabled={busy} onClick={() => void decide('under_review')}>
+                        <Button variant="secondary" disabled={busy || !canDecide} onClick={() => void decide('under_review')}>
                           Start review
                         </Button>
                       )}
-                      <Button disabled={busy || !vetted} onClick={() => void decide('verified')} title={vetted ? undefined : 'Your organisation must be verified by PROFILE first'}>
+                      <Button disabled={busy || !vetted || !canDecide} onClick={() => void decide('verified')} title={vetted ? undefined : 'Your organisation must be verified by PROFILE first'}>
                         Confirm record
                       </Button>
-                      <Button variant="secondary" disabled={busy || note.trim().length < 3} onClick={() => void decide('rejected')}>
+                      <Button variant="secondary" disabled={busy || !canDecide || note.trim().length < 3} onClick={() => void decide('rejected')}>
                         Decline
                       </Button>
                     </div>
@@ -260,6 +273,10 @@ export function VerificationInbox() {
           </div>
         </div>
       </div>
-    </OrgWorkspaceShell>
+    </Shell>
   )
+}
+
+function Shell({ asStaff, navItems, children }: { asStaff: boolean; navItems: OrgNavItem[]; children: React.ReactNode }) {
+  return asStaff ? <AppShell>{children}</AppShell> : <OrgWorkspaceShell title="Verification inbox" navItems={navItems}>{children}</OrgWorkspaceShell>
 }
