@@ -69,33 +69,33 @@ export function NotificationCentre() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
-        <div className="mb-5 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-text-0">Notifications</h1>
-          <div className="flex items-center gap-3">
+      <div className="mx-auto max-w-[800px] px-4 pb-14 pt-7 sm:px-7">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold leading-tight tracking-tight text-text-0">Notifications</h1>
+          <div className="flex items-center gap-2">
             {items.some((i) => !i.read) && (
               <button
                 onClick={async () => {
                   await markAllRead(owner)
                   setItems(listNotifications(owner))
                 }}
-                className="text-xs font-semibold text-accent"
+                className="h-[34px] rounded-lg border border-border-strong bg-surface px-[13px] text-xs font-semibold text-text-0"
               >
                 Mark all read
               </button>
             )}
-            <Link to="/settings?tab=notifications" className="text-xs font-semibold text-text-1 hover:text-accent">
+            <Link to="/settings?tab=notifications" className="flex h-[34px] items-center rounded-lg border border-border-strong bg-surface px-[13px] text-xs font-semibold text-text-0">
               Preferences
             </Link>
           </div>
         </div>
-        <div className="mb-6 flex flex-wrap gap-1.5">
+        <div className="mb-5 mt-5 flex flex-wrap gap-[7px]">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               onClick={() => setTab(c)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                tab === c ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'
+              className={`rounded-full border-[1.5px] px-[13px] py-[7px] text-[11.5px] font-semibold ${
+                tab === c ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'
               }`}
             >
               {CATEGORY_LABEL[c]}
@@ -118,16 +118,16 @@ export function NotificationCentre() {
                     await markRead(n.id)
                     navigate(n.deepLink)
                   }}
-                  className={`flex items-start gap-3 rounded-xl border p-3.5 text-left ${n.read ? 'border-border bg-surface' : 'border-border bg-surface-sunken'}`}
+                  className={`flex items-start gap-3 rounded-xl border px-[15px] py-[13px] text-left ${n.read ? 'border-border bg-surface' : 'border-border bg-surface-sunken'}`}
                 >
-                  <span className={`flex h-8 w-8 flex-none items-center justify-center rounded-lg text-xs font-bold ${g.bg} ${g.ink}`}>{g.glyph}</span>
+                  <span className={`flex h-8 w-8 flex-none items-center justify-center rounded-[9px] text-xs font-bold ${g.bg} ${g.ink}`}>{g.glyph}</span>
                   <span className="min-w-0 flex-1">
                     <span className={`block text-sm text-text-0 ${n.read ? 'font-normal' : 'font-semibold'}`}>{n.text}</span>
-                    <span className="mt-0.5 block text-xs text-text-2">
+                    <span className="mt-[3px] block text-[11px] text-text-2">
                       {timeAgo(n.createdAt)} · {CATEGORY_LABEL[n.category]}{n.groupCount > 1 ? ` · ${n.groupCount} people` : ''}
                     </span>
                   </span>
-                  {!n.read && <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-accent" />}
+                  {!n.read && <span className="mt-[5px] h-2 w-2 flex-none rounded-full bg-accent" />}
                 </button>
               )
             })}

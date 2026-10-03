@@ -5,7 +5,8 @@ import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { JobCard } from '@/shared/ui/JobCard'
 import { useAccount } from '@/app/AccountContext'
-import { ownerKey } from '@/app/activityStore'
+import { ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
+import { matchJob, recordedSkills } from '@/app/opportunityMatch'
 
 /** §18.2 JOB_LISTING_FIELDS.types */
 const WORK_TYPES = ['remote', 'hybrid', 'on_site'] as const
@@ -32,87 +33,116 @@ type CareerCluster = (typeof CAREER_CLUSTERS)[number]
  * university/recruiter deep link should land exactly where it promised.
  */
 export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: CareerCluster; title?: string } = {}) {
-  const [workType, setWorkType] = useState<(typeof WORK_TYPES)[number] | 'all'>('all')
+  const [workTypes, setWorkTypes] = useState<Set<(typeof WORK_TYPES)[number]>>(() => new Set(WORK_TYPES))
+  const [minMatch, setMinMatch] = useState(0)
   const [query, setQuery] = useState('')
   const [cluster, setCluster] = useState<CareerCluster | null>(pinnedCluster ?? null)
   useJobsCacheVersion()
   useCampaignsCacheVersion()
+  useActivitiesCacheVersion()
   const { account } = useAccount()
+  const viewer = ownerKey(account)
+  const isIndividual = account?.accountType === 'individual'
+  const mySkills = isIndividual ? recordedSkills(viewer) : []
 
-  // V9 Unified Ecosystem Patch §10 — an advertiser paying for the
-  // 'opportunities' placement was previously charged for a surface that
-  // never rendered anything (only home_feed did); this closes that gap.
+  // A paid 'opportunities' placement renders as a labelled card at the top of the list.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('opportunities')
 
   const q = query.trim().toLowerCase()
-  const jobs = listOpenJobs().filter((j) => {
-    if (workType !== 'all' && j.workType !== workType) return false
-    if (!q) return true
-    return j.title.toLowerCase().includes(q) || j.description.toLowerCase().includes(q) || j.requiredSkills.some((s) => s.toLowerCase().includes(q)) || orgDisplayName(j.orgEmail).toLowerCase().includes(q)
-  })
+  const jobs = listOpenJobs()
+    .map((j) => ({ job: j, match: isIndividual ? matchJob(mySkills, j) : null }))
+    .filter(({ job: j, match }) => {
+      if (!workTypes.has(j.workType)) return false
+      if (minMatch > 0 && (match?.pct ?? 0) < minMatch) return false
+      if (!q) return true
+      return j.title.toLowerCase().includes(q) || j.description.toLowerCase().includes(q) || j.requiredSkills.some((s) => s.toLowerCase().includes(q)) || orgDisplayName(j.orgEmail).toLowerCase().includes(q)
+    })
+    .sort((x, y) => (y.match?.pct ?? -1) - (x.match?.pct ?? -1))
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[900px] px-4 py-8 sm:px-6">
-        <h1 className="mb-2 text-xl font-bold text-text-0">{title ?? 'Opportunity Hub'}</h1>
-        <p className="mb-6 text-sm text-text-1">
-          PROFILE is the application. One-tap apply submits your verified profile, trust score, and relevant
-          activities — never a separate CV upload.
-        </p>
+      <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-8">
+        <h1 className="mb-4 text-[26px] font-bold leading-tight tracking-tight text-text-0">{title ?? 'Opportunity Hub'}</h1>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title, skill, or organisation…"
-            className="min-h-[42px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
-          />
-          <select
-            value={workType}
-            onChange={(e) => setWorkType(e.target.value as typeof workType)}
-            className="min-h-[42px] rounded-lg border border-border-strong bg-surface px-3 text-sm"
-          >
-            <option value="all">Any work type</option>
-            {WORK_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t.replace('_', ' ')}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap gap-5">
+          <aside className="flex flex-[0_0_220px] flex-col gap-4" aria-label="Filters">
+            <div>
+              <div className="mb-2 text-[11.5px] font-semibold text-text-0">Type</div>
+              <div className="flex flex-col gap-[5px]">
+                {WORK_TYPES.map((t) => (
+                  <label key={t} className="flex items-center gap-[7px] text-[12.5px] capitalize text-text-1">
+                    <input
+                      type="checkbox"
+                      checked={workTypes.has(t)}
+                      onChange={() =>
+                        setWorkTypes((prev) => {
+                          const next = new Set(prev)
+                          if (next.has(t)) next.delete(t)
+                          else next.add(t)
+                          return next
+                        })
+                      }
+                    />
+                    {t.replace('_', ' ')}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label htmlFor="min-match" className="mb-2 block text-[11.5px] font-semibold text-text-0">Minimum match</label>
+              <input id="min-match" type="range" min={0} max={100} value={minMatch} onChange={(e) => setMinMatch(Number(e.target.value))} disabled={!isIndividual} className="w-full" />
+              <div className="text-[11px] text-text-1">{isIndividual ? `${minMatch}%+` : 'Sign in with an individual account to filter by match.'}</div>
+            </div>
+            <p className="border-t border-border pt-3 text-[11.5px] leading-relaxed text-text-1">
+              Match is computed from the skills on your recorded work against each listing's required skills — never from follower counts or profile views.
+            </p>
+          </aside>
+
+          <div className="min-w-0 flex-1 basis-[420px]">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by title, skill, or organisation…"
+                aria-label="Search opportunities"
+                className="min-h-[42px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
+              />
+            </div>
+
+            <div className="mb-4 flex flex-wrap gap-1.5">
+              {CAREER_CLUSTERS.map((c) => (
+                <button
+                  key={c}
+                  disabled={!!pinnedCluster}
+                  onClick={() => setCluster((current) => (current === c ? null : c))}
+                  className={`rounded-full border px-3 py-1 text-xs disabled:opacity-100 ${
+                    cluster === c ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {sponsoredCampaigns[0] && (
+              <div className="mb-3">
+                <SponsoredCard campaign={sponsoredCampaigns[0]} viewerAccount={account} viewerEmail={viewer} />
+              </div>
+            )}
+
+            {jobs.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
+                No opportunities posted yet{query || minMatch > 0 || workTypes.size < WORK_TYPES.length ? ' matching your filters' : ''}.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {jobs.map(({ job, match }) => (
+                  <JobCard key={job.id} job={job} viewerAccount={account} viewerEmail={viewer} matchPct={match?.pct} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="mb-6 flex flex-wrap gap-1.5">
-          {CAREER_CLUSTERS.map((c) => (
-            <button
-              key={c}
-              disabled={!!pinnedCluster}
-              onClick={() => setCluster((current) => (current === c ? null : c))}
-              className={`rounded-full border px-3 py-1 text-xs disabled:opacity-100 ${
-                cluster === c ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-
-        {sponsoredCampaigns[0] && (
-          <div className="mb-2">
-            <SponsoredCard campaign={sponsoredCampaigns[0]} viewerAccount={account} viewerEmail={ownerKey(account)} />
-          </div>
-        )}
-
-        {jobs.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-            No opportunities posted yet{query || workType !== 'all' ? ' matching your filters' : ''}.
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {jobs.map((j) => (
-              <JobCard key={j.id} job={j} viewerAccount={account} viewerEmail={ownerKey(account)} />
-            ))}
-          </div>
-        )}
       </div>
     </AppShell>
   )

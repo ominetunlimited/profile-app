@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { RepostCard } from '@/shared/ui/RepostCard'
@@ -22,10 +22,12 @@ import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { followOrg, followerCount, isFollowing, unfollowOrg, useFollowsCacheVersion } from '@/app/followStore'
 import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, useConnectionsCacheVersion, type RelationshipState } from '@/app/connectionStore'
+import { CareerStagePanel, JourneyPanel, SkillsByEvidencePanel, skillsByEvidence } from './EvidencePanels'
 import { getMentorshipPreference, menteeRequestState, sendMenteeRequest } from '@/app/mentorshipStore'
 
 const TABS = ['overview', 'cv-portfolio', 'skills-tools', 'reviews'] as const
 type Tab = (typeof TABS)[number]
+const TAB_LABEL: Record<Tab, string> = { overview: 'Overview', 'cv-portfolio': 'CV & Portfolio', 'skills-tools': 'Skills & Tools', reviews: 'Reviews' }
 
 /**
  * §24 Profile Page Architecture — one component serves both §24.1 (own
@@ -37,6 +39,7 @@ type Tab = (typeof TABS)[number]
 export function ProfilePage() {
   const { username } = useParams<{ username: string }>()
   const [params, setParams] = useSearchParams()
+  const navigate = useNavigate()
   const { account } = useAccount()
   const [tab, setTab] = useState<Tab>((params.get('tab') as Tab) ?? 'overview')
 
@@ -77,7 +80,6 @@ export function ProfilePage() {
   }
 
   const viewed = (isSelf ? account : otherAccount)!
-  const viewerEmail = isSelf ? ownerKey(account) : ownerKey(viewed)
   // §9.7 Private Professional Mode — never show a non-owner the legal name
   // when the account holder has set it private; falls back to the legal
   // name itself when public (the default) or when no alias was ever set.
@@ -101,7 +103,7 @@ export function ProfilePage() {
   // connections-only reposts from people who shouldn't see them).
   const profileReposts = listRepostsBy(targetKey).filter((r) => isSelf || r.visibility !== 'private')
   const trustScore = computeTrustScore(viewed)
-  const media = getProfileMedia(viewerEmail)
+  const media = getProfileMedia(targetKey)
 
   function selectTab(t: Tab) {
     setTab(t)
@@ -114,7 +116,7 @@ export function ProfilePage() {
         {media.coverDataUrl ? (
           <img src={media.coverDataUrl} alt="" className="h-36 w-full object-cover" />
         ) : (
-          <div className="h-36 bg-gradient-to-br from-accent/20 to-trust/10" />
+          <div className="h-36 bg-gradient-to-br from-accent-soft to-trust-soft" />
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-10 flex flex-wrap items-end gap-4">
@@ -178,7 +180,7 @@ export function ProfilePage() {
               never rendered for organisations, which have no personal badge concept. */}
           {viewed.accountType === 'individual' && <BadgesRow ownerAccount={viewed} />}
 
-          <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {(
               viewed.accountType === 'organisation'
                 ? [
@@ -194,18 +196,11 @@ export function ProfilePage() {
                     ['Verified Programmes', 0],
                   ]
                 : [
-                    ['Activities', activityCount],
-                    ['Trust Score', trustScore.total],
-                    // Individuals have no follow concept in this build (§4.2's
-                    // notification table only names Org Follow) — honestly 0, real
-                    // once one exists. Connections is real (connectionStore.ts).
-                    // Reviews/Verified items have no review system/verification
-                    // pipeline yet — honestly 0 rather than fabricated, same
-                    // reasoning as computeTrustScore()'s current-always-0 result.
-                    ['Followers', 0],
+                    // Real figures only — no follower, like or view counters.
+                    ['Records', activityCount],
+                    ['Trust Score', `${trustScore.total} / 1000`],
+                    ['Tier', trustScore.tier.label],
                     ['Connections', connectionCount(targetKey)],
-                    ['Reviews', 0],
-                    ['Verified items', 0],
                   ]
             ).map(([label, value]) => (
               <div key={label as string} className="rounded-lg border border-border p-2.5 text-center">
@@ -227,9 +222,9 @@ export function ProfilePage() {
             <button
               key={t}
               onClick={() => selectTab(t)}
-              className={`rounded-lg px-3 py-2 text-sm font-medium capitalize ${tab === t ? 'bg-surface-sunken text-text-0' : 'text-text-1'}`}
+              className={`rounded-lg px-3 py-2 text-sm font-medium ${tab === t ? 'bg-surface-sunken text-text-0' : 'text-text-1'}`}
             >
-              {t.replace('-', ' & ')}
+              {TAB_LABEL[t]}
             </button>
           ))}
         </nav>
@@ -262,6 +257,13 @@ export function ProfilePage() {
                   </div>
                 </div>
               )}
+              {viewed.accountType === 'individual' && (
+                <>
+                  <SkillsByEvidencePanel activities={activities} isSelf={isSelf} />
+                  <JourneyPanel activities={activities} onOpen={(id) => navigate(`/activity/${id}`)} />
+                  <CareerStagePanel stage={viewed.careerStage} recordCount={activityCount} skillCount={skillsByEvidence(activities).length} />
+                </>
+              )}
               {isSelf && <SelfTagRequestsPanel ownerEmail={ownerKey(viewed)} />}
               <EmptySection title="Verification status" body="No verification requests submitted yet — start from the Trust Centre." action={isSelf ? { label: 'Go to Trust Centre', to: '/trust-passport' } : undefined} />
             </div>
@@ -271,7 +273,7 @@ export function ProfilePage() {
             <CvPortfolioTab viewed={viewed} isSelf={isSelf} viewerAccount={account} canCv={canCv} canPortfolio={canPortfolio} />
           )}
 
-          {tab === 'skills-tools' && <EmptySection title="Skills & tools" body="Skills you tag on recorded activities appear here automatically." />}
+          {tab === 'skills-tools' && <SkillsByEvidencePanel activities={activities} isSelf={isSelf} />}
           {tab === 'reviews' && <EmptySection title="Client reviews" body="Verified reviews from clients and collaborators appear here." />}
         </div>
       </div>

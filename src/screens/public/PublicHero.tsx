@@ -31,6 +31,17 @@ const ILLUSTRATIVE_TRUST_SCORE: TrustScoreResult = {
   lastCalculated: new Date(0).toISOString(),
 }
 
+const JOURNEY = [
+  { glyph: '1', label: 'Identity', box: 'bg-surface border-border-strong text-text-0', size: 'h-[38px] w-[38px]', edge: 'var(--border-strong)' },
+  { glyph: '2', label: 'Evidence', box: 'bg-accent-soft border-accent text-accent', size: 'h-[38px] w-[38px]', edge: 'var(--accent)' },
+  { glyph: '✓', label: 'Verification', box: 'bg-trust-soft border-trust text-trust', size: 'h-11 w-11', edge: 'var(--trust)' },
+  { glyph: '★', label: 'Trust', box: 'bg-trust border-trust text-[#04222B] motion-safe:animate-[profile-pulse_2.4s_ease-in-out_infinite]', size: 'h-11 w-11', edge: 'var(--trust)' },
+  { glyph: '→', label: 'Opportunity', box: 'bg-gold-soft border-gold text-gold', size: 'h-[38px] w-[38px]', edge: 'var(--gold)' },
+  { glyph: '↑', label: 'Growth', box: 'bg-coral-soft border-coral text-coral', size: 'h-[38px] w-[38px]', edge: 'var(--coral)' },
+]
+
+const LOOP_TONES = ['bg-accent-soft text-accent', 'bg-trust-soft text-trust', 'bg-gold-soft text-gold', 'bg-coral-soft text-coral']
+
 const LOOP_CARDS = [
   { title: 'Record the work', body: 'Structured evidence — what happened, for whom, with what changed as a result.' },
   { title: 'Get it verified', body: 'The institution or person who was there confirms it directly, in their own words.' },
@@ -54,8 +65,21 @@ export function PublicHero() {
     <div className="min-h-screen bg-bg">
       <PublicHeader />
 
-      <section className="px-4 py-16 text-center sm:px-8 sm:py-20">
-        <div className="mx-auto flex max-w-[900px] flex-col items-center gap-4">
+      <section className="relative overflow-hidden px-4 py-16 text-center sm:px-8 sm:py-24">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(circle at 22% 18%, var(--accent-soft), transparent 55%), radial-gradient(circle at 82% 8%, var(--trust-soft), transparent 50%)' }}
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden text-text-2">
+          <div className="absolute start-[5%] top-[11%] h-[52px] w-[72px] rounded-lg border-2 border-current opacity-[.07]" />
+          <div className="absolute end-[6%] top-[6%] h-[66px] w-[66px] rounded-full border-2 border-current opacity-[.06]" />
+          <div className="absolute end-[8.4%] top-[10%] h-10 w-10 rounded-full border-2 border-current opacity-[.06]" />
+          <div className="absolute end-[7%] top-[46%] h-[76px] w-[62px] rounded-[5px] border-2 border-current opacity-[.06]" />
+          <div className="absolute start-[8%] top-[60%] h-9 w-14 -rotate-6 rounded-[5px] border-2 border-current opacity-[.06]" />
+          <div className="absolute bottom-[8%] end-[4%] h-[42px] w-[58px] rounded-lg border-2 border-current opacity-[.06]" />
+        </div>
+        <div className="relative mx-auto flex max-w-[900px] flex-col items-center gap-4">
           <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
             {t('hero.tag')}
           </span>
@@ -77,6 +101,19 @@ export function PublicHero() {
               {t('hero.cta.secondary')}
             </a>
           </div>
+          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-center">
+            {JOURNEY.map((n, i) => (
+              <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
+                <span className="flex flex-none flex-col items-center gap-2">
+                  <span className={`flex items-center justify-center rounded-full border-2 text-[13px] font-bold ${n.size} ${n.box}`}>{n.glyph}</span>
+                  <span className="whitespace-nowrap text-[10.5px] font-semibold text-text-1">{n.label}</span>
+                </span>
+                {i < JOURNEY.length - 1 && (
+                  <span aria-hidden className="mx-1.5 mt-[19px] h-0.5 min-w-[14px] flex-1" style={{ background: `linear-gradient(90deg, ${n.edge}, ${JOURNEY[i + 1].edge})` }} />
+                )}
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -112,7 +149,7 @@ export function PublicHero() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {LOOP_CARDS.map((c, i) => (
               <div key={c.title} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-                <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-surface-sunken text-sm font-bold text-accent">
+                <span className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${LOOP_TONES[i]}`}>
                   {i + 1}
                 </span>
                 <div className="mb-1.5 font-semibold text-text-0">{c.title}</div>

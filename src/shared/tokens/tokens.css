@@ -169,6 +169,10 @@ h1, h2, h3 {
   styles) since these are cross-cutting animation primitives, same reasoning
   as the theme tokens above. Durations/easings match §3.11's timing table.
 */
+@keyframes profile-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
 @keyframes profile-glow-breathe {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--trust) 35%, transparent); }
   50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--trust) 0%, transparent); }

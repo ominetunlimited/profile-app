@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
@@ -6,7 +6,9 @@ import { hubForOrgType } from '@/app/accountTypes'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
 import { changePassword, updateDemoAccount, useAccountsCacheVersion } from '@/app/demoAccountStore'
-import { ownerKey } from '@/app/activityStore'
+import { listActivities, ownerKey } from '@/app/activityStore'
+import { listVerificationRequests } from '@/app/verificationRequestStore'
+import { KIND_LABEL as REQUEST_KIND_LABEL, listMyDataRequests, submitDataRequest, type DataRequest, type DataRequestKind } from '@/app/dataRequestStore'
 import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
@@ -27,31 +29,40 @@ function Toggle({
   defaultChecked = false,
   checked,
   onChange,
+  soon = false,
 }: {
   label: string
   hint?: string
   defaultChecked?: boolean
   checked?: boolean
   onChange?: (next: boolean) => void
+  /** The control isn't connected to anything yet: shown off, disabled and labelled rather than pretending to save. */
+  soon?: boolean
 }) {
   const [uncontrolled, setUncontrolled] = useState(defaultChecked)
-  const on = checked ?? uncontrolled
+  const on = soon ? false : (checked ?? uncontrolled)
   function toggle() {
+    if (soon) return
     if (onChange) onChange(!on)
     else setUncontrolled((v) => !v)
   }
   return (
     <label className="flex items-center justify-between gap-4 border-b border-border py-3 last:border-0">
       <span>
-        <span className="block text-sm text-text-0">{label}</span>
+        <span className="block text-sm text-text-0">
+          {label}
+          {soon && <span className="ms-2 rounded-full border border-border-strong px-2 py-0.5 text-[10.5px] font-medium text-text-2">Coming soon</span>}
+        </span>
         {hint && <span className="block text-xs text-text-1">{hint}</span>}
       </span>
       <button
         type="button"
         role="switch"
         aria-checked={on}
+        aria-disabled={soon || undefined}
+        disabled={soon}
         onClick={toggle}
-        className={`h-6 w-11 flex-none rounded-full transition-colors ${on ? 'bg-accent' : 'bg-border-strong'}`}
+        className={`h-6 w-11 flex-none rounded-full transition-colors ${soon ? 'cursor-not-allowed opacity-50' : ''} ${on ? 'bg-accent' : 'bg-border-strong'}`}
       >
         <span className={`block h-5 w-5 translate-x-0.5 rounded-full bg-white transition-transform ${on ? 'translate-x-[22px]' : ''}`} />
       </button>
@@ -192,26 +203,26 @@ export function PrivacyTab() {
         </Section>
       )}
       <Section title="Visibility">
-        <Toggle label="Profile visibility" hint="Public — anyone can view your profile" defaultChecked />
-        <Toggle label="Credential visibility" hint="Show verified credentials to visitors" defaultChecked />
-        <Toggle label="Trust Passport visibility" hint="Allow sharing your Trust Passport via link" defaultChecked />
-        <Toggle label="Search engine indexing" hint="Let search engines index your public profile" defaultChecked />
-        <Toggle label="Recruiter access" hint="Allow recruiters to find you in Trust Search" defaultChecked />
+        <p className="mb-1 text-xs text-text-1">
+          Each record you post already has its own visibility (public, connections only or private). Account-wide controls arrive with the visibility engine, so they are not switchable yet.
+        </p>
+        <Toggle soon label="Profile visibility" hint="Who can find and view your full profile." />
+        <Toggle soon label="Credential visibility" hint="Show verified credentials to visitors." />
+        <Toggle soon label="Trust Passport visibility" hint="Allow sharing your Trust Passport via link." />
+        <Toggle soon label="Search engine indexing" hint="Whether your public profile appears in search results." />
+        <Toggle soon label="Recruiter access" hint="Whether organisations can discover you for roles." />
       </Section>
       <Section title="CV visibility">
-        <p className="mb-2 text-xs text-text-1">
-          Unlike Portfolio, your CV has a real
-          visibility preference.
-        </p>
-        <SelectInput defaultValue="public">
+        <p className="mb-2 text-xs text-text-1">Who can see your CV. Coming soon — your CV is currently shared only where you choose to attach it.</p>
+        <SelectInput defaultValue="public" disabled aria-label="CV visibility (coming soon)">
           <option value="public">Public</option>
           <option value="private">Private</option>
           <option value="organisations_only">Organisations only</option>
         </SelectInput>
       </Section>
       <Section title="Identity presentation mode">
-        <p className="mb-2 text-xs text-text-1">Changes what's shown, never the underlying verified evidence.</p>
-        <SelectInput defaultValue="standard">
+        <p className="mb-2 text-xs text-text-1">Changes what's shown, never the underlying verified evidence. Coming soon.</p>
+        <SelectInput defaultValue="standard" disabled aria-label="Identity presentation mode (coming soon)">
           <option value="standard">Standard — full profile</option>
           <option value="portfolio_only">Portfolio only — identity/contact suppressed</option>
           <option value="recruiter_mode">Recruiter mode</option>
@@ -291,20 +302,21 @@ export function CvExportTab() {
     <Section title="CV & export">
       <div className="flex flex-col gap-3 pt-2">
         <Field label="Template preference">
-          <SelectInput defaultValue="Modern Professional">
+          <SelectInput defaultValue="Modern Professional" disabled aria-label="Template preference (coming soon)">
             {['Executive', 'Corporate', 'Modern Professional', 'Minimalist', 'Creative'].map((t) => (
               <option key={t}>{t}</option>
             ))}
           </SelectInput>
         </Field>
         <Field label="Portfolio default view mode" hint="Only applies to a visitor who hasn't already picked their own view mode.">
-          <SelectInput defaultValue="grid">
+          <SelectInput defaultValue="grid" disabled aria-label="Portfolio default view mode (coming soon)">
             <option value="thumbnail">Thumbnail</option>
             <option value="grid">Grid</option>
             <option value="card_flip">Card flip</option>
           </SelectInput>
         </Field>
-        <Toggle label="Auto-include new evidence" hint="New verified activity is added to your CV automatically" defaultChecked />
+        <Toggle soon label="Auto-include new evidence" hint="New verified activity is added to your CV automatically" />
+        <p className="text-xs text-text-1">Template and view-mode defaults arrive soon; today you pick them on the CV and Portfolio pages.</p>
       </div>
     </Section>
   )
@@ -312,19 +324,28 @@ export function CvExportTab() {
 
 /** §25 SETTINGS_TABS.CareerJourney */
 export function CareerJourneyTab() {
-  const { account } = useAccount()
+  const { account, setAccount } = useAccount()
+  const [saved, setSaved] = useState(false)
+  async function changeStage(value: string) {
+    if (!account || account.accountType !== 'individual') return
+    const updated = { ...account, careerStage: (value || undefined) as typeof account.careerStage }
+    setAccount(updated)
+    await updateDemoAccount(account.email, updated)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
   return (
     <Section title="Career journey">
       <div className="flex flex-col gap-3 pt-2">
         <Field label="Career stage">
-          <SelectInput defaultValue={account?.accountType === 'individual' ? account.careerStage ?? '' : ''}>
+          <SelectInput value={account?.accountType === 'individual' ? account.careerStage ?? '' : ''} onChange={(e) => void changeStage(e.target.value)}>
             <option value="">Not set</option>
             <option value="student">Student</option>
             <option value="professional">Professional</option>
             <option value="freelancer">Freelancer</option>
           </SelectInput>
         </Field>
-        <p className="text-xs text-text-1">Update as you progress — set once at onboarding, editable here anytime.</p>
+        <p className="text-xs text-text-1">Update as you progress — set once at onboarding, editable here anytime.{saved && <span className="ms-2 text-success">Saved.</span>}</p>
       </div>
     </Section>
   )
@@ -369,9 +390,10 @@ export function CommerceTab() {
 export function AiAssistantTab() {
   return (
     <Section title="AI Assistant">
-      <Toggle label="Enable PROFILE Advisor" hint="Personal AI professional agent — fully optional" defaultChecked />
-      <Toggle label="Daily Return Engine suggestions" hint="Show suggested actions on Home" defaultChecked />
-      <Toggle label="AI data usage disclosure acknowledged" />
+      <p className="mb-1 text-xs text-text-1">PROFILE Advisor only reads what you paste or open in it, and never invents a credential or achievement. Account-wide AI controls are coming.</p>
+      <Toggle soon label="Enable PROFILE Advisor" hint="Personal AI professional agent — fully optional." />
+      <Toggle soon label="Suggested actions on Home" hint="Show suggested actions on Home." />
+      <Toggle soon label="AI data usage disclosure acknowledged" />
     </Section>
   )
 }
@@ -462,9 +484,9 @@ export function SecurityTab() {
         </div>
       </Section>
       <Section title="Multi-factor authentication">
-        <Toggle label="Authenticator app (TOTP)" hint="Requires a real TOTP backend — not connected in this build." />
-        <Toggle label="Email verification" defaultChecked hint="Already real — this is the code sent at sign-up and account recovery." />
-        <Toggle label="Passkeys (WebAuthn)" hint="Requires real WebAuthn registration — not connected in this build." />
+        <Toggle soon label="Authenticator app (TOTP)" hint="A 6-digit code from an authenticator app on unrecognised devices." />
+        <Toggle label="Email verification" checked hint="Always on — the code sent at sign-up and account recovery." onChange={() => undefined} />
+        <Toggle soon label="Passkeys (WebAuthn)" hint="Sign in with your device instead of a password." />
         <Toggle
           label="Suspicious login alerts"
           checked={alertsEnabled}
@@ -472,7 +494,7 @@ export function SecurityTab() {
             setAlertsEnabled(v)
             setSuspiciousLoginAlertsEnabled(v)
           }}
-          hint="Real: controls whether an unrecognised device is challenged with a code at sign-in."
+          hint="Whether an unrecognised device is challenged with a code at sign-in."
         />
       </Section>
       <Section title="Sessions & devices">
@@ -579,47 +601,143 @@ export function AccessibilityTab() {
   )
 }
 
-/** §25 SETTINGS_TABS.DataRights, implementing §27.4's compliance rights as real controls. */
+/** Data rights: a real download of your own data, plus auditable correction / consent / appeal / deletion requests. */
 export function DataRightsTab() {
+  const { account } = useAccount()
+  const email = account ? ownerKey(account) : ''
+  const [requests, setRequests] = useState<DataRequest[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState<DataRequestKind | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [details, setDetails] = useState<Partial<Record<DataRequestKind, string>>>({})
+
+  useEffect(() => {
+    let live = true
+    listMyDataRequests()
+      .then((r) => live && setRequests(r))
+      .catch(() => live && setError('Could not load your requests.'))
+    return () => {
+      live = false
+    }
+  }, [])
+
+  function downloadMyData() {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      account,
+      activities: listActivities(email),
+      verificationRequests: listVerificationRequests(email).map(({ documentDataUrl: _doc, ...rest }) => rest),
+    }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `profile-data-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function submit(kind: DataRequestKind) {
+    setError(null)
+    setPending(kind)
+    try {
+      const created = await submitDataRequest(email, kind, details[kind])
+      setRequests((r) => [created, ...(r ?? [])])
+      setDetails((d) => ({ ...d, [kind]: '' }))
+      setConfirmingDelete(false)
+    } catch {
+      setError('Could not submit that request. Please try again.')
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const rows: { kind: Exclude<DataRequestKind, 'delete'>; label: string; hint: string; placeholder: string }[] = [
+    { kind: 'correction', label: 'Request correction', hint: 'Ask us to correct inaccurate account data.', placeholder: 'What should be corrected?' },
+    { kind: 'withdraw_consent', label: 'Withdraw consent', hint: 'Revoke a previously granted consent.', placeholder: 'Which consent are you withdrawing?' },
+    { kind: 'appeal', label: 'Appeal a decision', hint: 'Dispute a verification or moderation outcome.', placeholder: 'Which decision, and why?' },
+  ]
+
   return (
     <Section title="Data rights">
       <div className="flex flex-col gap-3 pt-2">
-        <RightRow label="Download my data" hint="Export your CV and credential history at any time." />
-        <RightRow label="Request correction" hint="Ask us to correct inaccurate account data." />
-        <RightRow label="Withdraw consent" hint="Revoke a previously granted consent." />
-        <RightRow label="Appeal a decision" hint="Dispute a verification or moderation outcome." />
-        <div className="flex items-center justify-between border-t border-border pt-3">
+        <div className="flex items-center justify-between gap-3 border-b border-border py-2">
           <span>
-            <span className="block text-sm text-danger">Delete my account</span>
-            <span className="block text-xs text-text-1">Verification and audit records may be retained where legally required.</span>
+            <span className="block text-sm text-text-0">Export your data</span>
+            <span className="block text-xs text-text-1">Download your account details, recorded activities and verification history as a JSON file.</span>
           </span>
-          <button onClick={() => setConfirmingDelete(true)} className="rounded-lg border border-danger px-3 py-1.5 text-xs font-semibold text-danger">
-            Delete account
+          <button onClick={downloadMyData} className="flex-none rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0">
+            Download
+          </button>
+        </div>
+        {rows.map((r) => (
+          <div key={r.kind} className="border-b border-border py-2">
+            <div className="mb-1.5">
+              <span className="block text-sm text-text-0">{r.label}</span>
+              <span className="block text-xs text-text-1">{r.hint}</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={details[r.kind] ?? ''}
+                onChange={(e) => setDetails((d) => ({ ...d, [r.kind]: e.target.value }))}
+                placeholder={r.placeholder}
+                aria-label={r.label}
+                className="min-h-[36px] min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-3 text-xs outline-none focus-visible:border-accent"
+              />
+              <button
+                disabled={pending === r.kind || !(details[r.kind] ?? '').trim()}
+                onClick={() => void submit(r.kind)}
+                className="flex-none rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0 disabled:opacity-50"
+              >
+                {pending === r.kind ? 'Sending…' : 'Submit'}
+              </button>
+            </div>
+          </div>
+        ))}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <span>
+            <span className="block text-sm text-danger">Delete account</span>
+            <span className="block text-xs text-text-1">Removes your personal data. Records that institutions or employers independently verified may remain in their own systems.</span>
+          </span>
+          <button onClick={() => setConfirmingDelete(true)} className="flex-none rounded-lg border border-danger px-3 py-1.5 text-xs font-semibold text-danger">
+            Start deletion
           </button>
         </div>
         {confirmingDelete && (
-          <div role="alertdialog" className="rounded-lg border border-danger bg-surface-sunken p-3 text-sm text-text-0">
-            This is a demo build — account deletion isn't wired to a backend yet. No data was deleted.
-            <button onClick={() => setConfirmingDelete(false)} className="ml-2 font-semibold text-accent">
-              Dismiss
-            </button>
+          <div role="alertdialog" aria-label="Confirm account deletion request" className="rounded-lg border border-danger bg-surface-sunken p-3 text-sm text-text-0">
+            <p className="mb-2">This sends a deletion request for review. Your account stays active until it is approved, and you will be notified.</p>
+            <div className="flex gap-2">
+              <button disabled={pending === 'delete'} onClick={() => void submit('delete')} className="rounded-lg border border-danger px-3 py-1.5 text-xs font-semibold text-danger disabled:opacity-50">
+                {pending === 'delete' ? 'Sending…' : 'Send deletion request'}
+              </button>
+              <button onClick={() => setConfirmingDelete(false)} className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {error && (
+          <p role="alert" className="text-xs text-danger">
+            {error}
+          </p>
+        )}
+        {requests && requests.length > 0 && (
+          <div>
+            <div className="mb-1.5 text-xs font-semibold text-text-0">Your requests</div>
+            <ul className="divide-y divide-border rounded-lg border border-border">
+              {requests.map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
+                  <span className="min-w-0">
+                    <span className="block font-medium text-text-0">{REQUEST_KIND_LABEL[r.kind]}</span>
+                    <span className="block text-text-2">Requested {new Date(r.createdAt).toLocaleDateString()}</span>
+                  </span>
+                  <span className="flex-none rounded-full border border-border-strong px-2 py-0.5 font-medium capitalize text-text-1">{r.status.replace('_', ' ')}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
     </Section>
-  )
-}
-
-function RightRow({ label, hint }: { label: string; hint: string }) {
-  return (
-    <div className="flex items-center justify-between border-b border-border py-2 last:border-0">
-      <span>
-        <span className="block text-sm text-text-0">{label}</span>
-        <span className="block text-xs text-text-1">{hint}</span>
-      </span>
-      <button className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0">Request</button>
-    </div>
   )
 }
 

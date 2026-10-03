@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 
@@ -28,7 +28,12 @@ const TABS = ['about', 'solutions'] as const
 
 /** §43 About, Vision, Mission & Platform Narrative. */
 export function AboutSolutions() {
-  const [tab, setTab] = useState<(typeof TABS)[number]>('about')
+  const location = useLocation()
+  const [tab, setTab] = useState<(typeof TABS)[number]>(() => (location.hash === '#solutions' ? 'solutions' : 'about'))
+  useEffect(() => {
+    if (location.hash === '#solutions') setTab('solutions')
+    else if (location.hash === '#about') setTab('about')
+  }, [location.hash])
 
   return (
     <div className="min-h-screen bg-bg">

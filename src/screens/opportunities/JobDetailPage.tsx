@@ -9,6 +9,8 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { ActionBar } from '@/shared/ui/ActionBar'
+import { matchJob, recordedSkills } from '@/app/opportunityMatch'
+import { useActivitiesCacheVersion } from '@/app/activityStore'
 
 /**
  * §6 Job Adverts and Apply With PROFILE — a real detail page, not just the
@@ -20,6 +22,7 @@ export function JobDetailPage() {
   const { account } = useAccount()
   useJobsCacheVersion()
   useApplicationsCacheVersion()
+  useActivitiesCacheVersion()
   const job = id ? getJobById(id) : undefined
 
   if (!job) {
@@ -40,6 +43,7 @@ export function JobDetailPage() {
   const orgUsername = org && 'username' in org ? org.username : undefined
   const orgTrust = computeTrustScore(org ?? null)
   const isIndividualViewer = account?.accountType === 'individual'
+  const match = isIndividualViewer && job.requiredSkills.length > 0 ? matchJob(recordedSkills(ownerKey(account)), job) : null
   const existingApplication = isIndividualViewer ? myApplicationFor(job.id, ownerKey(account)) : undefined
 
   return (
@@ -66,7 +70,10 @@ export function JobDetailPage() {
           <ActionBar target={{ type: 'job', id: job.id }} viewerEmail={ownerKey(account)} viewerAccount={account} authorEmail={job.orgEmail} />
         </div>
 
-        <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">{job.title}</h1>
+        <div className="mb-1 flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="text-[22px] font-bold leading-tight tracking-tight text-text-0">{job.title}</h1>
+          {match && match.pct !== null && <span className="font-mono text-lg font-bold text-trust">{match.pct}% match</span>}
+        </div>
         <div className="mb-5 flex flex-wrap gap-2 text-xs text-text-2">
           <span className="rounded-full border border-border px-2 py-0.5">{job.workType.replace('_', ' ')}</span>
           {job.salaryRange && <span className="rounded-full border border-border px-2 py-0.5">{job.salaryRange}</span>}
@@ -89,6 +96,35 @@ export function JobDetailPage() {
               ))}
             </div>
           </section>
+        )}
+
+        {match && (
+          <>
+            <section className="mb-5">
+              <h2 className="mb-2 text-[13px] font-semibold text-text-0">Why this matches</h2>
+              {match.matched.length === 0 ? (
+                <p className="text-[12.5px] text-text-1">None of your recorded skills are listed for this role yet.</p>
+              ) : (
+                match.matched.map((s) => (
+                  <div key={s} className="flex gap-2 py-1.5 text-[12.5px] leading-normal text-text-0">
+                    <span className="font-bold text-success">✓</span>
+                    <span>You have recorded work demonstrating {s}.</span>
+                  </div>
+                ))
+              )}
+            </section>
+            {match.missing.length > 0 && (
+              <section className="mb-6">
+                <h2 className="mb-2 text-[13px] font-semibold text-text-0">What's missing</h2>
+                {match.missing.map((s) => (
+                  <div key={s} className="flex gap-2 py-1.5 text-[12.5px] leading-normal text-text-1">
+                    <span className="font-bold text-text-2">–</span>
+                    <span>No recorded work yet shows {s}.</span>
+                  </div>
+                ))}
+              </section>
+            )}
+          </>
         )}
 
         {isIndividualViewer ? (
