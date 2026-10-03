@@ -13,7 +13,7 @@ import { useAccount } from '@/app/AccountContext'
 import { activitiesStatus, listActivities, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { listVerificationRequests } from '@/app/verificationRequestStore'
+import { listVerificationRequests, useVerificationVersion } from '@/app/verificationRequestStore'
 import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
 import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
 import { useAccountsCacheVersion } from '@/app/demoAccountStore'
@@ -69,7 +69,7 @@ export function HomePage() {
   const [explainOpen, setExplainOpen] = useState(false)
   const versions =
     useActivitiesCacheVersion() + useAccountsCacheVersion() + useConnectionsCacheVersion() + useFollowsCacheVersion() + useJobsCacheVersion() +
-    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useCampaignsCacheVersion()
+    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useCampaignsCacheVersion() + useVerificationVersion()
   const { status, lastSyncedAt } = activitiesStatus()
   // The signed-in account's own activity plus real activity from people and organisations they follow or connect with, and reposts.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('home_feed')

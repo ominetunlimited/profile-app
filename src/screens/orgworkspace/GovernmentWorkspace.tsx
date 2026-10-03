@@ -5,7 +5,7 @@ import { canAccessGovernmentConsole, sectorForOrgType, orgRoleCan, type OrgAdmin
 import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
-import { listRequestsForIssuer, setVerificationRequestStatus, type VerificationRequest } from '@/app/verificationRequestStore'
+import { listRequestsForIssuerEmail, setVerificationRequestStatus, useVerificationVersion, type VerificationRequest } from '@/app/verificationRequestStore'
 import { ACCESS_LABEL, inviteStaffBulk, listStaffFor, revokeStaff, MAX_STAFF } from '@/app/orgStaffStore'
 import { listAuditLogFor, logOrgAction } from '@/app/orgAuditLogStore'
 
@@ -58,9 +58,9 @@ export function GovernmentWorkspace() {
   const owner = account ? ownerKey(account) : ''
   const canAppointRoles = account ? orgRoleCan(account, 'appointRoles') : false
 
-  const [requests, setRequests] = useState<VerificationRequest[]>(() =>
-    account ? listRequestsForIssuer(account.legalName).filter((r) => r.moduleKey === 'professional_licence') : [],
-  )
+  useVerificationVersion()
+  const requests = account?.accountType === 'organisation' ? listRequestsForIssuerEmail(account.officialEmail).filter((r) => r.moduleKey === 'professional_licence') : []
+  const [actionError, setActionError] = useState<string | null>(null)
   const [staff, setStaff] = useState(() => listStaffFor(owner))
   const [auditLog, setAuditLog] = useState(() => listAuditLogFor(owner))
   const [bulkEmails, setBulkEmails] = useState('')
@@ -69,10 +69,6 @@ export function GovernmentWorkspace() {
 
   if (!account || !canAccessGovernmentConsole(account)) {
     return <HubAccessDenied requiredHub="regulatory_console" />
-  }
-
-  function refreshRequests() {
-    setRequests(listRequestsForIssuer(account!.legalName).filter((r) => r.moduleKey === 'professional_licence'))
   }
 
   function toCsv(rows: VerificationRequest[]): string {
@@ -136,6 +132,11 @@ export function GovernmentWorkspace() {
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
+            {actionError && (
+              <p role="alert" className="text-xs text-danger">
+                {actionError}
+              </p>
+            )}
             {requests.map((r) => {
               const person = findAccountByEmail(r.ownerEmail)
               const s = statusDisplay(r.status)
@@ -153,11 +154,15 @@ export function GovernmentWorkspace() {
                   <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${s.bg} ${s.ink}`}>{s.label}</span>
                   {actionable && (
                     <button
-                      onClick={() => {
-                        setVerificationRequestStatus(r.id, 'verified')
-                        logOrgAction(owner, `Confirmed licence for ${person?.legalName ?? r.ownerEmail} (${r.moduleName}).`)
-                        refreshRequests()
-                        setAuditLog(listAuditLogFor(owner))
+                      onClick={async () => {
+                        setActionError(null)
+                        try {
+                          await setVerificationRequestStatus(r.id, 'verified')
+                          logOrgAction(owner, `Confirmed licence for ${person?.legalName ?? r.ownerEmail} (${r.moduleName}).`)
+                          setAuditLog(listAuditLogFor(owner))
+                        } catch (e) {
+                          setActionError((e as Error).message)
+                        }
                       }}
                       className="h-[34px] rounded-lg bg-accent-solid px-3.5 text-xs font-semibold text-white"
                     >

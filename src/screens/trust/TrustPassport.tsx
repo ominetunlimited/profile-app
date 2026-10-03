@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
@@ -23,7 +23,11 @@ import {
 } from '@/app/trustScore'
 import {
   listVerificationRequests,
+  resolveIssuerEmail,
   submitVerificationRequest,
+  useVerificationVersion,
+  fetchVerificationEvents,
+  type VerificationEvent,
   VERIFICATION_MODULES,
   VERIFICATION_TIMELINE,
   type VerificationModuleKey,
@@ -48,7 +52,8 @@ export function TrustPassport() {
   const owner = account ? ownerKey(account) : ''
   useKycVersion() // re-score live when a reviewer decides your identity check
   const trust = computeTrustScore(account)
-  const [requests, setRequests] = useState(() => listVerificationRequests(owner))
+  useVerificationVersion()
+  const requests = listVerificationRequests(owner)
   const [shares, setShares] = useState(() => listSharesFor(owner))
   const [shareModalOpen, setShareModalOpen] = useState(false)
 
@@ -266,16 +271,15 @@ export function TrustPassport() {
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Verification Center</h2>
           <p className="mb-3 text-xs text-text-1">
-            Submitting here creates a real, persisted request — it does not fabricate an approval. No institution
-            reviewer is wired to these individual requests yet in this build, so a real submission honestly stays at
-            "Submitted" rather than being auto-approved to look finished.
+            A request goes to the institution you name. If it has a PROFILE account it sees your request in its inbox and decides it itself;
+            if it isn't on PROFILE yet, PROFILE staff review it. Nothing is confirmed until they say so.
           </p>
           {account?.accountType === 'individual' && (
             <div className="mb-4">
               <KycFlow />
             </div>
           )}
-          <VerificationSubmitForm owner={owner} onSubmitted={() => setRequests(listVerificationRequests(owner))} />
+          <VerificationSubmitForm owner={owner} />
           {requests.length > 0 && (
             <div className="mt-4 flex flex-col gap-3">
               {requests.map((r) => (
@@ -308,7 +312,10 @@ export function TrustPassport() {
   )
 }
 
-function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmitted: () => void }) {
+function VerificationSubmitForm({ owner }: { owner: string }) {
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [sentTo, setSentTo] = useState<string | null>(null)
   const [moduleKey, setModuleKey] = useState<VerificationModuleKey>('identity')
   const [identifierValue, setIdentifierValue] = useState('')
   const [issuerName, setIssuerName] = useState('')
@@ -405,26 +412,46 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
         {uploading && <p className="mt-1 text-xs text-text-2">Uploading…</p>}
         {document && !uploading && <p className="mt-1 text-xs text-success">Uploaded — {document.copyrightId}</p>}
       </Field>
+      {issuerName.trim() && (
+        <p className="text-xs text-text-1">
+          {resolveIssuerEmail(issuerName)
+            ? `${issuerName.trim()} is on PROFILE — it will see this in its inbox.`
+            : `${issuerName.trim()} isn't a PROFILE organisation yet, so PROFILE staff will review this request.`}
+        </p>
+      )}
+      {submitError && (
+        <p role="alert" className="text-xs text-danger">
+          {submitError}
+        </p>
+      )}
+      {sentTo && <p className="text-xs text-success">Request sent to {sentTo}. You'll be notified of every update.</p>}
       <Button
-        disabled={!identifierValue.trim() || !issuerName.trim() || uploading}
-        onClick={() => {
-          submitVerificationRequest({
-            ownerEmail: owner,
-            moduleKey,
-            moduleName: selectedModule.name,
-            identifierValue,
-            issuerName,
-            documentDataUrl: null,
-            documentMediaAssetId: document?.id ?? null,
-            documentCopyrightId: document?.copyrightId ?? null,
-          })
-          setIdentifierValue('')
-          setIssuerName('')
-          setDocument(null)
-          onSubmitted()
+        disabled={!identifierValue.trim() || !issuerName.trim() || uploading || submitting}
+        onClick={async () => {
+          setSubmitting(true)
+          setSubmitError(null)
+          setSentTo(null)
+          try {
+            await submitVerificationRequest({
+              ownerEmail: owner,
+              moduleKey,
+              moduleName: selectedModule.name,
+              identifierValue,
+              issuerName,
+              documentMediaAssetId: document?.id ?? null,
+              documentCopyrightId: document?.copyrightId ?? null,
+            })
+            setSentTo(issuerName.trim())
+            setIdentifierValue('')
+            setIssuerName('')
+            setDocument(null)
+          } catch (e) {
+            setSubmitError((e as Error).message)
+          }
+          setSubmitting(false)
         }}
       >
-        Submit for verification
+        {submitting ? 'Sending…' : 'Submit for verification'}
       </Button>
     </div>
   )
@@ -433,6 +460,16 @@ function VerificationSubmitForm({ owner, onSubmitted }: { owner: string; onSubmi
 function VerificationRequestCard({ request }: { request: VerificationRequest }) {
   const currentIndex = VERIFICATION_TIMELINE.indexOf(request.status)
   const isRejected = request.status === 'rejected'
+  const [events, setEvents] = useState<VerificationEvent[] | null>(null)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    let live = true
+    void fetchVerificationEvents(request.id).then((e) => live && setEvents(e)).catch(() => live && setEvents([]))
+    return () => {
+      live = false
+    }
+  }, [open, request.id, request.status])
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center justify-between">
@@ -444,7 +481,7 @@ function VerificationRequestCard({ request }: { request: VerificationRequest }) 
         {request.documentCopyrightId && <span className="ml-1.5 text-text-2">· 📎 {request.documentCopyrightId}</span>}
       </p>
       {isRejected ? (
-        <p className="text-xs text-danger">Rejected — appeal available.</p>
+        <p className="text-xs text-danger">Not confirmed{request.decisionNote ? `: ${request.decisionNote}` : '.'}</p>
       ) : (
         <div className="flex items-center gap-1">
           {VERIFICATION_TIMELINE.map((step, i) => (
@@ -456,6 +493,21 @@ function VerificationRequestCard({ request }: { request: VerificationRequest }) 
         </div>
       )}
       {!isRejected && <p className="mt-1.5 text-[10.5px] uppercase tracking-wide text-text-2">{request.status.replace(/_/g, ' ')}</p>}
+      {request.status === 'verified' && request.decisionNote && <p className="mt-1 text-xs text-text-1">Note from {request.issuerName}: {request.decisionNote}</p>}
+      <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className="mt-2 text-[11px] font-semibold text-accent">
+        {open ? 'Hide history' : 'Show history'}
+      </button>
+      {open && (
+        <ol className="mt-2 flex flex-col gap-1.5 border-s border-border ps-3 text-[11px] text-text-1">
+          {(events ?? []).map((e) => (
+            <li key={e.id}>
+              <span className="font-medium capitalize text-text-0">{e.toStatus.replace(/_/g, ' ')}</span> · {new Date(e.at).toLocaleString()}
+              {e.note && <span> — {e.note}</span>}
+            </li>
+          ))}
+          {events && events.length === 0 && <li>Submitted. No decisions yet.</li>}
+        </ol>
+      )}
     </div>
   )
 }

@@ -616,7 +616,7 @@ export function DataRightsTab() {
       exportedAt: new Date().toISOString(),
       account,
       activities: listActivities(email),
-      verificationRequests: listVerificationRequests(email).map(({ documentDataUrl: _doc, ...rest }) => rest),
+      verificationRequests: listVerificationRequests(email),
     }
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
     const a = document.createElement('a')

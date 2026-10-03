@@ -9,6 +9,7 @@ const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin/users', label: 'Users & Roles', module: 'user_role_management' },
   { to: '/admin/verification', label: 'Verification Queue', module: 'verification_queue' },
   { to: '/admin/kyc', label: 'Identity (KYC)', module: 'verification_queue' },
+  { to: '/admin/verification-requests', label: 'Unrouted requests', module: 'verification_queue' },
   { to: '/admin/content', label: 'Content Moderation', module: 'content_moderation' },
   { to: '/admin/communities', label: 'Communities', module: 'content_moderation' },
   { to: '/admin/data-requests', label: 'Data requests', module: 'data_requests' },

@@ -177,6 +177,7 @@ export const routeRegistry: RouteEntry[] = [
     screen: 'Enterprise Integrations',
     gate: { kind: 'organisation' },
   },
+  { path: '/verification-inbox', screen: 'Verification Inbox', gate: { kind: 'organisation' } },
   {
     path: '/org/:id/recruiter',
     screen: 'Recruiter Workflow',
@@ -217,6 +218,7 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/admin/users', screen: 'Admin Users & Roles', gate: { kind: 'platform_admin' } },
   { path: '/admin/verification', screen: 'Admin Verification Queue', gate: { kind: 'platform_admin' } },
   { path: '/admin/kyc', screen: 'Admin Identity (KYC) Review', gate: { kind: 'platform_admin' } },
+  { path: '/admin/verification-requests', screen: 'Admin Unrouted Verification Requests', gate: { kind: 'platform_admin' } },
   { path: '/admin/data-requests', screen: 'Admin Data Requests', gate: { kind: 'platform_admin' } },
   { path: '/admin/content', screen: 'Admin Content Moderation', gate: { kind: 'platform_admin' } },
   { path: '/admin/communities', screen: 'Admin Communities', gate: { kind: 'platform_admin' } },

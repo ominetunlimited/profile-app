@@ -5,7 +5,7 @@ import { canAccessInstitutionHubTools, canAccessUniversityTools, orgRoleCan, typ
 import { OrgWorkspaceShell, HubAccessDenied, type OrgNavItem } from './OrgWorkspaceShell'
 import { ownerKey } from '@/app/activityStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
-import { listRequestsForIssuer, setVerificationRequestStatus, type VerificationRequest } from '@/app/verificationRequestStore'
+import { listRequestsForIssuerEmail, setVerificationRequestStatus, useVerificationVersion, type VerificationRequest } from '@/app/verificationRequestStore'
 import { listSchemas } from '@/app/schemaStore'
 import { ACCESS_LABEL, inviteStaffBulk, listStaffFor, revokeStaff, MAX_STAFF } from '@/app/orgStaffStore'
 import { listAuditLogFor, logOrgAction } from '@/app/orgAuditLogStore'
@@ -48,7 +48,9 @@ export function InstitutionWorkspace() {
   const owner = account ? ownerKey(account) : ''
   const canAppointRoles = account ? orgRoleCan(account, 'appointRoles') : false
 
-  const [requests, setRequests] = useState<VerificationRequest[]>(() => (account ? listRequestsForIssuer(account.legalName) : []))
+  useVerificationVersion()
+  const requests = account?.accountType === 'organisation' ? listRequestsForIssuerEmail(account.officialEmail) : []
+  const [actionError, setActionError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [staff, setStaff] = useState(() => listStaffFor(owner))
   const [auditLog, setAuditLog] = useState(() => listAuditLogFor(owner))
@@ -63,10 +65,6 @@ export function InstitutionWorkspace() {
   const pending = requests.filter((r) => r.status !== 'verified' && r.status !== 'rejected')
   const allChecked = pending.length > 0 && pending.every((r) => selected.has(r.id))
   const schemas = listSchemas(account.officialEmail)
-
-  function refreshRequests() {
-    setRequests(listRequestsForIssuer(account!.legalName))
-  }
 
   function toCsv(rows: VerificationRequest[]): string {
     const header = 'record,person,submitted,status\n'
@@ -133,11 +131,19 @@ export function InstitutionWorkspace() {
                   <div className="flex-1" />
                   <button
                     disabled={selected.size === 0}
-                    onClick={() => {
-                      for (const id of selected) setVerificationRequestStatus(id, 'verified')
-                      logOrgAction(owner, `Confirmed ${selected.size} record(s).`)
+                    onClick={async () => {
+                      setActionError(null)
+                      let done = 0
+                      try {
+                        for (const id of selected) {
+                          await setVerificationRequestStatus(id, 'verified')
+                          done++
+                        }
+                      } catch (e) {
+                        setActionError((e as Error).message)
+                      }
+                      if (done > 0) logOrgAction(owner, `Confirmed ${done} record(s).`)
                       setSelected(new Set())
-                      refreshRequests()
                       setAuditLog(listAuditLogFor(owner))
                     }}
                     className="rounded-lg bg-success px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50"
@@ -153,6 +159,18 @@ export function InstitutionWorkspace() {
                   </button>
                 </div>
               )}
+              {actionError && (
+                <p role="alert" className="mb-2 text-xs text-danger">
+                  {actionError}
+                </p>
+              )}
+              <p className="mb-2 text-xs text-text-1">
+                To review a request properly — see the supporting document, ask for more information or decline with a reason — open the{' '}
+                <Link to="/verification-inbox" className="font-semibold text-accent">
+                  verification inbox
+                </Link>
+                .
+              </p>
               <div className="overflow-hidden rounded-xl border border-border">
                 <div className="grid grid-cols-[24px_2fr_1fr_1fr_110px] bg-surface-sunken text-[10.5px] font-semibold tracking-wide text-text-2">
                   <div className="px-3 py-2.5" />

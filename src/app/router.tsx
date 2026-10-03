@@ -44,6 +44,7 @@ import { InstitutionAnalytics } from '@/screens/orgworkspace/InstitutionAnalytic
 import { GovernmentAnalytics } from '@/screens/orgworkspace/GovernmentAnalytics'
 import { EnterpriseIntegrations } from '@/screens/orgworkspace/EnterpriseIntegrations'
 import { SavedPage } from '@/screens/more/SavedPage'
+import { VerificationInbox } from '@/screens/orgworkspace/VerificationInbox'
 import { RecruiterWorkflow } from '@/screens/orgworkspace/RecruiterWorkflow'
 import { MissionControl } from '@/screens/internal/MissionControl'
 import { AIDecisionLog } from '@/screens/internal/AIDecisionLog'
@@ -57,6 +58,7 @@ import { AdminDashboard } from '@/screens/admin/AdminDashboard'
 import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
 import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { AdminKyc } from '@/screens/admin/AdminKyc'
+import { AdminVerificationRequests } from '@/screens/admin/AdminVerificationRequests'
 import { AdminDataRequests } from '@/screens/admin/AdminDataRequests'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
@@ -385,6 +387,14 @@ function elementFor(route: RouteEntry): ReactElement {
           <OwnerContentConsole />
         </RequirePlatformAdmin>
       )
+    case '/admin/verification-requests':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminVerificationRequests />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
     case '/admin/data-requests':
       return (
         <RequirePlatformAdmin>
@@ -491,6 +501,12 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequireOrganisation>
           <EnterpriseIntegrations />
+        </RequireOrganisation>
+      )
+    case '/verification-inbox':
+      return (
+        <RequireOrganisation>
+          <VerificationInbox />
         </RequireOrganisation>
       )
     case '/org/:id/recruiter':
