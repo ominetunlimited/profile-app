@@ -8,7 +8,6 @@ import { FeatureShell } from '@/screens/shared/FeatureShell'
 import { CVTemplatesRoute } from '@/screens/career/cv/CVTemplatesRoute'
 import { PortfolioTemplatesRoute } from '@/screens/career/portfolio/PortfolioTemplatesRoute'
 import { RouteIntegrityEngine } from '@/screens/internal/RouteIntegrityEngine'
-import { DisputeReview } from '@/screens/internal/DisputeReview'
 import { NotFoundShell } from '@/screens/shared/NotFoundShell'
 import { RootErrorBoundary } from '@/screens/shared/RootErrorBoundary'
 import { PublicHero } from '@/screens/public/PublicHero'
@@ -59,6 +58,7 @@ import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
 import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { AdminKyc } from '@/screens/admin/AdminKyc'
 import { AdminVerificationRequests } from '@/screens/admin/AdminVerificationRequests'
+import { AdminDisputes } from '@/screens/admin/AdminDisputes'
 import { AdminDataRequests } from '@/screens/admin/AdminDataRequests'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
@@ -307,13 +307,7 @@ function elementFor(route: RouteEntry): ReactElement {
         </RequireStaff>
       )
     case '/internal/dispute-review':
-      return (
-        <RequireStaff>
-          <RequireInternalAccessGate>
-            <DisputeReview />
-          </RequireInternalAccessGate>
-        </RequireStaff>
-      )
+      return <Navigate to="/admin/disputes" replace />
     case '/mission-control':
       return (
         <RequireStaff>
@@ -392,6 +386,14 @@ function elementFor(route: RouteEntry): ReactElement {
         <RequirePlatformAdmin>
           <AdminShell>
             <AdminVerificationRequests />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/admin/disputes':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminDisputes />
           </AdminShell>
         </RequirePlatformAdmin>
       )

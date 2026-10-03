@@ -477,7 +477,12 @@ function VerificationRequestCard({ request }: { request: VerificationRequest }) 
         {request.documentCopyrightId && <span className="ml-1.5 text-text-2">· 📎 {request.documentCopyrightId}</span>}
       </p>
       {isRejected ? (
-        <p className="text-xs text-danger">Not confirmed{request.decisionNote ? `: ${request.decisionNote}` : '.'}</p>
+        <p className="text-xs text-danger">
+          Not confirmed{request.decisionNote ? `: ${request.decisionNote}` : '.'}{' '}
+          <Link to={`/disputes/${request.id}`} className="font-semibold text-accent">
+            Dispute this
+          </Link>
+        </p>
       ) : (
         <div className="flex items-center gap-1">
           {VERIFICATION_TIMELINE.map((step, i) => (

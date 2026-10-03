@@ -13,6 +13,7 @@ const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin/content', label: 'Content Moderation', module: 'content_moderation' },
   { to: '/admin/communities', label: 'Communities', module: 'content_moderation' },
   { to: '/admin/data-requests', label: 'Data requests', module: 'data_requests' },
+  { to: '/admin/disputes', label: 'Disputes', module: 'data_requests' },
   { to: '/admin/mission-control', label: 'Mission Control', module: 'mission_control' },
 ]
 

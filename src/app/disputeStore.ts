@@ -1,61 +1,83 @@
-/** Temporary client-only scaffolding, same caveats as demoAccountStore.ts. */
+import { supabase } from './supabaseClient'
 
-/** §50.1 Dispute interface, verbatim shape. */
+/**
+ * Disputes & appeals, server-side (public.disputes, RLS-enforced): a person files one, a PROFILE reviewer
+ * sees it in the Admin Centre and records an outcome, and the person is notified.
+ */
+export type DisputeType = 'verification_decision' | 'trust_score_change' | 'recruiter_filter_exclusion' | 'moderation_action' | 'institutional_rejection'
+export type DisputeStatus = 'submitted' | 'under_review' | 'upheld' | 'corrected' | 'removed' | 'escalated' | 'independent_review'
+
 export interface DisputeRecord {
   id: string
   ownerEmail: string
-  disputeType: 'verification_decision' | 'trust_score_change' | 'recruiter_filter_exclusion' | 'moderation_action' | 'institutional_rejection'
+  disputeType: DisputeType
   targetId: string
   reason: string
-  status: 'submitted' | 'under_review' | 'upheld' | 'corrected' | 'removed' | 'escalated' | 'independent_review'
+  evidenceAssetIds: string[]
+  status: DisputeStatus
+  reviewerNote: string | null
   submittedAt: string
+  resolvedAt: string | null
 }
 
-const STORAGE_KEY = 'profile:demo-disputes'
-
-function readAll(): DisputeRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+interface Row {
+  id: string
+  owner_email: string
+  dispute_type: DisputeType
+  target_id: string
+  reason: string
+  evidence_asset_ids: string[]
+  status: DisputeStatus
+  reviewer_note: string | null
+  created_at: string
+  resolved_at: string | null
 }
 
-function writeAll(records: DisputeRecord[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // best-effort demo scaffolding only
-  }
+const toRecord = (r: Row): DisputeRecord => ({
+  id: r.id,
+  ownerEmail: r.owner_email,
+  disputeType: r.dispute_type,
+  targetId: r.target_id,
+  reason: r.reason,
+  evidenceAssetIds: r.evidence_asset_ids ?? [],
+  status: r.status,
+  reviewerNote: r.reviewer_note,
+  submittedAt: r.created_at,
+  resolvedAt: r.resolved_at,
+})
+
+export const OPEN_STATUSES: DisputeStatus[] = ['submitted', 'under_review', 'escalated', 'independent_review']
+
+/** Disputes visible to this account: their own, or — for a reviewer — all of them. */
+async function fetchAll(): Promise<DisputeRecord[]> {
+  const { data, error } = await supabase.from('disputes').select('*').order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as Row[]).map(toRecord)
 }
 
-export function listDisputes(ownerEmail: string): DisputeRecord[] {
-  return readAll()
-    .filter((d) => d.ownerEmail === ownerEmail)
-    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+export async function listMyDisputes(ownerEmail: string): Promise<DisputeRecord[]> {
+  return (await fetchAll()).filter((d) => d.ownerEmail.toLowerCase() === ownerEmail.toLowerCase())
 }
 
-export function fileDispute(input: Omit<DisputeRecord, 'id' | 'status' | 'submittedAt'>): DisputeRecord {
-  const record: DisputeRecord = { ...input, id: crypto.randomUUID(), status: 'submitted', submittedAt: new Date().toISOString() }
-  writeAll([...readAll(), record])
-  return record
+export const listAllDisputes = fetchAll
+
+export async function fileDispute(input: { ownerEmail: string; disputeType: DisputeType; targetId: string; reason: string; evidenceAssetIds?: string[] }): Promise<DisputeRecord> {
+  const { data, error } = await supabase
+    .from('disputes')
+    .insert({
+      owner_email: input.ownerEmail,
+      dispute_type: input.disputeType,
+      target_id: input.targetId,
+      reason: input.reason.trim(),
+      evidence_asset_ids: input.evidenceAssetIds ?? [],
+    })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return toRecord(data as Row)
 }
 
-/** §26 ADMIN_MODULES's trust_score_dispute_management — every dispute ever
- * filed, across every owner, for the staff-only review queue. Mission
- * Control already surfaced a raw count; this is what actually lets staff
- * act on one. */
-export function listAllDisputes(): DisputeRecord[] {
-  return readAll().sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
-}
-
-/** All actions auditable/documented/timestamped per §26 — reusing this
- * record's own submittedAt-style timestamp field rather than a second log. */
-export function resolveDispute(id: string, status: DisputeRecord['status']): void {
-  const all = readAll()
-  const idx = all.findIndex((d) => d.id === id)
-  if (idx === -1) return
-  all[idx] = { ...all[idx], status }
-  writeAll(all)
+export async function resolveDispute(id: string, decision: Exclude<DisputeStatus, 'submitted'>, note = ''): Promise<void> {
+  const { error } = await supabase.rpc('staff_resolve_dispute', { did: id, decision, note })
+  if (error) throw new Error(error.message)
 }
