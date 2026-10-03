@@ -4,70 +4,89 @@ import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { FAQ_ITEMS } from './legal/faqContent'
 
-/** §37.10 SUPPORT_ECOSYSTEM categories. */
-const CATEGORIES = [
-  { title: 'Knowledge base', body: 'Guides for building your profile, requesting verification, and using the Trust Center.' },
-  { title: 'Scam protection centre', body: 'How to spot and report impersonation, phishing, or credential fraud.' },
-  { title: 'Safety tips', body: 'Keeping your account and identity documents secure.' },
-  { title: 'Account status', body: 'Check the status of your account, verification requests, or a filed dispute.' },
-  { title: 'Report a problem', body: "Something not working the way it should? Tell us what happened." },
-  { title: 'Report abuse', body: 'Report harassment, impersonation, or a Professional Conduct Standards violation.' },
-  { title: 'Appeal a verification decision', body: 'Every rejected record can be disputed within 14 days.' },
-  { title: 'System status', body: 'Live status of PROFILE services.' },
+const ARTICLES = [
+  { title: 'How does verification work?', body: 'An institution or employer confirms your record directly — PROFILE never verifies on their behalf.' },
+  { title: 'Why was my record rejected?', body: "Common causes: date mismatch, wrong institution selected, or the verifier couldn't confirm your role. You can always dispute." },
+  { title: 'How is my Trust Score calculated?', body: 'From capped inputs, each tied to something that was confirmed — identity, employment, academic degrees, licences and more. Nothing counts followers, likes or views.' },
+  { title: 'Can I hide my Trust Score?', body: 'No — verified badges and Trust Score always stay visible so a claim is never shown without its evidence trail.' },
+  { title: 'How do I dispute a rejected record?', body: 'Go to Trust Centre → Disagreements get a human, or open the record directly and select Dispute.' },
+  { title: 'What can PROFILE Advisor see?', body: 'Only what you give it in the conversation. It never fabricates a credential or achievement.' },
+  { title: 'How do I delete my account?', body: 'Settings → Data Rights → Delete account. Records independently confirmed by an institution may remain in their system.' },
+  { title: 'How do organisation workspaces get approved?', body: 'A person with a personal PROFILE account requests it with an official-domain email; a PROFILE reviewer confirms the domain.' },
 ]
 
-/** §37.10 Help & Support Center. */
+const CATEGORIES = [
+  { title: 'Getting started', body: 'Account creation, your first record, understanding onboarding.', search: 'account' },
+  { title: 'Verification', body: 'How confirmation works, rejection, disputes and appeals.', search: 'verif' },
+  { title: 'Trust Score', body: "What it measures, how it's calculated, what it doesn't count.", search: 'trust score' },
+  { title: 'Career Engine', body: 'CV, Portfolio, Cover Letter, and how evidence powers each.', search: 'cv' },
+  { title: 'Organisations & institutions', body: 'Workspace setup, staff roles, bulk verification.', search: 'organisation' },
+  { title: 'Privacy & security', body: 'Visibility settings, data export, account deletion.', search: 'privacy' },
+]
+
+/** Help Centre: search the articles, or browse by topic. */
 export function HelpCentre() {
   const [query, setQuery] = useState('')
-  const filtered = FAQ_ITEMS.filter((f) => f.q.toLowerCase().includes(query.toLowerCase()))
+  const q = query.trim().toLowerCase()
+  const results = q
+    ? [
+        ...ARTICLES.filter((a) => a.title.toLowerCase().includes(q) || a.body.toLowerCase().includes(q)),
+        ...FAQ_ITEMS.filter((f) => (f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q)) && !ARTICLES.some((a) => a.title === f.q)).map((f) => ({ title: f.q, body: f.a })),
+      ]
+    : []
 
   return (
     <div className="min-h-screen bg-bg">
       <PublicHeader />
-      <main className="mx-auto max-w-[880px] px-4 py-14 sm:px-8">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-text-0">Help Centre</h1>
-        <p className="mb-6 text-text-1">Search the knowledge base, or browse a category below.</p>
+      <main className="mx-auto max-w-[880px] px-4 pb-16 pt-10 sm:px-7">
+        <h1 className="mb-3.5 text-center text-[26px] font-bold leading-tight tracking-tight text-text-0">How can we help?</h1>
         <input
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search help articles and FAQs…"
-          aria-label="Search help articles and FAQs"
-          className="mb-10 min-h-[48px] w-full rounded-lg border border-border-strong bg-surface px-4 text-sm text-text-0 outline-none focus-visible:border-accent"
+          placeholder="Search help articles…"
+          aria-label="Search help articles"
+          className="mb-[22px] min-h-[48px] w-full rounded-[11px] border border-border-strong bg-surface px-4 text-sm text-text-0 outline-none focus-visible:border-accent"
         />
 
-        {query ? (
-          <section>
-            <h2 className="mb-3 text-sm font-semibold text-text-1">
-              {filtered.length} result{filtered.length === 1 ? '' : 's'}
-            </h2>
-            <div className="flex flex-col gap-2">
-              {filtered.map((f) => (
-                <div key={f.q} className="rounded-lg border border-border bg-surface p-4">
-                  <div className="mb-1 font-medium text-text-0">{f.q}</div>
-                  <div className="text-sm text-text-1">{f.a}</div>
+        {q ? (
+          <section aria-live="polite">
+            <div className="mb-3 text-xs font-semibold text-text-1">
+              {results.length} result{results.length === 1 ? '' : 's'}
+            </div>
+            <div className="flex flex-col gap-[9px]">
+              {results.map((a) => (
+                <div key={a.title} className="rounded-[11px] border border-border bg-surface px-4 py-[13px]">
+                  <div className="mb-1 text-[13px] font-semibold text-text-0">{a.title}</div>
+                  <div className="text-xs leading-relaxed text-text-1">{a.body}</div>
                 </div>
               ))}
-              {filtered.length === 0 && <p className="text-sm text-text-1">No matches — try the full FAQ library.</p>}
+              {results.length === 0 && <p className="text-sm text-text-1">No matches — try the full FAQ library below.</p>}
             </div>
           </section>
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-3">
             {CATEGORIES.map((c) => (
-              <div key={c.title} className="rounded-xl border border-border bg-surface p-4">
-                <div className="mb-1.5 font-semibold text-text-0">{c.title}</div>
-                <div className="text-sm text-text-1">{c.body}</div>
-              </div>
+              <button
+                key={c.title}
+                type="button"
+                onClick={() => setQuery(c.search)}
+                className="rounded-xl border border-border bg-surface px-4 py-[15px] text-start shadow-sm hover:border-accent"
+              >
+                <div className="mb-1.5 text-[13px] font-semibold text-text-0">{c.title}</div>
+                <div className="text-[11.5px] leading-normal text-text-1">{c.body}</div>
+              </button>
             ))}
           </div>
         )}
 
-        <div className="mt-10 rounded-xl border border-border bg-surface-sunken p-5 text-sm text-text-1">
+        <p className="mt-10 text-center text-sm text-text-1">
           Looking for the full question list? Visit the{' '}
           <Link to="/help/faq" className="font-semibold text-accent">
             FAQ Library
           </Link>
           .
-        </div>
+        </p>
       </main>
       <PublicFooter />
     </div>

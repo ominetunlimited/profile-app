@@ -38,8 +38,7 @@ export function MissionControl() {
         <div className="font-mono text-[11px] uppercase tracking-widest text-text-2">Internal · Owner intelligence layer</div>
         <h1 className="text-lg font-semibold">Mission Control</h1>
         <p className="max-w-[74ch] text-sm text-text-1">
-          Synthesis over this build's real local data — not a fabricated briefing. Most of the 9 intelligence
-          domains have no backend telemetry source to synthesise yet, and say so rather than inventing numbers.
+          A summary of real platform data — not a fabricated briefing. Most of the 9 intelligence domains have no data source connected yet, and say so rather than inventing numbers.
         </p>
       </header>
 
@@ -56,8 +55,7 @@ export function MissionControl() {
             <Metric label="Creator templates published" value={publishedTemplates.length} />
           </div>
           <p className="text-xs text-text-2">
-            Computed directly from this browser's local demo data, not AI-generated — no AI Gateway or
-            backend telemetry exists in this build.
+            Computed directly from platform data, not AI-generated. Telemetry sources are not connected yet.
           </p>
         </section>
 
@@ -98,7 +96,7 @@ export function MissionControl() {
             <DomainCard title="Copilot Intelligence" real body="0 AI decisions logged — no AI Gateway connected yet." link={{ to: '/internal/ai-decision-log', label: 'Open AI Decision Log' }} />
             <DomainCard title="User Health Intelligence" body="Requires Profile Health Dashboard data aggregated across a real user base — not available from a single-browser demo." />
             <DomainCard title="Enterprise Intelligence" body="Requires real SSO/API integration usage — this build's integrations are demo placeholders." />
-            <DomainCard title="Security Intelligence" body="Requires production monitoring — no backend exists to monitor." />
+            <DomainCard title="Security Intelligence" body="Needs production monitoring to be connected." />
             <DomainCard title="Operational Intelligence" body="Requires deployment/CI-CD and SRE telemetry — not applicable to a local dev build." />
             <DomainCard title="Customer Intelligence" body="Requires real support-ticket data — none exists yet." />
           </div>

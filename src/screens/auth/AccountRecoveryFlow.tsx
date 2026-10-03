@@ -39,9 +39,9 @@ export function AccountRecoveryFlow() {
         <p className="mb-5 text-sm text-text-1">Choose how you'd like to recover access.</p>
         <div className="flex flex-col gap-2">
           <RecoveryOption label="Email reset link" onClick={() => setMethod('email')} />
-          <RecoveryOption label="Phone OTP recovery" note="Requires an SMS backend — not connected in this build." onClick={() => setMethod('phone')} />
-          <RecoveryOption label="Trusted device confirmation" note="Requires a real trusted-device registry — not built in this demo." onClick={() => setMethod('device')} />
-          <RecoveryOption label="Identity recovery (admin-assisted)" note="Requires human PROFILE staff review — no support queue exists in this build." onClick={() => setMethod('identity')} />
+          <RecoveryOption label="Phone OTP recovery" note="Coming soon." onClick={() => setMethod('phone')} />
+          <RecoveryOption label="Trusted device confirmation" note="Coming soon." onClick={() => setMethod('device')} />
+          <RecoveryOption label="Identity recovery (admin-assisted)" note="Coming soon." onClick={() => setMethod('identity')} />
         </div>
         <div className="mt-5 text-center text-sm text-text-1">
           <Link to="/auth" className="font-semibold text-accent">
@@ -55,11 +55,11 @@ export function AccountRecoveryFlow() {
   if (method !== 'email') {
     return (
       <AuthChrome>
-        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Not available in this build</h1>
+        <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Not available yet</h1>
         <p className="mb-5 text-sm text-text-1">
-          {method === 'phone' && 'Phone OTP recovery needs a real SMS delivery backend, which does not exist yet.'}
-          {method === 'device' && 'Trusted device confirmation needs a real per-device registry tied to a backend session, which does not exist yet.'}
-          {method === 'identity' && 'Admin-assisted identity recovery needs a real PROFILE staff support queue, which does not exist yet.'}
+          {method === 'phone' && 'Phone recovery is not available yet. Use the email reset link instead.'}
+          {method === 'device' && 'Trusted-device recovery is not available yet. Use the email reset link instead.'}
+          {method === 'identity' && 'Assisted recovery is not available yet. Use the email reset link instead.'}
         </p>
         <Button variant="secondary" onClick={() => setMethod(null)}>
           ← Choose a different method

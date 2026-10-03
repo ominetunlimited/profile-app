@@ -35,7 +35,7 @@ export function CVTemplatesPage() {
               setIndex(i)
               navigate(`/career/cv/${CV_TEMPLATES[i].id}`, { replace: true })
             }}
-            className="min-h-[40px] rounded-lg border border-border-strong bg-surface px-3 text-sm font-medium text-text-0"
+            className="min-h-[40px] max-w-full rounded-lg border border-border-strong bg-surface px-3 text-sm font-medium text-text-0"
           >
             {CV_TEMPLATES.map((t, i) => (
               <option key={t.id} value={i}>
@@ -69,7 +69,7 @@ export function CVTemplatesPage() {
           </div>
         )}
 
-        <div className="mb-8 rounded-xl bg-surface-sunken p-6">
+        <div className="mb-8 overflow-x-auto rounded-xl bg-surface-sunken p-3 sm:p-6">
           <active.Component cv={cv} />
         </div>
 

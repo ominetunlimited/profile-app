@@ -51,8 +51,7 @@ function CoverLetterInner() {
                 TEMPLATE-ASSEMBLED FROM {cv.experience.length} RECORDED {cv.experience.length === 1 ? 'ACTIVITY' : 'ACTIVITIES'}
               </div>
               <p className="text-xs leading-relaxed text-text-0">
-                This isn't AI-generated — no AI Gateway backend is connected in this build. It's assembled directly from
-                your own recorded activities, the same evidence-only rule an AI draft would have to follow anyway.
+                This isn't AI-written. It's assembled directly from your own recorded activities, so it only ever says what your evidence supports.
               </p>
             </div>
 

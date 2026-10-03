@@ -100,8 +100,7 @@ export function OrganizationWorkspace() {
             ))}
           </div>
           <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-            No candidates match yet — this is a real, ranked search over verified profiles once individuals exist to
-            match against in this build.
+            No candidates match yet. Results appear here, ranked by verified evidence, as people add records that fit.
           </div>
         </div>
       )}

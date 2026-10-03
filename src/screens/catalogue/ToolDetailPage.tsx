@@ -37,10 +37,10 @@ export function ToolDetailPage() {
             <Link to={`/provider/${tool.provider.id}`} className="font-semibold text-accent">
               {tool.provider.name}
             </Link>
-            . No verified provider account has claimed this entity yet in this build.
+            . No verified provider account has claimed this entity yet.
           </p>
         ) : (
-          <p className="mb-6 text-sm text-text-1">No recognised provider in this build's catalogue.</p>
+          <p className="mb-6 text-sm text-text-1">No recognised provider in the catalogue.</p>
         )}
 
         <div className="mb-6 rounded-xl border border-border bg-surface p-4">

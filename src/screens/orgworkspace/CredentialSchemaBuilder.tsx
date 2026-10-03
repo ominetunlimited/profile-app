@@ -85,7 +85,7 @@ export function CredentialSchemaBuilder() {
       )}
 
       <div className="flex flex-wrap gap-5">
-        <div className="flex flex-none basis-[230px] flex-col gap-2">
+        <div className="flex w-full flex-none flex-col gap-2 sm:w-auto sm:basis-[230px]">
           {schemas.map((s) => (
             <button
               key={s.id}
@@ -109,7 +109,7 @@ export function CredentialSchemaBuilder() {
           )}
         </div>
 
-        <div className="min-w-0 flex-1 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+        <div className="min-w-0 flex-1 basis-[300px] rounded-2xl border border-border bg-surface p-5 shadow-sm">
           {creating ? (
             <div>
               <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">

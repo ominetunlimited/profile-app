@@ -151,8 +151,7 @@ export function AdsCentrePage() {
         )}
 
         <p className="mt-6 text-xs text-text-2">
-          No real payment processor exists in this build — "Confirm payment" is a disclosed mock, the same honesty
-          pattern as Settings → Premium Plans.
+          Online payment is not switched on yet, so "Confirm payment" records the order without charging a card.
         </p>
       </div>
     </AppShell>

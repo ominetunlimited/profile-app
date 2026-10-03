@@ -223,7 +223,7 @@ export function InstitutionWorkspace() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <ExportCard
               title="Accreditation review pack"
-              body="Every credential confirmed by the institution in this build, with reviewer identity attached."
+              body="Every credential confirmed by the institution, with reviewer identity attached."
               onGenerate={() => downloadCsv(requests.filter((r) => r.status === 'verified'), 'accreditation-review-pack.csv')}
             />
             <ExportCard

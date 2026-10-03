@@ -501,8 +501,7 @@ export function SecurityTab() {
               </div>
             ))}
             <p className="mt-1 text-xs text-text-2">
-              This build has one browser and no backend session store, so only real sign-ins on this device appear
-              here — multi-device session tracking needs a real backend.
+              Only sign-ins on this device are listed. Sessions on other devices are not tracked yet.
             </p>
           </div>
         )}
@@ -899,8 +898,7 @@ export function PremiumPlansTab() {
         ))}
       </div>
       <p className="mt-3 text-xs text-text-2">
-        Upgrade/billing isn't wired to a real payment processor yet in this build — no fake checkout flow, this is a
-        real, accurate plan comparison ready for one.
+        Paid plans are not available to buy yet. This is an accurate comparison of what each plan will include.
       </p>
     </Section>
   )

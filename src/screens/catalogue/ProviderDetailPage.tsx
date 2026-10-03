@@ -35,8 +35,7 @@ export function ProviderDetailPage() {
           <span className="rounded-full border border-border-strong px-2 py-0.5 text-[10.5px] font-medium text-text-1">Unclaimed</span>
         </div>
         <p className="mb-6 text-sm text-text-1">
-          No verified provider account has claimed {provider.name} in this build yet — this is a real, read-only
-          catalogue entry, never an endorsement. {provider.website && (
+          No verified provider account has claimed {provider.name} yet — this is a read-only catalogue entry, never an endorsement. {provider.website && (
             <a href={provider.website} target="_blank" rel="noreferrer" className="font-semibold text-accent">
               {provider.website}
             </a>

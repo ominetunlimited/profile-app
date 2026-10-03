@@ -151,7 +151,7 @@ export function TrustPassport() {
                   <div className="min-w-0 flex-1 basis-[150px]">
                     <strong className="font-semibold text-text-0">Verify independently</strong>
                     <br />
-                    <span title="Illustrative — a live public verification page isn't built in this pass">profile.app/v/{displayPid(owner)}</span>
+                    <span title="Illustrative — public verification pages are coming soon">profile.app/v/{displayPid(owner)}</span>
                   </div>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function TrustPassport() {
 
             <div className="mt-3.5 flex flex-wrap gap-2">
               <Button onClick={() => setShareModalOpen(true)}>Share with someone</Button>
-              <Button variant="secondary" disabled title="Passport PDF export isn't built in this pass — flagged, not silently faked">
+              <Button variant="secondary" disabled title="PDF export is coming soon">
                 Download PDF
               </Button>
             </div>
@@ -235,9 +235,7 @@ export function TrustPassport() {
         <section className="mb-8">
           <h2 className="mb-3 font-semibold text-text-0">Calculation matrix</h2>
           <p className="mb-3 text-xs text-text-1">
-            Every signal below needs a real verification to contribute. Identity counts once a PROFILE reviewer
-            approves your documents; the others still have no verification source in this build, so they stay at 0
-            rather than being estimated.
+            Every signal below needs a real verification to contribute. Identity counts once a PROFILE reviewer approves your documents; the others count once the institution you named confirms the record. Nothing is estimated.
           </p>
           {(Object.keys(TRUST_DIMENSION_LABELS) as (keyof TrustDimensions)[]).map((dim) => (
             <div key={dim} className="mb-3">
@@ -293,9 +291,7 @@ export function TrustPassport() {
           <h2 className="mb-3 font-semibold text-text-0">Signal log</h2>
           {trust.signals.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-6 text-center text-sm text-text-1">
-              Nothing has actually been verified yet — a submission above only starts the process. No institution
-              reviewer exists in this build to approve one, so there is no real signal to log yet, only honestly
-              empty until one is.
+              Nothing has been verified yet — a request above only starts the process. Each confirmation will appear here, with who confirmed it.
             </div>
           ) : (
             <div className="flex flex-col gap-2">

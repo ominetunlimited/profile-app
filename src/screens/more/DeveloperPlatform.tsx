@@ -4,7 +4,7 @@ export function DeveloperPlatform() {
   return (
     <ComingSoonPage
       title="Developer Platform"
-      description="Build on PROFILE's verification and trust infrastructure. Not yet available in this build."
+      description="Build on PROFILE's verification and trust infrastructure. Coming soon."
       planned={['OAuth-based app registration', 'Webhooks for verification events', 'Sandbox environment', 'Partner review process']}
     />
   )

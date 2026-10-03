@@ -53,8 +53,7 @@ export function StoreHub() {
           )}
           {marketItems.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-              No listings yet — this is a real, always-visible browse surface, ready for sellers once any exist
-              in this build.
+              No listings yet. Items appear here as soon as sellers add them.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -209,7 +208,7 @@ function CreateItemForm({ owner, onClose, onCreated }: { owner: string; onClose:
             ))}
           </SelectInput>
         </Field>
-        <Field label="Price" hint="Informational only — no payment processor in this build">
+        <Field label="Price" hint="Shown to buyers for information — online payment is not switched on yet">
           <TextInput value={priceLabel} onChange={(e) => setPriceLabel(e.target.value)} placeholder="e.g. $49 or Contact for quote" />
         </Field>
       </div>

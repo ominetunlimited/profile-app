@@ -131,10 +131,9 @@ function BusinessAnalytics() {
       <div className="mx-auto max-w-[820px] px-4 py-8 sm:px-6">
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Analytics</h1>
         <p className="mb-6 text-sm text-text-1">
-          Organisation metrics, computed for real over this build's real data — there is no hiring pipeline,
-          staff-verification, or job-board backend yet, so every metric below is honestly 0/empty rather than a
-          fabricated chart. Each activates automatically once the underlying feature (recruiter pipeline, staff
-          verification, job postings) is built.
+          Organisation metrics, computed from real platform data. Metrics that depend on features not
+          live yet (recruiter pipeline, staff verification, job postings) show 0 or empty rather than a made-up
+          chart, and fill in as those features go live.
         </p>
         <div className="flex flex-col gap-1.5">
           {ORG_METRICS.map((m) => (

@@ -77,8 +77,8 @@ export function VerificationReview() {
         ? { glyph: '⚠', ink: 'text-warning', label: 'Government domain — requires manual verification with MDA registry' }
         : eduLike
           ? { glyph: domain.includes('edu') ? '✓' : '⚠', ink: domain.includes('edu') ? 'text-success' : 'text-warning', label: domain.includes('edu') ? 'Domain matches an academic (.edu-style) pattern' : 'Domain does not match an academic pattern — verify manually' }
-          : { glyph: '◷', ink: 'text-text-1', label: 'External company registry match — no registry API in this build' },
-      { glyph: '◷', ink: 'text-text-1', label: 'Domain age — no WHOIS lookup available in this build' },
+          : { glyph: '◷', ink: 'text-text-1', label: 'External company registry match — not connected yet' },
+      { glyph: '◷', ink: 'text-text-1', label: 'Domain age — lookup not connected yet' },
     ]
   }
 
@@ -200,7 +200,7 @@ export function VerificationReview() {
                   </div>
                   {showMoreInfoNotice && (
                     <div className="mt-3 rounded-lg border border-border-strong bg-surface-sunken px-3 py-2 text-[11.5px] text-text-1">
-                      No reviewer-to-requester messaging thread exists yet for org claims in this build — nothing was sent.
+                      Messaging the requester from here is coming soon — nothing was sent.
                     </div>
                   )}
                   <p className="mt-3.5 text-[11.5px] leading-relaxed text-text-1">
