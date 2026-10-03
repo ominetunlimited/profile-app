@@ -1,18 +1,9 @@
-import { useEffect, useState } from 'react'
-import { getProfileMedia } from '@/app/mediaStore'
+import { getAccountImages, useAccountsCacheVersion } from '@/app/demoAccountStore'
 
 /**
- * Pipeline repair S4 — the author's photo showed only on their own Profile
- * page, never on their activity cards, comments, reposts, or anywhere else
- * their name appears. Root cause: every other surface either rendered bare
- * initials (ActivityCard) or never existed as a shared component at all, so
- * each screen re-derived its own avatar markup instead of resolving the
- * account's real photo. This resolves it fresh from the account's own media
- * record every render — never a snapshot taken at write time — so a later
- * photo change is reflected everywhere without touching stored records, and
- * so this same component keeps working unchanged once accounts live in a
- * real backend instead of localStorage (only the data source under
- * `getProfileMedia` changes then, not this component).
+ * The one avatar component: user → account's uploaded photo → this component →
+ * everywhere. Resolved live from the server-side accounts cache; the initial
+ * is shown only when the account has no photo.
  */
 export function UserAvatar({
   ownerEmail,
@@ -25,16 +16,8 @@ export function UserAvatar({
   size?: number
   className?: string
 }) {
-  const [avatarUrl, setAvatarUrl] = useState(() => (ownerEmail ? getProfileMedia(ownerEmail).avatarDataUrl : null))
-
-  useEffect(() => {
-    function refresh() {
-      setAvatarUrl(ownerEmail ? getProfileMedia(ownerEmail).avatarDataUrl : null)
-    }
-    refresh()
-    window.addEventListener('profile-media-changed', refresh)
-    return () => window.removeEventListener('profile-media-changed', refresh)
-  }, [ownerEmail])
+  useAccountsCacheVersion()
+  const avatarUrl = getAccountImages(ownerEmail).avatarUrl
 
   const initials = name.trim().slice(0, 1).toUpperCase() || '?'
 

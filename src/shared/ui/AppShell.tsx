@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useAccount } from '@/app/AccountContext'
 import { useLanguage } from '@/app/LanguageContext'
 import { ownerKey } from '@/app/activityStore'
-import { getProfileMedia } from '@/app/mediaStore'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { onNotificationsChange, unreadCount } from '@/app/notificationStore'
 import { onChatChange, setChatUser, unreadTotal } from '@/app/messageStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
@@ -53,16 +53,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const displayName = account?.accountType === 'individual' ? account.legalName : account?.accountType === 'organisation' ? account.legalName : staffRole ? 'Staff' : 'Guest'
   const owner = account ? ownerKey(account) : ''
-  const [avatarUrl, setAvatarUrl] = useState(() => (owner ? getProfileMedia(owner).avatarDataUrl : null))
-
-  useEffect(() => {
-    function refresh() {
-      setAvatarUrl(owner ? getProfileMedia(owner).avatarDataUrl : null)
-    }
-    refresh()
-    window.addEventListener('profile-media-changed', refresh)
-    return () => window.removeEventListener('profile-media-changed', refresh)
-  }, [owner])
 
   const drawerItems = profileDrawerItems({ account, staffRole })
   const groups = hamburgerGroups({ account, staffRole })
@@ -131,9 +121,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 aria-label="Profile"
-                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-accent-solid text-xs font-semibold text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full"
               >
-                {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : displayName.slice(0, 1).toUpperCase()}
+                <UserAvatar ownerEmail={owner} name={displayName} size={36} />
               </button>
               {menuOpen && (
                 <div role="menu" className="absolute end-0 top-11 w-56 rounded-xl border border-border bg-surface p-1.5 shadow-lg">

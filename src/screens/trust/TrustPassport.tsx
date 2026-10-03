@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
@@ -54,12 +55,6 @@ export function TrustPassport() {
   const verifiedCount = requests.filter((r) => r.status === 'verified').length
   const pendingCount = requests.filter((r) => r.status !== 'verified' && r.status !== 'rejected').length
   const headline = account?.accountType === 'individual' ? account.headline : account?.accountType === 'organisation' ? account.orgType : ''
-  const initials = account?.legalName
-    ?.split(' ')
-    .map((p) => p[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
 
   const dimensionSignals: Record<keyof TrustDimensions, string[]> = {
     identityTrust: [], academicTrust: [], professionalTrust: [], employmentTrust: [],
@@ -116,7 +111,7 @@ export function TrustPassport() {
               </div>
               <div className="p-4">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <span className="flex h-[46px] w-[46px] flex-none items-center justify-center rounded-full bg-accent-solid text-base font-semibold text-white">{initials}</span>
+                  <UserAvatar ownerEmail={owner} name={account?.legalName ?? ''} size={46} />
                   <div className="min-w-[140px] flex-1">
                     <div className="text-sm font-semibold text-text-0">{account?.legalName}</div>
                     <div className="text-xs text-text-1">{headline}</div>

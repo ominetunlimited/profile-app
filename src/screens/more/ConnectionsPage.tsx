@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
@@ -113,7 +114,7 @@ function PersonRow({ email, children }: { email: string; children?: ReactNode })
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">{name.slice(0, 1).toUpperCase()}</span>
+      <UserAvatar ownerEmail={email} name={name} size={36} />
       <div className="min-w-0 flex-1">
         {username ? (
           <Link to={`/profile/${username}`} className="truncate text-sm font-semibold text-text-0 hover:text-accent">

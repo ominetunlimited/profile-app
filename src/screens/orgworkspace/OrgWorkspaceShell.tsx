@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import type { ReactNode } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
@@ -39,13 +40,6 @@ export function OrgWorkspaceShell({ title, navItems, children }: { title: string
   const { account } = useAccount()
   if (!account || account.accountType !== 'organisation') return null
   const hub = hubForOrgType(account.orgType)
-  const initials = account.legalName
-    .split(/\s+/)
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
 
   return (
     <AppShell>
@@ -74,7 +68,7 @@ export function OrgWorkspaceShell({ title, navItems, children }: { title: string
             )
           })}
           <div className="mt-auto hidden items-center gap-2 border-t border-dashed border-border-strong pt-3 ps-2 sm:flex">
-            <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg bg-accent-solid text-[10px] font-semibold text-white">{initials}</span>
+            <UserAvatar ownerEmail={account.officialEmail} name={account.legalName} size={26} />
             <span className="truncate text-[11.5px] text-text-1">
               {account.officialEmail} · {account.orgRole.replace(/_/g, ' ')}
             </span>

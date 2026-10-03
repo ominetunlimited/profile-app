@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
@@ -83,14 +84,6 @@ export function OnboardingPage() {
   const worked = work.trim().length > 3
   const activities = account ? listActivities(owner) : []
   const trust = computeTrustScore(account)
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
 
   function saveIdentity() {
     if (!account || account.accountType !== 'individual') return
@@ -558,9 +551,11 @@ export function OnboardingPage() {
               <div className="font-mono text-[10px] uppercase tracking-wide text-text-2">Your profile so far</div>
               <div className="rounded-xl border border-border bg-surface p-3.5">
                 <div className="mb-3 flex items-center gap-2.5">
-                  <span className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-full text-[15px] font-semibold text-white ${name.trim() ? 'bg-accent-solid' : 'bg-border-strong'}`}>
-                    {initials || '—'}
-                  </span>
+                  {name.trim() ? (
+                    <UserAvatar ownerEmail={owner} name={name} size={42} />
+                  ) : (
+                    <span className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-full bg-border-strong text-[15px] font-semibold text-white">—</span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className={`text-[13px] font-semibold ${name.trim() ? 'text-text-0' : 'text-text-2'}`}>{name.trim() || 'Your name'}</div>
                     <div className="text-[11.5px] text-text-1">{role.trim() || 'Your field of work'}</div>

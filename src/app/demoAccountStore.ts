@@ -47,6 +47,8 @@ interface AccountRow {
   official_email: string | null
   registry_level: string | null
   org_role: string | null
+  avatar_url?: string | null
+  cover_url?: string | null
 }
 
 type OrganisationAccountShape = Extract<Account, { accountType: 'organisation' }>
@@ -339,6 +341,30 @@ export async function setOrganisationRegistryLevel(officialEmail: string, level:
  * No-ops if the email isn't a registered record — callers should also update
  * the live `AccountContext` session themselves via `setAccount`.
  */
+/** Canonical avatar/cover for an account — the one server-side source every surface reads. */
+export function getAccountImages(email: string | undefined): { avatarUrl: string | null; coverUrl: string | null } {
+  if (!email) return { avatarUrl: null, coverUrl: null }
+  const target = email.trim().toLowerCase()
+  const row = cache.find((r) => r.email.toLowerCase() === target)
+  return { avatarUrl: row?.avatar_url ?? null, coverUrl: row?.cover_url ?? null }
+}
+
+/** Uploads a (pre-resized) image data URL to the public account-images bucket and records it on the account row. */
+export async function setAccountImage(email: string, kind: 'avatar' | 'cover', dataUrl: string): Promise<void> {
+  const { data: sess } = await supabase.auth.getSession()
+  const uid = sess.session?.user?.id
+  if (!uid) throw new Error('Sign in to change your photo.')
+  const blob = await (await fetch(dataUrl)).blob()
+  const path = `${uid}/${kind}-${Date.now()}.jpg`
+  const { error: upErr } = await supabase.storage.from('account-images').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
+  if (upErr) throw upErr
+  const url = supabase.storage.from('account-images').getPublicUrl(path).data.publicUrl
+  const { data, error } = await supabase.from('accounts').update({ [kind === 'avatar' ? 'avatar_url' : 'cover_url']: url }).eq('id', uid).select().maybeSingle()
+  if (error) throw error
+  if (data) upsertCacheRow(data as AccountRow)
+  void email
+}
+
 export async function updateDemoAccount(email: string, account: Account): Promise<void> {
   const { data } = await supabase.from('accounts').update(accountToRow(account)).eq('email', email.toLowerCase()).select().maybeSingle()
   if (data) upsertCacheRow(data as AccountRow)

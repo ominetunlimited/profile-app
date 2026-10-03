@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
@@ -81,12 +82,6 @@ export function ProfilePage() {
   // when the account holder has set it private; falls back to the legal
   // name itself when public (the default) or when no alias was ever set.
   const name = publicDisplayName(ownerKey(viewed), viewed.legalName, viewed.accountType === 'individual' ? viewed.preferredDisplayName : undefined, isSelf)
-  const initials = name
-    .split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
   const canCv = isCvEligible(viewed)
   const canPortfolio = isPortfolioEligible(viewed)
   const targetKey = ownerKey(viewed)
@@ -123,8 +118,8 @@ export function ProfilePage() {
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-10 flex flex-wrap items-end gap-4">
-            <div className="flex h-20 w-20 flex-none items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-accent-solid text-xl font-semibold text-white">
-              {media.avatarDataUrl ? <img src={media.avatarDataUrl} alt="" className="h-full w-full object-cover" /> : initials}
+            <div className="flex-none rounded-full border-4 border-surface">
+              <UserAvatar ownerEmail={targetKey} name={name} size={72} />
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <div className="flex flex-wrap items-center gap-2">

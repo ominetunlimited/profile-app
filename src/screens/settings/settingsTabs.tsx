@@ -4,7 +4,7 @@ import { useAccount } from '@/app/AccountContext'
 import { hubForOrgType } from '@/app/accountTypes'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
-import { changePassword, updateDemoAccount } from '@/app/demoAccountStore'
+import { changePassword, updateDemoAccount, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { ownerKey } from '@/app/activityStore'
 import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
@@ -78,7 +78,9 @@ export function ProfileTab() {
   const { account, setAccount } = useAccount()
   const isIndividual = account?.accountType === 'individual'
   const owner = account ? ownerKey(account) : ''
-  const [media, setMedia] = useState(() => (owner ? getProfileMedia(owner) : { avatarDataUrl: null, coverDataUrl: null }))
+  useAccountsCacheVersion()
+  const media = owner ? getProfileMedia(owner) : { avatarDataUrl: null, coverDataUrl: null }
+  const [photoError, setPhotoError] = useState<string | null>(null)
   const [form, setForm] = useState(() => ({
     legalName: account?.legalName ?? '',
     preferredDisplayName: isIndividual ? account.preferredDisplayName ?? '' : '',
@@ -109,8 +111,8 @@ export function ProfileTab() {
           maxDimension={1600}
           shape="banner"
           onUploaded={(dataUrl) => {
-            saveCover(owner, dataUrl)
-            setMedia((m) => ({ ...m, coverDataUrl: dataUrl }))
+            setPhotoError(null)
+            saveCover(owner, dataUrl).catch((e) => setPhotoError(e instanceof Error ? e.message : 'Could not save your cover image.'))
           }}
         />
         <ImageUploadField
@@ -119,10 +121,11 @@ export function ProfileTab() {
           maxDimension={480}
           shape="circle"
           onUploaded={(dataUrl) => {
-            saveAvatar(owner, dataUrl)
-            setMedia((m) => ({ ...m, avatarDataUrl: dataUrl }))
+            setPhotoError(null)
+            saveAvatar(owner, dataUrl).catch((e) => setPhotoError(e instanceof Error ? e.message : 'Could not save your photo.'))
           }}
         />
+        {photoError && <p role="alert" className="text-xs text-danger">{photoError}</p>}
         <Field label="Full name">
           <TextInput value={form.legalName} onChange={(e) => setForm((f) => ({ ...f, legalName: e.target.value }))} />
         </Field>

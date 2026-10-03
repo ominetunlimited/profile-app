@@ -156,8 +156,9 @@ export function AccountCreationWizard() {
     // state and previewed, but never actually saved anywhere — completing
     // registration silently discarded them. Now persisted through the same
     // real pipeline Settings' photo upload uses (mediaStore.ts).
-    if (s.profilePhoto) saveAvatar(s.email, s.profilePhoto)
-    if (s.coverPhoto) saveCover(s.email, s.coverPhoto)
+    // Best-effort: the account exists either way, and Settings can retry the upload.
+    if (s.profilePhoto) await saveAvatar(s.email, s.profilePhoto).catch(() => undefined)
+    if (s.coverPhoto) await saveCover(s.email, s.coverPhoto).catch(() => undefined)
     setAccount(newAccount)
     setWizardError(null)
     return true
