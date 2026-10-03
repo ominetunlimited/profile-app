@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { TextInput } from '@/shared/ui/Field'
@@ -28,6 +29,7 @@ function printLetter(date: string, body: string) {
 function CoverLetterInner() {
   const { account } = useAccount()
   useJobsCacheVersion()
+  useCvDetailsVersion()
   const cv = buildCvData(account)
   const jobs = listOpenJobs()
   const [choice, setChoice] = useState<string>(jobs[0]?.id ?? CUSTOM)

@@ -13,6 +13,7 @@ import { computeTrustScore } from '@/app/trustScore'
 import { findAccountByEmail, findAccountByUsername, getAccountVisibility, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
 import { buildCvData } from '@/app/careerData'
+import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { publicDisplayName } from '@/app/privacyModeStore'
 import { buildPortfolioData } from '@/app/portfolioData'
 import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
@@ -54,6 +55,7 @@ export function ProfilePage() {
   useActivitiesCacheVersion()
   useFollowsCacheVersion()
   useConnectionsCacheVersion()
+  useCvDetailsVersion()
 
   // §24.2 — viewing someone else: a real registered account (never
   // fabricated), looked up by username from every account actually

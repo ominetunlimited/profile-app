@@ -47,9 +47,18 @@ export function CvDetailsEditor({ ownerEmail, onSaved }: { ownerEmail: string; o
   function toggleSection(key: CvSectionKey) {
     patch({ enabledSections: { ...details.enabledSections, [key]: !details.enabledSections[key] } })
   }
-  function save() {
-    saveCvDetails(ownerEmail, details)
-    onSaved()
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  async function save() {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await saveCvDetails(ownerEmail, details)
+      onSaved()
+    } catch (e) {
+      setSaveError((e as Error).message)
+    }
+    setSaving(false)
   }
 
   return (
@@ -123,7 +132,14 @@ export function CvDetailsEditor({ ownerEmail, onSaved }: { ownerEmail: string; o
         />
       )}
 
-      <Button onClick={save}>Save CV details</Button>
+      {saveError && (
+        <p role="alert" className="text-xs text-danger">
+          {saveError}
+        </p>
+      )}
+      <Button disabled={saving} onClick={() => void save()}>
+        {saving ? 'Saving…' : 'Save CV details'}
+      </Button>
     </div>
   )
 }

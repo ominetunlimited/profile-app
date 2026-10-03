@@ -2,31 +2,45 @@ import { useMemo, useState } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { ACADEMY_TOPICS, completeCourse, listEnrollments, startCourse } from '@/app/learningStore'
-import { getCvDetails, saveCvDetails } from '@/app/cvDetailsStore'
+import { ACADEMY_TOPICS, completeCourse, listEnrollments, startCourse, useLearningVersion } from '@/app/learningStore'
+import { cvDetailsReady, getCvDetails, saveCvDetails, useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { recommend } from '@/app/recommendationEngine'
 
 /** Learning: topics worth working on, what you've started, and what you've finished. */
 export function LearningPage() {
   const { account } = useAccount()
   const owner = account ? ownerKey(account) : ''
-  const [enrollments, setEnrollments] = useState(() => listEnrollments(owner))
+  useLearningVersion()
+  useCvDetailsVersion()
+  const enrollments = listEnrollments(owner)
+  const [error, setError] = useState<string | null>(null)
 
-  function refresh() {
-    setEnrollments(listEnrollments(owner))
+  async function handleStart(topic: string) {
+    setError(null)
+    try {
+      await startCourse(owner, topic)
+    } catch (e) {
+      setError((e as Error).message)
+    }
   }
 
-  function handleComplete(topic: string) {
-    completeCourse(owner, topic)
-    // A finished topic becomes a CV certification entry, marked as self-reported.
-    const details = getCvDetails(owner)
-    if (!details.certifications.some((c) => c.name === topic)) {
-      saveCvDetails(owner, {
-        ...details,
-        certifications: [...details.certifications, { id: `course-${Date.now()}`, name: topic, issuer: 'Self-reported', year: new Date().getFullYear().toString() }],
-      })
+  async function handleComplete(topic: string) {
+    setError(null)
+    try {
+      await completeCourse(owner, topic)
+      // A finished topic becomes a CV certification entry, marked as self-reported.
+      if (cvDetailsReady()) {
+        const details = getCvDetails(owner)
+        if (!details.certifications.some((c) => c.name === topic)) {
+          await saveCvDetails(owner, {
+            ...details,
+            certifications: [...details.certifications, { id: `course-${Date.now()}`, name: topic, issuer: 'Self-reported', year: new Date().getFullYear().toString() }],
+          })
+        }
+      }
+    } catch (e) {
+      setError((e as Error).message)
     }
-    refresh()
   }
 
   // The engine's own reason for suggesting a topic, where it has one.
@@ -52,6 +66,12 @@ export function LearningPage() {
           Courses aren't hosted on PROFILE yet — use this to track what you're learning. A finished topic appears on your CV as self-reported, not verified, and doesn't add Trust Score points.
         </p>
 
+        {error && (
+          <p role="alert" className="mb-4 text-xs text-danger">
+            {error}
+          </p>
+        )}
+
         <section className="mb-[26px]" aria-labelledby="recommended">
           <h2 id="recommended" className="mb-3 text-[13px] font-semibold text-text-0">Recommended for you</h2>
           {recommended.length === 0 ? (
@@ -69,10 +89,7 @@ export function LearningPage() {
                     <div className="mb-3 text-[11px] text-text-2">PROFILE Academy · self-paced</div>
                     <button
                       type="button"
-                      onClick={() => {
-                        startCourse(owner, topic)
-                        refresh()
-                      }}
+                      onClick={() => void handleStart(topic)}
                       className="h-8 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-0 hover:border-accent"
                     >
                       Start learning
@@ -95,7 +112,7 @@ export function LearningPage() {
                   <span className="block text-[13px] font-semibold text-text-0">{e.topic}</span>
                   <span className="block text-[11.5px] text-text-1">PROFILE Academy · started {new Date(e.startedAt).toLocaleDateString()}</span>
                 </span>
-                <button type="button" onClick={() => handleComplete(e.topic)} className="h-8 rounded-lg bg-accent-solid px-3 text-xs font-semibold text-white">
+                <button type="button" onClick={() => void handleComplete(e.topic)} className="h-8 rounded-lg bg-accent-solid px-3 text-xs font-semibold text-white">
                   Mark complete
                 </button>
               </div>

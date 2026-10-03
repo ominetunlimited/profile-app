@@ -1,5 +1,7 @@
 /**
- * Temporary client-only scaffolding, same caveats as demoAccountStore.ts.
+ * The hand-entered parts of a CV, stored on the server (public.cv_details, RLS-enforced) and read through a live cache.
+ * The owner reads and writes their own; anyone allowed to see the account can read it. Reads are synchronous over the
+ * cache; `saveCvDetails` is an async write that updates the cache straight away.
  *
  * Patch (pre-Phase-7): §4.6 names `EducationEntry`, `CertificationEntry`,
  * and `SummaryContent` as CV sub-schemas but never field-specifies any of
@@ -23,6 +25,10 @@
  * if un-hidden, rather than the CV silently absorbing every activity with
  * no way to review it first.
  */
+
+import { useSyncExternalStore } from 'react'
+import { supabase } from './supabaseClient'
+import { joinRealtime } from './realtimeAuth'
 
 export interface EducationEntry {
   id: string
@@ -168,7 +174,7 @@ export interface CvDetails {
   enabledSections: Record<CvSectionKey, boolean>
 }
 
-const STORAGE_KEY = 'profile:demo-cv-details'
+const LEGACY_KEY = 'profile:demo-cv-details'
 
 const DEFAULT_ENABLED_SECTIONS: Record<CvSectionKey, boolean> = {
   summary: true,
@@ -202,28 +208,93 @@ const EMPTY_DETAILS: CvDetails = {
   enabledSections: DEFAULT_ENABLED_SECTIONS,
 }
 
-function readAll(): Record<string, Partial<CvDetails>> {
+// --- Live cache ----------------------------------------------------------
+let cache = new Map<string, Partial<CvDetails>>()
+let loaded = false
+let version = 0
+const listeners = new Set<() => void>()
+const notify = () => {
+  version++
+  listeners.forEach((fn) => fn())
+}
+
+function readLegacy(): Record<string, Partial<CvDetails>> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(LEGACY_KEY)
     return raw ? JSON.parse(raw) : {}
   } catch {
     return {}
   }
 }
 
-function writeAll(all: Record<string, CvDetails>) {
+async function load() {
+  const { data, error } = await supabase.from('cv_details').select('owner_email, details')
+  if (!error) {
+    cache = new Map((data ?? []).map((r) => [String(r.owner_email).toLowerCase(), r.details as Partial<CvDetails>]))
+    loaded = true
+    await importLegacy()
+  }
+  notify()
+}
+
+/** One-time carry-over: CV details this person typed in before they were stored on the server. */
+async function importLegacy() {
+  const { data } = await supabase.auth.getSession()
+  const email = data.session?.user?.email?.toLowerCase()
+  if (!email || cache.has(email)) return
+  const legacy = readLegacy()
+  const mine = Object.entries(legacy).find(([k]) => k.toLowerCase() === email)
+  if (!mine) return
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
+    await saveCvDetails(email, { ...EMPTY_DETAILS, ...mine[1], enabledSections: { ...DEFAULT_ENABLED_SECTIONS, ...mine[1].enabledSections } } as CvDetails)
+    delete legacy[mine[0]]
+    localStorage.setItem(LEGACY_KEY, JSON.stringify(legacy))
   } catch {
-    // best-effort demo scaffolding only
+    // leave the local copy in place; it will be retried next load
   }
 }
 
-/** Merges over EMPTY_DETAILS so a record saved before these new fields
- * existed still gets a real, complete CvDetails back rather than crashing
- * on a missing array/section. */
+if (typeof window !== 'undefined') {
+  void load()
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      loaded = false
+      notify()
+      void load()
+    }
+  })
+  joinRealtime(() =>
+    supabase
+      .channel('cv-details')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cv_details' }, (payload) => {
+        if (payload.eventType === 'DELETE') cache.delete(String((payload.old as { owner_email: string }).owner_email).toLowerCase())
+        else cache.set(String((payload.new as { owner_email: string }).owner_email).toLowerCase(), (payload.new as { details: Partial<CvDetails> }).details)
+        cache = new Map(cache)
+        notify()
+      })
+      .subscribe(),
+  )
+}
+
+export function useCvDetailsVersion(): number {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn)
+      return () => listeners.delete(fn)
+    },
+    () => version,
+    () => version,
+  )
+}
+
+/** False until the first load from the server has finished — don't offer to edit before then, or an empty form could overwrite saved data. */
+export function cvDetailsReady(): boolean {
+  return loaded
+}
+
+/** Merges over EMPTY_DETAILS so a record saved before newer fields existed still gets a complete CvDetails back. */
 export function getCvDetails(ownerEmail: string): CvDetails {
-  const stored = readAll()[ownerEmail]
+  const stored = cache.get(ownerEmail.toLowerCase())
   if (!stored) return EMPTY_DETAILS
   return {
     ...EMPTY_DETAILS,
@@ -232,8 +303,19 @@ export function getCvDetails(ownerEmail: string): CvDetails {
   }
 }
 
-export function saveCvDetails(ownerEmail: string, details: CvDetails): void {
-  const all = readAll() as Record<string, CvDetails>
-  all[ownerEmail] = details
-  writeAll(all)
+export async function saveCvDetails(ownerEmail: string, details: CvDetails): Promise<void> {
+  const key = ownerEmail.toLowerCase()
+  const previous = cache.get(key)
+  cache = new Map(cache).set(key, details)
+  notify()
+  const { error } = await supabase.from('cv_details').upsert({ owner_email: key, details, updated_at: new Date().toISOString() }, { onConflict: 'owner_email' })
+  if (error) {
+    // Put back what the server still has so the screen doesn't show something that wasn't saved.
+    const restored = new Map(cache)
+    if (previous) restored.set(key, previous)
+    else restored.delete(key)
+    cache = restored
+    notify()
+    throw new Error(error.message)
+  }
 }

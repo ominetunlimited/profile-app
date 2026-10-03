@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, ownerKey } from '@/app/activityStore'
-import { getCvDetails } from '@/app/cvDetailsStore'
+import { getCvDetails, useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { RecommendationsPanel } from '@/shared/ui/RecommendationsPanel'
 
 /**
@@ -21,6 +21,7 @@ export function CareerGrowthPage() {
     )
   }
   const activities = listActivities(ownerKey(account))
+  useCvDetailsVersion()
   const details = getCvDetails(ownerKey(account))
 
   const steps: { label: string; to: string }[] = [

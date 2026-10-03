@@ -17,6 +17,8 @@ import { listVerificationRequests, useVerificationVersion } from '@/app/verifica
 import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
 import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
 import { useAccountsCacheVersion } from '@/app/demoAccountStore'
+import { useLearningVersion } from '@/app/learningStore'
+import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { useConnectionsCacheVersion } from '@/app/connectionStore'
 import { useFollowsCacheVersion } from '@/app/followStore'
 import { useApplicationsCacheVersion } from '@/app/applicationStore'
@@ -69,7 +71,7 @@ export function HomePage() {
   const [explainOpen, setExplainOpen] = useState(false)
   const versions =
     useActivitiesCacheVersion() + useAccountsCacheVersion() + useConnectionsCacheVersion() + useFollowsCacheVersion() + useJobsCacheVersion() +
-    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useCampaignsCacheVersion() + useVerificationVersion()
+    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useCampaignsCacheVersion() + useVerificationVersion() + useLearningVersion() + useCvDetailsVersion()
   const { status, lastSyncedAt } = activitiesStatus()
   // The signed-in account's own activity plus real activity from people and organisations they follow or connect with, and reposts.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('home_feed')

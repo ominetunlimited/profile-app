@@ -1,7 +1,7 @@
 import type { IndividualAccount, OrganisationAccount } from '@/app/accountTypes'
 import { emailIsRegistered, ensureSignedInAs, saveDemoAccount, updateDemoAccount, waitForAccountsCacheReady } from '@/app/demoAccountStore'
 import { postActivity, listActivities } from '@/app/activityStore'
-import { saveCvDetails, getCvDetails } from '@/app/cvDetailsStore'
+import { saveCvDetails, getCvDetails, cvDetailsReady } from '@/app/cvDetailsStore'
 import { createDraftTemplate, publishTemplate, listCreatorTemplates } from '@/app/creatorTemplateStore'
 import { setCommerceSettings, getCommerceSettings } from '@/app/commerceStore'
 import { saveOrgPortfolioConfig } from '@/app/organisationPortfolioStore'
@@ -162,7 +162,8 @@ export async function ensureOminiNfawaSeeded(): Promise<IndividualAccount> {
     },
   ])
 
-  if (!getCvDetails(OMINI_EMAIL).summaryStatement) {
+  // Only seed once the saved copy has loaded — otherwise this could overwrite a real CV with sample text.
+  if (cvDetailsReady() && !getCvDetails(OMINI_EMAIL).summaryStatement) {
     saveCvDetails(OMINI_EMAIL, {
       summaryStatement:
         "Founder of PROFILE, building the global infrastructure for verified professional trust — where real work becomes evidence, and evidence becomes opportunity.",

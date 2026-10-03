@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { getCvDetails } from '@/app/cvDetailsStore'
+import { getCvDetails, useCvDetailsVersion } from '@/app/cvDetailsStore'
 
 /**
  * §10.4 Hamburger Menu's "Credential Hub" — individual accounts only. Reads
@@ -21,6 +21,7 @@ export function CredentialHub() {
       </AppShell>
     )
   }
+  useCvDetailsVersion()
   const details = getCvDetails(ownerKey(account))
 
   return (

@@ -7,6 +7,7 @@ import { ownerKey } from '@/app/activityStore'
 import { buildCvData } from '@/app/careerData'
 import { CV_TEMPLATES } from './cvTemplates'
 import { CvDetailsEditor } from './CvDetailsEditor'
+import { cvDetailsReady, useCvDetailsVersion } from '@/app/cvDetailsStore'
 
 /** §47.5 CV Template Library — real data-bound preview, never the Handoff's
  * illustrative persona. */
@@ -14,7 +15,8 @@ export function CVTemplatesPage() {
   const { template } = useParams<{ template: string }>()
   const navigate = useNavigate()
   const { account } = useAccount()
-  const [cv, setCv] = useState(() => buildCvData(account))
+  useCvDetailsVersion()
+  const cv = buildCvData(account)
   const [editorOpen, setEditorOpen] = useState(false)
 
   const initialIndex = Math.max(0, CV_TEMPLATES.findIndex((t) => t.id === template))
@@ -49,14 +51,12 @@ export function CVTemplatesPage() {
           </Button>
         </div>
 
-        {editorOpen && (
+        {editorOpen && !cvDetailsReady() && <p className="mb-8 text-sm text-text-1">Loading your saved CV details…</p>}
+        {editorOpen && cvDetailsReady() && (
           <div className="mb-8 rounded-xl border border-border bg-surface p-5">
             <CvDetailsEditor
               ownerEmail={ownerKey(account)}
-              onSaved={() => {
-                setCv(buildCvData(account))
-                setEditorOpen(false)
-              }}
+              onSaved={() => setEditorOpen(false)}
             />
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
@@ -31,6 +32,7 @@ function ApplyInner() {
   useJobsCacheVersion()
   useApplicationsCacheVersion()
   const job = jobId ? getJobById(jobId) : undefined
+  useCvDetailsVersion()
   const cv = buildCvData(account)
   const CvComponent = CV_TEMPLATES[0].Component
 

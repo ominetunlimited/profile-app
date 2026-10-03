@@ -10,6 +10,8 @@ import { useApplicationsCacheVersion } from '@/app/applicationStore'
 import { useCommunitiesVersion } from '@/app/communityStore'
 import { useSocialCacheVersion } from '@/app/socialStore'
 import { KIND_LABEL, recommend, type Recommendation } from '@/app/recommendationEngine'
+import { useLearningVersion } from '@/app/learningStore'
+import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { recordFeedback, useRecommendationFeedbackVersion } from '@/app/recommendationFeedbackStore'
 
 /** "Recommended for you" — ranked, explained suggestions for this account type.
@@ -20,7 +22,7 @@ export function RecommendationsPanel({ limit = 5, title = 'Recommended for you',
   const owner = ownerKey(account)
   const versions =
     useActivitiesCacheVersion() + useAccountsCacheVersion() + useConnectionsCacheVersion() + useFollowsCacheVersion() + useJobsCacheVersion() +
-    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion()
+    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useLearningVersion() + useCvDetailsVersion()
   const recs = useMemo(() => recommend(account, limit), [account, limit, versions]) // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState<string | null>(null)
 
