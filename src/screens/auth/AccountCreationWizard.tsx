@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthChrome } from './AuthChrome'
 import { Button } from '@/shared/ui/Button'
@@ -234,14 +235,7 @@ export function AccountCreationWizard() {
           <p className="mb-4 text-sm leading-relaxed text-text-1">Registering a {s.orgType} workspace.</p>
           {account?.accountType === 'individual' && (
             <div className="mb-4 flex items-center gap-3 rounded-lg border border-success bg-surface-sunken p-3">
-              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-accent-solid text-xs font-semibold text-white">
-                {account.legalName
-                  .split(' ')
-                  .map((p) => p[0])
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </span>
+              <UserAvatar ownerEmail={account.email} name={account.legalName} size={32} />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-text-0">Signed in as {account.legalName}</div>
                 <div className="text-xs text-text-1">{account.email} · this workspace's admin</div>

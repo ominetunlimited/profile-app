@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 import { KYC_DOCUMENT_LABEL, listKyc, reviewKyc, useKycVersion, type KycSubmission } from '@/app/kycStore'
 import { ensureMediaAsset, getMediaAssetById, getSignedMediaUrl, useMediaAssetsCacheVersion } from '@/app/mediaAssetStore'
@@ -106,6 +107,7 @@ export function AdminKyc() {
                 className={`rounded-xl border p-3 text-left ${selectedId === k.id ? 'border-accent bg-surface-sunken' : 'border-border bg-surface'}`}
               >
                 <div className="flex items-center gap-2">
+                  <UserAvatar ownerEmail={k.userEmail} name={name(k.userEmail)} size={28} />
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-0">{name(k.userEmail)}</span>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${STATUS_TONE[k.status]}`}>{k.status.replace('_', ' ')}</span>
                 </div>

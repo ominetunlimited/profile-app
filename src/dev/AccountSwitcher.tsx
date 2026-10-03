@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { setColourMode, resolvedIsDark } from '@/app/theme'
 import { useNavigate } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import type { Account, OrgAdminRoleV3, OrganisationType, OrgRegistryLevel } from '@/app/accountTypes'
@@ -216,7 +217,7 @@ export function AccountSwitcher() {
       </button>
       <button
         className="rounded border border-border px-2 py-1 hover:border-accent"
-        onClick={() => document.documentElement.classList.toggle('dark')}
+        onClick={() => setColourMode(resolvedIsDark() ? 'light' : 'dark')}
       >
         Toggle theme
       </button>

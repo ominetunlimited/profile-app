@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Button } from '@/shared/ui/Button'
 import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { useAdmin } from '@/app/AdminContext'
@@ -128,8 +129,13 @@ export function AdminUsersRoles() {
               {admins.map((a) => (
                 <tr key={a.id} className="border-t border-border bg-surface">
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-text-0">{a.displayName ?? a.email}</div>
-                    <div className="text-xs text-text-2">{a.email}</div>
+                    <div className="flex items-center gap-2.5">
+                      <UserAvatar ownerEmail={a.email} name={a.displayName ?? a.email} size={30} />
+                      <div>
+                        <div className="font-semibold text-text-0">{a.displayName ?? a.email}</div>
+                        <div className="text-xs text-text-2">{a.email}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     {isSuperAdmin && a.id !== me?.id ? (

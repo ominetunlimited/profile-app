@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { listConversations, useChatVersion } from '@/app/messageStore'
 import { findAccountByEmail } from '@/app/demoAccountStore'
 
@@ -41,6 +42,7 @@ export function ConversationList({ ownerEmail, onOpen }: { ownerEmail: string; o
         <div className="flex flex-col gap-2">
           {conversations.map((c) => (
             <button key={c.conversationId} onClick={() => onOpen(c.conversationId)} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 text-left hover:border-accent">
+              <UserAvatar ownerEmail={c.otherEmail} name={displayNameFor(c.otherEmail)} size={40} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className={`truncate ${c.unreadCount > 0 ? 'font-bold' : 'font-semibold'} text-text-0`}>{displayNameFor(c.otherEmail)}</span>

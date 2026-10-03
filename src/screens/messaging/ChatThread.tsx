@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import {
   blockUser,
   deleteMessage,
@@ -133,6 +134,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle }: {
             ←
           </button>
         )}
+        {!isGroup && <UserAvatar ownerEmail={otherEmail} name={displayNameFor(otherEmail)} size={36} />}
         <div className="min-w-0 flex-1">
           <div className="truncate font-semibold text-text-0">{isGroup ? groupTitle : displayNameFor(otherEmail)}</div>
           <div className="h-4 text-[11px] text-text-2" aria-live="polite">

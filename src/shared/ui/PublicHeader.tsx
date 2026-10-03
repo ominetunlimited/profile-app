@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import { useLanguage } from '@/app/LanguageContext'
 import { LanguagePicker } from './LanguagePicker'
 import { BRAND } from '@/shared/brand/assets'
@@ -15,7 +15,6 @@ const NAV_LINKS = [
 
 /** §6.2/§6.9 — shared header across every public-facing page. */
 export function PublicHeader() {
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
   const { t } = useLanguage()
 
   return (
@@ -26,16 +25,7 @@ export function PublicHeader() {
         </Link>
         <div className="order-2 ms-auto flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           <LanguagePicker />
-          <button
-            type="button"
-            onClick={() => {
-              document.documentElement.classList.toggle('dark')
-              setDark((d) => !d)
-            }}
-            className="h-[34px] rounded-lg border border-border-strong bg-surface px-3 text-xs font-medium text-text-0"
-          >
-            {dark ? 'Dark' : 'Light'}
-          </button>
+          <ColourModeSelect className="h-[34px]" />
           <Link to="/auth" className="flex h-[34px] items-center rounded-lg px-3 text-sm font-semibold text-text-0">
             {t('nav.signin')}
           </Link>

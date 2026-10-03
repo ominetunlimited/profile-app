@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { shouldShowGpa, type CvData } from '@/app/careerData'
 
 /** Shared "no content yet" strip shown inside a template when there's
@@ -222,9 +223,7 @@ function ModernSidebar({ cv }: { cv: CvData }) {
   return (
     <div className="mx-auto flex w-full max-w-[780px] overflow-hidden bg-white text-gray-900 shadow-lg">
       <div className="w-[220px] flex-none bg-[#0F1F35] p-8 text-white">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#4C8DFF] text-lg font-bold">
-          {cv.name.slice(0, 1).toUpperCase()}
-        </div>
+        <UserAvatar ownerEmail={cv.email} name={cv.name} size={56} className="mb-4" />
         <div className="text-base font-bold">{cv.name}</div>
         <div className="mb-5 text-xs text-[#9FB3CC]">{cv.role}</div>
         <div className="mb-2 text-[10px] font-bold tracking-widest text-[#9FB3CC]">CONTACT</div>
@@ -424,9 +423,7 @@ function PhotoCardModern({ cv }: { cv: CvData }) {
   return (
     <div className="mx-auto w-full max-w-[780px] overflow-hidden bg-white text-gray-900 shadow-lg">
       <div className="flex items-center gap-4 bg-gray-100 px-9 py-7">
-        <div className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-accent-solid text-xl font-bold text-white">
-          {cv.name.slice(0, 1).toUpperCase()}
-        </div>
+        <UserAvatar ownerEmail={cv.email} name={cv.name} size={64} className="mb-0" />
         <div>
           <div className="text-xl font-bold">{cv.name}</div>
           <div className="text-sm text-gray-600">{cv.role}</div>

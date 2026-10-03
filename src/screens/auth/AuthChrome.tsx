@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useState, type ReactNode } from 'react'
+import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
+import type { ReactNode } from 'react'
 import { BRAND } from '@/shared/brand/assets'
 
 /** §6.2/§7.1/§8 shared chrome: logo + theme toggle, matching the Handoff's Sign
@@ -13,7 +14,6 @@ export function AuthChrome({
   progress?: { stepNum: number; stepCount: number; stepName: string }
   children: ReactNode
 }) {
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
@@ -22,16 +22,7 @@ export function AuthChrome({
           <Link to="/" className="flex items-center">
             <img src={BRAND.lockup} alt="PROFILE" className="h-6 w-auto" />
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              document.documentElement.classList.toggle('dark')
-              setDark((d) => !d)
-            }}
-            className="h-8 rounded-lg border border-border-strong bg-surface px-3 text-xs font-medium text-text-0"
-          >
-            {dark ? 'Dark' : 'Light'}
-          </button>
+          <ColourModeSelect className="h-8" />
         </div>
 
         {progress && (

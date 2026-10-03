@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { orgRoleCan, canAccessRecruiterHub } from '@/app/accountTypes'
@@ -176,6 +177,7 @@ export function RecruiterWorkflow() {
                             return (
                               <div key={a.id} className="rounded-lg border border-border bg-surface p-2.5 text-xs">
                                 <div className="mb-0.5 flex items-center gap-1.5">
+                                  <UserAvatar ownerEmail={a.applicantEmail} name={applicant?.legalName ?? 'Applicant'} size={22} />
                                   {username ? (
                                     <Link to={`/profile/${username}`} className="font-semibold text-text-0 hover:text-accent">
                                       {applicant?.legalName}

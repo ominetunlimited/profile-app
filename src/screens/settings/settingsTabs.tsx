@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
 import { hubForOrgType } from '@/app/accountTypes'
@@ -546,6 +547,9 @@ export function AccessibilityTab() {
 
   return (
     <Section title="Accessibility">
+      <Field label="Colour mode" hint="Light, dark, or follow your device. Applies everywhere in PROFILE, including the public pages.">
+        <ColourModeSelect className="h-10 w-full" />
+      </Field>
       <Toggle
         label="Reduce motion"
         hint="Stops PROFILE's own animations (including the brand loading motion), regardless of your OS setting."

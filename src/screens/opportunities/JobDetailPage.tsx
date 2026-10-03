@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
@@ -46,7 +47,7 @@ export function JobDetailPage() {
       <div className="mx-auto max-w-[720px] px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-surface p-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent-solid text-sm font-semibold text-white">{orgDisplayName(job.orgEmail).slice(0, 1)}</span>
+            <UserAvatar ownerEmail={job.orgEmail} name={orgDisplayName(job.orgEmail)} size={40} />
             <div>
               {orgUsername ? (
                 <Link to={`/profile/${orgUsername}`} className="font-semibold text-text-0 hover:text-accent">

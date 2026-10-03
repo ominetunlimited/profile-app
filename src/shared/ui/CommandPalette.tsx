@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
 import { routeRegistry } from '@/app/routeRegistry'
 import { useAccount } from '@/app/AccountContext'
@@ -12,6 +13,7 @@ interface PersonResult {
   path: string
   screen: string
   sub: string
+  email?: string
 }
 
 /**
@@ -125,6 +127,7 @@ export function CommandPalette() {
           kind: 'person' as const,
           path: `/profile/${username}`,
           screen: a.legalName,
+          email: a.accountType === 'individual' ? a.email : a.officialEmail,
           // §9.4 Name Collision Resolution — never a bare name+username; carry
           // headline/org-type and country alongside so two "John Smith"s are
           // distinguishable at a glance, same rule ProfilePage's header follows.
@@ -211,7 +214,7 @@ export function CommandPalette() {
                 style={i === 0 ? { background: 'var(--surface-sunken)' } : undefined}
               >
                 <span className="inline-flex items-center gap-1.5 text-text-0">
-                  {r.kind === 'person' && <IconPerson size={14} />}
+                  {r.kind === 'person' && (r.email ? <UserAvatar ownerEmail={r.email} name={r.screen} size={22} /> : <IconPerson size={14} />)}
                   {r.kind === 'tool' && <IconTool size={14} />}
                   {r.kind === 'provider' && <IconFactory size={14} />}
                   {r.screen}

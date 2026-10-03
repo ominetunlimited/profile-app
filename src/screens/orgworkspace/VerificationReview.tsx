@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { AppShell } from '@/shared/ui/AppShell'
 import { listAllOrganisations, onAccountsChange, setOrganisationRegistryLevel } from '@/app/demoAccountStore'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type OrgRegistryLevel } from '@/app/accountTypes'
@@ -114,7 +115,10 @@ export function VerificationReview() {
                     className={`rounded-xl border-[1.5px] p-3.5 text-left ${isActive ? `${tone.edgeSelected} bg-accent-soft` : 'border-border bg-surface'}`}
                   >
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-[13.5px] font-semibold text-text-0">{org.legalName}</span>
+                      <span className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-text-0">
+                        <UserAvatar ownerEmail={org.officialEmail} name={org.legalName} size={24} />
+                        {org.legalName}
+                      </span>
                       <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${tone.bg} ${tone.ink}`}>{ORG_TRUST_STATUS_LABEL[org.registryLevel]}</span>
                     </div>
                     <div className="mb-1 text-[11.5px] text-text-1">
