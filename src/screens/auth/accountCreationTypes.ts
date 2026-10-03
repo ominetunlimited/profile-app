@@ -22,7 +22,6 @@ export interface WizardState {
   orgType: OrganisationType | null
 
   legalName: string
-  preferredDisplayName: string
   country: string
   dob: string
   email: string
@@ -75,7 +74,6 @@ export const initialWizardState: WizardState = {
   orgType: null,
 
   legalName: '',
-  preferredDisplayName: '',
   country: '',
   dob: '',
   email: '',

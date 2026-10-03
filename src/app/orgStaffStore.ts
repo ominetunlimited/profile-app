@@ -103,6 +103,8 @@ export function listMyMemberships(myEmail: string): OrgStaffRecord[] {
 }
 
 export interface InviteResult {
+  /** Whether the invitations were also emailed (set by the app from the platform's email delivery status). */
+  emailed?: boolean
   invited: string[]
   skipped: string[]
   invalid: string[]
@@ -117,7 +119,8 @@ export async function inviteStaffBulk(emailsInput: string, role: OrgAdminRoleV3)
   const { data, error } = await supabase.rpc('org_invite_staff', { p_emails: emails, p_role: role })
   if (error) throw new Error(error.message)
   await load()
-  return data as InviteResult
+  const { data: on } = await supabase.rpc('email_delivery_on')
+  return { ...(data as InviteResult), emailed: on === true }
 }
 
 /** Removes someone from the roster (an administrator), or leaves (the person themselves). */

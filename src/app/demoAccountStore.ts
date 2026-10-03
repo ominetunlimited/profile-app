@@ -39,7 +39,6 @@ interface AccountRow {
   country: string
   pathway: string | null
   career_stage: string | null
-  preferred_display_name: string | null
   headline: string | null
   city: string | null
   state_or_region: string | null
@@ -76,7 +75,6 @@ function rowToAccount(row: AccountRow): Account {
     pathway: row.pathway as IndividualAccountShape['pathway'],
     careerStage: (row.career_stage as IndividualAccountShape['careerStage']) ?? undefined,
     legalName: row.legal_name,
-    preferredDisplayName: row.preferred_display_name ?? undefined,
     username: row.username ?? undefined,
     headline: row.headline ?? undefined,
     email: row.email,
@@ -98,7 +96,6 @@ function accountToRow(account: Account): Omit<AccountRow, 'id'> {
     country: account.country,
     pathway: null as string | null,
     career_stage: null as string | null,
-    preferred_display_name: null as string | null,
     headline: null as string | null,
     city: null as string | null,
     state_or_region: null as string | null,
@@ -117,7 +114,6 @@ function accountToRow(account: Account): Omit<AccountRow, 'id'> {
     ...base,
     pathway: account.pathway,
     career_stage: account.careerStage ?? null,
-    preferred_display_name: account.preferredDisplayName ?? null,
     headline: account.headline ?? null,
     city: account.city ?? null,
     state_or_region: account.stateOrRegion ?? null,

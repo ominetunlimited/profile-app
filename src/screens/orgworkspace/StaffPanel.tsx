@@ -82,7 +82,7 @@ export function StaffPanel() {
         <div role="status" className="mb-3 rounded-lg border border-border bg-surface-sunken px-3.5 py-2.5 text-xs text-text-0">
           {result.invited.length > 0 && (
             <p className="mb-1 font-medium text-success">
-              {result.invited.length} invitation{result.invited.length === 1 ? '' : 's'} sent in-app. People with a PROFILE account see it under Workspaces; anyone without one will see it when they sign up with that email. No email is sent, so let them know directly.
+              {result.invited.length} invitation{result.invited.length === 1 ? '' : 's'} sent. {result.emailed ? 'Each person has been emailed, and people with a PROFILE account also see it under Workspaces.' : "Email delivery isn't set up on this platform yet, so nobody was emailed: people with a PROFILE account see it under Workspaces, and anyone without one sees it when they sign up with that email. Let them know directly."}
             </p>
           )}
           {result.skipped.length > 0 && <p className="text-text-1">Already on the roster or over the limit: {result.skipped.join(', ')}.</p>}

@@ -14,7 +14,6 @@ import { getCommerceSettings, setCommerceSettings, type CommerceSettings, useCom
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
 import { listLoginHistory } from '@/app/sessionStore'
-import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
 import { getMentorshipPreference, setMentorshipPreference, useMentorshipVersion } from '@/app/mentorshipStore'
 import { getPreference, PREFERENCE_CATEGORIES, setPreference, useNotificationsCacheVersion, type NotificationCategory } from '@/app/notificationStore'
 import { Field, PasswordInput, SelectInput, TextInput } from '@/shared/ui/Field'
@@ -96,7 +95,6 @@ export function ProfileTab() {
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [form, setForm] = useState(() => ({
     legalName: account?.legalName ?? '',
-    preferredDisplayName: isIndividual ? account.preferredDisplayName ?? '' : '',
     headline: isIndividual ? account.headline ?? '' : '',
     phone: isIndividual ? account.phone ?? '' : '',
     city: isIndividual ? account.city ?? '' : '',
@@ -141,9 +139,6 @@ export function ProfileTab() {
         {photoError && <p role="alert" className="text-xs text-danger">{photoError}</p>}
         <Field label="Full name">
           <TextInput value={form.legalName} onChange={(e) => setForm((f) => ({ ...f, legalName: e.target.value }))} />
-        </Field>
-        <Field label="Preferred display name" hint="Optional — shown publicly instead of your legal name if Privacy → Private Professional Mode is on.">
-          <TextInput value={form.preferredDisplayName} onChange={(e) => setForm((f) => ({ ...f, preferredDisplayName: e.target.value }))} placeholder="If different from your full name" />
         </Field>
         <Field label="Headline">
           <TextInput value={form.headline} onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))} placeholder="e.g. Structural Engineer" />
@@ -223,33 +218,10 @@ function ProfileVisibilityControl() {
   )
 }
 
-/** §25 SETTINGS_TABS.PrivacyAndVisibility + §25.1 PrivacyMode */
+/** §25 SETTINGS_TABS.PrivacyAndVisibility. Your verified legal name is always the name shown: there is deliberately no setting to hide or replace it. */
 export function PrivacyTab() {
-  const { account } = useAccount()
-  const owner = account ? ownerKey(account) : ''
-  const [privacyMode, setPrivacyModeState] = useState(() => (owner ? getPrivacyMode(owner) : { legalNamePublicVisibility: 'public' as const }))
-
-
   return (
     <div className="flex flex-col gap-4">
-      {account?.accountType === 'individual' && (
-        <Section title="Private Professional Mode">
-          <p className="mb-2 text-xs text-text-1">
-            For anyone whose primary occupation can't be publicly named. Turning this on never weakens your Verified
-            Identity badge or Trust Score — it just stops disclosing which legal name was verified.
-          </p>
-          <Toggle
-            label="Keep my legal name private"
-            hint={account.preferredDisplayName ? `Visitors will see "${account.preferredDisplayName}" instead.` : 'Add a preferred display name below, or your legal name will still show.'}
-            checked={privacyMode.legalNamePublicVisibility === 'private'}
-            onChange={(v) => {
-              const next = { legalNamePublicVisibility: (v ? 'private' : 'public') as 'public' | 'private' }
-              setPrivacyModeState(next)
-              setPrivacyMode(owner, next)
-            }}
-          />
-        </Section>
-      )}
       <Section title="Visibility">
         <p className="mb-1 text-xs text-text-1">
           Each record you post already has its own visibility (public, connections only or private). Account-wide controls arrive with the visibility engine, so they are not switchable yet.

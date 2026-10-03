@@ -135,7 +135,6 @@ export function AccountCreationWizard() {
       // Bug fix: captured at Step 2 (§8.5) but never saved to the finalized
       // account — same "collected then silently discarded" class of bug as
       // the profile/cover photos above.
-      preferredDisplayName: s.preferredDisplayName || undefined,
       username: s.username || undefined,
       headline: s.headline || undefined,
       email: s.email,
@@ -338,10 +337,7 @@ export function AccountCreationWizard() {
           <p className="mb-5 text-sm text-text-1">Just enough to get you in. Everything else comes later, on your terms.</p>
           <div className="mb-4 flex flex-col gap-3.5">
             <Field label="Full name">
-              <TextInput value={s.legalName} onChange={(e) => patch({ legalName: e.target.value })} placeholder="As you want it shown" />
-            </Field>
-            <Field label="Preferred display name (optional)">
-              <TextInput value={s.preferredDisplayName} onChange={(e) => patch({ preferredDisplayName: e.target.value })} placeholder="If different from your full name" />
+              <TextInput value={s.legalName} onChange={(e) => patch({ legalName: e.target.value })} placeholder="As it appears on your ID" />
             </Field>
             <Field label="Country" hint={countryRec ? `Default language: ${countryRec.lang} · minimum age ${countryRec.minAge}` : undefined}>
               <SelectInput value={s.country} onChange={(e) => patch({ country: e.target.value })}>

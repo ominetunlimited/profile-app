@@ -14,7 +14,6 @@ import { findAccountByEmail, findAccountByUsername, getAccountVisibility, useAcc
 import { getProfileMedia } from '@/app/mediaStore'
 import { buildCvData } from '@/app/careerData'
 import { useCvDetailsVersion } from '@/app/cvDetailsStore'
-import { publicDisplayName } from '@/app/privacyModeStore'
 import { buildPortfolioData } from '@/app/portfolioData'
 import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
 import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplates'
@@ -84,10 +83,7 @@ export function ProfilePage() {
   }
 
   const viewed = (isSelf ? account : otherAccount)!
-  // §9.7 Private Professional Mode — never show a non-owner the legal name
-  // when the account holder has set it private; falls back to the legal
-  // name itself when public (the default) or when no alias was ever set.
-  const name = publicDisplayName(ownerKey(viewed), viewed.legalName, viewed.accountType === 'individual' ? viewed.preferredDisplayName : undefined, isSelf)
+  const name = viewed.legalName
   const canCv = isCvEligible(viewed)
   const canPortfolio = isPortfolioEligible(viewed)
   const targetKey = ownerKey(viewed)

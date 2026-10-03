@@ -6,15 +6,21 @@ import {
   ALERT_EVENTS,
   CONTACT_FIELDS,
   fetchPlatformSettings,
+  getEmailLog,
+  getEmailSettings,
   getNotificationSettings,
   savePlatformSettings,
+  setEmail,
   setTelegram,
+  testEmail,
   testTelegram,
+  type EmailLogEntry,
+  type EmailSettings,
   type NotificationSettings,
   type PlatformSettings,
 } from '@/app/platformSettings'
 
-/** Support contact details (shown publicly in the Help Centre) and Telegram alerts for staff. */
+/** Support contact details (shown publicly in the Help Centre), email delivery and Telegram alerts for staff. */
 export function AdminSettings() {
   const { admin } = useAdmin()
   const allowed = !!admin && platformRoleCan(admin.role, 'platform_settings')
@@ -34,9 +40,32 @@ export function AdminSettings() {
   const [savingTg, setSavingTg] = useState(false)
   const [testing, setTesting] = useState(false)
 
+  const [mail, setMail] = useState<EmailSettings | null>(null)
+  const [mailKey, setMailKey] = useState('')
+  const [mailFrom, setMailFrom] = useState('')
+  const [mailName, setMailName] = useState('PROFILE')
+  const [mailReply, setMailReply] = useState('')
+  const [mailOn, setMailOn] = useState(false)
+  const [mailTo, setMailTo] = useState('')
+  const [mailMsg, setMailMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [mailLog, setMailLog] = useState<EmailLogEntry[]>([])
+  const [savingMail, setSavingMail] = useState(false)
+  const [testingMail, setTestingMail] = useState(false)
+
   useEffect(() => {
     if (!allowed) return
     let live = true
+    getEmailSettings()
+      .then((m) => {
+        if (!live) return
+        setMail(m)
+        setMailFrom(m.from_address ?? '')
+        setMailName(m.from_name)
+        setMailReply(m.reply_to ?? '')
+        setMailOn(m.enabled)
+      })
+      .catch((e: Error) => live && setMailMsg({ ok: false, text: e.message }))
+    getEmailLog().then((l) => live && setMailLog(l)).catch(() => undefined)
     void fetchPlatformSettings().then((s) => {
       if (!live || !s) return
       setSettings(s)
@@ -96,6 +125,33 @@ export function AdminSettings() {
     setTesting(false)
   }
 
+  async function saveMail() {
+    setSavingMail(true)
+    setMailMsg(null)
+    try {
+      await setEmail({ key: mailKey || undefined, fromAddress: mailFrom, fromName: mailName, replyTo: mailReply, enabled: mailOn })
+      setMailKey('')
+      setMail(await getEmailSettings())
+      setMailMsg({ ok: true, text: 'Saved.' })
+    } catch (e) {
+      setMailMsg({ ok: false, text: (e as Error).message })
+    }
+    setSavingMail(false)
+  }
+
+  async function sendMailTest() {
+    setTestingMail(true)
+    setMailMsg(null)
+    try {
+      const r = await testEmail(mailTo.trim())
+      setMailMsg({ ok: r.ok, text: r.message })
+      setMailLog(await getEmailLog())
+    } catch (e) {
+      setMailMsg({ ok: false, text: (e as Error).message })
+    }
+    setTestingMail(false)
+  }
+
   const inputCls = 'min-h-[40px] w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-0 outline-none focus-visible:border-accent'
 
   return (
@@ -128,6 +184,88 @@ export function AdminSettings() {
             </span>
           )}
         </div>
+      </section>
+
+      <section className="mb-6 rounded-xl border border-border bg-surface p-5" aria-labelledby="mail-h">
+        <h2 id="mail-h" className="mb-1 text-[15px] font-semibold text-text-0">Email delivery</h2>
+        <p className="mb-3 text-xs leading-relaxed text-text-1">
+          Lets PROFILE email people, starting with organisation staff invitations (people without an account get a sign-up link). Emails are short fixed text. Delivery uses Resend, so you need a Resend account, an API key, and a sending domain verified there.
+        </p>
+        <ol className="mb-4 list-decimal space-y-0.5 ps-5 text-xs text-text-1">
+          <li>Create an account at resend.com and add and verify your sending domain.</li>
+          <li>Create an API key with sending access and paste it below.</li>
+          <li>Enter a from-address on that domain, switch delivery on, save, then send yourself a test email.</li>
+        </ol>
+        {!isSuper && <p className="mb-3 rounded-lg border border-warning bg-warning-soft p-3 text-xs text-text-0">Only a super administrator can change email delivery. You can see its status here.</p>}
+        {!mail ? (
+          <p className="text-sm text-text-1">Loading…</p>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-text-0">API key</span>
+              <input type="password" autoComplete="off" value={mailKey} onChange={(e) => setMailKey(e.target.value)} disabled={!isSuper} placeholder={mail.key_set ? 'A key is saved — paste a new one to replace it' : 're_…'} className={inputCls} />
+              <span className="text-[11px] text-text-2">Stored encrypted. It can't be read back from this page once saved.</span>
+            </label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium text-text-0">From address</span>
+                <input type="email" value={mailFrom} onChange={(e) => setMailFrom(e.target.value)} disabled={!isSuper} placeholder="no-reply@yourdomain.com" className={inputCls} />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium text-text-0">From name</span>
+                <input value={mailName} onChange={(e) => setMailName(e.target.value)} disabled={!isSuper} className={inputCls} />
+              </label>
+              <label className="flex flex-col gap-1.5 sm:col-span-2">
+                <span className="text-xs font-medium text-text-0">Reply-to (optional)</span>
+                <input type="email" value={mailReply} onChange={(e) => setMailReply(e.target.value)} disabled={!isSuper} placeholder="support@yourdomain.com" className={inputCls} />
+              </label>
+            </div>
+            <label className="flex items-center gap-2.5 text-sm text-text-0">
+              <input type="checkbox" checked={mailOn} onChange={(e) => setMailOn(e.target.checked)} disabled={!isSuper} />
+              Send emails
+            </label>
+            {isSuper && (
+              <div className="flex flex-wrap items-end gap-3">
+                <Button disabled={savingMail} onClick={() => void saveMail()}>
+                  {savingMail ? 'Saving…' : 'Save email settings'}
+                </Button>
+                <input type="email" value={mailTo} onChange={(e) => setMailTo(e.target.value)} placeholder="Send a test to…" aria-label="Test email recipient" className={`${inputCls} max-w-[240px]`} />
+                <Button variant="secondary" disabled={testingMail || !mail.key_set || !mailTo.trim()} onClick={() => void sendMailTest()}>
+                  {testingMail ? 'Sending…' : 'Send test email'}
+                </Button>
+              </div>
+            )}
+            {mailMsg && (
+              <p role={mailMsg.ok ? 'status' : 'alert'} className={`text-xs ${mailMsg.ok ? 'text-success' : 'text-danger'}`}>
+                {mailMsg.text}
+              </p>
+            )}
+            {mailLog.length > 0 && (
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-surface-sunken text-text-2">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">When</th>
+                      <th className="px-3 py-2 font-medium">To</th>
+                      <th className="px-3 py-2 font-medium">What</th>
+                      <th className="px-3 py-2 font-medium">Provider</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mailLog.map((l, i) => (
+                      <tr key={i} className="border-t border-border text-text-1">
+                        <td className="px-3 py-2">{new Date(l.at).toLocaleString()}</td>
+                        <td className="px-3 py-2">{l.to}</td>
+                        <td className="px-3 py-2">{l.kind === 'org_staff_invite' ? 'Staff invitation' : l.kind === 'test' ? 'Test' : l.kind}</td>
+                        <td className="px-3 py-2">{l.status == null ? 'Pending' : l.status >= 200 && l.status < 300 ? 'Accepted' : `Refused (${l.status})`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="rounded-xl border border-border bg-surface p-5" aria-labelledby="tg-h">
