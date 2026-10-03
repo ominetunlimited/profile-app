@@ -45,7 +45,37 @@ export function AdminDashboard() {
         {platformRoleCan(admin.role, 'mission_control') && (
           <Link to="/admin/mission-control" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
             <div className="mb-1 font-semibold text-text-0">Mission Control</div>
-            <p className="text-sm text-text-1">Route registry and platform health.</p>
+            <p className="text-sm text-text-1">What needs a decision, and the platform at a glance.</p>
+          </Link>
+        )}
+        {platformRoleCan(admin.role, 'verification_queue') && (
+          <Link to="/admin/verification-requests" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Unrouted requests</div>
+            <p className="text-sm text-text-1">Verification requests naming an institution that isn't on PROFILE.</p>
+          </Link>
+        )}
+        {platformRoleCan(admin.role, 'data_requests') && (
+          <Link to="/admin/data-requests" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Data requests</div>
+            <p className="text-sm text-text-1">Corrections, consent withdrawals, appeals and account deletions.</p>
+          </Link>
+        )}
+        {platformRoleCan(admin.role, 'data_requests') && (
+          <Link to="/admin/disputes" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Disputes &amp; appeals</div>
+            <p className="text-sm text-text-1">Examine both sides and record a written outcome.</p>
+          </Link>
+        )}
+        {platformRoleCan(admin.role, 'mission_control') && (
+          <Link to="/admin/ai-decision-log" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">AI decision log</div>
+            <p className="text-sm text-text-1">Every AI output that touched a user, and whether it was reviewed.</p>
+          </Link>
+        )}
+        {platformRoleCan(admin.role, 'mission_control') && (
+          <Link to="/admin/route-integrity" className="rounded-xl border border-border bg-surface p-4 hover:border-accent">
+            <div className="mb-1 font-semibold text-text-0">Route integrity</div>
+            <p className="text-sm text-text-1">Every registered route and whether it is in good order.</p>
           </Link>
         )}
       </div>

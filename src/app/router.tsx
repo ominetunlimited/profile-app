@@ -7,7 +7,6 @@ import { RequireAuthenticated, RequireIndividual, RequireOrganisation, RequireOw
 import { FeatureShell } from '@/screens/shared/FeatureShell'
 import { CVTemplatesRoute } from '@/screens/career/cv/CVTemplatesRoute'
 import { PortfolioTemplatesRoute } from '@/screens/career/portfolio/PortfolioTemplatesRoute'
-import { RouteIntegrityEngine } from '@/screens/internal/RouteIntegrityEngine'
 import { NotFoundShell } from '@/screens/shared/NotFoundShell'
 import { RootErrorBoundary } from '@/screens/shared/RootErrorBoundary'
 import { PublicHero } from '@/screens/public/PublicHero'
@@ -45,8 +44,6 @@ import { EnterpriseIntegrations } from '@/screens/orgworkspace/EnterpriseIntegra
 import { SavedPage } from '@/screens/more/SavedPage'
 import { VerificationInbox } from '@/screens/orgworkspace/VerificationInbox'
 import { RecruiterWorkflow } from '@/screens/orgworkspace/RecruiterWorkflow'
-import { MissionControl } from '@/screens/internal/MissionControl'
-import { AIDecisionLog } from '@/screens/internal/AIDecisionLog'
 import { StoreHub } from '@/screens/store/StoreHub'
 import { OwnerContentConsole } from '@/screens/internal/OwnerContentConsole'
 import { AdminManagement } from '@/screens/internal/AdminManagement'
@@ -59,6 +56,9 @@ import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { AdminKyc } from '@/screens/admin/AdminKyc'
 import { AdminVerificationRequests } from '@/screens/admin/AdminVerificationRequests'
 import { AdminDisputes } from '@/screens/admin/AdminDisputes'
+import { AdminMissionControl } from '@/screens/admin/AdminMissionControl'
+import { AdminAiDecisionLog } from '@/screens/admin/AdminAiDecisionLog'
+import { AdminRouteIntegrity } from '@/screens/admin/AdminRouteIntegrity'
 import { AdminDataRequests } from '@/screens/admin/AdminDataRequests'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
@@ -299,31 +299,13 @@ function elementFor(route: RouteEntry): ReactElement {
     case '/release-notes':
       return <ReleaseNotes />
     case '/internal/route-integrity':
-      return (
-        <RequireStaff>
-          <RequireInternalAccessGate>
-            <RouteIntegrityEngine />
-          </RequireInternalAccessGate>
-        </RequireStaff>
-      )
+      return <Navigate to="/admin/route-integrity" replace />
     case '/internal/dispute-review':
       return <Navigate to="/admin/disputes" replace />
     case '/mission-control':
-      return (
-        <RequireStaff>
-          <RequireInternalAccessGate>
-            <MissionControl />
-          </RequireInternalAccessGate>
-        </RequireStaff>
-      )
+      return <Navigate to="/admin/mission-control" replace />
     case '/internal/ai-decision-log':
-      return (
-        <RequireStaff>
-          <RequireInternalAccessGate>
-            <AIDecisionLog />
-          </RequireInternalAccessGate>
-        </RequireStaff>
-      )
+      return <Navigate to="/admin/ai-decision-log" replace />
     case '/internal/content-console':
       return (
         <RequireStaff>
@@ -424,7 +406,25 @@ function elementFor(route: RouteEntry): ReactElement {
     case '/admin/mission-control':
       return (
         <RequirePlatformAdmin>
-          <MissionControl />
+          <AdminShell>
+            <AdminMissionControl />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/admin/ai-decision-log':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminAiDecisionLog />
+          </AdminShell>
+        </RequirePlatformAdmin>
+      )
+    case '/admin/route-integrity':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminRouteIntegrity />
+          </AdminShell>
         </RequirePlatformAdmin>
       )
     // Structural CV/Portfolio wall (§49.5) — routed explicitly, not via the

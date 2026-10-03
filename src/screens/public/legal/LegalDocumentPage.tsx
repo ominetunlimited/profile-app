@@ -12,14 +12,15 @@ export function LegalDocumentPage({ path }: { path: string }) {
   return (
     <div className="min-h-screen bg-bg">
       <PublicHeader />
-      <main className="mx-auto max-w-[760px] px-4 py-14 sm:px-8">
-        <nav aria-label="Legal documents" className="mb-8 flex flex-wrap gap-1.5">
+      <main className="mx-auto max-w-[760px] px-4 pb-16 pt-8 sm:px-7">
+        <nav aria-label="Legal documents" className="mb-6 flex flex-wrap gap-[7px]">
           {LEGAL_DOCS.map((d) => (
             <Link
               key={d.path}
               to={d.path}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                d.path === path ? 'border-accent bg-surface-sunken text-accent' : 'border-border text-text-1'
+              aria-current={d.path === path ? 'page' : undefined}
+              className={`rounded-[9px] border-[1.5px] px-[13px] py-2 text-xs font-semibold ${
+                d.path === path ? 'border-accent bg-accent-solid text-white' : 'border-border bg-surface text-text-1'
               }`}
             >
               {d.title}
@@ -38,14 +39,15 @@ export function LegalDocumentPage({ path }: { path: string }) {
           )}
         </div>
 
-        <h1 className="mb-3 text-3xl font-bold tracking-tight text-text-0">{doc.title}</h1>
+        <h1 className="mb-1.5 text-2xl font-bold leading-tight tracking-tight text-text-0">{doc.title}</h1>
+        <div className="mb-[22px] text-xs text-text-2">Draft · under legal review</div>
         <p className="mb-8 rounded-lg border-l-4 border-accent bg-surface-sunken p-4 text-sm leading-relaxed text-text-0">
           <strong>In plain terms:</strong> {doc.plainSummary}
         </p>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-[18px]">
           {doc.body.map((para, i) => (
-            <p key={i} className="text-sm leading-relaxed text-text-1">
+            <p key={i} className="text-[13px] leading-[1.7] text-text-1">
               {para}
             </p>
           ))}
