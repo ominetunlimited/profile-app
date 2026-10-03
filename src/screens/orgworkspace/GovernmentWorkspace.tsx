@@ -68,7 +68,7 @@ export function GovernmentWorkspace() {
   function toCsv(rows: VerificationRequest[]): string {
     const header = 'record,person,submitted,status\n'
     const body = rows
-      .map((r) => [r.moduleName, findAccountByEmail(r.ownerEmail)?.legalName ?? r.ownerEmail, r.submittedAt, r.status].map((v) => `"${v}"`).join(','))
+      .map((r) => [r.moduleName, findAccountByEmail(r.ownerEmail)?.legalName ?? r.ownerEmail, r.submittedAt, r.status, r.decidedAt ?? '', (r.decisionNote ?? '').replace(/"/g, "''")].map((v) => `"${v}"`).join(','))
       .join('\n')
     return header + body
   }
@@ -111,9 +111,8 @@ export function GovernmentWorkspace() {
           <span className="flex-none font-semibold text-text-2">ⓘ</span>
           <p>
             Licence confirmations, Compliance exports, and Analytics are scoped to regulatory authorities, licensing
-            boards, and professional councils. {account.legalName}'s own sector modules — country adapter
-            tools, IOTR, and regulatory licensing workflows — aren't built yet in this release. Staff, audit, and
-            settings below are available now.
+            boards, and professional councils. The tools specific to {account.legalName}'s own sector (country adapters,
+            IOTR and regulatory licensing workflows) aren't available yet. Staff, audit trail and settings are.
           </p>
         </div>
       )}

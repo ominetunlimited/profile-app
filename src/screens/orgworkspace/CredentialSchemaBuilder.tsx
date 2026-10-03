@@ -18,6 +18,14 @@ import {
 } from '@/app/schemaStore'
 
 const VERIFICATION_TYPES: VerificationType[] = ['academic_affiliation', 'academic', 'employment', 'professional_licence', 'certification', 'custom']
+const VERIFICATION_TYPE_LABEL: Record<VerificationType, string> = {
+  academic_affiliation: 'Academic affiliation',
+  academic: 'Academic record',
+  employment: 'Employment',
+  professional_licence: 'Professional licence',
+  certification: 'Certification',
+  custom: 'Custom',
+}
 const FIELD_TYPES: SchemaFieldRecord['type'][] = ['text', 'number', 'date', 'select', 'document']
 
 /** §16.2 Institutional Schema Builder — design handoff gap audit rebuild.
@@ -35,6 +43,16 @@ const FIELD_TYPES: SchemaFieldRecord['type'][] = ['text', 'number', 'date', 'sel
  */
 export function CredentialSchemaBuilder() {
   const { account } = useAccount()
+  useSchemasVersion()
+  const officialEmail = account?.accountType === 'organisation' ? account.officialEmail : ''
+  const schemas = listSchemas(officialEmail)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [evidenceDraft, setEvidenceDraft] = useState('')
+
+  const [name, setName] = useState('')
+  const [verificationType, setVerificationType] = useState<VerificationType>('academic_affiliation')
+  const [fields, setFields] = useState<SchemaFieldRecord[]>([{ name: 'fullLegalName', label: 'Full legal name', type: 'text', required: true }])
 
   if (!account || !canAccessInstitutionHubTools(account)) {
     return <HubAccessDenied requiredHub="institutional_hub" />
@@ -47,22 +65,9 @@ export function CredentialSchemaBuilder() {
   }
 
   const canEdit = orgRoleCan(account, 'editOrgProfile')
-  const officialEmail = account.officialEmail
-  useSchemasVersion()
-  const schemas = listSchemas(officialEmail)
-  useSchemasVersion()
-  const activeId = listSchemas(officialEmail)[0]?.id ?? null
-  const [creating, setCreating] = useState(schemas.length === 0)
-  const [evidenceDraft, setEvidenceDraft] = useState('')
-
-  const [name, setName] = useState('')
-  const [verificationType, setVerificationType] = useState<VerificationType>('academic_affiliation')
-  const [fields, setFields] = useState<SchemaFieldRecord[]>([{ name: 'fullLegalName', label: 'Full legal name', type: 'text', required: true }])
-
-  const active = schemas.find((s) => s.id === activeId) ?? null
-
-  function refresh() {
-  }
+  const active = schemas.find((s) => s.id === selectedId) ?? schemas[0] ?? null
+  const activeId = active?.id ?? null
+  const showCreate = creating || schemas.length === 0
 
   function addField() {
     setFields((f) => [...f, { name: '', label: '', type: 'text', required: false }])
@@ -92,9 +97,10 @@ export function CredentialSchemaBuilder() {
             <button
               key={s.id}
               onClick={() => {
+                setSelectedId(s.id)
                 setCreating(false)
               }}
-              className={`rounded-lg border-[1.5px] px-3 py-2.5 text-left ${!creating && activeId === s.id ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
+              className={`rounded-lg border-[1.5px] px-3 py-2.5 text-left ${!showCreate && activeId === s.id ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
             >
               <div className="text-[12.5px] font-semibold text-text-0">{s.name}</div>
               <div className="text-[11px] text-text-1">{s.fields.length} fields</div>
@@ -103,7 +109,7 @@ export function CredentialSchemaBuilder() {
           {canEdit && (
             <button
               onClick={() => setCreating(true)}
-              className={`rounded-lg border-[1.5px] border-dashed px-3 py-2.5 text-left text-[12.5px] font-semibold text-accent ${creating ? 'border-accent bg-accent-soft' : 'border-border-strong'}`}
+              className={`rounded-lg border-[1.5px] border-dashed px-3 py-2.5 text-left text-[12.5px] font-semibold text-accent ${showCreate ? 'border-accent bg-accent-soft' : 'border-border-strong'}`}
             >
               + New schema
             </button>
@@ -111,7 +117,7 @@ export function CredentialSchemaBuilder() {
         </div>
 
         <div className="min-w-0 flex-1 basis-[300px] rounded-2xl border border-border bg-surface p-5 shadow-sm">
-          {creating ? (
+          {showCreate ? (
             <div>
               <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Schema name">
@@ -121,7 +127,7 @@ export function CredentialSchemaBuilder() {
                   <SelectInput disabled={!canEdit} value={verificationType} onChange={(e) => setVerificationType(e.target.value as VerificationType)}>
                     {VERIFICATION_TYPES.map((t) => (
                       <option key={t} value={t}>
-                        {t}
+                        {VERIFICATION_TYPE_LABEL[t]}
                       </option>
                     ))}
                   </SelectInput>
@@ -170,8 +176,8 @@ export function CredentialSchemaBuilder() {
                   <Button
                     disabled={!name.trim() || fields.length === 0}
                     onClick={() => {
-                      createSchema(account.officialEmail, name, verificationType, fields)
-                      refresh()
+                      const made = createSchema(account.officialEmail, name, verificationType, fields)
+                      setSelectedId(made.id)
                       setCreating(false)
                       setName('')
                       setFields([{ name: 'fullLegalName', label: 'Full legal name', type: 'text', required: true }])
@@ -196,7 +202,6 @@ export function CredentialSchemaBuilder() {
                       active!.id,
                       active!.fields.map((field, idx) => (idx === i ? { ...field, ...patch } : field)),
                     )
-                    refresh()
                   }
                   if (!canEdit) {
                     return (
@@ -235,7 +240,6 @@ export function CredentialSchemaBuilder() {
                             active.id,
                             active.fields.filter((_, idx) => idx !== i),
                           )
-                          refresh()
                         }}
                         className="text-xs text-danger"
                       >
@@ -248,7 +252,6 @@ export function CredentialSchemaBuilder() {
                   <button
                     onClick={() => {
                       updateSchemaFields(active.id, [...active.fields, { name: '', label: '', type: 'text', required: false }])
-                      refresh()
                     }}
                     className="self-start rounded-lg border border-border-strong bg-surface-sunken px-3.5 py-2 text-xs font-semibold text-text-0"
                   >
@@ -268,7 +271,6 @@ export function CredentialSchemaBuilder() {
                         <button
                           onClick={() => {
                             removeEvidenceRequirement(active.id, e)
-                            refresh()
                           }}
                           aria-label={`Remove ${e}`}
                           className="text-trust"
@@ -292,7 +294,6 @@ export function CredentialSchemaBuilder() {
                       onClick={() => {
                         addEvidenceRequirement(active.id, evidenceDraft.trim())
                         setEvidenceDraft('')
-                        refresh()
                       }}
                       className="h-9 rounded-lg border border-border-strong bg-surface-sunken px-3 text-xs font-semibold text-text-0 disabled:opacity-50"
                     >
@@ -311,7 +312,6 @@ export function CredentialSchemaBuilder() {
                     <button
                       onClick={() => {
                         publishSchema(active.id)
-                        refresh()
                       }}
                       className="h-[38px] rounded-lg bg-accent-solid px-4 text-[12.5px] font-semibold text-white"
                     >

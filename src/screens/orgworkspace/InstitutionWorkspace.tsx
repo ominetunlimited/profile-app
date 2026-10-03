@@ -50,6 +50,8 @@ export function InstitutionWorkspace() {
   const requests = account?.accountType === 'organisation' ? listRequestsForIssuerEmail(account.officialEmail) : []
   const [actionError, setActionError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
   useOrgAuditVersion()
   const auditLog = listAuditLogFor(owner)
 
@@ -61,9 +63,30 @@ export function InstitutionWorkspace() {
   const allChecked = pending.length > 0 && pending.every((r) => selected.has(r.id))
   const schemas = listSchemas(account.officialEmail)
 
+  /** Requests inside the chosen submission date range (both ends optional, inclusive). */
+  function inRange(rows: VerificationRequest[]): VerificationRequest[] {
+    const lo = from ? new Date(`${from}T00:00:00`).getTime() : -Infinity
+    const hi = to ? new Date(`${to}T23:59:59`).getTime() : Infinity
+    return rows.filter((r) => {
+      const t = new Date(r.submittedAt).getTime()
+      return t >= lo && t <= hi
+    })
+  }
+
+  function responseTimeCsv(rows: VerificationRequest[]): string {
+    const hours = rows
+      .filter((r) => r.status === 'verified' && r.decidedAt)
+      .map((r) => ({ r, h: (new Date(r.decidedAt as string).getTime() - new Date(r.submittedAt).getTime()) / 3_600_000 }))
+    const sorted = hours.map((x) => x.h).sort((a, b) => a - b)
+    const pct = (p: number) => (sorted.length ? sorted[Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1)] : 0)
+    const lines = [`median_hours,${pct(0.5).toFixed(1)}`, `p90_hours,${pct(0.9).toFixed(1)}`, `confirmed_requests,${sorted.length}`, '', 'record,submitted,decided,hours_to_confirm']
+    for (const { r, h } of hours) lines.push([`"${r.moduleName}"`, r.submittedAt, r.decidedAt, h.toFixed(1)].join(','))
+    return lines.join('\n')
+  }
+
   function toCsv(rows: VerificationRequest[]): string {
     const header = 'record,person,submitted,status\n'
-    const body = rows.map((r) => [r.moduleName, findAccountByEmail(r.ownerEmail)?.legalName ?? r.ownerEmail, r.submittedAt, r.status].map((v) => `"${v}"`).join(',')).join('\n')
+    const body = rows.map((r) => [r.moduleName, findAccountByEmail(r.ownerEmail)?.legalName ?? r.ownerEmail, r.submittedAt, r.status, r.decidedAt ?? '', (r.decisionNote ?? '').replace(/"/g, "''")].map((v) => `"${v}"`).join(',')).join('\n')
     return header + body
   }
 
@@ -214,20 +237,49 @@ export function InstitutionWorkspace() {
       {tab === 'compliance' && (
         <div>
           <p className="mb-4 max-w-[70ch] text-sm leading-relaxed text-text-1">Auditable exports for accreditation reviews and regulatory reporting.</p>
+          <div className="mb-4 flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1 text-[11.5px] text-text-1">
+              Submitted from
+              <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className="h-9 rounded-lg border border-border-strong bg-surface px-2.5 text-xs text-text-0" />
+            </label>
+            <label className="flex flex-col gap-1 text-[11.5px] text-text-1">
+              to
+              <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className="h-9 rounded-lg border border-border-strong bg-surface px-2.5 text-xs text-text-0" />
+            </label>
+            {(from || to) && (
+              <button onClick={() => { setFrom(''); setTo('') }} className="h-9 rounded-lg border border-border-strong px-3 text-xs font-semibold text-text-0">
+                Clear range
+              </button>
+            )}
+            <span className="pb-2 text-[11.5px] text-text-2">Applies to every export below except the audit trail.</span>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <ExportCard
               title="Accreditation review pack"
-              body="Every credential confirmed by the institution, with reviewer identity attached."
-              onGenerate={() => downloadCsv(requests.filter((r) => r.status === 'verified'), 'accreditation-review-pack.csv')}
+              body="Every credential confirmed by the institution in a chosen date range, with reviewer identity attached."
+              onGenerate={() => downloadCsv(inRange(requests).filter((r) => r.status === 'verified'), 'accreditation-review-pack.csv')}
             />
             <ExportCard
               title="Fraud & dispute log"
-              body="All disputed or rejected requests, with outcomes."
-              onGenerate={() => downloadCsv(requests.filter((r) => r.status === 'rejected'), 'fraud-dispute-log.csv')}
+              body="All disputed or rejected requests, with outcomes and reviewer notes."
+              onGenerate={() => downloadCsv(inRange(requests).filter((r) => r.status === 'rejected'), 'fraud-dispute-log.csv')}
+            />
+            <ExportCard
+              title="Response-time report"
+              body="Median and 90th-percentile time from request to confirmation."
+              onGenerate={() => {
+                const blob = new Blob([responseTimeCsv(inRange(requests))], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'response-time-report.csv'
+                a.click()
+                URL.revokeObjectURL(url)
+              }}
             />
             <ExportCard
               title="Full audit trail"
-              body="Every action any staff member took on institutional records."
+              body="Every action any staff member took on institutional records, unfiltered."
               onGenerate={() => {
                 const blob = new Blob([auditLog.map((a) => `${a.at}\t${a.text}`).join('\n')], { type: 'text/plain' })
                 const url = URL.createObjectURL(blob)

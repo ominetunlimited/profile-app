@@ -1,56 +1,63 @@
 import { useAccount } from '@/app/AccountContext'
 import { canAccessInstitutionHubTools, canAccessUniversityTools } from '@/app/accountTypes'
 import { OrgSubPageShell, HubAccessDenied, SectorAccessDenied } from './OrgWorkspaceShell'
-import { listSchemas, useSchemasVersion } from '@/app/schemaStore'
+import { listRequestsForIssuerEmail, useVerificationVersion } from '@/app/verificationRequestStore'
+import { computeIssuerAnalytics, formatDays } from '@/app/orgAnalytics'
+import { ListCard, MonthChart, StatCard } from './AnalyticsParts'
 
-/** §23/§16 Institution Analytics — verification volume trends. Real counts
- * from this institution's own schema/queue state, never fabricated trend
- * lines (build doc §49.8). */
+/** §23/§16 Institution Analytics — computed from the requests addressed to this institution, never estimated. */
 export function InstitutionAnalytics() {
-  useSchemasVersion()
+  useVerificationVersion()
   const { account } = useAccount()
   if (!account || !canAccessInstitutionHubTools(account)) {
     return <HubAccessDenied requiredHub="institutional_hub" />
   }
-  // §34.2a — institution_excellence_dashboard is a university_or_school
-  // module, not every institutional_hub org type's.
+  // §34.2a — institution_excellence_dashboard is a university_or_school module, not every institutional_hub org type's.
   if (!canAccessUniversityTools(account)) {
     return <SectorAccessDenied toolName="Institution Analytics" scopeDescription="universities, polytechnics, colleges, and schools" />
   }
 
-  const schemas = listSchemas(account.officialEmail)
-  const published = schemas.filter((s) => s.status === 'published')
+  const a = computeIssuerAnalytics(listRequestsForIssuerEmail(account.officialEmail))
+  const change = a.confirmedLastMonth > 0 ? Math.round(((a.confirmedThisMonth - a.confirmedLastMonth) / a.confirmedLastMonth) * 100) : null
+  const respDelta = a.avgResponseDays != null && a.avgResponseDaysLastMonth != null ? a.avgResponseDays - a.avgResponseDaysLastMonth : null
 
   return (
-    <OrgSubPageShell title="Analytics" back={{ to: '/institution/me', label: `${account.legalName} workspace` }}>
-      {/* Design handoff gap audit: real stat labels tracked different
-          metrics than PROFILE Institution Analytics.dc.html specifies —
-          relabelled to match exactly. Values stay honest (0/—), unlike the
-          mockup's illustrative populated example (312 confirmed, 3.4d avg,
-          etc.) — no real verification pipeline flows through this build's
-          schemas yet, and "published schemas" is this file's own real,
-          additional metric the mockup doesn't show but is kept since it's
-          real data, not a replacement for one of the four spec'd stats. */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Confirmed this month" value={0} />
-        <Stat label="Avg. response time" value="—" />
-        <Stat label="Rejection rate" value="—" />
-        <Stat label="Total records confirmed" value={0} />
+    <OrgSubPageShell title="Verification analytics" back={{ to: '/institution/me', label: `${account.legalName} workspace` }}>
+      <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] gap-3">
+        <StatCard label="Confirmed this month" value={a.confirmedThisMonth} delta={change == null ? undefined : `${change >= 0 ? '+' : ''}${change}%`} tone={change != null && change >= 0 ? 'good' : 'neutral'} />
+        <StatCard label="Avg. response time" value={formatDays(a.avgResponseDays)} delta={respDelta == null ? undefined : `${respDelta <= 0 ? '' : '+'}${respDelta.toFixed(1)}d`} tone={respDelta != null && respDelta <= 0 ? 'good' : 'neutral'} />
+        <StatCard label="Rejection rate" value={a.rejectionRate == null ? '—' : `${a.rejectionRate.toFixed(1)}%`} />
+        <StatCard label="Total records confirmed" value={a.totalConfirmed.toLocaleString()} delta="all-time" />
       </div>
-      <p className="mb-6 text-xs text-text-2">{published.length} published schema{published.length === 1 ? '' : 's'} on this institution's account.</p>
-      <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
-        No verification volume yet — trends populate once bulk ingestion or individual verification requests
-        start flowing through your published schemas.
+
+      <MonthChart title="Verification volume, last 12 months" months={a.months} barClass="bg-trust" />
+
+      <div className="flex flex-wrap gap-4">
+        <div className="min-w-0 flex-[1_1_300px] rounded-xl border border-border bg-surface p-5">
+          <div className="mb-3 text-[13.5px] font-semibold text-text-0">Response time distribution</div>
+          {a.responseBands == null ? (
+            <p className="text-xs text-text-1">Appears once you have confirmed your first record.</p>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {a.responseBands.map((r) => (
+                <div key={r.label}>
+                  <div className="mb-1 flex justify-between">
+                    <span className="text-xs text-text-0">{r.label}</span>
+                    <span className="font-mono text-[11px] font-medium text-text-1">{r.share}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                    <div className="h-full rounded-full bg-accent-solid" style={{ width: `${r.share}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="min-w-[230px] flex-[1_1_260px]">
+          <ListCard title="By credential type" rows={a.byType} empty="No confirmed records yet." />
+        </div>
       </div>
+      {a.pending > 0 && <p className="mt-4 text-xs text-text-1">{a.pending} request{a.pending === 1 ? ' is' : 's are'} waiting for a decision in your verification inbox.</p>}
     </OrgSubPageShell>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-lg border border-border bg-surface p-3.5">
-      <div className="mb-1 font-mono text-[10px] tracking-wide text-text-2">{label.toUpperCase()}</div>
-      <div className="font-mono text-xl font-semibold text-text-0">{value}</div>
-    </div>
   )
 }

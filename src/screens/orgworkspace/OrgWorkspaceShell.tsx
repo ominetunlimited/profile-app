@@ -6,6 +6,12 @@ import { useAccount } from '@/app/AccountContext'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type Account } from '@/app/accountTypes'
 import { BRAND } from '@/shared/brand/assets'
 
+const HUB_LABEL: Record<string, string> = {
+  business_hub: 'Business hub',
+  institutional_hub: 'Institution hub',
+  regulatory_console: 'Government console',
+}
+
 /** A workspace's own section nav item — either a real route (`to`, e.g.
  * Analytics/Schemas which are genuinely separate pages) or an in-page tab
  * switch (`onSelect`), matching how each of PROFILE Organization/Institution/
@@ -81,7 +87,7 @@ export function OrgWorkspaceShell({ title, navItems, children }: { title: string
             <StatusBadge account={account} />
           </div>
           <p className="mb-5 text-sm text-text-1">
-            {account.orgType} · {hub}
+            {account.orgType} · {HUB_LABEL[hub] ?? hub.replace(/_/g, ' ')}
           </p>
           {children}
         </div>
