@@ -32,6 +32,7 @@
   --success: #04763c;
   --warning: #8a5200;
   --danger: #c2181d;
+  --coral: #c93b22;
 
   --focus: var(--accent);
 
@@ -65,6 +66,7 @@
   --success-soft: color-mix(in srgb, var(--success) 15%, transparent);
   --warning-soft: color-mix(in srgb, var(--warning) 15%, transparent);
   --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
+  --coral-soft: color-mix(in srgb, var(--coral) 12%, transparent);
 }
 
 .dark {
@@ -84,6 +86,7 @@
   --success: #3ddc7f;
   --warning: #fbbf24;
   --danger: #ff7a7a;
+  --coral: #ff8b78;
 
   --focus: var(--accent);
 }

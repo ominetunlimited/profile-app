@@ -116,10 +116,33 @@ function notifyListeners() {
   listeners.forEach((fn) => fn())
 }
 
+export type ActivitiesStatus = 'loading' | 'ready' | 'degraded'
+let status: ActivitiesStatus = 'loading'
+let lastSyncedAt: string | null = null
+
 async function loadCache() {
-  const { data } = await supabase.from('activities').select('*')
-  cache = data ?? []
+  try {
+    const { data, error } = await supabase.from('activities').select('*')
+    if (error) throw error
+    cache = data ?? []
+    status = 'ready'
+    lastSyncedAt = new Date().toISOString()
+  } catch {
+    // Keep whatever the cache already holds; the UI shows it as last-synced data.
+    status = 'degraded'
+  }
   notifyListeners()
+}
+
+/** Whether the first load is pending, done, or failed — drives Home's loading and degraded states. */
+export function activitiesStatus(): { status: ActivitiesStatus; lastSyncedAt: string | null } {
+  return { status, lastSyncedAt }
+}
+
+export function retryActivities(): void {
+  status = 'loading'
+  notifyListeners()
+  void loadCache()
 }
 
 function upsertCacheRow(row: ActivityRow) {

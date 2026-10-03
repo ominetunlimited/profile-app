@@ -9,6 +9,7 @@ import { onChatChange, setChatUser, unreadTotal } from '@/app/messageStore'
 import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/app/navConfig'
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
+import { NavRail } from './NavRail'
 import { IconBell, IconBriefcase, IconDocument, IconHandshake, IconHome, IconMenu, IconMessage, IconPlus, IconSearch, type IconProps } from './icons'
 import type { ComponentType } from 'react'
 
@@ -58,6 +59,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const groups = hamburgerGroups({ account, staffRole })
   const tabs = bottomTabs({ account, staffRole })
   const topItems = topNavItems({ account, staffRole })
+  const showRail = account?.accountType === 'individual'
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
   function signOut() {
     setAccount(null)
@@ -73,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6">
+        <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
             <img src={BRAND.mark} alt="" className="h-7 w-7" />
           </Link>
@@ -81,27 +84,29 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event('open-global-search'))}
-            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-strong bg-surface-sunken px-3 text-sm text-text-2 sm:max-w-[360px]"
+            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-strong bg-surface-sunken px-3 text-sm text-text-2 sm:max-w-[520px]"
           >
             <IconSearch size={16} />
             <span className="truncate">{t('nav.search')}</span>
-            <span className="ms-auto hidden font-mono text-[10px] text-text-2 sm:inline">Ctrl K</span>
+            <span className="ms-auto hidden rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px] text-text-2 sm:inline">{isMac ? '⌘K' : 'Ctrl K'}</span>
           </button>
 
           <div className="ms-auto flex flex-none items-center gap-1.5">
-            <LanguagePicker />
+            <span className="hidden sm:block">
+              <LanguagePicker />
+            </span>
             <Link to="/notifications" aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
               <IconBell size={18} />
               {unread > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 font-mono text-[9px] font-bold text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-coral px-1 text-[9px] font-semibold text-white">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
             </Link>
-            <Link to="/messages" aria-label={unreadMessages > 0 ? `Messages, ${unreadMessages} unread` : 'Messages'} className="relative hidden h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0 sm:flex">
+            <Link to="/messages" aria-label={unreadMessages > 0 ? `Messages, ${unreadMessages} unread` : 'Messages'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
               <IconMessage size={18} />
               {unreadMessages > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 font-mono text-[9px] font-bold text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent-solid px-1 text-[9px] font-semibold text-white">
                   {unreadMessages > 9 ? '9+' : unreadMessages}
                 </span>
               )}
@@ -146,7 +151,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
-        {topItems.length > 0 && (
+        {topItems.length > 0 && !showRail && (
           <nav aria-label="Primary" className="hidden border-t border-border sm:block">
             <div className="mx-auto flex max-w-[1200px] gap-1 px-4 py-1.5 sm:px-6">
               {topItems.map((item) => {
@@ -166,24 +171,29 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      <main id="main" className="pb-16 sm:pb-0">
-        {children}
-      </main>
+      <div className="flex">
+        {showRail && <NavRail onOpenAll={() => setHamburgerOpen(true)} />}
+        <main id="main" className="min-w-0 flex-1 pb-16 sm:pb-0">
+          {children}
+        </main>
+      </div>
 
       {tabs.length > 0 && (
         <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur sm:hidden">
           {tabs.map((tab) => {
             const TabIcon = TAB_ICON[tab.key]
+            const active = tab.key !== 'create' && (location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))
             return (
               <Link
                 key={tab.key}
                 to={tab.to}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-text-1 ${tab.key === 'create' ? 'relative' : ''}`}
+                aria-current={active ? 'page' : undefined}
+                className={`flex min-h-[44px] flex-1 flex-col items-center justify-end gap-1 pb-2 pt-2 text-[9.5px] font-medium ${active ? 'text-accent' : 'text-text-1'}`}
               >
-                <span className={tab.key === 'create' ? '-mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent-solid text-white shadow-lg' : 'flex items-center justify-center'}>
+                <span className={tab.key === 'create' ? '-mt-5 flex h-11 w-11 items-center justify-center rounded-full bg-accent-solid text-white shadow-[0_4px_12px_rgba(0,87,217,.34)]' : 'flex items-center justify-center'}>
                   <TabIcon size={tab.key === 'create' ? 22 : 20} />
                 </span>
-                {tab.key !== 'create' && tab.label}
+                {tab.label}
               </Link>
             )
           })}

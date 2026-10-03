@@ -40,9 +40,9 @@ export function bottomTabs({ account, staffRole }: NavContext): NavItem[] {
   const isOrg = account?.accountType === 'organisation'
   return [
     { key: 'home', label: 'Home', to: '/home', show: true },
-    { key: 'connections', label: 'Connections', to: '/connections', show: true },
+    { key: 'connections', label: 'Connect', to: '/connections', show: true },
     { key: 'create', label: 'Record', to: '/record', show: !!account },
-    { key: 'opportunity', label: 'Opportunities', to: '/opportunities', show: true },
+    { key: 'opportunity', label: 'Opportunity', to: '/opportunities', show: true },
     { key: 'cv_portfolio', label: isOrg ? 'Portfolio' : 'CV', to: isOrg ? '/career/portfolio/organisation-company-showcase' : '/career/cv/executive', show: true },
   ].filter((t) => t.show)
 }

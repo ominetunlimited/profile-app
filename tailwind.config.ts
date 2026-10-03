@@ -30,6 +30,8 @@ export default {
         success: 'var(--success)',
         warning: 'var(--warning)',
         danger: 'var(--danger)',
+        coral: 'var(--coral)',
+        'coral-soft': 'var(--coral-soft)',
         // Design handoff gap audit: mockups style callouts/pills as a soft
         // filled tint (e.g. `background:var(--warning-soft)`) — this token
         // family didn't exist anywhere in the app, so real components fell

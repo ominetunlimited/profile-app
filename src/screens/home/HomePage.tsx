@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Button } from '@/shared/ui/Button'
@@ -6,19 +6,23 @@ import { Field, SelectInput, TextInput } from '@/shared/ui/Field'
 import { ActivityCard } from '@/shared/ui/ActivityCard'
 import { SponsoredCard } from '@/shared/ui/SponsoredCard'
 import { RepostCard } from '@/shared/ui/RepostCard'
-import { RecommendationsPanel } from '@/shared/ui/RecommendationsPanel'
 import { CameraCapture } from '@/shared/ui/CameraCapture'
-import { listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
+import { listBookmarks, listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
-import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { useAccount } from '@/app/AccountContext'
-import { listActivities, listFeedFor, onActivitiesChange, ownerKey, postActivity } from '@/app/activityStore'
+import { activitiesStatus, listActivities, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
-import { listOpenJobs, orgDisplayName } from '@/app/jobStore'
+import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStore'
 import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
-
+import { useAccountsCacheVersion } from '@/app/demoAccountStore'
+import { useConnectionsCacheVersion } from '@/app/connectionStore'
+import { useFollowsCacheVersion } from '@/app/followStore'
+import { useApplicationsCacheVersion } from '@/app/applicationStore'
+import { useCommunitiesVersion } from '@/app/communityStore'
+import { KIND_LABEL, recommend } from '@/app/recommendationEngine'
+import { recordFeedback, useRecommendationFeedbackVersion } from '@/app/recommendationFeedbackStore'
 
 /** §11.4 POST_COMPOSER_TYPES, verbatim. */
 const ACTIVITY_TYPES = [
@@ -36,55 +40,58 @@ const ACTIVITY_TYPES = [
   'Portfolio Item',
 ]
 
-/** §11 Home Feed & Record Work System — a real feed: the signed-in
- * account's own activity plus real activity from accounts they actually
- * follow/connect with (activityStore.ts's listFeedFor), not just a private
- * personal log. */
+type FeedTab = 'all' | 'verified' | 'network' | 'saved'
+const FEED_TABS: { key: FeedTab; label: string }[] = [
+  { key: 'all', label: 'All activity' },
+  { key: 'verified', label: 'Verified only' },
+  { key: 'network', label: 'My network' },
+  { key: 'saved', label: 'Saved' },
+]
+
+const KIND_TONE: Record<string, { glyph: string; bg: string; ink: string }> = {
+  verification: { glyph: '◷', bg: 'bg-warning-soft', ink: 'text-warning border-warning' },
+  profile: { glyph: '1', bg: 'bg-accent-soft', ink: 'text-accent border-accent' },
+  evidence: { glyph: '✓', bg: 'bg-trust-soft', ink: 'text-trust border-trust' },
+  opportunity: { glyph: '→', bg: 'bg-trust-soft', ink: 'text-trust border-trust' },
+}
+const DEFAULT_TONE = { glyph: '•', bg: 'bg-surface-sunken', ink: 'text-text-1 border-border-strong' }
+
+function greetingFor(hour: number): string {
+  return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+}
+
+/** Home: a professional command centre — where am I, how am I doing, what matters, what next. */
 export function HomePage() {
   const { account } = useAccount()
   const owner = ownerKey(account)
-  const [myActivityCount, setMyActivityCount] = useState(() => listActivities(owner).length)
-  const [feed, setFeed] = useState(() => listFeedFor(owner))
   const [composerOpen, setComposerOpen] = useState(false)
-  useCampaignsCacheVersion()
-  useSocialCacheVersion()
-  // §7.1 Feed Ad Position — real active campaigns for this placement only,
-  // never fabricated to look populated.
+  const [tab, setTab] = useState<FeedTab>('all')
+  const [explainOpen, setExplainOpen] = useState(false)
+  const versions =
+    useActivitiesCacheVersion() + useAccountsCacheVersion() + useConnectionsCacheVersion() + useFollowsCacheVersion() + useJobsCacheVersion() +
+    useApplicationsCacheVersion() + useCommunitiesVersion() + useSocialCacheVersion() + useRecommendationFeedbackVersion() + useCampaignsCacheVersion()
+  const { status, lastSyncedAt } = activitiesStatus()
+  // The signed-in account's own activity plus real activity from people and organisations they follow or connect with, and reposts.
   const sponsoredCampaigns = listActiveCampaignsForPlacement('home_feed')
-  // Activities + reposts (own, and from people/orgs this account connects with
-  // or follows) in one chronological stream.
-  const feedItems = [
+
+  const myActivities = listActivities(owner)
+  const feed = listFeedFor(owner)
+  const allItems = [
     ...feed.map((activity) => ({ kind: 'activity' as const, activity, at: activity.createdAt })),
     ...listFeedRepostsFor(owner).map((repost) => ({ kind: 'repost' as const, repost, at: repost.createdAt })),
   ].sort((a, b) => b.at.localeCompare(a.at))
+  const savedIds = new Set(listBookmarks(owner).filter((b) => b.type === 'activity').map((b) => b.id))
+  const me = owner.toLowerCase()
+  const shownItems =
+    tab === 'all'
+      ? allItems
+      : tab === 'network'
+        ? allItems.filter((i) => (i.kind === 'activity' ? i.activity.ownerEmail.toLowerCase() !== me : i.repost.reposterEmail.toLowerCase() !== me))
+        : tab === 'saved'
+          ? allItems.filter((i) => i.kind === 'activity' && savedIds.has(i.activity.id))
+          : []
 
-  const name = account?.accountType === 'individual' ? account.legalName.split(' ')[0] : account?.accountType === 'organisation' ? account.legalName : ''
-
-  const gaps = [
-    account?.accountType === 'individual' && !account.headline ? 'Add a professional headline' : null,
-    account?.accountType === 'individual' && !account.username ? 'Choose a username' : null,
-    myActivityCount === 0 ? 'Record your first activity' : null,
-  ].filter((g): g is string => !!g)
-
-  function refresh() {
-    setMyActivityCount(listActivities(owner).length)
-    setFeed(listFeedFor(owner))
-  }
-
-  // Pipeline repair Phase A: activityStore's cache loads asynchronously and
-  // can also receive a Realtime push (another device's post) — without this,
-  // myActivityCount/feed would freeze at whatever the cache held on mount,
-  // same class of bug useAccountsCacheVersion fixed for Search.
-  useEffect(() => onActivitiesChange(refresh), [owner])
-
-  // Design handoff gap audit — PROFILE Home.dc.html's right sidebar
-  // (Trust Score, Profile health, Matched opportunities, Verification in
-  // progress) had no real equivalent at all. Every figure below is
-  // computed from this build's own real stores — none of the mockup's
-  // illustrative numbers (14 records, 72% readiness, "812" score) are
-  // ported; where this build genuinely has no real signal for something
-  // the mockup shows, that's called out below rather than invented.
-  const myActivities = listActivities(owner)
+  const firstName = account?.accountType === 'individual' ? account.legalName.split(' ')[0] : account?.legalName ?? ''
   const distinctSkills = Array.from(new Set(myActivities.flatMap((a) => a.skills.map((s) => s.trim()).filter(Boolean))))
   const trust = computeTrustScore(account)
   const verifications = listVerificationRequests(owner)
@@ -92,17 +99,19 @@ export function HomePage() {
   const inProgressVerifications = verifications.filter((v) => v.status !== 'verified' && v.status !== 'rejected')
   const identityConfirmed = verifications.some((v) => v.moduleKey === 'identity' && v.status === 'verified')
   const verificationCoveragePct = verifications.length > 0 ? Math.round((verifiedCount / verifications.length) * 100) : 0
+  const isFirstRun = myActivities.length === 0 && verifications.length === 0
   const health = [
-    { label: 'Identity confirmed', value: identityConfirmed ? 'Yes' : 'No', pct: identityConfirmed ? 100 : 8 },
-    { label: 'Evidence depth', value: `${myActivities.length} record${myActivities.length === 1 ? '' : 's'}`, pct: Math.min(100, myActivities.length * 8) },
-    { label: 'Verification coverage', value: `${verificationCoveragePct}%`, pct: verificationCoveragePct },
-    { label: 'Skills mapped', value: `${distinctSkills.length}`, pct: Math.min(100, distinctSkills.length * 5) },
+    { label: 'Identity confirmed', value: identityConfirmed ? 'Yes' : 'No', pct: identityConfirmed ? 100 : 10, tone: identityConfirmed ? 'bg-success' : 'bg-warning' },
+    { label: 'Evidence depth', value: `${myActivities.length} record${myActivities.length === 1 ? '' : 's'}`, pct: Math.max(2, Math.min(100, myActivities.length * 8)), tone: 'bg-accent' },
+    { label: 'Verification coverage', value: `${verificationCoveragePct}%`, pct: Math.max(2, verificationCoveragePct), tone: 'bg-trust' },
+    { label: 'Skills mapped', value: `${distinctSkills.length}`, pct: Math.max(2, Math.min(100, distinctSkills.length * 5)), tone: 'bg-accent' },
   ]
   const healthPct = Math.round(health.reduce((s, h) => s + h.pct, 0) / health.length)
 
-  // Matched opportunities — a real, if simple, match%: overlap between
-  // this account's own recorded skills and a job's required skills. Never
-  // a fabricated ML-style score, since no matching engine exists.
+  const actions = useMemo(() => recommend(account, 4), [account, versions]) // eslint-disable-line react-hooks/exhaustive-deps
+  const actionsSummary = actions.length === 0 ? '' : `${actions.length} suggestion${actions.length === 1 ? '' : 's'}`
+
+  // A real, simple match%: overlap between this account's recorded skills and a job's required skills.
   const matchedOpportunities = listOpenJobs()
     .map((job) => {
       const overlap = job.requiredSkills.filter((req) => distinctSkills.some((s) => s.toLowerCase() === req.toLowerCase()))
@@ -113,197 +122,332 @@ export function HomePage() {
     .sort((a, b) => b.matchPct - a.matchPct)
     .slice(0, 2)
 
+  const greeting = isFirstRun ? `Welcome, ${firstName}.` : `${greetingFor(new Date().getHours())}, ${firstName}.`
+  const greetingSub = isFirstRun
+    ? 'Your account exists. Nothing is on your profile yet — three short steps change that.'
+    : actions.length > 0
+      ? `${actions.length === 1 ? 'One thing needs' : `${actions.length} things need`} you today.`
+      : inProgressVerifications.length > 0
+        ? `Nothing needs your attention today. ${inProgressVerifications.length} verification request${inProgressVerifications.length === 1 ? ' is' : 's are'} in progress.`
+        : 'Nothing needs your attention today.'
+
+  const metrics = [
+    { label: 'Verified records', value: String(verifiedCount), note: 'Records confirmed by an institution or employer.', to: '/trust-passport', link: 'View all records' },
+    { label: 'Career readiness', value: '—', note: isFirstRun ? 'Calculated once you have recorded work.' : 'Not calculated yet — it needs a role to measure against.', to: '/career-growth', link: "See what's missing" },
+    { label: 'Profile views by verifiers', value: '—', note: 'Recruiters and institutions only. Not a vanity count.', to: '/notifications', link: 'Who viewed' },
+  ]
+
   return (
     <AppShell>
-      <div className="mx-auto flex max-w-[1120px] flex-wrap gap-6 px-4 py-8 sm:px-6">
-        <div className="min-w-0 flex-1 basis-[560px]">
-          <h1 className="mb-6 text-xl font-bold text-text-0">Good to see you, {name}.</h1>
+      <div className="flex flex-wrap lg:flex-nowrap">
+        <div className="flex min-w-0 flex-1 basis-[420px] flex-col gap-4 p-[18px]">
+          <div className="flex flex-wrap items-start justify-between gap-3.5">
+            <div className="min-w-0">
+              <h1 className="font-sans text-[clamp(19px,2.2vw,23px)] font-semibold leading-tight tracking-tight text-text-0">{greeting}</h1>
+              <p className="mt-1.5 max-w-[56ch] text-[13px] leading-relaxed text-text-1">{greetingSub}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setComposerOpen((v) => !v)}
+              aria-expanded={composerOpen}
+              className="h-10 flex-none rounded-[9px] bg-accent-solid px-4 text-[13.5px] font-semibold text-white transition-colors hover:opacity-90"
+            >
+              Record work
+            </button>
+          </div>
 
-          {gaps.length > 0 && (
-            <div className="mb-6 rounded-xl border border-border bg-surface p-4">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Suggested next steps</div>
-              <div className="flex flex-col gap-1.5">
-                {gaps.map((g) => (
-                  <div key={g} className="flex items-center gap-2 text-sm text-text-0">
-                    <span className="text-text-2">·</span> {g}
-                  </div>
-                ))}
-              </div>
+          {composerOpen && (
+            <div className="rounded-[14px] border border-border bg-surface p-4 shadow-sm">
+              <Composer owner={owner} onClose={() => setComposerOpen(false)} onPosted={() => setComposerOpen(false)} />
             </div>
           )}
 
-          <div className="mb-6 rounded-xl border border-border bg-surface p-4">
-            {!composerOpen ? (
-              <button onClick={() => setComposerOpen(true)} className="w-full rounded-lg border border-dashed border-border-strong py-3 text-sm font-medium text-text-1">
-                + Record work
-              </button>
-            ) : (
-              <Composer
-                owner={owner}
-                onClose={() => setComposerOpen(false)}
-                onPosted={() => {
-                  setComposerOpen(false)
-                  refresh()
-                }}
-              />
-            )}
-          </div>
-
-          {/* Design handoff gap audit — PROFILE Home.dc.html's 3-metric row.
-              Values are real (own activity/verification data), not the
-              mockup's illustrative "14"/"72%"/"38" — this build has no
-              Career Readiness Engine or profile-view tracking
-              yet, so those two stay honestly "—"/0 rather than invented. */}
-          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <HomeMetric label="Verified records" value={verifiedCount} note="Records confirmed by an institution or employer." link={{ to: '/trust-passport', label: 'View all records' }} />
-            <HomeMetric label="Career readiness" value="—" note="No Career Readiness Engine exists in this build yet." link={{ to: '/career-growth', label: "See what's missing" }} />
-            <HomeMetric label="Profile views by verifiers" value={0} note="Recruiters and institutions only. Not a vanity count." link={{ to: '/notifications', label: 'Who viewed' }} />
-          </div>
-
-          <RecommendationsPanel limit={3} className="mb-4 lg:hidden" />
-          <div className="flex flex-col gap-4">
-            {feedItems.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
-                <p className="mb-3">
-                  {myActivityCount === 0
-                    ? 'Nothing here yet — your feed fills in as you record real work, never with filler content.'
-                    : "You've recorded your own work, but your feed is otherwise quiet — follow organisations or connect with people to see their activity here too."}
-                </p>
-                <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold text-accent">
-                  <Link to="/opportunities">Discover opportunities</Link>
-                  <Link to="/communities">Join communities</Link>
-                </div>
+          {isFirstRun && (
+            <div className="rounded-[14px] border border-accent bg-accent-soft px-5 py-[18px]">
+              <div className="mb-1.5 text-[14.5px] font-semibold text-text-0">Your first five minutes</div>
+              <p className="mb-3.5 max-w-[60ch] text-[13px] leading-relaxed text-text-1">
+                Nothing here is filled in yet, and that is the point — PROFILE is built from your actual work. Three steps put something real on your profile today.
+              </p>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,190px),1fr))] gap-2.5">
+                {[
+                  { step: 'STEP 1 · 2 MIN', title: 'Confirm who you are', body: 'Name, field of work, location. Nothing public until you say so.' },
+                  { step: 'STEP 2 · 3 MIN', title: 'Record one piece of work', body: 'Something you finished recently. Attach whatever evidence you have.' },
+                  { step: 'STEP 3', title: 'Send it for verification', body: 'We show you who can confirm it and what they will see.' },
+                ].map((s) => (
+                  <div key={s.step} className="rounded-[11px] border border-border bg-surface px-3.5 py-[13px]">
+                    <div className="mb-[7px] font-mono text-[10px] tracking-[.08em] text-accent">{s.step}</div>
+                    <div className="mb-[5px] text-[12.5px] font-semibold text-text-0">{s.title}</div>
+                    <div className="text-[11.5px] leading-relaxed text-text-1">{s.body}</div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              feedItems.map((item, i) => (
-                <div key={item.kind === 'repost' ? `r-${item.repost.id}` : item.activity.id} className="flex flex-col gap-4">
-                  {item.kind === 'repost' ? (
-                    <RepostCard repost={item.repost} viewerAccount={account} viewerEmail={owner} />
-                  ) : (
-                    <ActivityCard activity={item.activity} viewerAccount={account} viewerEmail={owner} />
-                  )}
-                  {/* Every 4th item, never the very first — a real, labelled,
-                      inline feed item, never an overlay. */}
-                  {i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
-                    <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} viewerAccount={account} viewerEmail={owner} />
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Design handoff gap audit — PROFILE Home.dc.html's right sidebar
-            had no real equivalent at all. Hidden below lg since AppShell's
-            own mobile chrome already reprioritises this content into the
-            main column, matching the mockup's own "Mobile — 390px" note
-            that the sidebar becomes a horizontal set below the fold rather
-            than disappearing. */}
-        <aside className="hidden w-[280px] flex-none flex-col gap-3.5 lg:flex">
-          <RecommendationsPanel limit={5} />
-          <div className="flex items-center gap-3.5 rounded-xl border border-border bg-surface p-4">
-            <TrustScoreRing trust={trust} size={64} />
-            <div className="min-w-0 flex-1">
-              <div className="mb-0.5 text-sm font-semibold text-text-0">Trust Score</div>
-              <p className="mb-1.5 text-xs leading-relaxed text-text-1">{trust.tier.label} tier.</p>
-              <Link to="/trust-passport" className="text-xs font-semibold text-trust">
-                How this is calculated
+              <Link to="/onboarding" className="mt-3.5 inline-flex h-[38px] items-center rounded-lg bg-accent-solid px-[15px] text-[13px] font-semibold text-white no-underline">
+                Start step 1
               </Link>
+            </div>
+          )}
+
+          {/* Mobile leads with the two numbers that change, then actions, then activity. */}
+          <div className="flex gap-2.5 lg:hidden">
+            <div className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-[13px] py-3">
+              <div className="mb-1.5 font-mono text-[9.5px] tracking-[.08em] text-text-2">TRUST SCORE</div>
+              <div className="font-mono text-[21px] font-semibold tabular-nums text-text-0">{trust.total > 0 ? trust.total : '—'}</div>
+              <Link to="/trust-passport" className="mt-1.5 block text-[11px] font-medium text-trust">How it's calculated</Link>
+            </div>
+            <div className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-[13px] py-3">
+              <div className="mb-1.5 font-mono text-[9.5px] tracking-[.08em] text-text-2">PROFILE HEALTH</div>
+              <div className="font-mono text-[21px] font-semibold tabular-nums text-text-0">{healthPct}%</div>
+              <div className="mt-2 h-[5px] overflow-hidden rounded-[3px] bg-surface-sunken"><div className="h-full rounded-[3px] bg-accent" style={{ width: `${healthPct}%` }} /></div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <div className="mb-2.5 flex items-baseline justify-between gap-2">
-              <span className="text-sm font-semibold text-text-0">Profile health</span>
-              <span className="font-mono text-xs text-text-1">{healthPct}%</span>
+          <div className="hidden grid-cols-[repeat(auto-fit,minmax(min(100%,230px),1fr))] gap-3 md:grid">
+            {metrics.map((m) => (
+              <div key={m.label} className="flex flex-col gap-[7px] rounded-[13px] border border-border bg-surface px-4 py-3.5 shadow-sm">
+                <span className="font-mono text-[10px] uppercase tracking-[.08em] text-text-2">{m.label}</span>
+                <span className="font-mono text-[26px] font-semibold tabular-nums tracking-tight text-text-0">{m.value}</span>
+                <span className="text-[11.5px] leading-normal text-text-1">{m.note}</span>
+                <Link to={m.to} className="mt-auto text-[11.5px] font-medium text-accent">{m.link}</Link>
+              </div>
+            ))}
+          </div>
+
+          <section className="overflow-hidden rounded-[14px] border border-border bg-surface shadow-sm" aria-labelledby="matters-today">
+            <div className="flex flex-wrap items-center gap-2.5 border-b border-border px-4 py-3.5">
+              <h2 id="matters-today" className="text-[14.5px] font-semibold text-text-0">What matters today</h2>
+              <span className="text-xs text-text-1">{actionsSummary}</span>
+            </div>
+            {actions.length > 0 ? (
+              actions.map((a) => {
+                const tone = KIND_TONE[a.kind] ?? DEFAULT_TONE
+                return (
+                  <div key={a.key} className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0">
+                    <span aria-hidden className={`flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] border text-[13px] font-semibold ${tone.bg} ${tone.ink}`}>{tone.glyph}</span>
+                    <span className="min-w-0 flex-[1_1_240px]">
+                      <span className="mb-1 flex flex-wrap items-center gap-[7px]">
+                        <span className="text-[13px] font-semibold text-text-0">{a.title}</span>
+                        <span className={`rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${tone.bg} ${tone.ink}`}>{KIND_LABEL[a.kind]}</span>
+                      </span>
+                      <span className="block max-w-[62ch] text-[12.5px] leading-relaxed text-text-1">{a.reason}</span>
+                    </span>
+                    <span className="flex flex-none flex-wrap gap-[7px]">
+                      <Link
+                        to={a.to}
+                        onClick={() => void recordFeedback(owner, a.key, a.kind, 'acted')}
+                        className="inline-flex h-[34px] items-center rounded-lg bg-accent-solid px-[13px] text-[12.5px] font-semibold text-white no-underline"
+                      >
+                        {a.cta}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => void recordFeedback(owner, a.key, a.kind, 'dismissed')}
+                        className="h-[34px] rounded-lg border border-border-strong bg-surface px-[11px] text-[12.5px] font-medium text-text-1"
+                      >
+                        Later
+                      </button>
+                    </span>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="px-5 py-[26px] text-center">
+                <div aria-hidden className="mx-auto mb-3 h-9 w-9 rounded-[10px] border-2 border-border-strong" />
+                <div className="mb-[5px] text-[13.5px] font-semibold text-text-0">Nothing needs you right now</div>
+                <div className="mx-auto max-w-[44ch] text-[12.5px] leading-relaxed text-text-1">
+                  {inProgressVerifications.length > 0
+                    ? `${inProgressVerifications.length} verification request${inProgressVerifications.length === 1 ? ' is' : 's are'} in progress. We will tell you the moment ${inProgressVerifications.length === 1 ? 'it responds' : 'either responds'}.`
+                    : 'New suggestions appear as your profile and the platform change.'}
+                </div>
+              </div>
+            )}
+          </section>
+
+          <div className="rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5 lg:hidden">
+            <div className="mb-1.5 font-mono text-[9.5px] font-semibold tracking-[.09em] text-trust">COPILOT</div>
+            <p className="text-xs leading-relaxed text-text-0">Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting.</p>
+          </div>
+
+          <section className="overflow-hidden rounded-[14px] border border-border bg-surface shadow-sm" aria-labelledby="pro-activity">
+            <div className="flex flex-wrap items-center gap-3 px-4 pt-[13px]">
+              <h2 id="pro-activity" className="flex-1 text-[14.5px] font-semibold text-text-0">Professional activity</h2>
+              <button type="button" onClick={() => setExplainOpen((v) => !v)} aria-expanded={explainOpen} className="flex-none text-xs font-medium text-accent">
+                Why this order?
+              </button>
+            </div>
+            {explainOpen && (
+              <p className="mx-4 mt-2.5 rounded-lg bg-surface-sunken px-3 py-2 text-xs leading-relaxed text-text-1">
+                Newest first: your own records, plus records and reposts from the people and organisations you follow or are connected with. Nothing is boosted or hidden by engagement.
+              </p>
+            )}
+            <div role="tablist" className="flex gap-4 overflow-auto border-b border-border px-4 pt-2.5">
+              {FEED_TABS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`-mb-px flex-none whitespace-nowrap border-b-2 pb-2.5 text-[12.5px] ${tab === t.key ? 'border-accent font-semibold text-text-0' : 'border-transparent text-text-1'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {status === 'loading' && allItems.length === 0 ? (
+              <div className="flex flex-col gap-3.5 p-4" role="status" aria-live="polite">
+                {[1, 2].map((n) => (
+                  <div key={n} className="rounded-xl border border-border p-[15px]">
+                    <div className="mb-3 flex items-center gap-2.5">
+                      <span className="h-[34px] w-[34px] flex-none rounded-full bg-surface-sunken" />
+                      <span className="flex-1">
+                        <span className="mb-1.5 block h-2.5 w-[38%] rounded-[3px] bg-surface-sunken" />
+                        <span className="block h-[9px] w-1/4 rounded-[3px] bg-surface-sunken" />
+                      </span>
+                    </div>
+                    <span className="mb-2 block h-[11px] rounded-[3px] bg-surface-sunken" />
+                    <span className="block h-[11px] w-[72%] rounded-[3px] bg-surface-sunken" />
+                  </div>
+                ))}
+                <div className="flex items-center gap-[9px] text-xs text-text-1">
+                  <span aria-hidden className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-trust-soft border-t-trust" />
+                  Loading your activity — the layout is already in place, so nothing will shift.
+                </div>
+              </div>
+            ) : (
+              <>
+                {status === 'degraded' && (
+                  <div role="alert" className="m-4 rounded-xl border border-warning bg-warning-soft px-[18px] py-4">
+                    <div className="mb-1.5 text-[13.5px] font-semibold text-text-0">⚠ Showing your last synced activity</div>
+                    <p className="mb-3 max-w-[60ch] text-[12.5px] leading-relaxed text-text-0">
+                      The activity service is not responding.{' '}
+                      {lastSyncedAt ? `Everything below was last synced at ${new Date(lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} and may be out of date.` : 'Nothing has been synced yet on this device.'}
+                    </p>
+                    <button type="button" onClick={retryActivities} className="h-[34px] rounded-lg bg-warning px-3 text-[12.5px] font-semibold text-white">
+                      ↻ Try again
+                    </button>
+                  </div>
+                )}
+                {shownItems.length === 0 ? (
+                  <div className="px-5 py-[34px] text-center">
+                    <div aria-hidden className="mx-auto mb-3.5 h-10 w-10 rounded-[11px] border-2 border-dashed border-border-strong" />
+                    <div className="mb-1.5 text-sm font-semibold text-text-0">{tab === 'saved' ? 'Nothing saved yet' : tab === 'verified' ? 'No verified records yet' : 'No activity here yet'}</div>
+                    <p className="mx-auto mb-3.5 max-w-[46ch] text-[12.5px] leading-relaxed text-text-1">
+                      {tab === 'saved'
+                        ? 'Save a record from its menu and it will be kept here.'
+                        : tab === 'verified'
+                          ? 'Records confirmed by an institution or employer will be listed here.'
+                          : 'Records from you and the people you work with appear here. Yours carry more weight once an institution has confirmed them.'}
+                    </p>
+                    {tab === 'all' && (
+                      <button type="button" onClick={() => setComposerOpen(true)} className="h-[38px] rounded-lg bg-accent-solid px-[15px] text-[13px] font-semibold text-white">
+                        Record your first activity
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3.5 p-4">
+                    {shownItems.map((item, i) => (
+                      <div key={item.kind === 'repost' ? `r-${item.repost.id}` : item.activity.id} className="flex flex-col gap-3.5">
+                        {item.kind === 'repost' ? (
+                          <RepostCard repost={item.repost} viewerAccount={account} viewerEmail={owner} />
+                        ) : (
+                          <ActivityCard activity={item.activity} viewerAccount={account} viewerEmail={owner} />
+                        )}
+                        {/* A real, labelled, inline sponsored item every 4th card, never the first. */}
+                        {tab === 'all' && i > 0 && (i + 1) % 4 === 0 && sponsoredCampaigns.length > 0 && (
+                          <SponsoredCard campaign={sponsoredCampaigns[Math.floor(i / 4) % sponsoredCampaigns.length]} viewerAccount={account} viewerEmail={owner} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </div>
+
+        <aside className="flex min-w-[250px] flex-[1_1_100%] flex-col gap-3.5 border-t border-border bg-surface-sunken px-3.5 py-[18px] lg:w-[292px] lg:flex-[0_0_292px] lg:border-s lg:border-t-0">
+          <div className="hidden flex-wrap items-center gap-3.5 rounded-[13px] border border-border bg-surface p-[15px] lg:flex">
+            <div className="relative h-[78px] w-[78px] flex-none">
+              <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(var(--trust) 0turn ${trust.total / 1000}turn, var(--surface-sunken) ${trust.total / 1000}turn 1turn)` }} />
+              <div className="absolute inset-[9px] flex flex-col items-center justify-center rounded-full bg-surface">
+                <span className="font-mono text-[21px] font-semibold tabular-nums tracking-tight text-text-0">{trust.total > 0 ? trust.total : '—'}</span>
+              </div>
+            </div>
+            <div className="min-w-[112px] flex-1">
+              <div className="mb-[3px] text-[12.5px] font-semibold text-text-0">Trust Score</div>
+              <p className="mb-2 text-[11.5px] leading-relaxed text-text-1">
+                {trust.total > 0 ? `${trust.tier.label} tier.` : 'Your score starts once your first record is verified.'}
+              </p>
+              <Link to="/trust-passport" className="text-[11.5px] font-medium text-trust">How this is calculated</Link>
+            </div>
+          </div>
+
+          <div className="hidden rounded-[13px] border border-border bg-surface p-[15px] lg:block">
+            <div className="mb-[11px] flex items-baseline justify-between gap-2">
+              <span className="text-[12.5px] font-semibold text-text-0">Profile health</span>
+              <span className="font-mono text-[11.5px] tabular-nums text-text-1">{healthPct}%</span>
             </div>
             {health.map((h) => (
               <div key={h.label} className="mb-2.5">
-                <div className="mb-1 flex justify-between gap-2 text-xs text-text-1">
-                  <span>{h.label}</span>
-                  <span className="font-mono text-text-2">{h.value}</span>
+                <div className="mb-1 flex justify-between gap-2">
+                  <span className="text-[11.5px] text-text-1">{h.label}</span>
+                  <span className="font-mono text-[10.5px] text-text-2">{h.value}</span>
                 </div>
-                <div className="h-[5px] overflow-hidden rounded-full bg-surface-sunken">
-                  <div className="h-full rounded-full bg-accent" style={{ width: `${h.pct}%` }} />
-                </div>
+                <div className="h-[5px] overflow-hidden rounded-[3px] bg-surface-sunken"><div className={`h-full rounded-[3px] ${h.tone}`} style={{ width: `${h.pct}%` }} /></div>
               </div>
             ))}
-            <p className="border-t border-border pt-2 text-[11px] text-text-1">Health measures evidence and verification depth. It is not a popularity score.</p>
+            <p className="border-t border-border pt-1 text-[11px] leading-relaxed text-text-1">Health measures evidence and verification depth. It is not a popularity score.</p>
           </div>
 
-          {/* Design handoff gap audit — the mockup's Copilot card asserts a
-              specific, written gap analysis ("your hospital commissioning
-              work covers two of four requirements..."). No real gap-
-              analysis engine exists to compute that, and this build never
-              fabricates a specific AI claim with nothing behind it — the
-              real PROFILE Advisor (api/advisor.ts) can actually answer this
-              kind of question live, so this invites that instead of
-              inventing a canned insight. Flagging this substitution rather
-              than silently shipping fabricated analysis. */}
-          <Link to="/career/advisor" className="block rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5">
-            <div className="mb-1.5 font-mono text-[9.5px] font-semibold tracking-wide text-trust">COPILOT</div>
-            <p className="text-xs leading-relaxed text-text-0">
-              Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting — grounded in
-              your real records, never a guess.
+          <Link to="/career/advisor" className="hidden rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5 no-underline lg:block">
+            <div className="mb-2 font-mono text-[9.5px] font-semibold tracking-[.09em] text-trust">COPILOT</div>
+            <p className="mb-2.5 text-[12.5px] leading-relaxed text-text-0">
+              Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting — grounded in your real records.
             </p>
+            <span className="inline-flex h-[31px] items-center rounded-[7px] bg-accent-solid px-[11px] text-[11.5px] font-semibold text-white">Ask Advisor</span>
           </Link>
 
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <div className="mb-2.5 text-sm font-semibold text-text-0">Matched opportunities</div>
+          <div className="rounded-[13px] border border-border bg-surface p-[15px]">
+            <div className="mb-[11px] text-[12.5px] font-semibold text-text-0">Matched opportunities</div>
             {matchedOpportunities.length === 0 ? (
-              <p className="mb-2.5 text-xs text-text-1">No open listing overlaps your recorded skills yet.</p>
+              <p className="mb-2.5 text-[11.5px] text-text-1">No open listing overlaps your recorded skills yet.</p>
             ) : (
               matchedOpportunities.map(({ job, matchPct }) => (
-                <Link key={job.id} to={`/job/${job.id}`} className="mb-2.5 block border-b border-border pb-2.5">
-                  <div className="mb-0.5 flex items-baseline justify-between gap-2">
-                    <span className="text-xs font-semibold text-text-0">{job.title}</span>
-                    <span className="font-mono text-[10.5px] text-trust">{matchPct}%</span>
-                  </div>
-                  <span className="mb-1 block text-[11px] text-text-1">{orgDisplayName(job.orgEmail)}</span>
-                  <span className="block text-[11px] leading-relaxed text-text-1">Based on skills you've recorded that this listing asks for.</span>
+                <Link key={job.id} to={`/job/${job.id}`} className="mb-[11px] block border-b border-border pb-[11px] no-underline">
+                  <span className="mb-1 flex items-baseline justify-between gap-2">
+                    <span className="text-[12.5px] font-semibold text-text-0">{job.title}</span>
+                    <span className="flex-none font-mono text-[10.5px] tabular-nums text-trust">{matchPct}%</span>
+                  </span>
+                  <span className="mb-1.5 block text-[11.5px] text-text-1">{orgDisplayName(job.orgEmail)}</span>
+                  <span className="block text-[11px] leading-normal text-text-1">Based on skills you've recorded that this listing asks for.</span>
                 </Link>
               ))
             )}
-            <Link to="/opportunities" className="text-xs font-semibold text-accent">
-              All opportunities
-            </Link>
+            <Link to="/opportunities" className="text-[11.5px] font-medium text-accent">All opportunities</Link>
           </div>
 
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <div className="mb-2.5 text-sm font-semibold text-text-0">Verification in progress</div>
+          <div className="rounded-[13px] border border-border bg-surface p-[15px]">
+            <div className="mb-2.5 text-[12.5px] font-semibold text-text-0">Verification in progress</div>
             {inProgressVerifications.length === 0 ? (
-              <p className="mb-2.5 text-xs text-text-1">Nothing in progress right now.</p>
+              <p className="mb-2.5 text-[11.5px] text-text-1">Nothing in progress right now.</p>
             ) : (
               inProgressVerifications.map((v) => (
-                <div key={v.id} className="mb-2 flex items-start gap-2">
-                  <span className="mt-1 h-2 w-2 flex-none rounded-full bg-trust" />
-                  <div className="min-w-0">
-                    <div className="text-xs font-medium text-text-0">{v.moduleName}</div>
-                    <div className="text-[11px] text-text-1">{v.status.replace(/_/g, ' ')} · {v.issuerName}</div>
-                  </div>
+                <div key={v.id} className="mb-2.5 flex items-start gap-[9px]">
+                  <span className="mt-[5px] h-2 w-2 flex-none rounded-full bg-trust" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[11.5px] font-medium text-text-0">{v.moduleName}</span>
+                    <span className="block text-[11px] leading-normal text-text-1">{v.status.replace(/_/g, ' ')} · {v.issuerName}</span>
+                  </span>
                 </div>
               ))
             )}
-            <Link to="/trust-passport" className="text-xs font-semibold text-accent">
-              Trust Center
-            </Link>
+            <Link to="/trust-passport" className="text-[11.5px] font-medium text-accent">Trust Center</Link>
           </div>
         </aside>
       </div>
     </AppShell>
-  )
-}
-
-function HomeMetric({ label, value, note, link }: { label: string; value: string | number; note: string; link: { to: string; label: string } }) {
-  return (
-    <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-sm">
-      <span className="font-mono text-[10px] uppercase tracking-wide text-text-2">{label}</span>
-      <span className="font-mono text-2xl font-semibold text-text-0">{value}</span>
-      <span className="text-xs leading-relaxed text-text-1">{note}</span>
-      <Link to={link.to} className="mt-auto text-xs font-semibold text-accent">
-        {link.label}
-      </Link>
-    </div>
   )
 }
 
