@@ -11,6 +11,7 @@ const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin/kyc', label: 'Identity (KYC)', module: 'verification_queue' },
   { to: '/admin/content', label: 'Content Moderation', module: 'content_moderation' },
   { to: '/admin/communities', label: 'Communities', module: 'content_moderation' },
+  { to: '/admin/data-requests', label: 'Data requests', module: 'data_requests' },
   { to: '/admin/mission-control', label: 'Mission Control', module: 'mission_control' },
 ]
 

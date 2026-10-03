@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { computeTrustScore } from '@/app/trustScore'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { ActionBar } from '@/shared/ui/ActionBar'
@@ -104,7 +105,7 @@ export function CommunityDetail() {
               <CommunityAvatar community={community} size={56} />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold text-text-0">{community.name}</h1>
+              <h1 className="text-2xl font-bold leading-tight tracking-tight text-text-0">{community.name}</h1>
               <div className="flex flex-wrap items-center gap-1.5 text-xs text-text-2">
                 <span>{community.type}</span>·<span>{community.kind === 'group' ? 'Group' : 'Community'}</span>·
                 <span>
@@ -123,14 +124,14 @@ export function CommunityDetail() {
 
         {!banned && (
           <>
-            <div className="mb-4 flex gap-1 overflow-x-auto border-b border-border" role="tablist">
+            <div className="mb-5 mt-1 flex flex-wrap gap-[7px]" role="tablist">
               {tabs.map(([key, label]) => (
                 <button
                   key={key}
                   role="tab"
                   aria-selected={tab === key}
                   onClick={() => setParams((p) => { const n = new URLSearchParams(p); n.set('tab', key); n.delete('post'); return n })}
-                  className={`whitespace-nowrap border-b-2 px-3 pb-2.5 text-sm font-semibold ${tab === key ? 'border-accent text-text-0' : 'border-transparent text-text-1'}`}
+                  className={`whitespace-nowrap rounded-[9px] border-[1.5px] px-[13px] py-2 text-xs font-semibold ${tab === key ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'}`}
                 >
                   {label}
                 </button>
@@ -413,10 +414,17 @@ function MembersTab({ community, owner, role }: { community: Community; owner: s
                   <span className="font-semibold text-text-0">{name(m.email)}</span>
                   {mine && <span className="ms-1 text-xs text-text-2">(you)</span>}
                   <div className="text-[11px] text-text-2">
-                    <span className="capitalize">{m.role}</span> · joined {new Date(m.joinedAt).toLocaleDateString()}
+                    <span className="capitalize">{m.role}</span>
+                    {(() => {
+                      const acct = findAccountByEmail(m.email)
+                      return acct?.accountType === 'individual' && acct.headline ? <> · {acct.headline}</> : null
+                    })()} · joined {new Date(m.joinedAt).toLocaleDateString()}
                     {muted && <span className="ms-1 text-warning">· muted</span>}
                   </div>
                 </div>
+                <span className="flex-none font-mono text-[11px] font-semibold text-trust" title="Trust Score">
+                  {computeTrustScore(findAccountByEmail(m.email) ?? null).total}
+                </span>
                 {(canManageRole || canModerate) && (
                   <div className="relative">
                     <button onClick={() => setOpenMenu(openMenu === m.email ? null : m.email)} aria-label={`Manage ${name(m.email)}`} aria-haspopup="menu" className="rounded-md px-2 py-1 text-text-2 hover:text-text-0">

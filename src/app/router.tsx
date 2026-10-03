@@ -57,6 +57,7 @@ import { AdminDashboard } from '@/screens/admin/AdminDashboard'
 import { AdminUsersRoles } from '@/screens/admin/AdminUsersRoles'
 import { AdminCommunities } from '@/screens/admin/AdminCommunities'
 import { AdminKyc } from '@/screens/admin/AdminKyc'
+import { AdminDataRequests } from '@/screens/admin/AdminDataRequests'
 import { ConnectionsPage } from '@/screens/more/ConnectionsPage'
 import { RecordActivityPage } from '@/screens/more/RecordActivityPage'
 import { ActivityDetailPage } from '@/screens/home/ActivityDetailPage'
@@ -382,6 +383,14 @@ function elementFor(route: RouteEntry): ReactElement {
       return (
         <RequirePlatformAdmin>
           <OwnerContentConsole />
+        </RequirePlatformAdmin>
+      )
+    case '/admin/data-requests':
+      return (
+        <RequirePlatformAdmin>
+          <AdminShell>
+            <AdminDataRequests />
+          </AdminShell>
         </RequirePlatformAdmin>
       )
     case '/admin/kyc':

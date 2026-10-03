@@ -36,9 +36,9 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[800px] px-4 py-8 sm:px-6">
-        <h1 className="mb-6 text-xl font-bold text-text-0">Messages &amp; Communities</h1>
-        <div className="mb-6 flex gap-2 border-b border-border">
+      <div className={`mx-auto px-4 pb-16 pt-7 sm:px-8 ${tab === 'messages' ? 'max-w-[1180px]' : 'max-w-[800px]'}`}>
+        <h1 className="mb-2 text-[26px] font-bold leading-tight tracking-tight text-text-0">Messages &amp; Communities</h1>
+        <div role="tablist" className="mb-5 mt-4 flex gap-5 border-b border-border">
           {TABS.map((t) => (
             <button
               key={t}
@@ -46,19 +46,31 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
                 setTab(t)
                 setOpenConversationId(null)
               }}
-              className={`border-b-2 px-1 pb-3 text-sm font-semibold capitalize ${tab === t ? 'border-accent text-text-0' : 'border-transparent text-text-1'}`}
+              role="tab"
+              aria-selected={tab === t}
+              className={`-mb-px border-b-2 pb-3 text-[12.5px] capitalize ${tab === t ? 'border-accent font-semibold text-text-0' : 'border-transparent font-normal text-text-1'}`}
             >
               {t}
             </button>
           ))}
         </div>
 
-        {tab === 'messages' &&
-          (openConversationId ? (
-            <ChatThread ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
-          ) : (
-            <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
-          ))}
+        {tab === 'messages' && (
+          <div className="md:grid md:min-h-[480px] md:grid-cols-[300px_minmax(0,1fr)] md:gap-4">
+            <div className={openConversationId ? 'hidden md:block' : ''}>
+              <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
+            </div>
+            <div className={openConversationId ? '' : 'hidden md:block'}>
+              {openConversationId ? (
+                <ChatThread ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
+              ) : (
+                <div className="flex h-full min-h-[320px] items-center justify-center rounded-[13px] border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
+                  Select a conversation to read it, or message someone from their profile.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {tab === 'communities' && <CommunityDirectory />}
       </div>

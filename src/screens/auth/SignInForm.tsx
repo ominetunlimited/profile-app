@@ -4,65 +4,109 @@ import { AuthChrome } from './AuthChrome'
 import { Button } from '@/shared/ui/Button'
 import { Field, PasswordInput, TextInput } from '@/shared/ui/Field'
 import { useAccount } from '@/app/AccountContext'
-import { findDemoAccount, isKnownDevice, markDeviceKnown } from '@/app/demoAccountStore'
-import { getSuspiciousLoginAlertsEnabled, recordLogin } from '@/app/sessionStore'
+import { findDemoAccount } from '@/app/demoAccountStore'
+import { recordLogin } from '@/app/sessionStore'
+import { pendingTotpFactor, verifyTotpChallenge } from '@/app/mfaStore'
+import { supabase } from '@/app/supabaseClient'
+import type { Account } from '@/app/accountTypes'
 import { ownerKey } from '@/app/activityStore'
 
-/** §7.1 Sign-In Screen + §7.2 conditional step-up MFA. */
+/** Sign In, with a real authenticator-app second factor for accounts that have set one up. */
 export function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [stage, setStage] = useState<'form' | 'mfa'>('form')
   const [mfaCode, setMfaCode] = useState('')
+  const [mfaError, setMfaError] = useState<string | null>(null)
+  const [mfaFactor, setMfaFactor] = useState<string | null>(null)
+  const [pendingAccount, setPendingAccount] = useState<Account | null>(null)
+  const [busy, setBusy] = useState(false)
   const [remember, setRememberState] = useState(false)
   const { setAccount, setStaffRole, setRemember } = useAccount()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const returnTo = params.get('return') ? decodeURIComponent(params.get('return')!) : '/home'
 
-  async function completeSignIn() {
-    const account = await findDemoAccount(email, password)
-    if (!account) {
-      setError(true)
-      return
-    }
-    setError(false)
+  function enter(account: Account) {
     setStaffRole(null)
     setRemember(remember)
     setAccount(account)
     recordLogin(ownerKey(account))
-    if (!isKnownDevice() && getSuspiciousLoginAlertsEnabled()) {
-      setStage('mfa')
-      return
-    }
     navigate(returnTo, { replace: true })
   }
 
-  function finishMfa() {
-    if (!/^\d{6}$/.test(mfaCode)) return
-    markDeviceKnown()
-    navigate(returnTo, { replace: true })
+  async function completeSignIn() {
+    setBusy(true)
+    const account = await findDemoAccount(email, password)
+    if (!account) {
+      setError(true)
+      setBusy(false)
+      return
+    }
+    setError(false)
+    // The account is only entered once any second factor is satisfied.
+    const factor = await pendingTotpFactor().catch(() => null)
+    setBusy(false)
+    if (factor) {
+      setPendingAccount(account)
+      setMfaFactor(factor)
+      setStage('mfa')
+      return
+    }
+    enter(account)
+  }
+
+  async function finishMfa() {
+    if (!/^\d{6}$/.test(mfaCode) || !mfaFactor || !pendingAccount) return
+    setBusy(true)
+    setMfaError(null)
+    try {
+      await verifyTotpChallenge(mfaFactor, mfaCode)
+      enter(pendingAccount)
+    } catch (e) {
+      setMfaError((e as Error).message)
+      setMfaCode('')
+    }
+    setBusy(false)
+  }
+
+  async function cancelMfa() {
+    await supabase.auth.signOut()
+    setStage('form')
+    setMfaCode('')
+    setMfaError(null)
+    setPendingAccount(null)
+    setPassword('')
   }
 
   if (stage === 'mfa') {
     return (
       <AuthChrome>
         <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-text-0">Confirm it's you</h1>
-        <p className="mb-5 text-sm text-text-1">We sent a 6-digit code to your email — this device hasn't signed in before.</p>
+        <p className="mb-5 text-sm text-text-1">Enter the 6-digit code from your authenticator app.</p>
         <input
           type="text"
           inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={6}
           value={mfaCode}
           onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
           placeholder="000000"
-          className="mb-4 w-full rounded-lg border border-border-strong bg-surface py-3 text-center font-mono text-xl font-semibold tracking-[.3em] text-text-0 outline-none focus-visible:border-accent"
+          aria-label="6-digit code"
+          className="mb-3 w-full rounded-lg border border-border-strong bg-surface py-3 text-center font-mono text-xl font-semibold tracking-[.3em] text-text-0 outline-none focus-visible:border-accent"
         />
-        <Button className="w-full" disabled={!/^\d{6}$/.test(mfaCode)} onClick={finishMfa}>
+        {mfaError && (
+          <p role="alert" className="mb-3 text-xs text-danger">
+            {mfaError}
+          </p>
+        )}
+        <Button className="w-full" disabled={!/^\d{6}$/.test(mfaCode) || busy} onClick={() => void finishMfa()}>
           Verify and continue
         </Button>
-        <p className="mt-4 text-center text-xs text-text-1">Any 6-digit code works in this demo build — no email backend exists yet.</p>
+        <button type="button" onClick={() => void cancelMfa()} className="mt-3 w-full text-center text-xs font-semibold text-text-1">
+          Cancel and sign out
+        </button>
       </AuthChrome>
     )
   }
@@ -87,7 +131,7 @@ export function SignInForm() {
           <TextInput value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </Field>
         <Field label="Password">
-          <PasswordInput showStrength value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
         </Field>
       </div>
       <div className="mb-4 flex items-center justify-between">
@@ -99,18 +143,9 @@ export function SignInForm() {
           Forgot password?
         </Link>
       </div>
-      <Button className="mb-3 w-full" onClick={completeSignIn} disabled={!email || !password}>
+      <Button className="mb-3 w-full" onClick={() => void completeSignIn()} disabled={!email || !password || busy}>
         Sign in
       </Button>
-
-      <div className="mb-5 flex items-center gap-3 text-xs text-text-2">
-        <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-      </div>
-      <div className="mb-5 flex flex-col gap-2">
-        {['Google', 'Microsoft', 'Apple'].map((provider) => (
-          <SocialButton key={provider} provider={provider} />
-        ))}
-      </div>
 
       <div className="text-center text-sm text-text-1">
         New to PROFILE?{' '}
@@ -119,21 +154,5 @@ export function SignInForm() {
         </Link>
       </div>
     </AuthChrome>
-  )
-}
-
-function SocialButton({ provider }: { provider: string }) {
-  const [note, setNote] = useState(false)
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setNote(true)}
-        className="flex w-full items-center justify-center rounded-lg border border-border-strong bg-surface py-2.5 text-sm font-medium text-text-0"
-      >
-        Continue with {provider}
-      </button>
-      {note && <p className="mt-1 text-xs text-warning">Social sign-in requires backend OAuth integration — not yet connected.</p>}
-    </div>
   )
 }

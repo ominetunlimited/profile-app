@@ -7,12 +7,13 @@ import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
 import { changePassword, updateDemoAccount, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { listActivities, ownerKey } from '@/app/activityStore'
+import { confirmTotpEnrollment, listTotpFactors, removeTotpFactor, startTotpEnrollment, type TotpEnrollment, type TotpFactor } from '@/app/mfaStore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
 import { KIND_LABEL as REQUEST_KIND_LABEL, listMyDataRequests, submitDataRequest, type DataRequest, type DataRequestKind } from '@/app/dataRequestStore'
 import { getCommerceSettings, setCommerceSettings, type CommerceSettings } from '@/app/commerceStore'
 import { getAccessibilityPrefs, saveAccessibilityPrefs, type AccessibilityPrefs } from '@/app/accessibilityStore'
 import { getProfileMedia, saveAvatar, saveCover } from '@/app/mediaStore'
-import { getSuspiciousLoginAlertsEnabled, listLoginHistory, setSuspiciousLoginAlertsEnabled } from '@/app/sessionStore'
+import { listLoginHistory } from '@/app/sessionStore'
 import { getPrivacyMode, setPrivacyMode } from '@/app/privacyModeStore'
 import { getMentorshipPreference, setMentorshipPreference } from '@/app/mentorshipStore'
 import { getPreference, PREFERENCE_CATEGORIES, setPreference, useNotificationsCacheVersion, type NotificationCategory } from '@/app/notificationStore'
@@ -452,7 +453,6 @@ export function SecurityTab() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
-  const [alertsEnabled, setAlertsEnabled] = useState(getSuspiciousLoginAlertsEnabled)
   const [history, setHistory] = useState(() => listLoginHistory(email))
 
   async function submitPasswordChange() {
@@ -484,18 +484,8 @@ export function SecurityTab() {
         </div>
       </Section>
       <Section title="Multi-factor authentication">
-        <Toggle soon label="Authenticator app (TOTP)" hint="A 6-digit code from an authenticator app on unrecognised devices." />
-        <Toggle label="Email verification" checked hint="Always on — the code sent at sign-up and account recovery." onChange={() => undefined} />
+        <AuthenticatorApp />
         <Toggle soon label="Passkeys (WebAuthn)" hint="Sign in with your device instead of a password." />
-        <Toggle
-          label="Suspicious login alerts"
-          checked={alertsEnabled}
-          onChange={(v) => {
-            setAlertsEnabled(v)
-            setSuspiciousLoginAlertsEnabled(v)
-          }}
-          hint="Whether an unrecognised device is challenged with a code at sign-in."
-        />
       </Section>
       <Section title="Sessions & devices">
         {history.length === 0 ? (
@@ -738,6 +728,115 @@ export function DataRightsTab() {
         )}
       </div>
     </Section>
+  )
+}
+
+/** Authenticator-app (TOTP) two-factor: set up, confirm with a code, remove. */
+function AuthenticatorApp() {
+  const [factors, setFactors] = useState<TotpFactor[] | null>(null)
+  const [enrolment, setEnrolment] = useState<TotpEnrollment | null>(null)
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function refresh() {
+    try {
+      setFactors(await listTotpFactors())
+    } catch {
+      setFactors([])
+    }
+  }
+  useEffect(() => {
+    void refresh()
+  }, [])
+
+  async function begin() {
+    setBusy(true)
+    setError(null)
+    try {
+      setEnrolment(await startTotpEnrollment())
+    } catch (e) {
+      setError((e as Error).message)
+    }
+    setBusy(false)
+  }
+  async function confirm() {
+    if (!enrolment) return
+    setBusy(true)
+    setError(null)
+    try {
+      await confirmTotpEnrollment(enrolment.factorId, code)
+      setEnrolment(null)
+      setCode('')
+      await refresh()
+    } catch (e) {
+      setError((e as Error).message)
+    }
+    setBusy(false)
+  }
+  async function remove(id: string) {
+    setBusy(true)
+    setError(null)
+    try {
+      await removeTotpFactor(id)
+      await refresh()
+    } catch (e) {
+      setError((e as Error).message)
+    }
+    setBusy(false)
+  }
+
+  const enabled = (factors?.length ?? 0) > 0
+  return (
+    <div className="border-b border-border py-3">
+      <div className="flex items-center justify-between gap-4">
+        <span>
+          <span className="block text-sm text-text-0">Authenticator app</span>
+          <span className="block text-xs text-text-1">
+            {enabled ? 'On — you will be asked for a 6-digit code every time you sign in.' : 'Use an authenticator app for a 6-digit code at sign-in.'}
+          </span>
+        </span>
+        {factors !== null && !enrolment && (enabled ? (
+          <button disabled={busy} onClick={() => void remove(factors[0].id)} className="flex-none rounded-lg border border-danger px-3 py-1.5 text-xs font-semibold text-danger disabled:opacity-50">
+            Turn off
+          </button>
+        ) : (
+          <button disabled={busy} onClick={() => void begin()} className="flex-none rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-0 disabled:opacity-50">
+            Set up
+          </button>
+        ))}
+      </div>
+      {enrolment && (
+        <div className="mt-3 flex flex-col gap-3 rounded-lg border border-border bg-surface-sunken p-3">
+          <p className="text-xs text-text-1">Scan this with Google Authenticator, 1Password, Authy or similar, then enter the 6-digit code it shows.</p>
+          <img src={enrolment.qrCode} alt="Authenticator QR code" className="h-40 w-40 rounded-lg bg-white p-2" />
+          <p className="text-xs text-text-1">
+            Can't scan? Enter this key instead: <span className="select-all font-mono text-text-0">{enrolment.secret}</span>
+          </p>
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              inputMode="numeric"
+              placeholder="000000"
+              aria-label="6-digit code"
+              className="w-32 rounded-lg border border-border-strong bg-surface px-3 py-2 text-center font-mono text-sm tracking-widest outline-none focus-visible:border-accent"
+            />
+            <button disabled={busy || code.length !== 6} onClick={() => void confirm()} className="rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">
+              Turn on
+            </button>
+            <button disabled={busy} onClick={() => { setEnrolment(null); setCode(''); setError(null) }} className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="mt-2 text-xs text-danger">
+          {error}
+        </p>
+      )}
+    </div>
   )
 }
 

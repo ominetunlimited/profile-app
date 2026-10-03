@@ -217,6 +217,7 @@ export const routeRegistry: RouteEntry[] = [
   { path: '/admin/users', screen: 'Admin Users & Roles', gate: { kind: 'platform_admin' } },
   { path: '/admin/verification', screen: 'Admin Verification Queue', gate: { kind: 'platform_admin' } },
   { path: '/admin/kyc', screen: 'Admin Identity (KYC) Review', gate: { kind: 'platform_admin' } },
+  { path: '/admin/data-requests', screen: 'Admin Data Requests', gate: { kind: 'platform_admin' } },
   { path: '/admin/content', screen: 'Admin Content Moderation', gate: { kind: 'platform_admin' } },
   { path: '/admin/communities', screen: 'Admin Communities', gate: { kind: 'platform_admin' } },
   { path: '/admin/mission-control', screen: 'Admin Mission Control', gate: { kind: 'platform_admin' } },

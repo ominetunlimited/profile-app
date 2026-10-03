@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
@@ -20,9 +21,9 @@ const STEP_DEFS = [
 ]
 
 const ID_METHODS = [
-  { title: 'Government ID', time: 'instant', body: 'Photograph a passport, national ID or driving licence. Checked automatically, then deleted.' },
-  { title: 'Work email at your employer', time: '2 minutes', body: 'We send a code. Confirms your current employment as well as your identity.' },
-  { title: 'Through your institution', time: '1–5 days', body: 'Your university or licensing body confirms you directly. Slowest, and the strongest.' },
+  { title: 'Government ID', time: 'Reviewed by a person', body: 'Photograph a passport, national ID or driving licence, plus a selfie. A person on our verification team compares them and decides.', available: true },
+  { title: 'Work email at your employer', time: 'Coming soon', body: 'A code sent to your employer email confirms your current employment as well as your identity.', available: false },
+  { title: 'Through your institution', time: 'Coming soon', body: 'Your university or licensing body confirms you directly. Slowest, and the strongest.', available: false },
 ]
 
 const VERIFIER_TYPES = [
@@ -76,7 +77,6 @@ export function OnboardingPage() {
   const [detail, setDetail] = useState('')
   const [skillsInput, setSkillsInput] = useState('')
   const [evidenceDataUrl, setEvidenceDataUrl] = useState<string | null>(null)
-  const [verifierType, setVerifierType] = useState<number | null>(null)
   const [recordPosted, setRecordPosted] = useState(false)
   const [visibility, setVisibility] = useState<ProfileVisibility>(() => (owner ? getProfileVisibility(owner) : 'private'))
 
@@ -257,8 +257,10 @@ export function OnboardingPage() {
                     {ID_METHODS.map((o, i) => (
                       <button
                         key={o.title}
-                        onClick={() => setIdMethod(i)}
-                        className={`flex items-start gap-3 rounded-xl border-[1.5px] p-3.5 text-left ${idMethod === i ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
+                        onClick={() => o.available && setIdMethod(i)}
+                        disabled={!o.available}
+                        aria-pressed={idMethod === i}
+                        className={`flex items-start gap-3 rounded-xl border-[1.5px] p-3.5 text-left disabled:cursor-not-allowed disabled:opacity-60 ${idMethod === i ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
                       >
                         <span
                           className={`mt-0.5 flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full border-[1.5px] text-[9px] font-bold text-white ${
@@ -280,13 +282,15 @@ export function OnboardingPage() {
                   <div className="mb-5 rounded-lg border border-border bg-surface-sunken p-3.5">
                     <div className="mb-1.5 text-xs font-semibold text-text-0">What happens to the document</div>
                     <div className="text-xs leading-relaxed text-text-1">
-                      It is checked, then deleted. PROFILE stores the result of the check and the date, never the
-                      document or its number. Your passport number is not something a recruiter, an employer or
-                      PROFILE staff can ever see.
+                      The photos are stored privately and only opened by the people who review identity checks. They
+                      are never shown to recruiters, employers or other members. Only the outcome — verified or not —
+                      appears on your profile.
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <Button onClick={next}>Continue</Button>
+                    <Link to="/trust-passport" className="inline-flex h-11 items-center rounded-lg bg-accent-solid px-5 text-sm font-semibold text-white no-underline">
+                      Verify my ID now
+                    </Link>
                     <Button variant="secondary" onClick={next}>
                       Skip for now
                     </Button>
@@ -401,25 +405,15 @@ export function OnboardingPage() {
                   <div className="mb-2.5 font-mono text-[10px] uppercase tracking-wide text-accent">Step 4 of 5 · about a minute</div>
                   <h2 className="mb-2 text-[clamp(21px,2.6vw,27px)] font-bold leading-[1.2] tracking-tight text-text-0">Ask someone to confirm it</h2>
                   <p className="mb-5 max-w-[56ch] text-[13.5px] leading-relaxed text-text-1">
-                    This is the step that turns a claim into evidence. They see this one record and the files attached
-                    to it — nothing else on your profile.
+                    This is the step that turns a claim into evidence: someone who was there confirms your record. Asking a
+                    person or organisation to confirm a record is coming soon, so for now your record stays unverified.
                   </p>
                   <div className="mb-5 flex flex-col gap-2.5">
-                    {VERIFIER_TYPES.map((v, i) => {
+                    <div className="text-xs font-semibold text-text-0">Who can confirm work on PROFILE</div>
+                    {VERIFIER_TYPES.map((v) => {
                       const strong = v.weight === 'Strongest'
                       return (
-                        <button
-                          key={v.title}
-                          onClick={() => setVerifierType(i)}
-                          className={`flex items-start gap-3 rounded-xl border-[1.5px] p-3.5 text-left ${verifierType === i ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
-                        >
-                          <span
-                            className={`mt-0.5 flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full border-[1.5px] text-[9px] font-bold text-white ${
-                              verifierType === i ? 'border-accent bg-accent' : 'border-border-strong bg-transparent'
-                            }`}
-                          >
-                            {verifierType === i ? '✓' : ''}
-                          </span>
+                        <div key={v.title} className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3.5">
                           <span className="min-w-0 flex-1">
                             <span className="mb-1 flex flex-wrap items-center gap-2">
                               <span className="text-[13.5px] font-semibold text-text-0">{v.title}</span>
@@ -429,29 +423,12 @@ export function OnboardingPage() {
                             </span>
                             <span className="block text-xs leading-relaxed text-text-1">{v.body}</span>
                           </span>
-                        </button>
+                        </div>
                       )
                     })}
                   </div>
-                  <div className="mb-5 rounded-lg border border-border bg-surface-sunken p-4">
-                    <div className="mb-2 text-xs font-semibold text-text-0">What they will be sent</div>
-                    <div className="mb-2.5 rounded-lg border border-border bg-surface p-3">
-                      <p className="text-[12.5px] leading-relaxed text-text-0">
-                        "{name.trim() || 'Your name'} has recorded work they say was carried out for you, and has asked
-                        you to confirm it. Confirming takes two clicks. If it is wrong, or you have no record of it,
-                        you can say so — and say why."
-                      </p>
-                    </div>
-                    <p className="text-[11.5px] leading-relaxed text-text-1">
-                      You will see whether they opened it. If nothing happens in seven days we remind them once, and
-                      at fourteen days we offer you an alternative verifier.
-                    </p>
-                  </div>
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <Button onClick={next}>Send the request</Button>
-                    <Button variant="secondary" onClick={next}>
-                      Not yet
-                    </Button>
+                    <Button onClick={next}>Continue</Button>
                     <Button variant="secondary" onClick={back}>
                       Back
                     </Button>
