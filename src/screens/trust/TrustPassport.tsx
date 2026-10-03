@@ -98,10 +98,8 @@ export function TrustPassport() {
         {/* Design handoff gap audit — PROFILE Profile & Trust.dc.html's
             Trust Passport share flow (passport card, share modal, "who
             currently holds it" + Revoke) had no real equivalent. Built from
-            the mockup's exact source text/structure; "opened N times" is
-            never reproduced since no real recipient-side session exists in
-            this build to track an open event — shares honestly always show
-            "not yet opened". */}
+            the mockup's exact source text/structure; each open of the
+            share link is recorded server-side and shown per share. */}
         <section className="mb-8 flex flex-wrap items-start gap-6">
           <div className="min-w-0 flex-1 basis-[400px]">
             <h2 className="mb-1.5 font-semibold text-text-0">Trust Passport</h2>

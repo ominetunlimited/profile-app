@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import { Link } from 'react-router-dom'
 import { useAccount } from '@/app/AccountContext'
-import { hubForOrgType } from '@/app/accountTypes'
+import { hubForOrgType, ORG_TRUST_STATUS_LABEL } from '@/app/accountTypes'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
 import { changePassword, getAccountVisibility, setAccountVisibility, updateDemoAccount, useAccountsCacheVersion, type ProfileVisibility } from '@/app/demoAccountStore'
@@ -934,34 +934,32 @@ export function OrganisationTab() {
       <Section title="Workspace">
         <div className="flex flex-col gap-3 pt-2">
           <Field label="Organisation name">
-            <TextInput defaultValue={account.legalName} />
+            <TextInput value={account.legalName} readOnly />
           </Field>
           <Field label="Official email">
-            <TextInput defaultValue={account.officialEmail} />
+            <TextInput value={account.officialEmail} readOnly />
           </Field>
         </div>
         <p className="mt-2 text-xs text-text-1">
-          Registry status: <span className="font-mono">{account.registryLevel}</span> · Type: {account.orgType}
+          Registry status: {ORG_TRUST_STATUS_LABEL[account.registryLevel]} · Type: {account.orgType}. Your registered name and official email are what PROFILE verified, so they can't be edited here.
         </p>
       </Section>
       <Section title="Team & roles">
         <p className="text-sm text-text-1">
-          No staff invited yet — inviting staff needs a real matching-email registration flow this build doesn't
-          have.
+          Invite staff, give them roles and see the audit trail in your workspace under Staff &amp; roles.
         </p>
       </Section>
       {hub === 'institutional_hub' && (
         <Section title="Verification schemas">
           <p className="mb-2 text-sm text-text-1">Define what your institution verifies, and how records are matched at scale.</p>
-          <Link to={`/institution/${account.officialEmail}/schemas`} className="text-sm font-semibold text-accent">
+          <Link to="/institution/me/schemas" className="text-sm font-semibold text-accent">
             Open Schema Builder →
           </Link>
         </Section>
       )}
       <Section title="Billing">
         <p className="text-sm text-text-1">
-          Plan management, invoice history, and payout details render here once real billing exists — no
-          fabricated invoices in the meantime.
+          Billing isn't available yet. Paid plans can't be bought, so there are no invoices or payouts to manage.
         </p>
       </Section>
     </div>

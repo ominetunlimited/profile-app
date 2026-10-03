@@ -207,7 +207,7 @@ export interface UploadMediaInput {
 
 export async function uploadMediaAsset({ file, ownerEmail, targetType, targetId }: UploadMediaInput): Promise<MediaAsset> {
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw new Error(`"${file.name}" is larger than the 50MB limit for this build.`)
+    throw new Error(`"${file.name}" is larger than the 50MB limit.`)
   }
   const fileCategory = categorizeFile(file)
   const contentHash = await sha256Hex(file)

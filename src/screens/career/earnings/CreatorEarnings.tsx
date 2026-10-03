@@ -55,11 +55,8 @@ export function CreatorEarnings() {
         <div className="rounded-xl border border-border bg-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <span className="font-semibold text-text-0">Payout history</span>
-            <button className="rounded-lg border border-border-strong bg-surface-sunken px-3 py-1.5 text-xs font-semibold text-text-0" disabled={totalEarned === 0}>
-              Request payout
-            </button>
           </div>
-          <p className="text-sm text-text-1">No payouts yet.</p>
+          <p className="text-sm text-text-1">No payouts yet. Payouts open once payment processing launches; nothing is owed or paid out before then.</p>
         </div>
       </div>
     </AppShell>

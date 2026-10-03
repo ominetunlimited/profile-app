@@ -176,7 +176,7 @@ export function GovernmentWorkspace() {
           />
           <ExportCard
             title="Rejected licences"
-            body="For cross-agency compliance checks. This build has no expiry tracking yet, so only rejected requests are included here."
+            body="For cross-agency compliance checks. Expiry dates aren't recorded yet, so this export covers rejected requests only."
             onGenerate={() => downloadBlob(toCsv(requests.filter((r) => r.status === 'rejected')), 'text/csv', 'rejected-licences.csv')}
           />
           <ExportCard

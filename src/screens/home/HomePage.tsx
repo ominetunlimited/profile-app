@@ -549,7 +549,7 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
                 const picked = Array.from(e.target.files ?? [])
                 const tooBig = picked.filter((f) => f.size > MAX_FILE_SIZE_BYTES)
                 if (tooBig.length > 0) {
-                  setUploadState((s) => ({ ...s, error: `${tooBig.map((f) => f.name).join(', ')} exceeds the 50MB limit for this build.` }))
+                  setUploadState((s) => ({ ...s, error: `${tooBig.map((f) => f.name).join(', ')} is over the 50MB limit.` }))
                 }
                 setStagedFiles((prev) => [...prev, ...picked.filter((f) => f.size <= MAX_FILE_SIZE_BYTES)])
                 e.target.value = ''
@@ -575,8 +575,7 @@ export function Composer({ owner, onClose, onPosted }: { owner: string; onClose:
               </div>
             )}
             <p className="mt-2 text-[11px] text-text-2">
-              Each upload gets a real Copyright ID. Direct upload, no resumable transfer or virus scan yet — a 50MB
-              practical limit for this build, not the full spec's 20GB.
+              Each upload gets its own Copyright ID. Files up to 50MB are uploaded directly: there is no resumable transfer or virus scan yet.
             </p>
           </div>
         )}
