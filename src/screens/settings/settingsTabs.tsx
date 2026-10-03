@@ -5,7 +5,7 @@ import { useAccount } from '@/app/AccountContext'
 import { hubForOrgType } from '@/app/accountTypes'
 import { useLanguage } from '@/app/LanguageContext'
 import { LANGUAGES, type LanguageCode } from '@/app/i18n'
-import { changePassword, updateDemoAccount, useAccountsCacheVersion } from '@/app/demoAccountStore'
+import { changePassword, getAccountVisibility, setAccountVisibility, updateDemoAccount, useAccountsCacheVersion, type ProfileVisibility } from '@/app/demoAccountStore'
 import { listActivities, ownerKey } from '@/app/activityStore'
 import { confirmTotpEnrollment, listTotpFactors, removeTotpFactor, startTotpEnrollment, type TotpEnrollment, type TotpFactor } from '@/app/mfaStore'
 import { listVerificationRequests } from '@/app/verificationRequestStore'
@@ -177,6 +177,52 @@ export function ProfileTab() {
   )
 }
 
+/** Who can find and view your profile. Saved on your account and enforced by the database. */
+function ProfileVisibilityControl() {
+  const { account } = useAccount()
+  const owner = account ? ownerKey(account) : ''
+  useAccountsCacheVersion()
+  const current = getAccountVisibility(owner)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+  const options: { value: ProfileVisibility; label: string; hint: string }[] = [
+    { value: 'private', label: 'Private', hint: "Only you, people you're connected with and people you message. You don't appear in search." },
+    { value: 'discoverable', label: 'Verified organisations', hint: "Recruiters and institutions PROFILE has verified can find you, as well as your connections." },
+    { value: 'public', label: 'Public', hint: "Anyone can find and view your profile, signed in or not." },
+  ]
+  return (
+    <div className="border-b border-border py-3">
+      <div className="mb-1 text-sm text-text-0">Profile visibility</div>
+      <div className="mb-2 text-xs text-text-1">Who can find and view your profile and the activity you've made public.</div>
+      <div role="radiogroup" aria-label="Profile visibility" className="flex flex-col gap-2">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={current === o.value}
+            onClick={() => {
+              setError(null)
+              setSaved(false)
+              setAccountVisibility(o.value).then(() => setSaved(true)).catch((e: Error) => setError(e.message))
+            }}
+            className={`rounded-lg border-[1.5px] px-3 py-2 text-left ${current === o.value ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
+          >
+            <span className="block text-xs font-semibold text-text-0">{o.label}</span>
+            <span className="block text-[11.5px] text-text-1">{o.hint}</span>
+          </button>
+        ))}
+      </div>
+      {saved && <p className="mt-1.5 text-xs text-success">Saved.</p>}
+      {error && (
+        <p role="alert" className="mt-1.5 text-xs text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
 /** §25 SETTINGS_TABS.PrivacyAndVisibility + §25.1 PrivacyMode */
 export function PrivacyTab() {
   const { account } = useAccount()
@@ -207,7 +253,7 @@ export function PrivacyTab() {
         <p className="mb-1 text-xs text-text-1">
           Each record you post already has its own visibility (public, connections only or private). Account-wide controls arrive with the visibility engine, so they are not switchable yet.
         </p>
-        <Toggle soon label="Profile visibility" hint="Who can find and view your full profile." />
+        <ProfileVisibilityControl />
         <Toggle soon label="Credential visibility" hint="Show verified credentials to visitors." />
         <Toggle soon label="Trust Passport visibility" hint="Allow sharing your Trust Passport via link." />
         <Toggle soon label="Search engine indexing" hint="Whether your public profile appears in search results." />

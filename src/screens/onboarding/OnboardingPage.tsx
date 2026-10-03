@@ -10,7 +10,7 @@ import { listActivities, ownerKey, postActivity } from '@/app/activityStore'
 import { updateDemoAccount } from '@/app/demoAccountStore'
 import { resizeImage } from '@/app/mediaStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { getProfileVisibility, setProfileVisibility, type ProfileVisibility } from '@/app/profileVisibilityStore'
+import { getAccountVisibility, setAccountVisibility, useAccountsCacheVersion, type ProfileVisibility } from '@/app/demoAccountStore'
 
 const STEP_DEFS = [
   { title: 'Who you are', sub: 'Name, work, location' },
@@ -33,9 +33,9 @@ const VERIFIER_TYPES = [
 ]
 
 const VISIBILITY_OPTIONS: { value: ProfileVisibility; title: string; body: string }[] = [
-  { value: 'private', title: 'Private for now', body: 'Only you. Nothing is discoverable, including by recruiters. You can publish later.' },
-  { value: 'discoverable', title: 'Discoverable by verified recruiters and institutions', body: 'Your name, field and verified records only. Not indexed by search engines.' },
-  { value: 'public', title: 'Public profile', body: 'A public page on PROFILE, indexed by search engines. Verified records only.' },
+  { value: 'private', title: 'Private for now', body: "Only you, people you're connected with and people you message can find you. You don't appear in search or to recruiters. You can publish later." },
+  { value: 'discoverable', title: 'Discoverable by verified recruiters and institutions', body: 'Organisations PROFILE has verified can find you and see what you have made public. Nobody else can.' },
+  { value: 'public', title: 'Public profile', body: "Anyone can find and view your profile, including people who aren't signed in." },
 ]
 
 /**
@@ -78,7 +78,9 @@ export function OnboardingPage() {
   const [skillsInput, setSkillsInput] = useState('')
   const [evidenceDataUrl, setEvidenceDataUrl] = useState<string | null>(null)
   const [recordPosted, setRecordPosted] = useState(false)
-  const [visibility, setVisibility] = useState<ProfileVisibility>(() => (owner ? getProfileVisibility(owner) : 'private'))
+  useAccountsCacheVersion()
+  const visibility: ProfileVisibility = getAccountVisibility(owner)
+  const [visibilityError, setVisibilityError] = useState<string | null>(null)
 
   const named = name.trim().length > 1 && role.trim().length > 1
   const worked = work.trim().length > 3
@@ -485,14 +487,19 @@ export function OnboardingPage() {
 
                   <div className="mb-5 rounded-2xl border border-border bg-surface p-4">
                     <div className="mb-1.5 text-[13.5px] font-semibold text-text-0">Before you go — what should be visible?</div>
-                    <p className="mb-3.5 text-xs text-text-1">Your profile is private until you answer this. You can change it any time.</p>
+                    <p className="mb-3.5 text-xs text-text-1">This takes effect straight away and you can change it any time in Settings → Privacy &amp; Visibility.</p>
+                    {visibilityError && (
+                      <p role="alert" className="mb-2 text-xs text-danger">
+                        {visibilityError}
+                      </p>
+                    )}
                     <div className="flex flex-col gap-2.5">
                       {VISIBILITY_OPTIONS.map((v) => (
                         <button
                           key={v.value}
                           onClick={() => {
-                            setVisibility(v.value)
-                            if (owner) setProfileVisibility(owner, v.value)
+                            setVisibilityError(null)
+                            setAccountVisibility(v.value).catch((e: Error) => setVisibilityError(e.message))
                           }}
                           className={`flex items-start gap-2.5 rounded-xl border-[1.5px] p-3 text-left ${visibility === v.value ? 'border-accent bg-accent-soft' : 'border-border bg-surface'}`}
                         >

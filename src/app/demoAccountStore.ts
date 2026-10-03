@@ -4,6 +4,9 @@ import { supabase } from './supabaseClient'
 import { joinRealtime } from './realtimeAuth'
 import type { Account, OrgRegistryLevel } from './accountTypes'
 
+/** Who may find and view a profile — enforced by the database (see migration 0019), not just hidden in the UI. */
+export type ProfileVisibility = 'private' | 'discoverable' | 'public'
+
 /**
  * Pipeline repair Phase A — real Supabase Auth + `public.accounts` (RLS-backed),
  * replacing the old `localStorage` scaffolding this file used to be. This is
@@ -49,6 +52,7 @@ interface AccountRow {
   org_role: string | null
   avatar_url?: string | null
   cover_url?: string | null
+  profile_visibility?: ProfileVisibility
 }
 
 type OrganisationAccountShape = Extract<Account, { accountType: 'organisation' }>
@@ -221,7 +225,7 @@ export function useAccountsCacheVersion(): number {
 
 /** §8 registration — real signup (Supabase Auth) + the `accounts` row in one
  * call, mirroring the old save-then-done shape call sites already expect. */
-export async function saveDemoAccount(email: string, password: string, account: Account): Promise<void> {
+export async function saveDemoAccount(email: string, password: string, account: Account, visibility?: ProfileVisibility): Promise<void> {
   const { data, error } = await supabase.auth.signUp({ email, password })
   if (error) throw error
   if (data.user && data.user.identities && data.user.identities.length === 0) {
@@ -229,7 +233,7 @@ export async function saveDemoAccount(email: string, password: string, account: 
   }
   const userId = data.user?.id
   if (!userId) throw new Error('Sign-up did not return a session — check Supabase Auth settings.')
-  const row = { id: userId, ...accountToRow(account) }
+  const row = { id: userId, ...accountToRow(account), ...(visibility ? { profile_visibility: visibility } : {}) }
   const { error: insertError } = await supabase.from('accounts').insert(row)
   if (insertError) throw insertError
   upsertCacheRow(row)
@@ -347,6 +351,23 @@ export function getAccountImages(email: string | undefined): { avatarUrl: string
   const target = email.trim().toLowerCase()
   const row = cache.find((r) => r.email.toLowerCase() === target)
   return { avatarUrl: row?.avatar_url ?? null, coverUrl: row?.cover_url ?? null }
+}
+
+/** An account's profile visibility; defaults to the most private setting while the row isn't loaded. */
+export function getAccountVisibility(email: string | undefined): ProfileVisibility {
+  if (!email) return 'private'
+  const target = email.trim().toLowerCase()
+  return cache.find((r) => r.email.toLowerCase() === target)?.profile_visibility ?? 'public'
+}
+
+/** Changes the signed-in account's own visibility. */
+export async function setAccountVisibility(visibility: ProfileVisibility): Promise<void> {
+  const { data: sess } = await supabase.auth.getSession()
+  const uid = sess.session?.user?.id
+  if (!uid) throw new Error('Sign in to change your visibility.')
+  const { data, error } = await supabase.from('accounts').update({ profile_visibility: visibility }).eq('id', uid).select().maybeSingle()
+  if (error) throw new Error(error.message)
+  if (data) upsertCacheRow(data as AccountRow)
 }
 
 /** Uploads a (pre-resized) image data URL to the public account-images bucket and records it on the account row. */

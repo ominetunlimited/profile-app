@@ -142,7 +142,7 @@ export function AccountCreationWizard() {
       country: s.country,
     }
     try {
-      await saveDemoAccount(s.email, s.password, newAccount)
+      await saveDemoAccount(s.email, s.password, newAccount, 'private')
     } catch (err) {
       // Real failure mode now that this hits a real backend (e.g. the email
       // actually got registered a moment ago, on this device or another) —

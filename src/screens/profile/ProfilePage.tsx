@@ -10,7 +10,7 @@ import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account
 import { listActivities, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
 import { pendingRequestsForOwner, respondToSelfTag } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
-import { findAccountByEmail, findAccountByUsername, useAccountsCacheVersion } from '@/app/demoAccountStore'
+import { findAccountByEmail, findAccountByUsername, getAccountVisibility, useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { getProfileMedia } from '@/app/mediaStore'
 import { buildCvData } from '@/app/careerData'
 import { publicDisplayName } from '@/app/privacyModeStore'
@@ -217,6 +217,16 @@ export function ProfilePage() {
       </div>
 
       <div className="mx-auto max-w-[900px] px-4 sm:px-6">
+        {isSelf && viewed.accountType === 'individual' && getAccountVisibility(targetKey) !== 'public' && (
+          <div role="status" className="mt-4 rounded-lg border border-border-strong bg-surface-sunken px-3.5 py-2.5 text-xs text-text-1">
+            {getAccountVisibility(targetKey) === 'private'
+              ? "Your profile is private: only you, your connections and people you message can find it."
+              : 'Your profile is visible to verified organisations and your connections, but not to the public.'}{' '}
+            <Link to="/settings?tab=privacy" className="font-semibold text-accent">
+              Change who can see it
+            </Link>
+          </div>
+        )}
         <nav className="flex gap-1 border-b border-border py-2">
           {TABS.filter((t) => t !== 'cv-portfolio' || canCv || canPortfolio).map((t) => (
             <button
