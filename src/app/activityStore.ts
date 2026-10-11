@@ -21,6 +21,8 @@ import { joinRealtime } from './realtimeAuth'
 import { listFollowedOrgs } from './followStore'
 import { listConnectedEmails } from './connectionStore'
 import { recordToolReferences } from './providerReferenceStore'
+import { emitEvent } from './eventBus'
+import { resolveEntities } from './entityResolution'
 
 /** Simplified §4.3 Activity — the fields this build's UI actually reads/writes. */
 export interface ActivityRecord {
@@ -201,7 +203,31 @@ export async function postActivity(input: Omit<ActivityRecord, 'id' | 'createdAt
   // that resolves to the real catalogue (toolCatalogue.ts) — never a claim
   // of endorsement, and never invented for a tool with no known provider.
   recordToolReferences(record.id, record.ownerEmail, record.tools)
+  // §11.4 Organisation Mention System + §5.2 "Activity (org mentioned) → Org
+  // Notification": if the recorded activity names a registered organisation,
+  // that organisation's account is notified in-app/email so it can review and
+  // verify — exactly the linkage the Feature Linkage Table requires. Resolved
+  // through the one shared entity-resolution engine (§3) so a mention is
+  // matched the same way everywhere. Fire-and-forget: a notification problem
+  // must never fail the user's post, and self-mentions are skipped by the
+  // engine's own eligibility check.
+  notifyMentionedOrg(record)
   return record
+}
+
+/** §11.4 — resolve the activity's free-text `organisation` to a registered
+ *  organisation account and, if it's someone other than the author, notify it. */
+function notifyMentionedOrg(record: ActivityRecord) {
+  const typed = record.organisation?.trim()
+  if (!typed) return
+  const org = resolveEntities(typed, 'mention').find((e) => e.type === 'organisation')
+  if (!org) return
+  void emitEvent('org_mention', org.id, {
+    deepLink: `/activity/${record.id}`,
+    targetType: 'activity',
+    targetId: record.id,
+    vars: { title: record.title },
+  }).catch(() => undefined)
 }
 
 export function getActivityById(id: string): ActivityRecord | undefined {

@@ -1,5 +1,6 @@
 import type { Account } from './accountTypes'
 import { listMyKyc } from './kycStore'
+import { listVerificationRequests, type VerificationModuleKey } from './verificationRequestStore'
 
 /**
  * §13.2 TRUST_WEIGHTS, verbatim. Phase 7 hardening: ProfilePage previously
@@ -105,6 +106,23 @@ export interface TrustSignalEntry {
   verified: boolean
 }
 
+/**
+ * §5.2 "Verification (approved) → Trust Score" — maps each institution-decided
+ * verification module to the §13.2 weight it earns. A request only counts once
+ * its status has reached the terminal 'verified' state (§12.4 timeline), i.e. a
+ * named institution actually confirmed it — never on submission, never on the
+ * requester's own claim. 'custom' carries no §13.2 weight of its own, so it
+ * deliberately earns nothing here rather than being guessed.
+ */
+export const VERIFICATION_MODULE_WEIGHT: Partial<Record<VerificationModuleKey, keyof typeof TRUST_WEIGHTS>> = {
+  identity: 'identity_verification',
+  employment: 'employment_verification',
+  academic: 'academic_degree_verification',
+  professional_licence: 'professional_licence',
+  trade_competence: 'trade_competence',
+  certification: 'certification',
+}
+
 export interface TrustScoreResult {
   total: number
   tier: (typeof TRUST_TIERS)[number]
@@ -130,31 +148,54 @@ const ZERO_DIMENSIONS: TrustDimensions = {
 }
 
 export function computeTrustScore(account: Account | null): TrustScoreResult {
-  // The only real signal source today is a HUMAN-approved identity (KYC)
-  // review (kycStore.ts) — it earns the identity_verification weight. Every
-  // other signal still has no verification pipeline behind it, so those stay
-  // honestly 0 rather than estimated, and nothing here ever fabricates points
-  // (no auto-approval, no vendor liveness pass).
+  // Two real, verified signal sources — nothing here ever fabricates points
+  // (no auto-approval, no vendor liveness pass):
+  //
+  //  1. A HUMAN-approved identity (KYC) review (kycStore.ts) → identity_verification.
+  //  2. §5.2's "Verification (approved) → Trust Score": any verification request
+  //     this account filed that a named institution has driven to the terminal
+  //     'verified' state (verificationRequestStore.ts) earns its module's §13.2
+  //     weight. This is the same source badgeStore.ts reads to mint badges, so a
+  //     badge and its Trust Score points now always agree.
+  //
+  // Each signal is counted at most once per weight key (deduplicated), so a
+  // person can't stack the same weight from a KYC pass and an identity request.
   const email = !account ? '' : account.accountType === 'individual' ? account.email : account.officialEmail
   const signals: TrustSignalEntry[] = []
   const dimensions: TrustDimensions = { ...ZERO_DIMENSIONS }
-  const approved = email ? listMyKyc(email).find((k) => k.status === 'approved') : undefined
-  if (approved) {
-    signals.push({
-      type: 'identity_verification',
-      weight: TRUST_WEIGHTS.identity_verification,
-      source: 'PROFILE reviewer — identity documents checked',
-      date: approved.reviewedAt ?? approved.createdAt,
-      verified: true,
-    })
-    dimensions.identityTrust = TRUST_WEIGHTS.identity_verification
+  const awarded = new Set<keyof typeof TRUST_WEIGHTS>()
+
+  const award = (weightKey: keyof typeof TRUST_WEIGHTS, source: string, date: string) => {
+    if (awarded.has(weightKey)) return
+    awarded.add(weightKey)
+    const weight = TRUST_WEIGHTS[weightKey]
+    signals.push({ type: weightKey, weight, source, date, verified: true })
+    dimensions[TRUST_DIMENSION_SIGNAL_MAP[weightKey]] += weight
   }
+
+  // 1. Identity — a human-approved KYC review.
+  const approvedKyc = email ? listMyKyc(email).find((k) => k.status === 'approved') : undefined
+  if (approvedKyc) {
+    award('identity_verification', 'PROFILE reviewer — identity documents checked', approvedKyc.reviewedAt ?? approvedKyc.createdAt)
+  }
+
+  // 2. Institution-confirmed verifications (employment, academic, licence, …).
+  if (email) {
+    for (const req of listVerificationRequests(email)) {
+      if (req.status !== 'verified') continue
+      const weightKey = VERIFICATION_MODULE_WEIGHT[req.moduleKey]
+      if (!weightKey) continue
+      award(weightKey, `${req.moduleName} verified by ${req.issuerName}`, req.decidedAt ?? req.submittedAt)
+    }
+  }
+
   const total = signals.reduce((sum, s) => sum + s.weight, 0)
   const tier = TRUST_TIERS.find((t) => total >= t.range[0] && total <= t.range[1]) ?? TRUST_TIERS[0]
+  const confidenceLevel: TrustScoreResult['confidenceLevel'] = signals.length >= 4 ? 'high' : signals.length >= 2 ? 'moderate' : signals.length === 1 ? 'moderate' : 'low'
   return {
     total,
     tier,
-    confidenceLevel: approved ? 'moderate' : 'low',
+    confidenceLevel,
     dimensions,
     signals,
     formulaVersion: '13.2-v1',

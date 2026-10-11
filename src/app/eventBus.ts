@@ -21,6 +21,7 @@ export type ClientEvent =
   | 'credit_dispute'
   | 'tag_request'
   | 'tag_response'
+  | 'org_mention'
   | 'mentorship_request'
   | 'mentorship_response'
   | 'staff_invite'
