@@ -13,6 +13,7 @@ import { KIND_LABEL, recommend, type Recommendation } from '@/app/recommendation
 import { useLearningVersion } from '@/app/learningStore'
 import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { recordFeedback, useRecommendationFeedbackVersion } from '@/app/recommendationFeedbackStore'
+import { IconClose } from './icons'
 
 /** "Recommended for you" — ranked, explained suggestions for this account type.
  * Recomputes live as the underlying data changes; every card says why it's
@@ -51,8 +52,8 @@ function Card({ rec, owner, expanded, onToggle }: { rec: Recommendation; owner: 
       <div className="mb-1 flex items-center gap-2">
         <span className="rounded-full bg-accent-soft px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide text-accent">{KIND_LABEL[rec.kind]}</span>
         <div className="flex-1" />
-        <button onClick={() => void recordFeedback(owner, rec.key, rec.kind, 'dismissed')} aria-label={`Not interested: ${rec.title}`} title="Not interested" className="text-xs text-text-2 hover:text-text-0">
-          ✕
+        <button onClick={() => void recordFeedback(owner, rec.key, rec.kind, 'dismissed')} aria-label={`Not interested: ${rec.title}`} title="Not interested" className="flex items-center text-text-2 hover:text-text-0">
+          <IconClose size={14} />
         </button>
       </div>
       <div className="text-sm font-semibold text-text-0">{rec.title}</div>

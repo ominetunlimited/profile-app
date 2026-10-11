@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { Field, SelectInput } from '@/shared/ui/Field'
+import { IconClose } from '@/shared/ui/icons'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { fileDispute, listMyDisputes, OPEN_STATUSES, type DisputeRecord, type DisputeStatus } from '@/app/disputeStore'
@@ -160,8 +161,8 @@ export function DisputeAppeal() {
             {evidence.map((e) => (
               <div key={e.id} className="flex items-center gap-2 rounded-[9px] border border-dashed border-border-strong px-3.5 py-2.5 font-mono text-[11.5px] text-text-1">
                 {e.fileName}
-                <button type="button" onClick={() => setEvidence((all) => all.filter((x) => x.id !== e.id))} aria-label={`Remove ${e.fileName}`} className="font-sans font-semibold text-danger">
-                  ✕
+                <button type="button" onClick={() => setEvidence((all) => all.filter((x) => x.id !== e.id))} aria-label={`Remove ${e.fileName}`} className="flex items-center text-danger hover:opacity-80">
+                  <IconClose size={14} />
                 </button>
               </div>
             ))}

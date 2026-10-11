@@ -61,17 +61,17 @@ export function ProfileSeal({ size = 16, tone = 'green', className = '', label, 
       className={`${animate ? 'profile-seal-animate' : ''} ${className}`}
       {...a11y}
     >
-      {/* Faceted identity node — the seal body */}
+      {/* Faceted identity node — the seal body (rounded hexagonal shield) */}
       <path
-        d="M12 1.8l8.2 3.4v7c0 5-3.6 9-8.2 10.4-4.6-1.4-8.2-5.4-8.2-10.4v-7L12 1.8Z"
+        d="M12 1.7 20.3 5.2v6.3c0 5-3.7 9.1-8.3 10.5-4.6-1.4-8.3-5.5-8.3-10.5V5.2Z"
         fill={TONE_FILL[tone]}
       />
       {/* Inner verification vertex — two strokes forming the PROFILE check */}
       <path
-        d="M8.3 12.3l2.6 2.6 4.8-5.2"
+        d="M8.2 12.2 11 15 16 9.1"
         fill="none"
         stroke={TONE_INK[tone]}
-        strokeWidth="2.4"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

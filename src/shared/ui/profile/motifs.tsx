@@ -58,9 +58,9 @@ function Motif({ size = 24, className, strokeWidth = STROKE, color, children }: 
 export function ProfileNode(p: MotifProps) {
   return (
     <Motif {...p}>
-      <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
-      <rect x="4.5" y="4.5" width="15" height="15" rx="4.5" />
-      <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" />
+      <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" />
+      <rect x="4.4" y="4.4" width="15.2" height="15.2" rx="4.6" />
+      <path d="M12 1.4v3M12 19.6v3M1.4 12h3M19.6 12h3" />
     </Motif>
   )
 }
@@ -72,8 +72,8 @@ export function ProfileNode(p: MotifProps) {
 export function ProfileLink(p: MotifProps) {
   return (
     <Motif {...p}>
-      <circle cx="5.5" cy="12" r="2.6" fill="currentColor" stroke="none" />
-      <circle cx="18.5" cy="12" r="2.6" />
+      <circle cx="5.4" cy="12" r="2.7" fill="currentColor" stroke="none" />
+      <circle cx="18.6" cy="12" r="2.7" />
       <path d="M8.1 12h7.8" />
     </Motif>
   )
@@ -86,11 +86,11 @@ export function ProfileLink(p: MotifProps) {
 export function ProfilePath(p: MotifProps) {
   return (
     <Motif {...p}>
-      <path d="M4 19.5l5-6 4 3 7-9" />
-      <circle cx="4" cy="19.5" r="1.8" fill="currentColor" stroke="none" />
-      <circle cx="9" cy="13.5" r="1.6" />
-      <circle cx="13" cy="16.5" r="1.6" />
-      <circle cx="20" cy="7.5" r="2" fill="currentColor" stroke="none" />
+      <path d="M4 19.6 9 13.6 13 16.6 20 7.4" />
+      <circle cx="4" cy="19.6" r="1.9" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="13.6" r="1.7" />
+      <circle cx="13" cy="16.6" r="1.7" />
+      <circle cx="20" cy="7.4" r="2.1" fill="currentColor" stroke="none" />
     </Motif>
   )
 }
@@ -104,8 +104,8 @@ export function ProfilePath(p: MotifProps) {
 export function ProfileSealMotif(p: MotifProps) {
   return (
     <Motif {...p}>
-      <path d="M12 2.5l8 3.2v6.1c0 4.6-3.3 8.3-8 9.7-4.7-1.4-8-5.1-8-9.7V5.7l8-3.2Z" />
-      <path d="M8.7 12.2l2.4 2.4 4.2-4.6" strokeWidth={(p.strokeWidth ?? STROKE) + 0.25} />
+      <path d="M12 2.4 20.2 5.7v6.2c0 4.7-3.4 8.5-8.2 9.9-4.8-1.4-8.2-5.2-8.2-9.9V5.7Z" />
+      <path d="M8.6 12.2 11.1 14.7 15.8 9.2" strokeWidth={(p.strokeWidth ?? STROKE) + 0.25} />
     </Motif>
   )
 }
@@ -118,11 +118,11 @@ export function ProfileSealMotif(p: MotifProps) {
 export function ProfileFrame(p: MotifProps) {
   return (
     <Motif {...p}>
-      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-      <circle cx="3.5" cy="3.5" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="20.5" cy="3.5" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="3.5" cy="20.5" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="20.5" cy="20.5" r="1.5" fill="currentColor" stroke="none" />
+      <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="5" />
+      <circle cx="3.4" cy="3.4" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="20.6" cy="3.4" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="3.4" cy="20.6" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="20.6" cy="20.6" r="1.5" fill="currentColor" stroke="none" />
     </Motif>
   )
 }
@@ -160,10 +160,10 @@ export function ProfileGrid(p: MotifProps) {
 export function ProfileSignal(p: MotifProps) {
   return (
     <Motif {...p}>
-      <circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none" />
-      <path d="M12 6.2a5.8 5.8 0 0 1 5.8 5.8" />
-      <path d="M12 3.2a8.8 8.8 0 0 1 8.8 8.8" opacity="0.55" />
-      <path d="M6.2 12A5.8 5.8 0 0 1 12 6.2" opacity="0.55" />
+      <circle cx="12" cy="12" r="2.7" fill="currentColor" stroke="none" />
+      <path d="M12 6.1a5.9 5.9 0 0 1 5.9 5.9" />
+      <path d="M12 3a9 9 0 0 1 9 9" opacity="0.55" />
+      <path d="M6.1 12A5.9 5.9 0 0 1 12 6.1" opacity="0.55" />
     </Motif>
   )
 }
@@ -175,10 +175,10 @@ export function ProfileSignal(p: MotifProps) {
 export function ProfileOrbit(p: MotifProps) {
   return (
     <Motif {...p}>
-      <circle cx="12" cy="12" r="3.4" />
+      <circle cx="12" cy="12" r="3.5" />
       <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="19" cy="12" r="1.6" />
-      <circle cx="5" cy="12" r="1.6" opacity="0.6" />
+      <circle cx="19.2" cy="12" r="1.7" />
+      <circle cx="4.8" cy="12" r="1.7" opacity="0.6" />
     </Motif>
   )
 }

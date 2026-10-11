@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { sendMessage, type AttachmentInput, type ChatMessage } from '@/app/messageStore'
 import { CameraCapture } from '@/shared/ui/CameraCapture'
+import { IconClose } from '@/shared/ui/icons'
 import { CHAT_ACCEPT, CHAT_MAX_FILES_PER_MESSAGE, validateChatFile, type ChatFileCategory } from '@/app/fileValidation'
 
 const isCoarsePointer = () => typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
@@ -174,8 +175,8 @@ export function ChatComposer({
             <div className="font-semibold text-text-0">Replying to {displayName(replyTo.senderEmail)}</div>
             <div className="truncate text-text-1">{replyTo.text || 'Attachment'}</div>
           </div>
-          <button onClick={onCancelReply} aria-label="Cancel reply" className="flex-none text-text-2">
-            ✕
+          <button onClick={onCancelReply} aria-label="Cancel reply" className="flex flex-none items-center text-text-2 hover:text-text-0">
+            <IconClose size={14} />
           </button>
         </div>
       )}
@@ -185,8 +186,8 @@ export function ChatComposer({
             <div key={s.key} className="flex items-center gap-2 rounded-lg border border-border bg-surface-sunken p-1.5 text-xs">
               {s.previewUrl ? <img src={s.previewUrl} alt="" className="h-9 w-9 rounded object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded bg-surface text-[10px] font-bold uppercase">{s.input.category}</span>}
               <span className="max-w-[120px] truncate">{s.input.fileName}</span>
-              <button onClick={() => { if (s.previewUrl) URL.revokeObjectURL(s.previewUrl); setStaged((p) => p.filter((x) => x.key !== s.key)) }} aria-label={`Remove ${s.input.fileName}`} className="text-text-2">
-                ✕
+              <button onClick={() => { if (s.previewUrl) URL.revokeObjectURL(s.previewUrl); setStaged((p) => p.filter((x) => x.key !== s.key)) }} aria-label={`Remove ${s.input.fileName}`} className="flex items-center text-text-2 hover:text-text-0">
+                <IconClose size={14} />
               </button>
             </div>
           ))}

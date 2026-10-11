@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getAttachmentUrl, type MessageAttachment } from '@/app/messageStore'
+import { IconClose } from '@/shared/ui/icons'
 
 /** Full-screen viewer: loads the 1600px preview (not the original), zoom, and
  * a download link for the untouched original. Esc / backdrop click closes. */
@@ -40,8 +41,8 @@ export function ImageViewer({ attachment, onClose }: { attachment: MessageAttach
               Download
             </a>
           )}
-          <button onClick={onClose} className="rounded-md border border-white/30 px-2.5 py-1" aria-label="Close viewer">
-            ✕
+          <button onClick={onClose} className="flex items-center rounded-md border border-white/30 px-2 py-1" aria-label="Close viewer">
+            <IconClose size={16} />
           </button>
         </div>
       </div>

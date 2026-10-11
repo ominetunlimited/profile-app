@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { IconClose } from './icons'
 
 /**
  * Live camera capture for mobile and desktop (webcam). Uses getUserMedia with
@@ -142,8 +143,8 @@ export function CameraCapture({
           <div className="truncate text-sm font-semibold">{title}</div>
           {hint && <div className="text-xs text-white/70">{hint}</div>}
         </div>
-        <button onClick={onClose} aria-label="Close camera" className="rounded-md border border-white/30 px-2.5 py-1 text-sm">
-          ✕
+        <button onClick={onClose} className="flex items-center rounded-md border border-white/30 px-2 py-1 text-sm" aria-label="Close camera">
+          <IconClose size={16} />
         </button>
       </div>
 

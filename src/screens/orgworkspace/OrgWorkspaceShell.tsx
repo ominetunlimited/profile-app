@@ -5,6 +5,7 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type Account } from '@/app/accountTypes'
 import { BRAND } from '@/shared/brand/assets'
+import { IconCheck, IconClose } from '@/shared/ui/icons'
 
 const HUB_LABEL: Record<string, string> = {
   business_hub: 'Business hub',
@@ -198,7 +199,7 @@ export function SectorAccessDenied({ toolName, scopeDescription }: { toolName: s
 function Condition({ ok, label }: { ok: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-2 rounded-lg border p-2.5 ${ok ? 'border-success' : 'border-warning'}`}>
-      <span className={ok ? 'text-success' : 'text-warning'}>{ok ? '✓' : '✕'}</span>
+      {ok ? <IconCheck size={16} className="flex-none text-success" /> : <IconClose size={16} className="flex-none text-warning" />}
       <span className="text-text-0">{label}</span>
     </div>
   )

@@ -23,7 +23,7 @@ import {
 import { listConversations, sendMessage, useChatVersion } from '@/app/messageStore'
 import { REACTION_ICON } from './reactionIcons'
 import { UserAvatar } from './UserAvatar'
-import { IconBookmark, IconMessage, IconRepost, IconShare, IconStar } from './icons'
+import { IconBookmark, IconClose, IconMessage, IconRepost, IconShare, IconStar } from './icons'
 
 type ActionTarget = { type: ActionTargetType; id: string }
 
@@ -463,8 +463,8 @@ export function CommentThread({ type, id, viewerEmail, canComment }: { type: Act
           {replyTo && (
             <div className="mb-1 flex items-center justify-between rounded-md bg-surface-sunken px-2 py-1 text-[11px] text-text-1">
               <span>Replying to {findAccountByEmail(replyTo.authorEmail)?.legalName ?? 'Someone'}</span>
-              <button onClick={() => setReplyTo(null)} aria-label="Cancel reply">
-                ✕
+              <button onClick={() => setReplyTo(null)} aria-label="Cancel reply" className="flex items-center text-text-2 hover:text-text-0">
+                <IconClose size={14} />
               </button>
             </div>
           )}

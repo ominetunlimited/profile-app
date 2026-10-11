@@ -10,7 +10,7 @@ import { bottomTabs, hamburgerGroups, profileDrawerItems, topNavItems } from '@/
 import { BRAND } from '@/shared/brand/assets'
 import { LanguagePicker } from './LanguagePicker'
 import { NavRail } from './NavRail'
-import { IconBell, IconBriefcase, IconDocument, IconHandshake, IconHome, IconMenu, IconMessage, IconPlus, IconSearch, type IconProps } from './icons'
+import { IconBell, IconBriefcase, IconClose, IconDocument, IconHandshake, IconHome, IconMenu, IconMessage, IconPlus, IconSearch, type IconProps } from './icons'
 import type { ComponentType } from 'react'
 
 const TAB_ICON: Record<string, ComponentType<IconProps>> = {
@@ -205,8 +205,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div role="dialog" aria-modal="true" aria-label="Menu" onClick={(e) => e.stopPropagation()} className="flex h-full w-full max-w-[320px] flex-col overflow-y-auto border-s border-border bg-surface p-2">
             <div className="flex items-center justify-between px-2 py-2">
               <img src={BRAND.lockup} alt="PROFILE" className="h-5 w-auto" />
-              <button onClick={() => setHamburgerOpen(false)} aria-label="Close menu" className="flex h-8 w-8 items-center justify-center rounded-lg text-text-1">
-                ✕
+              <button onClick={() => setHamburgerOpen(false)} aria-label="Close menu" className="flex h-8 w-8 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
+                <IconClose size={18} />
               </button>
             </div>
             {groups.map((group, gi) => (
