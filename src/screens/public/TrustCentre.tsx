@@ -3,13 +3,22 @@ import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { useAccount } from '@/app/AccountContext'
 import { TRUST_TIERS, TRUST_WEIGHTS } from '@/app/trustScore'
+import { ProfileSealMotif, ProfileNode, ProfilePath, ProfileFrame } from '@/shared/ui/profile/motifs'
 
-const PILLARS = [
-  { glyph: 'E', tone: 'bg-accent-soft text-accent', title: 'Evidence', body: 'Structured records of what happened, not posts.' },
-  { glyph: '✓', tone: 'bg-trust-soft text-trust', title: 'Verification', body: 'Confirmed by the institution or person who was there.' },
-  { glyph: '★', tone: 'bg-gold-soft text-gold', title: 'Trust Score', body: 'Capped, explainable inputs. Never a mystery number.' },
-  { glyph: '⎘', tone: 'bg-accent-soft text-accent', title: 'Trust Passport', body: 'A signed, revocable summary you share on your terms.' },
+type PillarMotif = 'seal' | 'node' | 'path' | 'frame'
+const PILLARS: { motif: PillarMotif; glyph?: string; tone: string; title: string; body: string }[] = [
+  { motif: 'frame', glyph: 'E', tone: 'bg-accent-soft text-accent', title: 'Evidence', body: 'Structured records of what happened, not posts.' },
+  { motif: 'seal', tone: 'bg-trust-soft text-trust', title: 'Verification', body: 'Confirmed by the institution or person who was there.' },
+  { motif: 'node', tone: 'bg-gold-soft text-gold', title: 'Trust Score', body: 'Capped, explainable inputs. Never a mystery number.' },
+  { motif: 'path', tone: 'bg-accent-soft text-accent', title: 'Trust Passport', body: 'A signed, revocable summary you share on your terms.' },
 ]
+
+function PillarIcon({ motif }: { motif: PillarMotif }) {
+  if (motif === 'seal') return <ProfileSealMotif size={20} />
+  if (motif === 'node') return <ProfileNode size={20} />
+  if (motif === 'path') return <ProfilePath size={20} />
+  return <ProfileFrame size={20} />
+}
 
 // The five largest real inputs, from the platform's own weights — each one is capped.
 const SCORE_INPUTS: { label: string; cap: number }[] = [
@@ -62,7 +71,9 @@ export function TrustCentre() {
         <div className="mb-11 grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3.5">
           {PILLARS.map((p) => (
             <div key={p.title} className="rounded-[13px] border border-border bg-surface px-[17px] py-[18px] shadow-sm">
-              <span className={`mb-3 flex h-8 w-8 items-center justify-center rounded-[9px] text-[13px] font-bold ${p.tone}`}>{p.glyph}</span>
+              <span className={`mb-3 flex h-8 w-8 items-center justify-center rounded-[9px] ${p.tone}`}>
+                <PillarIcon motif={p.motif} />
+              </span>
               <div className="mb-1.5 text-[13.5px] font-semibold text-text-0">{p.title}</div>
               <div className="text-xs leading-relaxed text-text-1">{p.body}</div>
             </div>

@@ -9,6 +9,7 @@ export default {
         bg: 'var(--bg)',
         surface: 'var(--surface)',
         'surface-sunken': 'var(--surface-sunken)',
+        'surface-secondary': 'var(--surface-secondary)',
         border: {
           DEFAULT: 'var(--border)',
           strong: 'var(--border-strong)',
@@ -25,6 +26,8 @@ export default {
         // on a solid button fill, short of WCAG AA. A fixed, theme-
         // invariant shade for solid-fill + white-text contexts specifically.
         'accent-solid': 'var(--accent-solid)',
+        'accent-hover': 'var(--accent-hover)',
+        link: 'var(--link)',
         trust: 'var(--trust)',
         gold: 'var(--gold)',
         success: 'var(--success)',
@@ -42,6 +45,18 @@ export default {
         'success-soft': 'var(--success-soft)',
         'warning-soft': 'var(--warning-soft)',
         'danger-soft': 'var(--danger-soft)',
+        // §1 official palette + §20 geometric token — exposed so new PROFILE
+        // components (seals, motifs, backgrounds) can reference the raw brand
+        // colours and the geometric system colour directly via Tailwind too.
+        'profile-royal': 'var(--profile-royal)',
+        'profile-beige': 'var(--profile-beige)',
+        'profile-powder': 'var(--profile-powder)',
+        'profile-blue': 'var(--profile-blue)',
+        'profile-bright-blue': 'var(--profile-bright-blue)',
+        'profile-gold': 'var(--profile-gold)',
+        'profile-off-white': 'var(--profile-off-white)',
+        'profile-green': 'var(--profile-green)',
+        'profile-geometric': 'var(--profile-geometric)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

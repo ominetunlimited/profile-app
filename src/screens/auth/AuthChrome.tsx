@@ -2,9 +2,13 @@ import { Link } from 'react-router-dom'
 import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import type { ReactNode } from 'react'
 import { BRAND } from '@/shared/brand/assets'
+import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
 
 /** §6.2/§7.1/§8 shared chrome: logo + theme toggle, matching the Handoff's Sign
- * In / Account Creation pages exactly (a plain header, no full public nav). */
+ * In / Account Creation pages exactly (a plain header, no full public nav).
+ *
+ * §8 — the whole auth flow sits on the PROFILE geometric background (quiet
+ * node/grid motifs), so even the entry point carries the identity. */
 export function AuthChrome({
   maxWidth = 460,
   progress,
@@ -16,7 +20,7 @@ export function AuthChrome({
 }) {
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-4 py-10">
+    <ProfileBackground variant="nodes" className="flex min-h-screen flex-col items-center px-4 py-10">
       <div className="w-full" style={{ maxWidth }}>
         <div className="mb-6 flex items-center justify-between">
           <Link to="/" className="flex items-center">
@@ -45,6 +49,6 @@ export function AuthChrome({
           {children}
         </div>
       </div>
-    </div>
+    </ProfileBackground>
   )
 }

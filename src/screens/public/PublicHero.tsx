@@ -3,6 +3,9 @@ import { PublicHeader } from '@/shared/ui/PublicHeader'
 import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { useLanguage } from '@/app/LanguageContext'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
+import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
+import { ProfileNode, ProfileSealMotif } from '@/shared/ui/profile/motifs'
+import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
 import { TRUST_TIERS, type TrustScoreResult } from '@/app/trustScore'
 
 // Design handoff gap audit: this page had its own second, hand-rolled
@@ -32,12 +35,12 @@ const ILLUSTRATIVE_TRUST_SCORE: TrustScoreResult = {
 }
 
 const JOURNEY = [
-  { glyph: '1', label: 'Identity', box: 'bg-surface border-border-strong text-text-0', size: 'h-[38px] w-[38px]', edge: 'var(--border-strong)' },
-  { glyph: '2', label: 'Evidence', box: 'bg-accent-soft border-accent text-accent', size: 'h-[38px] w-[38px]', edge: 'var(--accent)' },
-  { glyph: '✓', label: 'Verification', box: 'bg-trust-soft border-trust text-trust', size: 'h-11 w-11', edge: 'var(--trust)' },
-  { glyph: '★', label: 'Trust', box: 'bg-trust border-trust text-[#04222B] motion-safe:animate-[profile-pulse_2.4s_ease-in-out_infinite]', size: 'h-11 w-11', edge: 'var(--trust)' },
-  { glyph: '→', label: 'Opportunity', box: 'bg-gold-soft border-gold text-gold', size: 'h-[38px] w-[38px]', edge: 'var(--gold)' },
-  { glyph: '↑', label: 'Growth', box: 'bg-coral-soft border-coral text-coral', size: 'h-[38px] w-[38px]', edge: 'var(--coral)' },
+  { key: 'identity', glyph: '1', label: 'Identity', box: 'bg-surface border-border-strong text-text-0', size: 'h-[38px] w-[38px]', edge: 'var(--border-strong)' },
+  { key: 'evidence', glyph: '2', label: 'Evidence', box: 'bg-accent-soft border-accent text-accent', size: 'h-[38px] w-[38px]', edge: 'var(--accent)' },
+  { key: 'verification', label: 'Verification', box: 'bg-trust-soft border-trust text-trust', size: 'h-11 w-11', edge: 'var(--trust)', seal: 'green' as const },
+  { key: 'trust', label: 'Trust', box: 'bg-trust border-trust text-trust motion-safe:animate-[profile-pulse_2.4s_ease-in-out_infinite]', size: 'h-11 w-11', edge: 'var(--trust)', node: true },
+  { key: 'opportunity', glyph: '→', label: 'Opportunity', box: 'bg-gold-soft border-gold text-gold', size: 'h-[38px] w-[38px]', edge: 'var(--gold)' },
+  { key: 'growth', glyph: '↑', label: 'Growth', box: 'bg-coral-soft border-coral text-coral', size: 'h-[38px] w-[38px]', edge: 'var(--coral)' },
 ]
 
 const LOOP_TONES = ['bg-accent-soft text-accent', 'bg-trust-soft text-trust', 'bg-gold-soft text-gold', 'bg-coral-soft text-coral']
@@ -66,19 +69,10 @@ export function PublicHero() {
       <PublicHeader />
 
       <section className="relative overflow-hidden px-4 py-16 text-center sm:px-8 sm:py-24">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{ background: 'radial-gradient(circle at 22% 18%, var(--accent-soft), transparent 55%), radial-gradient(circle at 82% 8%, var(--trust-soft), transparent 50%)' }}
-        />
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden text-text-2">
-          <div className="absolute start-[5%] top-[11%] h-[52px] w-[72px] rounded-lg border-2 border-current opacity-[.07]" />
-          <div className="absolute end-[6%] top-[6%] h-[66px] w-[66px] rounded-full border-2 border-current opacity-[.06]" />
-          <div className="absolute end-[8.4%] top-[10%] h-10 w-10 rounded-full border-2 border-current opacity-[.06]" />
-          <div className="absolute end-[7%] top-[46%] h-[76px] w-[62px] rounded-[5px] border-2 border-current opacity-[.06]" />
-          <div className="absolute start-[8%] top-[60%] h-9 w-14 -rotate-6 rounded-[5px] border-2 border-current opacity-[.06]" />
-          <div className="absolute bottom-[8%] end-[4%] h-[42px] w-[58px] rounded-lg border-2 border-current opacity-[.06]" />
-        </div>
+        {/* §8 — PROFILE geometric background system replaces generic floating
+            shapes: one proprietary motif grammar (nodes, links, grid) at low
+            opacity, cropped by the viewport, never competing with content. */}
+        <ProfileBackground variant="mixed" className="absolute inset-0" />
         <div className="relative mx-auto flex max-w-[900px] flex-col items-center gap-4">
           <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
             {t('hero.tag')}
@@ -105,7 +99,15 @@ export function PublicHero() {
             {JOURNEY.map((n, i) => (
               <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
                 <span className="flex flex-none flex-col items-center gap-2">
-                  <span className={`flex items-center justify-center rounded-full border-2 text-[13px] font-bold ${n.size} ${n.box}`}>{n.glyph}</span>
+                  <span className={`flex items-center justify-center rounded-full border-2 text-[13px] font-bold ${n.size} ${n.box}`}>
+                    {'seal' in n && n.seal ? (
+                      <ProfileSealMotif size={24} />
+                    ) : 'node' in n && n.node ? (
+                      <ProfileNode size={24} />
+                    ) : (
+                      (n as { glyph?: string }).glyph
+                    )}
+                  </span>
                   <span className="whitespace-nowrap text-[10.5px] font-semibold text-text-1">{n.label}</span>
                 </span>
                 {i < JOURNEY.length - 1 && (
@@ -184,13 +186,13 @@ export function PublicHero() {
             </div>
             <div className="flex flex-col gap-2 text-xs text-text-0">
               <div className="flex items-center gap-2">
-                <span className="text-trust">✓</span> Verified evidence
+                <ProfileSeal size={14} tone="green" /> Verified evidence
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-trust">✓</span> Strength of verifiers
+                <ProfileSeal size={14} tone="green" /> Strength of verifiers
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-trust">✓</span> Credential standing
+                <ProfileSeal size={14} tone="green" /> Credential standing
               </div>
             </div>
           </div>

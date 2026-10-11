@@ -4,8 +4,8 @@
   "description": "Where work becomes credibility — verified professional trust infrastructure.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0057d9",
+  "background_color": "#162660",
+  "theme_color": "#162660",
   "icons": [
     { "src": "/design_handoff_profile/assets/profile-icon-16.png", "sizes": "16x16", "type": "image/png" },
     { "src": "/design_handoff_profile/assets/profile-icon-32.png", "sizes": "32x32", "type": "image/png" },

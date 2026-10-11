@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { BRAND } from '@/shared/brand/assets'
+import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, ownerKey, postActivity } from '@/app/activityStore'
 import { updateDemoAccount } from '@/app/demoAccountStore'
@@ -127,7 +128,7 @@ export function OnboardingPage() {
   const reachable = (i: number) => i <= Math.max(step, named ? 1 : 0)
 
   return (
-    <div className="min-h-screen bg-bg px-4 py-8 sm:px-6">
+    <ProfileBackground variant="mixed" className="min-h-screen bg-bg px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-[1180px]">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3.5">
           <div>
@@ -617,7 +618,7 @@ export function OnboardingPage() {
           </div>
         </div>
       )}
-    </div>
+    </ProfileBackground>
   )
 }
 

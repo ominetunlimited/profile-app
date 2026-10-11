@@ -7,6 +7,7 @@ import { RepostCard } from '@/shared/ui/RepostCard'
 import { listRepostsBy, useSocialCacheVersion } from '@/app/socialStore'
 import { useAccount } from '@/app/AccountContext'
 import { isCvEligible, isPortfolioEligible, ORG_TRUST_STATUS_LABEL, type Account } from '@/app/accountTypes'
+import { VerifiedTag } from '@/shared/ui/profile/ProfileSeal'
 import { listActivities, ownerKey, useActivitiesCacheVersion } from '@/app/activityStore'
 import { pendingRequestsForOwner, respondToSelfTag, useSelfTagsVersion } from '@/app/selfTagStore'
 import { computeTrustScore } from '@/app/trustScore'
@@ -120,15 +121,30 @@ export function ProfilePage() {
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-10 flex flex-wrap items-end gap-4">
-            <div className="flex-none rounded-full border-4 border-surface">
-              <UserAvatar ownerEmail={targetKey} name={name} size={72} />
+            {/* §13 PROFILE frame — the signature identity surface uses the
+                geometric frame, with the verification seal only when the
+                organisation is actually verified (restrained, never influencer-
+                styled). */}
+            <div className="flex-none">
+              <UserAvatar
+                ownerEmail={targetKey}
+                name={name}
+                size={76}
+                shape="geometric"
+                verified={viewed.accountType === 'organisation' && viewed.registryLevel === 'verified'}
+                sealTone={viewed.accountType === 'organisation' ? 'gold' : 'green'}
+              />
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-bold text-text-0">{name}</h1>
-                <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-1">
-                  {viewed.accountType === 'individual' ? 'Not yet verified' : ORG_TRUST_STATUS_LABEL[viewed.registryLevel]}
-                </span>
+                {viewed.accountType === 'organisation' && viewed.registryLevel === 'verified' ? (
+                  <VerifiedTag text={ORG_TRUST_STATUS_LABEL[viewed.registryLevel]} tone="gold" />
+                ) : (
+                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-1">
+                    {viewed.accountType === 'individual' ? 'Not yet verified' : ORG_TRUST_STATUS_LABEL[viewed.registryLevel]}
+                  </span>
+                )}
                 {/* §24.1 <PathwayBadge type="academic | competency" /> */}
                 {viewed.accountType === 'individual' && (
                   <span className="rounded-full border border-trust px-2 py-0.5 text-[11px] font-medium capitalize text-trust">{viewed.pathway}</span>

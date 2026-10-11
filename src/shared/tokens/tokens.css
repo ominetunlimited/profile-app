@@ -1,94 +1,143 @@
 /*
-  Source of truth: design_handoff_profile/README.md "Design Tokens" section,
-  itself sourced from `PROFILE Design System.dc.html`.
+  PROFILE VISUAL IDENTITY + ICONOGRAPHY SYSTEM — official token layer.
 
-  FLAGGED DISCREPANCY (per PROFILE_CLAUDE_CODE_BUILD_PROMPT.md §8 "flag, don't
-  silently resolve"): Master Prompt §3.1 gives flat (non-theme-split) hex values
-  for success/warning/danger/gold/trust that differ slightly from this file's
-  light-mode values. The dark-mode values agree almost exactly with the Master
-  Prompt's flat values, which reads as this Handoff being a later per-theme
-  refinement of the same palette rather than a competing decision — but this is
-  a reading, not a confirmed resolution. Held for product sign-off; do not
-  silently pick one side.
+  This is a visual-identity patch, not an architectural change. Every screen
+  already renders through these semantic custom properties (mapped into
+  Tailwind via tailwind.config.ts), so remapping them here re-skins the whole
+  ecosystem centrally — no per-screen colour sweep, no functional change.
+
+  OFFICIAL PROFILE COLOUR SYSTEM (§1). These eight are the only brand colours.
+  Every other token below is either a semantic alias of one of them, or a
+  contrast-safe derivation (color-mix against Royal Blue / Beige) that keeps
+  WCAG AA on the warm surfaces. No arbitrary purple/teal/neon/gradients.
+    ROYAL BLUE    #162660  primary dark bg, nav, headers, strong surfaces
+    WARM BEIGE    #F1E4D1  primary light bg, warm page surfaces
+    POWDER BLUE   #D0E6FD  subtle geometry, decorative shapes, quiet structure
+    BLUE          #2171B5  secondary brand, links, supporting/info
+    BRIGHT BLUE   #1E63D6  primary interactive — buttons, active, focus
+    GOLD          #D4AF37  verification, achievement, premium/trust
+    OFF-WHITE     #F8F7EF  secondary light surfaces, cards, panels
+    GREEN         #2BC48A  successful verification, confirmed, positive
 */
-
 :root {
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-sunken: #f1f5f9;
-  --border: #e5e7eb;
-  --border-strong: #cbd5e1;
-  --text-0: #1e293b;
-  --text-1: #5b6b80;
-  /* Accessibility spot-check gap #2 (color contrast) — the handoff's
-     #8496a9 renders at ~3:1 against white/surface at the small sizes this
-     token is actually used at (labels, hints, timestamps), short of WCAG
-     AA's 4.5:1 for normal text. Darkened to a value that clears 4.5:1
-     (measured against white) while staying visibly lighter than --text-1. */
-  --text-2: #59697d;
-  --accent: #0057d9;
-  --trust: #0e7490;
-  --gold: #8a6200;
-  --success: #04763c;
+  /* ── Raw official palette (§1) — never used directly for text on light
+     surfaces except where noted; semantic tokens below derive from these. ── */
+  --profile-royal: #162660;
+  --profile-beige: #f1e4d1;
+  --profile-powder: #d0e6fd;
+  --profile-blue: #2171b5;
+  --profile-bright-blue: #1e63d6;
+  --profile-gold: #d4af37;
+  --profile-off-white: #f8f7ef;
+  --profile-green: #2bc48a;
+
+  /* ── Surfaces (§10 Light mode: warm beige page, off-white cards) ── */
+  --bg: var(--profile-beige);
+  --surface: var(--profile-off-white);
+  --surface-sunken: color-mix(in srgb, var(--profile-beige) 88%, var(--profile-royal));
+  --surface-secondary: color-mix(in srgb, var(--profile-beige) 72%, var(--profile-powder));
+
+  /* ── Structure ── */
+  --border: color-mix(in srgb, var(--profile-royal) 14%, var(--profile-beige));
+  --border-strong: color-mix(in srgb, var(--profile-royal) 30%, var(--profile-beige));
+
+  /* ── Text (§10: Royal Blue for strong text; contrast-checked derivations
+     clear 4.5:1 on BOTH beige and off-white) ── */
+  --text-0: var(--profile-royal);
+  --text-1: color-mix(in srgb, var(--profile-royal) 70%, var(--profile-beige));
+  --text-2: color-mix(in srgb, var(--profile-royal) 68%, var(--profile-beige));
+
+  /* ── Interaction (§11) ── */
+  --accent: var(--profile-bright-blue);
+  --accent-hover: color-mix(in srgb, var(--profile-bright-blue) 86%, var(--profile-royal));
+  /* Solid-fill buttons with off-white text: #1E63D6 + #F8F7EF clears 5.13:1. */
+  --accent-solid: var(--profile-bright-blue);
+  --accent-soft: color-mix(in srgb, var(--profile-bright-blue) 12%, transparent);
+  --link: var(--profile-blue);
+
+  /* ── Verification / trust (§7 semantic hierarchy) ──
+     Light mode: verified/confirmed = a Green deep enough to read as text;
+     premium/distinguished = Gold derivation. Both clear 4.5:1. */
+  --trust: color-mix(in srgb, var(--profile-green) 48%, var(--profile-royal));
+  --success: color-mix(in srgb, var(--profile-green) 52%, var(--profile-royal));
+  --gold: color-mix(in srgb, var(--profile-gold) 52%, var(--profile-royal));
+  --trust-soft: color-mix(in srgb, var(--profile-green) 14%, transparent);
+  --success-soft: color-mix(in srgb, var(--profile-green) 15%, transparent);
+  --gold-soft: color-mix(in srgb, var(--profile-gold) 18%, transparent);
+
+  /* ── Functional status (kept, non-brand — §23 needs distinct error/warning
+     states with icon + text + colour; these already exist and are not
+     "new brand colours"). Retuned warm to sit on the beige. ── */
   --warning: #8a5200;
   --danger: #c2181d;
-  --coral: #c93b22;
-
-  --focus: var(--accent);
-
-  /* Accessibility spot-check gap #2 — fixed across both themes (not
-     redefined under .dark below) specifically for solid-fill buttons with
-     white text; dark mode's own lighter --accent is correct for text/link/
-     icon uses but too light for that combination. #0057d9 + white clears
-     6.2:1 in both themes. */
-  --accent-solid: #0057d9;
-  /* Same fixed-across-themes fix, for the one neutral-gray solid-fill
-     usage (Trust Score's "Emerging" tier badge) — reuses light mode's own
-     --text-1 value, already verified well above 4.5:1 with white text. */
-  --neutral-solid: #5b6b80;
-
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  /* Design handoff gap audit: every mockup's h1/h2 spec 'Plus Jakarta Sans'
-     700/800 for headings — loaded in index.html, applied globally below. */
-  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-
-  /* Design handoff gap audit: mockups style warning/success/danger/etc.
-     callouts and status pills as a soft filled tint behind same-color text
-     (e.g. AI Decision Log's policy callout, Route Integrity's status
-     pills) — this token family never existed, so real components fell
-     back to plain neutral/bordered treatments. `color-mix` against the
-     existing base var means one definition adapts correctly in both
-     themes, same pattern already used by this file's own keyframes below. */
-  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
-  --trust-soft: color-mix(in srgb, var(--trust) 12%, transparent);
-  --gold-soft: color-mix(in srgb, var(--gold) 15%, transparent);
-  --success-soft: color-mix(in srgb, var(--success) 15%, transparent);
+  --coral: #c0421f;
   --warning-soft: color-mix(in srgb, var(--warning) 15%, transparent);
   --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
   --coral-soft: color-mix(in srgb, var(--coral) 12%, transparent);
+
+  --focus: var(--accent-solid);
+
+  /* Neutral solid fill (Trust Score "Emerging" tier) — off-white text safe. */
+  --neutral-solid: #5b6b80;
+
+  /* ── PROFILE geometric system (§3, §8, §20) ── */
+  --profile-geometric: var(--profile-powder);
+  --profile-geometric-warm: var(--profile-beige);
+  --profile-verification: var(--trust);
+
+  /* ── Controlled radii (§11 — avoid generic pills) ── */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
+/* ── DARK MODE (§9 — built around Royal Blue, never pure black) ── */
 .dark {
-  --bg: #060e1c;
-  --surface: #0c1829;
-  --surface-sunken: #050b16;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text-0: rgba(255, 255, 255, 0.9);
-  --text-1: rgba(255, 255, 255, 0.65);
-  /* Same accessibility fix as light mode's --text-2 above — 0.4 opacity
-     measured at ~3.7:1 against --bg, short of 4.5:1. */
-  --text-2: rgba(255, 255, 255, 0.5);
-  --accent: #4c8dff;
-  --trust: #00e5ff;
-  --gold: #f4b400;
-  --success: #3ddc7f;
-  --warning: #fbbf24;
+  --bg: var(--profile-royal);
+  --surface: color-mix(in srgb, var(--profile-royal) 86%, var(--profile-powder));
+  --surface-sunken: color-mix(in srgb, var(--profile-royal) 80%, #05070f);
+  --surface-secondary: color-mix(in srgb, var(--profile-royal) 80%, var(--profile-powder));
+
+  --border: color-mix(in srgb, var(--profile-powder) 12%, transparent);
+  --border-strong: color-mix(in srgb, var(--profile-powder) 22%, transparent);
+
+  /* §9: primary text off-white, secondary powder blue. */
+  --text-0: var(--profile-off-white);
+  --text-1: var(--profile-powder);
+  --text-2: color-mix(in srgb, var(--profile-powder) 62%, var(--profile-royal));
+
+  /* §9: primary action #1E63D6 (solid fill, off-white text 5.13:1). Links
+     need a lighter blue to read on the deep navy — derived from bright+powder. */
+  --accent: color-mix(in srgb, var(--profile-bright-blue) 55%, var(--profile-powder));
+  --accent-hover: color-mix(in srgb, var(--profile-bright-blue) 70%, var(--profile-powder));
+  --accent-solid: var(--profile-bright-blue);
+  --accent-soft: color-mix(in srgb, var(--profile-bright-blue) 20%, transparent);
+  --link: color-mix(in srgb, var(--profile-bright-blue) 55%, var(--profile-powder));
+
+  /* §9: verification = Gold / Green, used at full strength on the deep navy. */
+  --trust: var(--profile-green);
+  --success: var(--profile-green);
+  --gold: var(--profile-gold);
+  --trust-soft: color-mix(in srgb, var(--profile-green) 16%, transparent);
+  --success-soft: color-mix(in srgb, var(--profile-green) 16%, transparent);
+  --gold-soft: color-mix(in srgb, var(--profile-gold) 18%, transparent);
+  --profile-verification: var(--profile-green);
+
+  --warning: #f4b400;
   --danger: #ff7a7a;
-  --coral: #ff8b78;
+  --coral: #ff9a86;
+  --warning-soft: color-mix(in srgb, var(--warning) 16%, transparent);
+  --danger-soft: color-mix(in srgb, var(--danger) 16%, transparent);
+  --coral-soft: color-mix(in srgb, var(--coral) 16%, transparent);
 
   --focus: var(--accent);
+
+  --profile-geometric: var(--profile-powder);
 }
 
 * {
@@ -208,6 +257,94 @@ h1, h2, h3 {
   0% { transform: scale(0.6); opacity: 0; }
   60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/*
+  PROFILE GEOMETRIC IDENTITY SYSTEM (§3, §8, §15, §16, §17)
+  ------------------------------------------------------------------
+  The proprietary visual vocabulary. One grammar — identity node + connected
+  geometry + verification seal — reused across backgrounds, loaders, seals and
+  micro-interactions so a fragment in isolation still reads as PROFILE. All of
+  it derives from --profile-geometric (Powder Blue) and the official palette at
+  low opacity, so decoration never competes with content (§8, §22).
+*/
+
+/* §15 LOADING — a sequence of PROFILE nodes connecting and disconnecting.
+   Three nodes on a line light up in turn; subtle and fast, never a generic
+   spinning circle. */
+@keyframes profile-node-connect {
+  0%, 100% { opacity: 0.25; transform: scale(0.82); }
+  40% { opacity: 1; transform: scale(1); }
+}
+@keyframes profile-node-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+.profile-loader-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: profile-node-connect 1.25s ease-in-out infinite;
+}
+.profile-loader-line {
+  stroke-dasharray: 3 5;
+  animation: profile-line-draw 1.25s ease-in-out infinite;
+}
+@keyframes profile-line-draw {
+  0%, 100% { stroke-dashoffset: 16; opacity: 0.4; }
+  50% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* §7 / §16 VERIFICATION — the seal settles into place with a precise pop,
+   never a bounce. Applied to <ProfileSeal> on successful confirmation. */
+@keyframes profile-seal-settle {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.profile-seal-animate { animation: profile-seal-settle 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) 1; transform-box: fill-box; transform-origin: center; }
+
+/* §17 SIGNAL — the radiating recognition node, used sparingly for discovery. */
+@keyframes profile-signal-emit {
+  0% { opacity: 0.55; transform: scale(0.6); }
+  70% { opacity: 0; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+.profile-signal-ring { transform-box: fill-box; transform-origin: center; animation: profile-signal-emit 2.4s ease-out infinite; }
+
+/* §8 BACKGROUND GEOMETRY — two reusable, restraint-first patterns. Powder
+   Blue at low opacity on light; Powder on the navy in dark. Rendered by
+   <ProfileBackground>, but defined here so they're globally available. */
+.profile-grid-bg {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--profile-geometric) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--profile-geometric) 12%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.profile-grid-bg-fine {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--profile-geometric) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--profile-geometric) 8%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* §22 — decorations shrink and fade on small screens; never obstruct content. */
+@media (max-width: 640px) {
+  .profile-decor { opacity: 0.6; }
+}
+
+/* All geometric decoration respects the two motion overrides. */
+@media (prefers-reduced-motion: reduce) {
+  .profile-loader-node, .profile-loader-line, .profile-seal-animate, .profile-signal-ring {
+    animation: none !important;
+  }
+}
+.a11y-reduce-motion .profile-loader-node,
+.a11y-reduce-motion .profile-loader-line,
+.a11y-reduce-motion .profile-seal-animate,
+.a11y-reduce-motion .profile-signal-ring {
+  animation: none !important;
 }
 
 .profile-logo-loading { animation: profile-mark-pulse 1.4s ease-in-out infinite, profile-glow-breathe 2s ease-in-out infinite; border-radius: 9999px; }

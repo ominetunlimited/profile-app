@@ -18,6 +18,8 @@ import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStor
 import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
 import { useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { useLearningVersion } from '@/app/learningStore'
+import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
+import { ProfileLoader } from '@/shared/ui/profile/ProfileLoader'
 import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { useConnectionsCacheVersion } from '@/app/connectionStore'
 import { useFollowsCacheVersion } from '@/app/followStore'
@@ -224,7 +226,9 @@ export function HomePage() {
                 const tone = KIND_TONE[a.kind] ?? DEFAULT_TONE
                 return (
                   <div key={a.key} className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0">
-                    <span aria-hidden className={`flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] border text-[13px] font-semibold ${tone.bg} ${tone.ink}`}>{tone.glyph}</span>
+                    <span aria-hidden className={`flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] border text-[13px] font-semibold ${tone.bg} ${tone.ink}`}>
+                      {a.kind === 'evidence' ? <ProfileSeal size={17} tone="green" /> : tone.glyph}
+                    </span>
                     <span className="min-w-0 flex-[1_1_240px]">
                       <span className="mb-1 flex flex-wrap items-center gap-[7px]">
                         <span className="text-[13px] font-semibold text-text-0">{a.title}</span>
@@ -312,7 +316,7 @@ export function HomePage() {
                   </div>
                 ))}
                 <div className="flex items-center gap-[9px] text-xs text-text-1">
-                  <span aria-hidden className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-trust-soft border-t-trust" />
+                  <ProfileLoader size={40} label="Loading your activity" />
                   Loading your activity — the layout is already in place, so nothing will shift.
                 </div>
               </div>
