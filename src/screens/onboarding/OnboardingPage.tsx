@@ -4,7 +4,7 @@ import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
-import { BRAND } from '@/shared/brand/assets'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
 import { useAccount } from '@/app/AccountContext'
 import { listActivities, ownerKey, postActivity } from '@/app/activityStore'
@@ -143,7 +143,7 @@ export function OnboardingPage() {
 
         <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
           <div className="flex flex-wrap items-center gap-3 border-b border-border bg-surface-sunken px-4 py-3">
-            <img src={BRAND.mark} alt="" className="h-[26px] w-auto flex-none" />
+            <ProfileLogo variant="symbol" className="h-[26px] w-auto flex-none" />
             <span className="min-w-[120px] flex-1 text-xs text-text-1">Setting up your PROFILE · step {step + 1} of 5</span>
             <span className="flex flex-none items-center gap-2">
               <span className="block h-[5px] w-[100px] overflow-hidden rounded-full bg-border">
@@ -171,7 +171,7 @@ export function OnboardingPage() {
                   >
                     <span
                       className={`mt-0.5 flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border text-[10.5px] font-semibold ${
-                        done ? 'border-trust bg-trust text-[#04222B]' : active ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-text-2'
+                        done ? 'border-trust bg-trust text-[var(--profile-royal)]' : active ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-text-2'
                       }`}
                     >
                       {done ? '✓' : i + 1}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/Button'
 import { Field, PasswordInput, TextInput } from '@/shared/ui/Field'
-import { BRAND } from '@/shared/brand/assets'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { useAdmin } from '@/app/AdminContext'
 
 /**
@@ -36,7 +36,7 @@ export function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border-strong bg-surface p-7 shadow-2xl">
-        <img src={BRAND.lockup} alt="PROFILE" className="mb-6 h-6 w-auto" />
+        <ProfileLogo variant="horizontal" className="mb-6 h-7 w-auto" />
         <h1 className="mb-1 text-lg font-bold text-text-0">Admin Centre</h1>
         <p className="mb-5 text-sm text-text-1">PROFILE staff sign-in — not your PROFILE account.</p>
 

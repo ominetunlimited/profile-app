@@ -1,15 +1,38 @@
 {
   "name": "PROFILE",
   "short_name": "PROFILE",
-  "description": "Where work becomes credibility — verified professional trust infrastructure.",
+  "description": "Where work becomes credibility \u2014 verified professional trust infrastructure.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#162660",
   "theme_color": "#162660",
   "icons": [
-    { "src": "/design_handoff_profile/assets/profile-icon-16.png", "sizes": "16x16", "type": "image/png" },
-    { "src": "/design_handoff_profile/assets/profile-icon-32.png", "sizes": "32x32", "type": "image/png" },
-    { "src": "/design_handoff_profile/assets/profile-icon-180.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "/design_handoff_profile/assets/profile-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/brand/profile/icons/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/profile/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/profile/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/profile/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/profile/logo/profile-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ]
 }

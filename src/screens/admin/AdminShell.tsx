@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAdmin } from '@/app/AdminContext'
 import { PLATFORM_ROLE_LABEL, platformRoleCan, type AdminModule } from '@/app/platformAdminStore'
-import { BRAND } from '@/shared/brand/assets'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 
 const NAV: { to: string; label: string; module: AdminModule | null }[] = [
   { to: '/admin', label: 'Dashboard', module: null },
@@ -50,7 +50,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-bg">
       <aside className="flex w-60 flex-none flex-col border-r border-border bg-surface">
         <div className="flex items-center gap-2 border-b border-border px-5 py-4">
-          <img src={BRAND.lockup} alt="PROFILE" className="h-5 w-auto" />
+          <ProfileLogo variant="horizontal" className="h-6 w-auto" />
           <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-2">Admin</span>
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 p-3">

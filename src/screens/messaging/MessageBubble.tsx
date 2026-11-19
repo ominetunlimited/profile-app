@@ -53,7 +53,7 @@ export function MessageBubble({
     if (!mine) return null
     if (message.status === 'sending') return <span aria-label="Sending">🕓</span>
     if (message.status === 'failed') return <span aria-label="Failed" className="text-danger">!</span>
-    if (read) return <span aria-label="Read" className="text-[#7dd3fc]">✓✓</span>
+    if (read) return <span aria-label="Read" className="text-[var(--profile-powder)]">✓✓</span>
     if (otherOnline) return <span aria-label="Delivered">✓✓</span>
     return <span aria-label="Sent">✓</span>
   }
