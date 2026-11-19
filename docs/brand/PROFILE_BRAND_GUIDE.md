@@ -26,6 +26,8 @@ PNG exports for browsers, iOS and PWA are in `/public/brand/profile/icons/`. Reg
 - Status colours (success, warning, error, verification) keep their semantic meaning.
 
 ## Icons
+Sources and licences are recorded in `docs/brand/ICON_SOURCES.md`. Gap-fill icons from Lucide (ISC) live in `src/shared/ui/profile/extraIcons.tsx`.
+
 Every icon is `currentColor`, so it takes the colour of its container's token (Royal/Blue on light, Off-White on dark, Bright Blue when active, Gold/Green for verification). Do not hardcode hex or raw Tailwind palette colours on icons.
 
 ## Minimum sizes and clear space
