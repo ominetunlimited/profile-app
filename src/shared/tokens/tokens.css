@@ -391,3 +391,26 @@ h1, h2, h3 {
   outline-width: 3px;
   outline-offset: 3px;
 }
+
+/* ── Parent-brand (Ominet Digital) signature gradient ──
+   Stops taken directly from the PROFILE logo artwork, which was built from the
+   Ominet Digital logo. BRAND SIGNATURE ONLY: logo, selected illustrations and
+   hero moments. The interface itself stays on the official eight-colour
+   palette above, and semantic status colours are unchanged. */
+:root {
+  --omnet-cyan: #00b4d8;
+  --omnet-blue: #0a72c2;
+  --omnet-navy: #170f42;
+  --omnet-purple: #7a0bdb;
+  --omnet-violet: #b93be0;
+  --omnet-magenta: #d42a6e;
+  --omnet-coral: #e85a4c;
+  --omnet-orange: #f08a2e;
+  --omnet-yellow: #f2b531;
+  --omnet-gradient: linear-gradient(135deg, var(--omnet-cyan), var(--omnet-purple) 45%, var(--omnet-magenta) 70%, var(--omnet-orange));
+}
+
+/* Theme-aware logo: <ProfileLogo> renders both artworks; show one per theme. */
+.profile-logo-for-dark { display: none; }
+.dark .profile-logo-for-light { display: none; }
+.dark .profile-logo-for-dark { display: inline-block; }

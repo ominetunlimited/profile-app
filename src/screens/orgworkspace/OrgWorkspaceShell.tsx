@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ORG_TRUST_STATUS_LABEL, hubForOrgType, type Account } from '@/app/accountTypes'
-import { BRAND } from '@/shared/brand/assets'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { IconCheck, IconClose } from '@/shared/ui/icons'
 
 const HUB_LABEL: Record<string, string> = {
@@ -53,7 +53,7 @@ export function OrgWorkspaceShell({ title, navItems, children }: { title: string
       <div className="flex min-h-[calc(100vh-97px)] flex-col sm:flex-row">
         <nav className="flex flex-none flex-row gap-1 overflow-x-auto border-b border-border bg-surface-sunken p-2.5 sm:w-[210px] sm:flex-col sm:gap-0.5 sm:overflow-visible sm:border-b-0 sm:border-e sm:p-3">
           <div className="mb-3.5 hidden items-center gap-2 px-2 sm:flex">
-            <img src={BRAND.mark} alt="" className="h-[22px] w-auto" />
+            <ProfileLogo variant="symbol" className="h-[22px] w-auto" />
             <span className="truncate text-[12.5px] font-bold text-text-0">{account.legalName}</span>
           </div>
           {navItems.map((item) => {

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ColourModeSelect } from '@/shared/ui/ColourModeSelect'
 import type { ReactNode } from 'react'
-import { BRAND } from '@/shared/brand/assets'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
 
 /** §6.2/§7.1/§8 shared chrome: logo + theme toggle, matching the Handoff's Sign
@@ -24,7 +24,7 @@ export function AuthChrome({
       <div className="w-full" style={{ maxWidth }}>
         <div className="mb-6 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <img src={BRAND.lockup} alt="PROFILE" className="h-6 w-auto" />
+            <ProfileLogo variant="horizontal" className="h-7 w-auto" />
           </Link>
           <ColourModeSelect className="h-8" />
         </div>
