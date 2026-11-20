@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
         <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
-            <ProfileLogo variant="symbol" className="h-7 w-7" />
+            <ProfileLogo variant="symbol" className="h-9 w-9" />
           </Link>
 
           <button
@@ -204,7 +204,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setHamburgerOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label="Menu" onClick={(e) => e.stopPropagation()} className="flex h-full w-full max-w-[320px] flex-col overflow-y-auto border-s border-border bg-surface p-2">
             <div className="flex items-center justify-between px-2 py-2">
-              <ProfileLogo variant="horizontal" className="h-6 w-auto" />
+              <ProfileLogo variant="horizontal" className="h-9 w-auto" />
               <button onClick={() => setHamburgerOpen(false)} aria-label="Close menu" className="flex h-8 w-8 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
                 <IconClose size={18} />
               </button>
