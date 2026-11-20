@@ -20,6 +20,7 @@ import { CV_TEMPLATES } from '@/screens/career/cv/cvTemplates'
 import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplates'
 import { createRequest, findRequest, listRequestsForOwner, respondToRequest, useCvRequestsVersion } from '@/app/cvRequestStore'
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
+import { BADGE_ICON } from './badgeIcons'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { followOrg, followerCount, isFollowing, unfollowOrg, useFollowsCacheVersion } from '@/app/followStore'
 import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, useConnectionsCacheVersion, type RelationshipState } from '@/app/connectionStore'
@@ -483,13 +484,16 @@ function BadgesRow({ ownerAccount }: { ownerAccount: Account }) {
     <div className="mt-3 flex flex-wrap gap-1.5">
       {earned.map((type) => {
         const def = BADGE_CATALOGUE.find((b) => b.type === type)!
+        const Icon = BADGE_ICON[type]
         return (
           <span
             key={type}
             title={def.selfEvidenced ? 'Self-reported evidence, not institutionally verified' : 'Institutionally verified'}
-            className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${def.selfEvidenced ? 'border-border-strong text-text-1' : 'border-success text-success'}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${def.selfEvidenced ? 'border-border-strong text-text-1' : 'border-success text-success'}`}
           >
-            {def.selfEvidenced ? '◇' : '✓'} {def.name}
+            <Icon size={14} className="flex-none" />
+            <span className="sr-only">{def.selfEvidenced ? 'Self-reported: ' : 'Verified: '}</span>
+            {def.name}
           </span>
         )
       })}

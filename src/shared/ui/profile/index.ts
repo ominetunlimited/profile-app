@@ -26,3 +26,5 @@ export { REACTION_GLYPH, type ReactionIconProps } from './reactions'
 
 // Extended PROFILE icon families (§5) — same grammar as shared/ui/icons.tsx.
 export * from './profileIcons'
+// Gap-fill icon families (Lucide, ISC) — see docs/brand/ICON_SOURCES.md
+export * from './extraIcons'

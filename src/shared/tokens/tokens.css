@@ -31,21 +31,21 @@
   --profile-off-white: #f8f7ef;
   --profile-green: #2bc48a;
 
-  /* ── Surfaces (§10 Light mode: warm beige page, off-white cards) ── */
-  --bg: var(--profile-beige);
-  --surface: var(--profile-off-white);
-  --surface-sunken: color-mix(in srgb, var(--profile-beige) 88%, var(--profile-royal));
-  --surface-secondary: color-mix(in srgb, var(--profile-beige) 72%, var(--profile-powder));
+  /* ── Surfaces (light mode: pure white page; Warm Beige / Off-White stay in the
+     palette for accents and illustrations but no longer tint the page) ── */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-sunken: color-mix(in srgb, var(--profile-royal) 5%, #ffffff);
+  --surface-secondary: color-mix(in srgb, var(--profile-powder) 38%, #ffffff);
 
   /* ── Structure ── */
-  --border: color-mix(in srgb, var(--profile-royal) 14%, var(--profile-beige));
-  --border-strong: color-mix(in srgb, var(--profile-royal) 30%, var(--profile-beige));
+  --border: color-mix(in srgb, var(--profile-royal) 14%, #ffffff);
+  --border-strong: color-mix(in srgb, var(--profile-royal) 30%, #ffffff);
 
-  /* ── Text (§10: Royal Blue for strong text; contrast-checked derivations
-     clear 4.5:1 on BOTH beige and off-white) ── */
+  /* ── Text (Royal Blue for strong text; derivations clear 4.5:1 on white) ── */
   --text-0: var(--profile-royal);
-  --text-1: color-mix(in srgb, var(--profile-royal) 70%, var(--profile-beige));
-  --text-2: color-mix(in srgb, var(--profile-royal) 68%, var(--profile-beige));
+  --text-1: color-mix(in srgb, var(--profile-royal) 70%, #ffffff);
+  --text-2: color-mix(in srgb, var(--profile-royal) 68%, #ffffff);
 
   /* ── Interaction (§11) ── */
   --accent: var(--profile-bright-blue);
