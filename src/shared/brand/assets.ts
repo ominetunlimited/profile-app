@@ -9,6 +9,11 @@
 const L = '/brand/profile/logo'
 const I = '/brand/profile/icons'
 
+/**
+ * RULE: UI uses transparent artwork. symbol.light / symbol.dark and appIcon carry a
+ * background and are reserved for icons, favicons and social images only.
+ * `npm run check:logos` fails if UI code references them.
+ */
 export const BRAND_LOGOS = {
   primary: { light: `${L}/profile-logo-primary-light.svg`, dark: `${L}/profile-logo-primary-dark.svg`, monoBlack: `${L}/profile-logo-primary-mono-black.svg`, monoWhite: `${L}/profile-logo-primary-mono-white.svg` },
   horizontal: { light: `${L}/profile-logo-horizontal-light.svg`, dark: `${L}/profile-logo-horizontal-dark.svg`, monoBlack: `${L}/profile-logo-horizontal-mono-black.svg`, monoWhite: `${L}/profile-logo-horizontal-mono-white.svg` },

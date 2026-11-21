@@ -76,7 +76,7 @@ export function PublicHero() {
         <ProfileBackground variant="mixed" className="absolute inset-0" />
         <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 lg:grid-cols-[1.1fr_.9fr]">
         <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
-          <ProfileLogo variant="symbol" className="h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40" />
+          <ProfileLogo variant="symbol" priority className="h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40" />
           <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
             {t('hero.tag')}
           </span>

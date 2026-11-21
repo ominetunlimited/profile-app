@@ -16,14 +16,18 @@ export function ProfileLogo({
   surface = 'auto',
   className = '',
   alt = 'PROFILE',
+  priority = false,
 }: {
   variant?: ProfileLogoVariant
   surface?: ProfileLogoSurface
   className?: string
   alt?: string
+  /** Above-the-fold logo: fetch early. */
+  priority?: boolean
 }) {
+  const pri = priority ? ({ fetchPriority: 'high', decoding: 'async' } as const) : {}
   if (variant === 'symbol') {
-    return <img src={BRAND_LOGOS.symbol.transparent} alt={alt === 'PROFILE' ? '' : alt} className={className} />
+    return <img src={BRAND_LOGOS.symbol.transparent} alt={alt === 'PROFILE' ? '' : alt} className={className} {...pri} />
   }
   const set = BRAND_LOGOS[variant]
   if (surface === 'on-light') return <img src={set.light} alt={alt} className={className} />
