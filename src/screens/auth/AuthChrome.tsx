@@ -20,11 +20,28 @@ export function AuthChrome({
 }) {
 
   return (
-    <ProfileBackground variant="nodes" className="flex min-h-screen flex-col items-center px-4 py-10">
+    <div className="min-h-screen lg:grid lg:grid-cols-[5fr_6fr]">
+      <aside
+        aria-hidden="true"
+        className="relative hidden flex-col justify-between overflow-hidden p-12 text-[var(--profile-off-white)] lg:flex"
+        style={{ background: 'var(--profile-royal)' }}
+      >
+        <ProfileLogo variant="symbol" className="h-28 w-28" />
+        <div>
+          <p className="text-[clamp(30px,3.4vw,46px)] font-extrabold leading-[1.05] tracking-tight">
+            Put your work on the record.
+          </p>
+          <p className="mt-3 max-w-[34ch] text-[15px] leading-relaxed opacity-80">
+            Evidence, verified by the people who were there. You decide what is public.
+          </p>
+        </div>
+        <span className="text-xs opacity-60">PROFILE</span>
+      </aside>
+    <ProfileBackground variant="nodes" className="flex min-h-screen flex-col items-center px-4 py-10 lg:justify-center">
       <div className="w-full" style={{ maxWidth }}>
         <div className="mb-6 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <ProfileLogo variant="horizontal" className="h-11 w-auto" />
+            <ProfileLogo variant="horizontal" className="h-12 w-auto lg:h-11" />
           </Link>
           <ColourModeSelect className="h-8" />
         </div>
@@ -50,5 +67,6 @@ export function AuthChrome({
         </div>
       </div>
     </ProfileBackground>
+    </div>
   )
 }
