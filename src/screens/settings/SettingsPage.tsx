@@ -54,42 +54,53 @@ export function SettingsPage() {
 
   const ActiveComponent = tabs.find((t) => t[0] === active)?.[2] ?? tabs[0][2]
 
+  const choose = (key: string) => {
+    setActive(key)
+    setParams({ tab: key })
+  }
+
   return (
     <AppShell>
-      <div className="mx-auto max-w-[1000px] px-4 pt-8 sm:px-6">
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Settings &amp; Privacy</h1>
-      </div>
-      <div className="mx-auto flex max-w-[1000px] gap-6 px-4 pb-8 sm:px-6">
-        <nav aria-label="Settings sections" className="hidden w-52 flex-none flex-col gap-0.5 sm:flex">
+      <div className="mx-auto max-w-[1080px] px-4 pb-16 pt-6 sm:px-8">
+        <header className="mb-6">
+          <h1 className="text-[clamp(24px,3.4vw,34px)] font-bold leading-tight tracking-tight text-text-0">Settings &amp; Privacy</h1>
+          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-relaxed text-text-1">You decide what is public, who can reach you and how your data is used.</p>
+        </header>
+
+        <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:hidden" role="tablist" aria-label="Settings sections">
           {tabs.map(([key, label]) => (
             <button
               key={key}
-              onClick={() => {
-                setActive(key)
-                setParams({ tab: key })
-              }}
-              className={`rounded-lg px-3 py-2 text-left text-sm ${active === key ? 'bg-surface-sunken font-semibold text-text-0' : 'text-text-1'}`}
+              role="tab"
+              aria-selected={active === key}
+              onClick={() => choose(key)}
+              className={`shrink-0 whitespace-nowrap rounded-full border-[1.5px] px-4 py-2 text-[12.5px] font-semibold ${
+                active === key ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'
+              }`}
             >
               {label}
             </button>
           ))}
-        </nav>
-        <div className="min-w-0 flex-1">
-          <select
-            className="mb-4 w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm sm:hidden"
-            value={active}
-            onChange={(e) => {
-              setActive(e.target.value)
-              setParams({ tab: e.target.value })
-            }}
-          >
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-[230px_minmax(0,1fr)] sm:items-start">
+          <nav aria-label="Settings sections" className="hidden flex-col gap-0.5 rounded-2xl border border-border bg-surface p-2 sm:sticky sm:top-20 sm:flex">
             {tabs.map(([key, label]) => (
-              <option key={key} value={key}>
+              <button
+                key={key}
+                onClick={() => choose(key)}
+                aria-current={active === key ? 'page' : undefined}
+                className={`relative min-h-[42px] rounded-xl px-3.5 py-2 text-left text-[14px] ${
+                  active === key ? 'bg-accent-soft font-semibold text-accent' : 'text-text-1 hover:bg-surface-sunken'
+                }`}
+              >
                 {label}
-              </option>
+              </button>
             ))}
-          </select>
-          <ActiveComponent />
+          </nav>
+          <div className="flex min-w-0 flex-col gap-4">
+            <ActiveComponent />
+          </div>
         </div>
       </div>
     </AppShell>

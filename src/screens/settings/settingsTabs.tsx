@@ -47,9 +47,9 @@ function Toggle({
     else setUncontrolled((v) => !v)
   }
   return (
-    <label className="flex items-center justify-between gap-4 border-b border-border py-3 last:border-0">
+    <label className="flex min-h-[56px] items-center justify-between gap-4 border-b border-border py-3.5 last:border-0">
       <span>
-        <span className="block text-sm text-text-0">
+        <span className="block text-[14.5px] text-text-0">
           {label}
           {soon && <span className="ms-2 rounded-full border border-border-strong px-2 py-0.5 text-[10.5px] font-medium text-text-2">Coming soon</span>}
         </span>
@@ -62,9 +62,9 @@ function Toggle({
         aria-disabled={soon || undefined}
         disabled={soon}
         onClick={toggle}
-        className={`h-6 w-11 flex-none rounded-full transition-colors ${soon ? 'cursor-not-allowed opacity-50' : ''} ${on ? 'bg-accent' : 'bg-border-strong'}`}
+        className={`h-7 w-12 flex-none rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${soon ? 'cursor-not-allowed opacity-50' : ''} ${on ? 'bg-accent' : 'bg-border-strong'}`}
       >
-        <span className={`block h-5 w-5 translate-x-0.5 rounded-full bg-white transition-transform ${on ? 'translate-x-[22px]' : ''}`} />
+        <span className={`block h-6 w-6 translate-x-0.5 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-[22px]' : ''}`} />
       </button>
     </label>
   )
@@ -72,8 +72,8 @@ function Toggle({
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <h2 className="mb-1 font-semibold text-text-0">{title}</h2>
+    <div className="rounded-2xl border border-border bg-surface p-5">
+      <h2 className="mb-2 text-[16px] font-semibold tracking-tight text-text-0">{title}</h2>
       <div>{children}</div>
     </div>
   )
