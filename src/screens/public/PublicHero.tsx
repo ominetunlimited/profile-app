@@ -74,8 +74,8 @@ export function PublicHero() {
             shapes: one proprietary motif grammar (nodes, links, grid) at low
             opacity, cropped by the viewport, never competing with content. */}
         <ProfileBackground variant="mixed" className="absolute inset-0" />
-        <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 lg:grid-cols-[1.1fr_.9fr]">
-        <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
+        <div className="relative mx-auto grid max-w-[1180px] grid-cols-[minmax(0,1fr)] items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
+        <div className="flex min-w-0 flex-col items-center gap-4 text-center lg:items-start lg:text-left">
           <ProfileLogo variant="symbol" priority className="h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40" />
           <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
             {t('hero.tag')}
@@ -98,7 +98,7 @@ export function PublicHero() {
               {t('hero.cta.secondary')}
             </a>
           </div>
-          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-center lg:justify-start">
+          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-start overflow-x-auto pb-2 sm:justify-center lg:justify-start">
             {JOURNEY.map((n, i) => (
               <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
                 <span className="flex flex-none flex-col items-center gap-2">

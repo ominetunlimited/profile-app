@@ -41,7 +41,7 @@ export function AuthChrome({
       <div className="w-full" style={{ maxWidth }}>
         <div className="mb-6 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <ProfileLogo variant="horizontal" className="h-12 w-auto lg:h-11" />
+            <ProfileLogo variant="horizontal" className="h-14 w-auto" />
           </Link>
           <ColourModeSelect className="h-8" />
         </div>
