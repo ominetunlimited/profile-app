@@ -74,7 +74,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-8">
         <Link to="/" className="flex flex-none items-center order-1" aria-label="PROFILE home">
-          <ProfileLogo variant="horizontal" className="h-7 w-auto sm:h-8" />
+          <ProfileLogo variant="horizontal" className="h-10 w-auto sm:h-12" />
         </Link>
         <div className="order-2 ms-auto flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           <LanguagePicker />

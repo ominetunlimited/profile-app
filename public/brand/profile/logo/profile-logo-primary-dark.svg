@@ -13,7 +13,6 @@
     <radialGradient id="gHead" gradientUnits="userSpaceOnUse" cx="128" cy="78" r="30"><stop offset="0" stop-color="#F8CB5C"/><stop offset="0.3" stop-color="#F5A04F"/><stop offset="0.6" stop-color="#E23A7E"/><stop offset="0.85" stop-color="#8E0FEF"/><stop offset="1" stop-color="#0B2A8A"/></radialGradient>
     <clipPath id="counter"><circle cx="120" cy="104" r="42"/></clipPath>
   </defs>
-  <rect id="background" width="1200" height="1200" rx="0" fill="#170F42"/>
   <g id="symbol-placement" transform="translate(360.00,201.80) scale(2.0)">
   <g id="symbol">
     <polygon id="stem" points="40,57.8 62,70.5 62,219.3 40,232" fill="url(#gStem)"/>
