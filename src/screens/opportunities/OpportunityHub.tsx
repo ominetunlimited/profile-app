@@ -59,19 +59,37 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
     })
     .sort((x, y) => (y.match?.pct ?? -1) - (x.match?.pct ?? -1))
 
+  const filtered = !!q || minMatch > 0 || workTypes.size < WORK_TYPES.length
+  const resetFilters = () => {
+    setQuery('')
+    setMinMatch(0)
+    setWorkTypes(new Set(WORK_TYPES))
+  }
+
   return (
     <AppShell>
       <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-8">
-        <h1 className="mb-4 text-[26px] font-bold leading-tight tracking-tight text-text-0">{title ?? 'Opportunity Hub'}</h1>
+        <header className="mb-6">
+          <h1 className="text-[clamp(24px,3.4vw,34px)] font-bold leading-tight tracking-tight text-text-0">{title ?? 'Opportunity Hub'}</h1>
+          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-relaxed text-text-1">
+            Apply with your verified profile. Listings are ranked by how your recorded work fits, never by attention.
+          </p>
+        </header>
 
-        <div className="flex flex-wrap gap-5">
-          <aside className="flex flex-[0_0_220px] flex-col gap-4" aria-label="Filters">
+        <div className="grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start">
+          <aside className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-4 lg:sticky lg:top-20" aria-label="Filters">
             <div>
-              <div className="mb-2 text-[11.5px] font-semibold text-text-0">Type</div>
-              <div className="flex flex-col gap-[5px]">
+              <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-text-1">Type</div>
+              <div className="flex flex-wrap gap-2">
                 {WORK_TYPES.map((t) => (
-                  <label key={t} className="flex items-center gap-[7px] text-[12.5px] capitalize text-text-1">
+                  <label
+                    key={t}
+                    className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium capitalize focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent ${
+                      workTypes.has(t) ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'
+                    }`}
+                  >
                     <input
+                      className="sr-only"
                       type="checkbox"
                       checked={workTypes.has(t)}
                       onChange={() =>
@@ -89,8 +107,8 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
               </div>
             </div>
             <div>
-              <label htmlFor="min-match" className="mb-2 block text-[11.5px] font-semibold text-text-0">Minimum match</label>
-              <input id="min-match" type="range" min={0} max={100} value={minMatch} onChange={(e) => setMinMatch(Number(e.target.value))} disabled={!isIndividual} className="w-full" />
+              <label htmlFor="min-match" className="mb-2 block text-[12px] font-semibold uppercase tracking-wide text-text-1">Minimum match</label>
+              <input id="min-match" type="range" min={0} max={100} value={minMatch} onChange={(e) => setMinMatch(Number(e.target.value))} disabled={!isIndividual} className="w-full accent-[var(--profile-bright-blue)]" />
               <div className="text-[11px] text-text-1">{isIndividual ? `${minMatch}%+` : 'Sign in with an individual account to filter by match.'}</div>
             </div>
             <p className="border-t border-border pt-3 text-[11.5px] leading-relaxed text-text-1">
@@ -105,17 +123,17 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by title, skill, or organisation…"
                 aria-label="Search opportunities"
-                className="min-h-[42px] flex-1 rounded-lg border border-border-strong bg-surface px-3 text-sm outline-none focus-visible:border-accent"
+                className="min-h-[48px] flex-1 rounded-xl border border-border-strong bg-surface px-4 text-[15px] outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
               />
             </div>
 
-            <div className="mb-4 flex flex-wrap gap-1.5">
+            <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
               {CAREER_CLUSTERS.map((c) => (
                 <button
                   key={c}
                   disabled={!!pinnedCluster}
                   onClick={() => setCluster((current) => (current === c ? null : c))}
-                  className={`rounded-full border px-3 py-1 text-xs disabled:opacity-100 ${
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium disabled:opacity-100 ${
                     cluster === c ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-1'
                   }`}
                 >
@@ -124,6 +142,15 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
               ))}
             </div>
 
+            <p className="mb-3 text-[12.5px] text-text-1" role="status" aria-live="polite">
+              {jobs.length} {jobs.length === 1 ? 'opportunity' : 'opportunities'}
+              {filtered && (
+                <button onClick={resetFilters} className="ml-2 font-semibold text-accent underline-offset-2 hover:underline">
+                  Clear filters
+                </button>
+              )}
+            </p>
+
             {sponsoredCampaigns[0] && (
               <div className="mb-3">
                 <SponsoredCard campaign={sponsoredCampaigns[0]} viewerAccount={account} viewerEmail={viewer} />
@@ -131,7 +158,7 @@ export function OpportunityHub({ pinnedCluster, title }: { pinnedCluster?: Caree
             )}
 
             {jobs.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
+              <div className="rounded-2xl border border-dashed border-border-strong bg-surface-sunken p-12 text-center text-sm text-text-1">
                 No opportunities posted yet{query || minMatch > 0 || workTypes.size < WORK_TYPES.length ? ' matching your filters' : ''}.
               </div>
             ) : (
