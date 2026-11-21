@@ -147,7 +147,7 @@ export function HomePage() {
         <div className="flex min-w-0 flex-1 basis-[420px] flex-col gap-4 p-[18px]">
           <div className="flex flex-wrap items-start justify-between gap-3.5">
             <div className="min-w-0">
-              <h1 className="font-sans text-[clamp(19px,2.2vw,23px)] font-semibold leading-tight tracking-tight text-text-0">{greeting}</h1>
+              <h1 className="font-sans text-[clamp(22px,3vw,30px)] font-semibold leading-tight tracking-tight text-text-0">{greeting}</h1>
               <p className="mt-1.5 max-w-[56ch] text-[13px] leading-relaxed text-text-1">{greetingSub}</p>
             </div>
             <button

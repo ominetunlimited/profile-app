@@ -56,7 +56,7 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
         </div>
 
         {tab === 'messages' && (
-          <div className="md:grid md:min-h-[480px] md:grid-cols-[300px_minmax(0,1fr)] md:gap-4">
+          <div className="md:grid md:min-h-[max(480px,70dvh)] md:grid-cols-[300px_minmax(0,1fr)] md:gap-4">
             <div className={openConversationId ? 'hidden md:block' : ''}>
               <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
             </div>

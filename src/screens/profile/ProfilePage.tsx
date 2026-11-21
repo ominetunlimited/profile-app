@@ -116,9 +116,12 @@ export function ProfilePage() {
     <AppShell>
       <div className="border-b border-border bg-surface">
         {media.coverDataUrl ? (
-          <img src={media.coverDataUrl} alt="" className="h-36 w-full object-cover" />
+          <img src={media.coverDataUrl} alt="" className="h-36 w-full object-cover sm:h-44" />
         ) : (
-          <div className="h-36 bg-gradient-to-br from-accent-soft to-trust-soft" />
+          <div aria-hidden className="relative h-36 overflow-hidden sm:h-44" style={{ background: 'var(--profile-royal)' }}>
+            <span className="absolute -right-10 -top-16 h-64 w-64 rounded-full opacity-50" style={{ background: 'var(--profile-blue)' }} />
+            <span className="absolute bottom-[-30px] right-40 h-28 w-28 rounded-3xl opacity-70" style={{ background: 'var(--profile-gold)' }} />
+          </div>
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-10 flex flex-wrap items-end gap-4">
