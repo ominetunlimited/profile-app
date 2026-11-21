@@ -73,23 +73,25 @@ export function TrustPassport() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-[860px] px-4 py-8 sm:px-6">
-        <div className="mb-1 font-mono text-[11px] uppercase tracking-widest text-text-2">Trust Passport</div>
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-0">Your Trust Score</h1>
+      <div className="mx-auto max-w-[980px] px-4 pb-16 pt-6 sm:px-8">
+        <header className="mb-6">
+          <div className="mb-1 font-mono text-[11px] uppercase tracking-widest text-text-2">Trust Passport</div>
+          <h1 className="text-[clamp(24px,3.4vw,34px)] font-bold leading-tight tracking-tight text-text-0">Your Trust Score</h1>
+        </header>
 
-        <div className="mb-8 flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:gap-8">
-          <TrustScoreRing trust={trust} size={140} />
+        <div className="mb-8 flex flex-col items-center gap-5 rounded-3xl border border-border bg-surface p-6 shadow-sm sm:flex-row sm:gap-10 sm:p-8">
+          <TrustScoreRing trust={trust} size={168} />
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-center gap-2">
-              <span className="rounded-full px-2.5 py-1 text-xs font-bold text-white" style={{ background: trust.tier.color }}>
+              <span className="rounded-full px-3.5 py-1.5 text-sm font-bold text-white" style={{ background: trust.tier.color }}>
                 {trust.tier.label}
               </span>
               <span className="text-xs capitalize text-text-2">{trust.confidenceLevel} confidence</span>
             </div>
             <p className="mb-2 text-sm text-text-1">
-              Every point here traces to a real, sourced signal — never a follower, like, or view count.
+              Every point here traces to a real, sourced signal. Never a follower, like or view count.
             </p>
-            <Link to="/trust" className="text-xs font-semibold text-accent">
+            <Link to="/trust" className="inline-flex min-h-[44px] items-center text-[13px] font-semibold text-accent">
               How trust scoring works →
             </Link>
           </div>
@@ -223,10 +225,10 @@ export function TrustPassport() {
         )}
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Trust dimensions</h2>
+          <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Trust dimensions</h2>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {(Object.keys(TRUST_DIMENSION_LABELS) as (keyof TrustDimensions)[]).map((key) => (
-              <div key={key} className="rounded-lg border border-border bg-surface p-3">
+              <div key={key} className="rounded-xl border border-border bg-surface p-4">
                 <div className="mb-1 flex items-center justify-between text-sm">
                   <span className="text-text-0">{TRUST_DIMENSION_LABELS[key]}</span>
                   <span className="font-mono text-xs text-text-2">{trust.dimensions[key]}</span>
@@ -240,7 +242,7 @@ export function TrustPassport() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Calculation matrix</h2>
+          <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Calculation matrix</h2>
           <p className="mb-3 text-xs text-text-1">
             Every signal below needs a real verification to contribute. Identity counts once a PROFILE reviewer approves your documents; the others count once the institution you named confirms the record. Nothing is estimated.
           </p>
@@ -260,7 +262,7 @@ export function TrustPassport() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Tier ladder</h2>
+          <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Tier ladder</h2>
           <div className="flex flex-col gap-1.5">
             {TRUST_TIERS.map((t) => (
               <div key={t.tier} className={`flex items-center gap-3 rounded-lg border p-2.5 ${t.tier === trust.tier.tier ? 'border-accent' : 'border-border'}`}>
@@ -274,7 +276,7 @@ export function TrustPassport() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-3 font-semibold text-text-0">Verification Center</h2>
+          <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Verification Center</h2>
           <p className="mb-3 text-xs text-text-1">
             A request goes to the institution you name. If it has a PROFILE account it sees your request in its inbox and decides it itself;
             if it isn't on PROFILE yet, PROFILE staff review it. Nothing is confirmed until they say so.
@@ -295,7 +297,7 @@ export function TrustPassport() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-semibold text-text-0">Signal log</h2>
+          <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Signal log</h2>
           {trust.signals.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-6 text-center text-sm text-text-1">
               Nothing has been verified yet — a request above only starts the process. Each confirmation will appear here, with who confirmed it.
