@@ -120,7 +120,6 @@ export function PublicHero() {
             ))}
           </ol>
         </div>
-        </div>
         <aside aria-label="Illustrative preview, not live data" className="hidden gap-3 lg:grid">
           <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg">
             <div className="text-[11px] font-medium text-text-2">Illustrative profile</div>
@@ -140,6 +139,7 @@ export function PublicHero() {
             <div className="mt-1 text-[15px] font-semibold text-text-0">Research fellow, urban governance</div>
           </div>
         </aside>
+      </div>
 
       </section>
 
