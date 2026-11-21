@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "check:logos": "node scripts/check-logo-usage.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
