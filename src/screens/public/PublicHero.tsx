@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/LanguageContext'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
 import { ProfileNode, ProfileSealMotif } from '@/shared/ui/profile/motifs'
+import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
 import { TRUST_TIERS, type TrustScoreResult } from '@/app/trustScore'
 
@@ -68,12 +69,14 @@ export function PublicHero() {
     <div className="min-h-screen bg-bg">
       <PublicHeader />
 
-      <section className="relative overflow-hidden px-4 py-16 text-center sm:px-8 sm:py-24">
+      <section className="relative overflow-hidden px-4 py-14 sm:px-8 sm:py-20 lg:py-24">
         {/* §8 — PROFILE geometric background system replaces generic floating
             shapes: one proprietary motif grammar (nodes, links, grid) at low
             opacity, cropped by the viewport, never competing with content. */}
         <ProfileBackground variant="mixed" className="absolute inset-0" />
-        <div className="relative mx-auto flex max-w-[900px] flex-col items-center gap-4">
+        <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 lg:grid-cols-[1.1fr_.9fr]">
+        <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
+          <ProfileLogo variant="symbol" className="h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40" />
           <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
             {t('hero.tag')}
           </span>
@@ -81,7 +84,7 @@ export function PublicHero() {
             {t('hero.headline')}
           </h1>
           <p className="max-w-[62ch] text-[clamp(15px,1.6vw,18px)] leading-relaxed text-text-1">{t('hero.subhead')}</p>
-          <div className="mt-1 flex flex-wrap justify-center gap-3">
+          <div className="mt-1 flex flex-wrap justify-center gap-3 lg:justify-start">
             <Link
               to="/auth?mode=signup"
               className="flex h-12 items-center rounded-lg bg-accent-solid px-6 text-[15px] font-semibold text-white shadow-lg"
@@ -95,7 +98,7 @@ export function PublicHero() {
               {t('hero.cta.secondary')}
             </a>
           </div>
-          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-center">
+          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-center lg:justify-start">
             {JOURNEY.map((n, i) => (
               <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
                 <span className="flex flex-none flex-col items-center gap-2">
@@ -117,6 +120,27 @@ export function PublicHero() {
             ))}
           </ol>
         </div>
+        </div>
+        <aside aria-label="Illustrative preview, not live data" className="hidden gap-3 lg:grid">
+          <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg">
+            <div className="text-[11px] font-medium text-text-2">Illustrative profile</div>
+            <div className="mt-1 text-[15px] font-semibold text-text-0">Verified record, in one place</div>
+            <div className="mt-3 flex flex-wrap gap-2 text-[12px]">
+              <span className="rounded-full bg-accent-soft px-3 py-1 text-accent">Degree confirmed</span>
+              <span className="rounded-full bg-gold-soft px-3 py-1 text-gold">Role verified</span>
+              <span className="rounded-full bg-trust-soft px-3 py-1 text-trust">Project evidence</span>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="text-[11px] font-medium text-text-2">Illustrative message</div>
+            <div className="mt-1 text-[15px] font-semibold text-text-0">Can you review the brief before Friday?</div>
+          </div>
+          <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="text-[11px] font-medium text-text-2">Illustrative opportunity</div>
+            <div className="mt-1 text-[15px] font-semibold text-text-0">Research fellow, urban governance</div>
+          </div>
+        </aside>
+
       </section>
 
       <section id="story" className="border-t border-border bg-surface-sunken px-4 py-14 sm:px-8">
