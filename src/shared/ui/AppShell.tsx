@@ -78,7 +78,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
         <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
-            <ProfileLogo variant="symbol" className="h-9 w-9" />
+            <ProfileLogo variant="symbol" className="h-9 w-9 md:hidden" />
+            <ProfileLogo variant="horizontal" className="hidden h-9 w-auto md:block" />
           </Link>
 
           <button
@@ -173,13 +174,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex">
         {showRail && <NavRail onOpenAll={() => setHamburgerOpen(true)} />}
-        <main id="main" className="min-w-0 flex-1 pb-16 sm:pb-0">
+        <main id="main" className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] sm:pb-0">
           {children}
         </main>
       </div>
 
       {tabs.length > 0 && (
-        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur sm:hidden">
+        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur sm:hidden">
           {tabs.map((tab) => {
             const TabIcon = TAB_ICON[tab.key]
             const active = tab.key !== 'create' && (location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))
@@ -188,9 +189,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={tab.key}
                 to={tab.to}
                 aria-current={active ? 'page' : undefined}
-                className={`flex min-h-[44px] flex-1 flex-col items-center justify-end gap-1 pb-2 pt-2 text-[9.5px] font-medium ${active ? 'text-accent' : 'text-text-1'}`}
+                className={`flex min-h-[44px] flex-1 flex-col items-center justify-end gap-1 pb-2 pt-2 text-[10.5px] font-medium ${active ? 'text-accent' : 'text-text-1'}`}
               >
-                <span className={tab.key === 'create' ? '-mt-5 flex h-11 w-11 items-center justify-center rounded-full bg-accent-solid text-white shadow-[0_4px_12px_rgba(0,87,217,.34)]' : 'flex items-center justify-center'}>
+                <span className={tab.key === 'create' ? '-mt-5 flex h-11 w-11 items-center justify-center rounded-full bg-accent-solid text-white shadow-[0_4px_12px_rgba(30,99,214,.34)]' : 'flex items-center justify-center'}>
                   <TabIcon size={tab.key === 'create' ? 22 : 20} />
                 </span>
                 {tab.label}
