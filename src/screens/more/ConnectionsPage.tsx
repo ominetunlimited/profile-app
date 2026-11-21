@@ -37,16 +37,35 @@ export function ConnectionsPage() {
     return r.requesterEmail.toLowerCase() === owner.toLowerCase() ? r.recipientEmail : r.requesterEmail
   }
 
+  const actionBtn = 'min-h-[44px] rounded-xl px-4 text-[13px] font-semibold'
+
   return (
     <AppShell>
-      <div className="mx-auto max-w-[640px] px-4 py-8 sm:px-6">
-        <h1 className="mb-1 text-2xl font-bold tracking-tight text-text-0">Connections</h1>
-        <p className="mb-6 text-sm text-text-1">Use Search in the header to find people and organisations, then Connect from their profile.</p>
+      <div className="mx-auto max-w-[980px] px-4 pb-16 pt-6 sm:px-8">
+        <header className="mb-6">
+          <h1 className="text-[clamp(24px,3.4vw,34px)] font-bold leading-tight tracking-tight text-text-0">Connections</h1>
+          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-relaxed text-text-1">
+            Use Search in the header to find people and organisations, then Connect from their profile.
+          </p>
+        </header>
+
+        <dl className="mb-7 grid grid-cols-3 gap-3">
+          {[
+            ['Connections', accepted.length],
+            ['Requests', receivedPending.length],
+            ['Pending', sentPending.length],
+          ].map(([label, n]) => (
+            <div key={label as string} className="rounded-2xl border border-border bg-surface px-4 py-3.5">
+              <dt className="text-[12px] font-medium text-text-1">{label}</dt>
+              <dd className="mt-0.5 text-[clamp(24px,3vw,32px)] font-bold leading-none tracking-tight text-text-0">{n}</dd>
+            </div>
+          ))}
+        </dl>
 
         {receivedPending.length > 0 && (
-          <section className="mb-6">
-            <h2 className="mb-2 text-sm font-semibold text-text-0">Requests</h2>
-            <div className="flex flex-col gap-2">
+          <section className="mb-8 rounded-2xl border border-accent/30 bg-accent-soft p-4 sm:p-5" aria-labelledby="req-h">
+            <h2 id="req-h" className="mb-3 text-[15px] font-semibold text-text-0">Requests waiting for you</h2>
+            <div className="grid gap-2.5">
               {receivedPending.map((r) => (
                 <PersonRow key={r.id} email={otherEmail(r)}>
                   <div className="flex gap-2">
@@ -55,7 +74,7 @@ export function ConnectionsPage() {
                         await acceptConnectionRequest(owner, otherEmail(r))
                         refresh()
                       }}
-                      className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
+                      className={`${actionBtn} bg-accent-solid text-white`}
                     >
                       Accept
                     </button>
@@ -64,7 +83,7 @@ export function ConnectionsPage() {
                         await removeConnection(owner, otherEmail(r))
                         refresh()
                       }}
-                      className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-text-1"
+                      className={`${actionBtn} border border-border-strong bg-surface text-text-1`}
                     >
                       Decline
                     </button>
@@ -75,14 +94,16 @@ export function ConnectionsPage() {
           </section>
         )}
 
-        <section className="mb-6">
-          <h2 className="mb-2 text-sm font-semibold text-text-0">Connections ({accepted.length})</h2>
+        <section className="mb-8" aria-labelledby="conn-h">
+          <h2 id="conn-h" className="mb-3 text-[15px] font-semibold text-text-0">Your connections</h2>
           {accepted.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
-              No connections yet — this is a real request/accept pipeline, not fabricated contacts.
+            <div className="rounded-2xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm leading-relaxed text-text-1">
+              <p className="mx-auto max-w-[44ch]">
+                No connections yet. Search for someone in your field, open their profile and choose Connect. Requests and acceptances here are real, never suggested contacts.
+              </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="grid gap-2.5 sm:grid-cols-2">
               {accepted.map((r) => (
                 <PersonRow key={r.id} email={otherEmail(r)} />
               ))}
@@ -91,12 +112,12 @@ export function ConnectionsPage() {
         </section>
 
         {sentPending.length > 0 && (
-          <section>
-            <h2 className="mb-2 text-sm font-semibold text-text-0">Pending ({sentPending.length})</h2>
-            <div className="flex flex-col gap-2">
+          <section aria-labelledby="pend-h">
+            <h2 id="pend-h" className="mb-3 text-[15px] font-semibold text-text-0">Waiting for a reply</h2>
+            <div className="grid gap-2.5 sm:grid-cols-2">
               {sentPending.map((r) => (
                 <PersonRow key={r.id} email={otherEmail(r)}>
-                  <span className="text-xs text-text-2">Request sent</span>
+                  <span className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-medium text-text-1">Request sent</span>
                 </PersonRow>
               ))}
             </div>
@@ -113,16 +134,17 @@ function PersonRow({ email, children }: { email: string; children?: ReactNode })
   const name = person?.legalName ?? email
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-      <UserAvatar ownerEmail={email} name={name} size={36} />
-      <div className="min-w-0 flex-1">
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 transition-shadow hover:shadow-md">
+      <UserAvatar ownerEmail={email} name={name} size={48} />
+      <div className="min-w-0 flex-1 basis-[140px]">
         {username ? (
-          <Link to={`/profile/${username}`} className="truncate text-sm font-semibold text-text-0 hover:text-accent">
+          <Link to={`/profile/${username}`} className="block truncate text-[15px] font-semibold text-text-0 hover:text-accent">
             {name}
           </Link>
         ) : (
-          <span className="truncate text-sm font-semibold text-text-0">{name}</span>
+          <span className="block truncate text-[15px] font-semibold text-text-0">{name}</span>
         )}
+        {username && <span className="block truncate text-xs text-text-1">@{username}</span>}
       </div>
       {children}
     </div>
