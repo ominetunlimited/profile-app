@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
-import { acceptConnectionRequest, listConnectionRecordsFor, onConnectionsChange, removeConnection, type ConnectionRecord } from '@/app/connectionStore'
-import { findAccountByEmail } from '@/app/demoAccountStore'
+import { acceptConnectionRequest, connectionsInCommon, listConnectionRecordsFor, onConnectionsChange, removeConnection, sendConnectionRequest, type ConnectionRecord } from '@/app/connectionStore'
+import { mutualLabel, suggestPeopleFor } from '@/app/connectionSuggestions'
+import { findAccountByEmail, useAccountsCacheVersion } from '@/app/demoAccountStore'
 
 /**
  * §10.1 Mobile Bottom Navigation's "connections" tab. Previously honestly
@@ -17,6 +18,7 @@ import { findAccountByEmail } from '@/app/demoAccountStore'
 export function ConnectionsPage() {
   const { account } = useAccount()
   const owner = ownerKey(account)
+  useAccountsCacheVersion()
   const [records, setRecords] = useState(() => listConnectionRecordsFor(owner))
 
   function refresh() {
@@ -37,6 +39,7 @@ export function ConnectionsPage() {
     return r.requesterEmail.toLowerCase() === owner.toLowerCase() ? r.recipientEmail : r.requesterEmail
   }
 
+  const suggestions = suggestPeopleFor(owner)
   const actionBtn = 'min-h-[44px] rounded-xl px-4 text-[13px] font-semibold'
 
   return (
@@ -67,7 +70,7 @@ export function ConnectionsPage() {
             <h2 id="req-h" className="mb-3 text-[15px] font-semibold text-text-0">Requests waiting for you</h2>
             <div className="grid gap-2.5">
               {receivedPending.map((r) => (
-                <PersonRow key={r.id} email={otherEmail(r)}>
+                <PersonRow key={r.id} email={otherEmail(r)} viewer={owner}>
                   <div className="flex gap-2">
                     <button
                       onClick={async () => {
@@ -105,11 +108,33 @@ export function ConnectionsPage() {
           ) : (
             <div className="grid gap-2.5 sm:grid-cols-2">
               {accepted.map((r) => (
-                <PersonRow key={r.id} email={otherEmail(r)} />
+                <PersonRow key={r.id} email={otherEmail(r)} viewer={owner} />
               ))}
             </div>
           )}
         </section>
+
+        {suggestions.length > 0 && (
+          <section className="mb-8" aria-labelledby="sug-h">
+            <h2 id="sug-h" className="text-[15px] font-semibold text-text-0">People you may know</h2>
+            <p className="mb-3 text-xs text-text-1">Suggested from mutual connections and your city. Never from popularity.</p>
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {suggestions.map((p) => (
+                <PersonRow key={p.email} email={p.email} viewer={owner} note={p.mutualEmails.length ? mutualLabel(p.mutualNames) : `Also in ${p.sameCity}`}>
+                  <button
+                    onClick={async () => {
+                      await sendConnectionRequest(owner, p.email)
+                      refresh()
+                    }}
+                    className={`${actionBtn} bg-accent-solid text-white`}
+                  >
+                    Connect
+                  </button>
+                </PersonRow>
+              ))}
+            </div>
+          </section>
+        )}
 
         {sentPending.length > 0 && (
           <section aria-labelledby="pend-h">
@@ -128,10 +153,12 @@ export function ConnectionsPage() {
   )
 }
 
-function PersonRow({ email, children }: { email: string; children?: ReactNode }) {
+function PersonRow({ email, children, viewer, note }: { email: string; children?: ReactNode; viewer?: string; note?: string }) {
   const person = findAccountByEmail(email)
   const username = person && 'username' in person ? person.username : undefined
   const name = person?.legalName ?? email
+  const mutual = viewer && !note ? connectionsInCommon(viewer, email).sharedConnections : []
+  const sub = note ?? (mutual.length ? `${mutual.length} mutual ${mutual.length === 1 ? 'connection' : 'connections'}` : username ? `@${username}` : '')
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface p-3.5 transition-shadow hover:shadow-md">
@@ -144,7 +171,7 @@ function PersonRow({ email, children }: { email: string; children?: ReactNode })
         ) : (
           <span className="block truncate text-[15px] font-semibold text-text-0">{name}</span>
         )}
-        {username && <span className="block truncate text-xs text-text-1">@{username}</span>}
+        {sub && <span className="block truncate text-xs text-text-1">{sub}</span>}
       </div>
       {children}
     </div>
