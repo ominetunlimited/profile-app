@@ -69,10 +69,61 @@ function SolutionsMenu() {
 /** Shared header across every public-facing page. */
 export function PublicHeader() {
   const { t } = useLanguage()
+  const [menu, setMenu] = useState(false)
+  useEffect(() => {
+    if (!menu) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenu(false)
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menu])
+  const close = () => setMenu(false)
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-      <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-8">
+      <div className="mx-auto max-w-[1360px] md:hidden">
+        <div className="flex items-center gap-3 px-4 py-2.5">
+          <Link to="/" className="flex flex-none items-center" aria-label="PROFILE home" onClick={close}>
+            <ProfileLogo variant="horizontal" className="h-12 w-auto" />
+          </Link>
+          <Link to="/auth?mode=signup" onClick={close} className="ms-auto flex min-h-[40px] items-center rounded-xl bg-accent-solid px-4 text-[13px] font-semibold text-white">
+            {t('nav.openProfile')}
+          </Link>
+          <button
+            type="button"
+            aria-expanded={menu}
+            aria-controls="public-menu"
+            aria-label={menu ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenu((v) => !v)}
+            className="flex h-10 w-10 flex-none items-center justify-center rounded-xl border border-border-strong text-text-0"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d={menu ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16'} />
+            </svg>
+          </button>
+        </div>
+        {menu && (
+          <div id="public-menu" className="border-t border-border px-4 pb-5 pt-3">
+            <nav aria-label="Primary" className="flex flex-col">
+              {NAV_LINKS.map((l) => (
+                <Link key={l.to} to={l.to} onClick={close} className="flex min-h-[48px] items-center border-b border-border text-[15px] font-medium text-text-0">
+                  {t(l.key)}
+                </Link>
+              ))}
+              <Link to="/about#solutions" onClick={close} className="flex min-h-[48px] items-center border-b border-border text-[15px] font-medium text-text-0">
+                Solutions
+              </Link>
+            </nav>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <LanguagePicker />
+              <ColourModeSelect className="h-[40px]" />
+              <Link to="/auth" onClick={close} className="ms-auto flex min-h-[40px] items-center rounded-xl border border-border-strong px-4 text-sm font-semibold text-text-0">
+                {t('nav.signin')}
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="mx-auto hidden max-w-[1360px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-8 md:flex">
         <Link to="/" className="flex flex-none items-center order-1" aria-label="PROFILE home">
           <ProfileLogo variant="horizontal" className="h-12 w-auto sm:h-14" />
         </Link>
