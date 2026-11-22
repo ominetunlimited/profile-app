@@ -98,10 +98,12 @@
 
 /* ── DARK MODE (§9 — built around Royal Blue, never pure black) ── */
 .dark {
-  --bg: var(--profile-royal);
-  --surface: color-mix(in srgb, var(--profile-royal) 86%, var(--profile-powder));
-  --surface-sunken: color-mix(in srgb, var(--profile-royal) 80%, #05070f);
-  --surface-secondary: color-mix(in srgb, var(--profile-royal) 80%, var(--profile-powder));
+  /* Four-step surface ladder (Master Prompt §3.4), derived from Royal Blue:
+     page < card < raised < highest. Deeper page, clearer card separation. */
+  --bg: color-mix(in srgb, var(--profile-royal) 58%, #02040b);
+  --surface: color-mix(in srgb, var(--profile-royal) 88%, #02040b);
+  --surface-sunken: color-mix(in srgb, var(--profile-royal) 72%, #02040b);
+  --surface-secondary: color-mix(in srgb, var(--profile-royal) 92%, var(--profile-powder));
 
   --border: color-mix(in srgb, var(--profile-powder) 12%, transparent);
   --border-strong: color-mix(in srgb, var(--profile-powder) 22%, transparent);
@@ -409,6 +411,25 @@ h1, h2, h3 {
   --omnet-yellow: #f2b531;
   --omnet-gradient: linear-gradient(135deg, var(--omnet-cyan), var(--omnet-purple) 45%, var(--omnet-magenta) 70%, var(--omnet-orange));
 }
+
+/* Local dark scope: the signed-in header is Royal Blue in every theme, so its
+   children (search, icon buttons, avatar menu) read the dark tokens. */
+.profile-on-royal {
+  --surface: color-mix(in srgb, var(--profile-royal) 86%, var(--profile-powder));
+  --surface-sunken: color-mix(in srgb, var(--profile-royal) 78%, #05070f);
+  --surface-secondary: color-mix(in srgb, var(--profile-royal) 80%, var(--profile-powder));
+  --border: color-mix(in srgb, var(--profile-powder) 14%, transparent);
+  --border-strong: color-mix(in srgb, var(--profile-powder) 26%, transparent);
+  --text-0: var(--profile-off-white);
+  --text-1: var(--profile-powder);
+  --text-2: color-mix(in srgb, var(--profile-powder) 70%, var(--profile-royal));
+  --accent: color-mix(in srgb, var(--profile-bright-blue) 55%, var(--profile-powder));
+  --accent-soft: color-mix(in srgb, var(--profile-bright-blue) 24%, transparent);
+  --link: color-mix(in srgb, var(--profile-bright-blue) 55%, var(--profile-powder));
+  color: var(--profile-off-white);
+}
+.profile-on-royal .profile-logo-for-light { display: none; }
+.profile-on-royal .profile-logo-for-dark { display: inline-block; }
 
 /* Theme-aware logo: <ProfileLogo> renders both artworks; show one per theme. */
 .profile-logo-for-dark { display: none; }
