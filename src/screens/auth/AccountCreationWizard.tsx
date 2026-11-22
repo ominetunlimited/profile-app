@@ -423,10 +423,14 @@ export function AccountCreationWizard() {
                   key={g}
                   type="button"
                   onClick={() => patch({ goals: checked ? s.goals.filter((x) => x !== g) : [...s.goals, g] })}
-                  className={`rounded-lg border px-3 py-2.5 text-left text-xs font-medium ${
-                    checked ? 'border-accent bg-surface-sunken text-text-0' : 'border-border text-text-1'
+                  aria-pressed={checked}
+                  className={`flex min-h-[48px] items-center gap-2 rounded-xl border-[1.5px] px-3.5 py-2.5 text-left text-[13px] font-medium transition-colors ${
+                    checked ? 'border-accent bg-accent-soft text-text-0' : 'border-border text-text-1 hover:border-border-strong'
                   }`}
                 >
+                  <span aria-hidden className={`flex h-4 w-4 flex-none items-center justify-center rounded-full border-[1.5px] ${checked ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-transparent'}`}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12l5 5 11-11" /></svg>
+                  </span>
                   {g}
                 </button>
               )
@@ -499,10 +503,14 @@ function AccountTypeStep({
               key={p}
               type="button"
               onClick={() => patch({ accountKind: 'individual', pathway: p, orgType: null })}
-              className={`rounded-lg border p-3 text-left ${on ? 'border-accent bg-surface-sunken' : 'border-border'}`}
+              aria-pressed={on}
+              className={`relative min-h-[84px] rounded-xl border-[1.5px] p-4 pe-11 text-left transition-colors ${on ? 'border-accent bg-accent-soft' : 'border-border hover:border-border-strong'}`}
             >
-              <div className="mb-1 text-sm font-semibold capitalize text-text-0">{p}</div>
-              <div className="text-[11px] leading-snug text-text-1">{INDIVIDUAL_CATEGORIES[p].description}</div>
+              <span aria-hidden className={`absolute end-3.5 top-3.5 flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-transparent'}`}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12l5 5 11-11" /></svg>
+              </span>
+              <div className="mb-1 text-[15px] font-semibold capitalize text-text-0">{p}</div>
+              <div className="text-[12.5px] leading-snug text-text-1">{INDIVIDUAL_CATEGORIES[p].description}</div>
             </button>
           )
         })}
