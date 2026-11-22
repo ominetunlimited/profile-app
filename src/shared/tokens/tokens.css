@@ -33,10 +33,10 @@
 
   /* ── Surfaces (light mode: pure white page; Warm Beige / Off-White stay in the
      palette for accents and illustrations but no longer tint the page) ── */
-  --bg: #ffffff;
-  --surface: #ffffff;
-  --surface-sunken: color-mix(in srgb, var(--profile-royal) 5%, #ffffff);
-  --surface-secondary: color-mix(in srgb, var(--profile-powder) 38%, #ffffff);
+  --bg: color-mix(in srgb, var(--profile-beige) 62%, var(--profile-off-white));
+  --surface: var(--profile-off-white);
+  --surface-sunken: color-mix(in srgb, var(--profile-royal) 6%, var(--profile-beige));
+  --surface-secondary: color-mix(in srgb, var(--profile-powder) 45%, var(--profile-off-white));
 
   /* ── Structure ── */
   --border: color-mix(in srgb, var(--profile-royal) 14%, #ffffff);
