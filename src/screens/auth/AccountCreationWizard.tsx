@@ -291,11 +291,11 @@ export function AccountCreationWizard() {
             A PROFILE team member confirms the domain before the workspace goes live — until then it's{' '}
             <span className="font-mono font-semibold">user_submitted</span>.
           </div>
-          <div className="flex gap-2">
-            <Button disabled={!orgValid} onClick={() => patch({ step: 'org-consent' })}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button className="w-full sm:w-auto" disabled={!orgValid} onClick={() => patch({ step: 'org-consent' })}>
               Continue
             </Button>
-            <Button variant="secondary" onClick={() => patch({ step: 'account-type' })}>
+            <Button variant="ghost" className="w-full border border-border-strong sm:w-auto" onClick={() => patch({ step: 'account-type' })}>
               Back
             </Button>
           </div>
@@ -382,11 +382,11 @@ export function AccountCreationWizard() {
               . You'll review both again, in full, after verifying your email.
             </span>
           </label>
-          <div className="flex gap-2">
-            <Button disabled={!individualValid || submitting} onClick={() => void afterIdentity()}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button className="w-full sm:w-auto" disabled={!individualValid || submitting} onClick={() => void afterIdentity()}>
               {submitting ? 'Creating…' : 'Continue'}
             </Button>
-            <Button variant="secondary" onClick={() => patch({ step: s.orgFinalizeAfterIndividual ? 'org-identity-choice' : 'account-type' })}>
+            <Button variant="ghost" className="w-full border border-border-strong sm:w-auto" onClick={() => patch({ step: s.orgFinalizeAfterIndividual ? 'org-identity-choice' : 'account-type' })}>
               Back
             </Button>
           </div>
@@ -436,9 +436,9 @@ export function AccountCreationWizard() {
               )
             })}
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => patch({ step: 'profile-setup' })}>Continue</Button>
-            <Button variant="secondary" onClick={() => patch({ step: 'consent' })}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button className="w-full sm:w-auto" onClick={() => patch({ step: 'profile-setup' })}>Continue</Button>
+            <Button variant="ghost" className="w-full border border-border-strong sm:w-auto" onClick={() => patch({ step: 'consent' })}>
               Back
             </Button>
           </div>
@@ -664,11 +664,11 @@ function ConsentStep({
           </span>
         </label>
       </div>
-      <div className="flex gap-2">
-        <Button disabled={!s.consentIdentity || !s.consentPrivacy} onClick={onContinue}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button className="w-full sm:w-auto" disabled={!s.consentIdentity || !s.consentPrivacy} onClick={onContinue}>
           Continue
         </Button>
-        <Button variant="secondary" onClick={onBack}>
+        <Button variant="ghost" className="w-full border border-border-strong sm:w-auto" onClick={onBack}>
           Back
         </Button>
       </div>
@@ -824,11 +824,11 @@ function JourneySetupStep({
           You'll be offered a draft Marketplace Store listing next — set up now, published only when you're ready.
         </p>
       )}
-      <div className="flex gap-2">
-        <Button disabled={!s.journeyStage} onClick={onContinue}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button className="w-full sm:w-auto" disabled={!s.journeyStage} onClick={onContinue}>
           Continue
         </Button>
-        <Button variant="secondary" onClick={onBack}>
+        <Button variant="ghost" className="w-full border border-border-strong sm:w-auto" onClick={onBack}>
           Back
         </Button>
       </div>
