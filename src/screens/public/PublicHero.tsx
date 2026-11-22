@@ -69,36 +69,42 @@ export function PublicHero() {
     <div className="min-h-screen bg-bg">
       <PublicHeader />
 
-      <section className="relative overflow-hidden px-4 py-14 sm:px-8 sm:py-20 lg:py-24">
+      <section
+        className="relative overflow-hidden px-4 py-14 text-[var(--profile-off-white)] sm:px-8 sm:py-16 lg:py-16"
+        style={{ background: 'linear-gradient(165deg, var(--profile-royal) 0%, color-mix(in srgb, var(--profile-royal) 78%, var(--profile-blue)) 100%)' }}
+      >
+        <span aria-hidden className="pointer-events-none absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full opacity-30" style={{ background: 'var(--profile-blue)' }} />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-[38%] h-56 w-56 rounded-[48px] opacity-20" style={{ background: 'var(--profile-powder)' }} />
+        <span aria-hidden className="pointer-events-none absolute bottom-16 right-[8%] h-20 w-20 rounded-2xl opacity-70" style={{ background: 'var(--profile-gold)' }} />
         {/* §8 — PROFILE geometric background system replaces generic floating
             shapes: one proprietary motif grammar (nodes, links, grid) at low
             opacity, cropped by the viewport, never competing with content. */}
-        <ProfileBackground variant="mixed" className="absolute inset-0" />
+        <ProfileBackground variant="mixed" className="absolute inset-0 text-[var(--profile-powder)] opacity-40" />
         <div className="relative mx-auto grid max-w-[1180px] grid-cols-[minmax(0,1fr)] items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
         <div className="flex min-w-0 flex-col items-center gap-4 text-center lg:items-start lg:text-left">
-          <ProfileLogo variant="symbol" priority className="h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40" />
-          <span className="rounded-full border border-border-strong bg-surface px-3.5 py-1 text-[11.5px] font-medium text-text-1">
+          <ProfileLogo variant="symbol" priority className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36" />
+          <span className="rounded-full border border-white/25 bg-white/10 px-3.5 py-1 text-[11.5px] font-medium text-[var(--profile-powder)]">
             {t('hero.tag')}
           </span>
-          <h1 className="text-balance text-[clamp(34px,6.4vw,64px)] font-extrabold leading-[1.05] tracking-tight text-text-0">
+          <h1 className="text-balance text-[clamp(34px,6.4vw,64px)] font-extrabold leading-[1.05] tracking-tight text-[var(--profile-off-white)]">
             {t('hero.headline')}
           </h1>
-          <p className="max-w-[62ch] text-[clamp(15px,1.6vw,18px)] leading-relaxed text-text-1">{t('hero.subhead')}</p>
+          <p className="max-w-[62ch] text-[clamp(15px,1.6vw,18px)] leading-relaxed text-[var(--profile-powder)]">{t('hero.subhead')}</p>
           <div className="mt-1 flex flex-wrap justify-center gap-3 lg:justify-start">
             <Link
               to="/auth?mode=signup"
-              className="flex h-12 items-center rounded-lg bg-accent-solid px-6 text-[15px] font-semibold text-white shadow-lg"
+              className="flex h-12 items-center rounded-xl bg-[var(--profile-off-white)] px-6 text-[15px] font-semibold text-[var(--profile-royal)] shadow-lg hover:bg-white"
             >
               {t('hero.cta.primary')}
             </Link>
             <a
               href="#story"
-              className="flex h-12 items-center rounded-lg border border-border-strong bg-surface px-5 text-[15px] font-semibold text-text-0"
+              className="flex h-12 items-center rounded-xl border border-white/40 px-5 text-[15px] font-semibold text-[var(--profile-off-white)] hover:bg-white/10"
             >
               {t('hero.cta.secondary')}
             </a>
           </div>
-          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-start overflow-x-auto pb-2 sm:justify-center lg:justify-start">
+          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-start overflow-x-auto rounded-2xl bg-[var(--profile-off-white)] px-5 pb-3 pt-4 text-text-0 sm:justify-center lg:justify-start">
             {JOURNEY.map((n, i) => (
               <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
                 <span className="flex flex-none flex-col items-center gap-2">
@@ -121,7 +127,7 @@ export function PublicHero() {
           </ol>
         </div>
         <aside aria-label="Illustrative preview, not live data" className="hidden gap-3 lg:grid">
-          <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg">
+          <div className="rounded-2xl border border-border bg-surface p-5 text-text-0 shadow-2xl">
             <div className="text-[11px] font-medium text-text-2">Illustrative profile</div>
             <div className="mt-1 text-[15px] font-semibold text-text-0">Verified record, in one place</div>
             <div className="mt-3 flex flex-wrap gap-2 text-[12px]">
@@ -130,11 +136,11 @@ export function PublicHero() {
               <span className="rounded-full bg-trust-soft px-3 py-1 text-trust">Project evidence</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-5">
+          <div className="rounded-2xl border border-border bg-surface p-5 text-text-0 shadow-xl">
             <div className="text-[11px] font-medium text-text-2">Illustrative message</div>
             <div className="mt-1 text-[15px] font-semibold text-text-0">Can you review the brief before Friday?</div>
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-5">
+          <div className="rounded-2xl border border-border bg-surface p-5 text-text-0 shadow-xl">
             <div className="text-[11px] font-medium text-text-2">Illustrative opportunity</div>
             <div className="mt-1 text-[15px] font-semibold text-text-0">Research fellow, urban governance</div>
           </div>
