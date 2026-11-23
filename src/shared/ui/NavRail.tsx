@@ -35,7 +35,7 @@ export function NavRail({ onOpenAll }: { onOpenAll: () => void }) {
   return (
     <nav
       aria-label="Primary"
-      className="sticky top-[53px] hidden h-[calc(100vh-53px)] w-[188px] min-w-[170px] flex-none flex-col gap-0.5 overflow-y-auto border-e border-white/10 bg-[var(--profile-royal)] px-2.5 py-3.5 text-[var(--profile-off-white)] md:flex dark:bg-[color-mix(in_srgb,var(--profile-royal)_82%,#05070f)]"
+      className="sticky top-[53px] hidden h-[calc(100vh-53px)] w-[188px] min-w-[170px] flex-none flex-col gap-0.5 overflow-y-auto border-e border-white/10 bg-[var(--profile-royal)] px-2.5 py-3.5 text-[var(--profile-off-white)] md:flex dark:bg-[#161618]"
     >
       {items.map(({ key, label, to, Icon, count }) => {
         const active = pathname === to || pathname.startsWith(`${to}/`) || (key === 'cv' && pathname.startsWith('/career/cv'))
