@@ -1,3 +1,4 @@
+import { ProfileLogoAnimated } from '@/shared/ui/ProfileLogoAnimated'
 import { useEffect, useState } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { useAdmin } from '@/app/AdminContext'
@@ -163,7 +164,7 @@ export function AdminSettings() {
         <h2 id="contact-h" className="mb-1 text-[15px] font-semibold text-text-0">Support contact details</h2>
         <p className="mb-4 text-xs text-text-1">Shown to everyone on the Help Centre. Leave a field empty to hide it.</p>
         {!settings ? (
-          <p className="text-sm text-text-1">Loading…</p>
+          <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {CONTACT_FIELDS.map((f) => (
@@ -198,7 +199,7 @@ export function AdminSettings() {
         </ol>
         {!isSuper && <p className="mb-3 rounded-lg border border-warning bg-warning-soft p-3 text-xs text-text-0">Only a super administrator can change email delivery. You can see its status here.</p>}
         {!mail ? (
-          <p className="text-sm text-text-1">Loading…</p>
+          <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
         ) : (
           <div className="flex flex-col gap-3.5">
             <label className="flex flex-col gap-1.5">
@@ -281,7 +282,7 @@ export function AdminSettings() {
         </ol>
         {!isSuper && <p className="mb-3 rounded-lg border border-warning bg-warning-soft p-3 text-xs text-text-0">Only a super administrator can change Telegram delivery. You can see its status here.</p>}
         {!notif ? (
-          <p className="text-sm text-text-1">Loading…</p>
+          <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
         ) : (
           <div className="flex flex-col gap-3.5">
             <label className="flex flex-col gap-1.5">

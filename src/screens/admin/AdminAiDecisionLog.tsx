@@ -1,3 +1,4 @@
+import { ProfileLogoAnimated } from '@/shared/ui/ProfileLogoAnimated'
 import { useCallback, useEffect, useState } from 'react'
 import { useAdmin } from '@/app/AdminContext'
 import { platformRoleCan } from '@/app/platformAdminStore'
@@ -92,7 +93,7 @@ export function AdminAiDecisionLog() {
       )}
 
       {entries === null && !error ? (
-        <p className="text-sm text-text-1">Loading…</p>
+        <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-10 text-center text-sm text-text-1">
           <p className="mb-1 font-semibold text-text-0">No AI decisions logged yet.</p>
