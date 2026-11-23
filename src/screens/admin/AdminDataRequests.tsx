@@ -1,3 +1,4 @@
+import { ProfileLogoAnimated } from '@/shared/ui/ProfileLogoAnimated'
 import { useCallback, useEffect, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { findAccountByEmail, useAccountsCacheVersion } from '@/app/demoAccountStore'
@@ -82,7 +83,7 @@ export function AdminDataRequests() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
         <div className="flex flex-col gap-2">
           {items === null ? (
-            <div className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-text-1">Loading…</div>
+            <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
           ) : list.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border-strong bg-surface-sunken p-6 text-center text-sm text-text-1">Nothing waiting.</div>
           ) : (

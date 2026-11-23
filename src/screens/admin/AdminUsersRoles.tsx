@@ -1,3 +1,4 @@
+import { ProfileLogoAnimated } from '@/shared/ui/ProfileLogoAnimated'
 import { useEffect, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Button } from '@/shared/ui/Button'
@@ -112,7 +113,7 @@ export function AdminUsersRoles() {
       )}
 
       {loading ? (
-        <p className="text-sm text-text-1">Loading…</p>
+        <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">

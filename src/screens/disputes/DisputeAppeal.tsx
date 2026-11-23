@@ -1,3 +1,4 @@
+import { ProfileLogoAnimated } from '@/shared/ui/ProfileLogoAnimated'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AppShell } from '@/shared/ui/AppShell'
@@ -204,7 +205,7 @@ export function DisputeAppeal() {
 
         <h2 className="mb-3 text-sm font-semibold text-text-0">Your disputes</h2>
         {disputes === null ? (
-          <p className="text-sm text-text-1">Loading…</p>
+          <div className="flex justify-center py-6"><ProfileLogoAnimated state="loading" size={32} /></div>
         ) : disputes.length === 0 ? (
           <p className="text-sm text-text-1">No disputes filed yet.</p>
         ) : (
