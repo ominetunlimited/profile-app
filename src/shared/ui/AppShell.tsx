@@ -1,3 +1,4 @@
+import { ProfileBackground } from '@/shared/ui/profile'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useAccount } from '@/app/AccountContext'
@@ -71,7 +72,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="relative isolate min-h-screen bg-bg">
+      <ProfileBackground variant="grid" />
       <a href="#main" className="skip-link">
         Skip to main content
       </a>
