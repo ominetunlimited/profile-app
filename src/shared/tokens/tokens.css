@@ -98,20 +98,20 @@
 
 /* ── DARK MODE (§9 — built around Royal Blue, never pure black) ── */
 .dark {
-  /* Four-step surface ladder (Master Prompt §3.4), derived from Royal Blue:
-     page < card < raised < highest. Deeper page, clearer card separation. */
-  --bg: color-mix(in srgb, var(--profile-royal) 58%, #02040b);
-  --surface: color-mix(in srgb, var(--profile-royal) 88%, #02040b);
-  --surface-sunken: color-mix(in srgb, var(--profile-royal) 72%, #02040b);
-  --surface-secondary: color-mix(in srgb, var(--profile-royal) 92%, var(--profile-powder));
+  /* Neutral charcoal ladder (Photoshop-style): canvas < panel < raised < highest.
+     No blue cast in surfaces; Royal Blue stays for brand panels and accents. */
+  --bg: #1e1e20;
+  --surface: #2a2a2d;
+  --surface-sunken: #232326;
+  --surface-secondary: #333337;
 
-  --border: color-mix(in srgb, var(--profile-powder) 12%, transparent);
-  --border-strong: color-mix(in srgb, var(--profile-powder) 22%, transparent);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.17);
 
   /* §9: primary text off-white, secondary powder blue. */
   --text-0: var(--profile-off-white);
-  --text-1: var(--profile-powder);
-  --text-2: color-mix(in srgb, var(--profile-powder) 62%, var(--profile-royal));
+  --text-1: #bcc0c8;
+  --text-2: #8f949e;
 
   /* §9: primary action #1E63D6 (solid fill, off-white text 5.13:1). Links
      need a lighter blue to read on the deep navy — derived from bright+powder. */

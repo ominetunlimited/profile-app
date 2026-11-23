@@ -14,36 +14,48 @@
  *    giving a quiet sense that one PROFILE system exists behind everything.
  *  - §22: scale and opacity reduce automatically on small screens.
  */
-import type { ReactNode } from 'react'
-import { ProfileGrid, ProfileNode, ProfileLink, ProfileOrbit } from './motifs'
+import { useId, type ReactNode } from 'react'
 
 export type BackgroundVariant = 'grid' | 'nodes' | 'orbit' | 'mixed'
 
 const DECOR = 'profile-decor pointer-events-none absolute inset-0 -z-10 overflow-hidden'
 
-/** Soft radial wash so the flat beige/navy reads as a designed surface. */
-function Wash({ onDark }: { onDark?: boolean }) {
-  return (
-    <div
-      className="absolute inset-0"
-      style={{
-        background: onDark
-          ? 'radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--profile-powder) 10%, transparent) 0%, transparent 60%)'
-          : 'radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--profile-powder) 55%, transparent) 0%, transparent 62%)',
-      }}
-    />
-  )
-}
-
 /**
- * A single quiet motif watermark, cropped by the viewport edge. Colour is the
- * geometric token at a low opacity, passed via `color`.
+ * Hexagonal lattice, the PROFILE mark's own shape: hairline strokes on a
+ * pointy-top tiling, faded by a diagonal mask so it dissolves instead of
+ * repeating edge to edge. Two oversized hexagon outlines and a small node
+ * constellation anchor the corners. No gradients washes, no blobs.
  */
-function CroppedMotif({ children, className, opacity }: { children: ReactNode; className: string; opacity: number }) {
+function Lattice({ onDark }: { onDark?: boolean }) {
+  const id = useId().replace(/:/g, '')
+  const ink = onDark ? 'text-white' : 'text-[var(--profile-royal)] dark:text-white'
   return (
-    <div className={`absolute ${className}`} style={{ opacity }} aria-hidden>
-      {children}
-    </div>
+    <svg className={`absolute inset-0 h-full w-full ${ink}`} aria-hidden focusable="false">
+      <defs>
+        <pattern id={`p${id}`} width="27.71" height="48" patternUnits="userSpaceOnUse" patternTransform="scale(1.7)">
+          <path d="M13.86 0 27.71 8V24L13.86 32 0 24V8ZM13.86 32V48" fill="none" stroke="currentColor" strokeWidth="0.55" />
+        </pattern>
+        <linearGradient id={`g${id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="1" />
+          <stop offset="0.55" stopColor="#fff" stopOpacity="0.25" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id={`m${id}`}>
+          <rect width="100%" height="100%" fill={`url(#g${id})`} />
+        </mask>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#p${id})`} mask={`url(#m${id})`} opacity={onDark ? 0.16 : 0.09} />
+      <g fill="none" stroke="currentColor" strokeWidth="1.1" opacity={onDark ? 0.2 : 0.12}>
+        <polygon points="860,-120 1010,-33 1010,141 860,228 710,141 710,-33" transform="translate(0 0)" className="hidden sm:block" />
+        <polygon points="-70,520 40,583 40,709 -70,772 -180,709 -180,583" />
+      </g>
+      <g className="hidden md:block" fill="currentColor" stroke="currentColor" opacity={onDark ? 0.34 : 0.22}>
+        <circle cx="86%" cy="62%" r="3" />
+        <circle cx="92%" cy="72%" r="2.2" />
+        <circle cx="80%" cy="78%" r="2.2" />
+        <path d="M86% 62% L92% 72% M86% 62% L80% 78% M92% 72% L80% 78%" fill="none" strokeWidth="0.8" />
+      </g>
+    </svg>
   )
 }
 
@@ -62,42 +74,11 @@ export interface ProfileBackgroundProps {
  * the decoration is layered behind via -z-10. With no children it renders as a
  * standalone backdrop layer (useful dropped into an already-`relative` section).
  */
-export function ProfileBackground({ variant = 'mixed', onDark, className = '', children }: ProfileBackgroundProps) {
-  // On light surfaces the geometry is Powder; on the dark navy we lift to a
-  // warm Beige so it reads as the same system against #162660 (§8).
-  const geo = onDark ? 'var(--profile-beige)' : 'var(--profile-geometric)'
-  const o = (n: number) => (onDark ? Math.max(2, n - 4) : n) / 100
-
+export function ProfileBackground({ onDark, className = '', children }: ProfileBackgroundProps) {
   return (
     <div className={`relative isolate ${className}`}>
       <div className={DECOR} aria-hidden>
-        <Wash onDark={onDark} />
-        {(variant === 'grid' || variant === 'mixed') && (
-          <div
-            className="absolute inset-0 profile-grid-bg-fine"
-            style={{ opacity: o(onDark ? 5 : 8), color: geo, ['--profile-geometric' as string]: geo }}
-          />
-        )}
-        {(variant === 'nodes' || variant === 'mixed') && (
-          <>
-            <CroppedMotif className="-right-10 -top-10" opacity={o(12)}>
-              <ProfileNode size={220} strokeWidth={1.1} color={geo} />
-            </CroppedMotif>
-            <CroppedMotif className="-bottom-16 -left-12" opacity={o(10)}>
-              <ProfileLink size={200} strokeWidth={1.1} color={geo} />
-            </CroppedMotif>
-          </>
-        )}
-        {(variant === 'orbit' || variant === 'mixed') && (
-          <CroppedMotif className="right-[8%] top-[18%] hidden md:block" opacity={o(12)}>
-            <ProfileOrbit size={140} strokeWidth={1} color={geo} />
-          </CroppedMotif>
-        )}
-        {variant === 'mixed' && (
-          <CroppedMotif className="left-[6%] bottom-[10%] hidden lg:block" opacity={o(10)}>
-            <ProfileGrid size={120} strokeWidth={1} color={geo} />
-          </CroppedMotif>
-        )}
+        <Lattice onDark={onDark} />
       </div>
       {children}
     </div>

@@ -4,7 +4,7 @@ import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { useLanguage } from '@/app/LanguageContext'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
-import { ProfileNode, ProfileSealMotif } from '@/shared/ui/profile/motifs'
+import { IdCard, FolderOpen, BadgeCheck, ShieldCheck, Briefcase, TrendingUp } from 'lucide-react'
 import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
 import { TRUST_TIERS, type TrustScoreResult } from '@/app/trustScore'
@@ -35,13 +35,14 @@ const ILLUSTRATIVE_TRUST_SCORE: TrustScoreResult = {
   lastCalculated: new Date(0).toISOString(),
 }
 
-const JOURNEY = [
-  { key: 'identity', glyph: '1', label: 'Identity', box: 'bg-surface border-border-strong text-text-0', size: 'h-[38px] w-[38px]', edge: 'var(--border-strong)' },
-  { key: 'evidence', glyph: '2', label: 'Evidence', box: 'bg-accent-soft border-accent text-accent', size: 'h-[38px] w-[38px]', edge: 'var(--accent)' },
-  { key: 'verification', label: 'Verification', box: 'bg-trust-soft border-trust text-trust', size: 'h-11 w-11', edge: 'var(--trust)', seal: 'green' as const },
-  { key: 'trust', label: 'Trust', box: 'bg-trust border-trust text-trust motion-safe:animate-[profile-pulse_2.4s_ease-in-out_infinite]', size: 'h-11 w-11', edge: 'var(--trust)', node: true },
-  { key: 'opportunity', glyph: '→', label: 'Opportunity', box: 'bg-gold-soft border-gold text-gold', size: 'h-[38px] w-[38px]', edge: 'var(--gold)' },
-  { key: 'growth', glyph: '↑', label: 'Growth', box: 'bg-coral-soft border-coral text-coral', size: 'h-[38px] w-[38px]', edge: 'var(--coral)' },
+const HEX = 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)'
+const HEX_JOURNEY = [
+  { label: 'Identity', Icon: IdCard, tone: 'var(--profile-powder)' },
+  { label: 'Evidence', Icon: FolderOpen, tone: 'var(--profile-powder)' },
+  { label: 'Verification', Icon: BadgeCheck, tone: 'var(--profile-green)' },
+  { label: 'Trust', Icon: ShieldCheck, tone: 'var(--profile-green)' },
+  { label: 'Opportunity', Icon: Briefcase, tone: 'var(--profile-gold)' },
+  { label: 'Growth', Icon: TrendingUp, tone: 'var(--profile-powder)' },
 ]
 
 const LOOP_TONES = ['bg-accent-soft text-accent', 'bg-trust-soft text-trust', 'bg-gold-soft text-gold', 'bg-coral-soft text-coral']
@@ -73,13 +74,7 @@ export function PublicHero() {
         className="relative overflow-hidden px-4 py-14 text-[var(--profile-off-white)] sm:px-8 sm:py-16 lg:py-16"
         style={{ background: 'linear-gradient(165deg, var(--profile-royal) 0%, color-mix(in srgb, var(--profile-royal) 78%, var(--profile-blue)) 100%)' }}
       >
-        <span aria-hidden className="pointer-events-none absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full opacity-30" style={{ background: 'var(--profile-blue)' }} />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 left-[38%] h-56 w-56 rounded-[48px] opacity-20" style={{ background: 'var(--profile-powder)' }} />
-        <span aria-hidden className="pointer-events-none absolute bottom-16 right-[8%] h-20 w-20 rounded-2xl opacity-70" style={{ background: 'var(--profile-gold)' }} />
-        {/* §8 — PROFILE geometric background system replaces generic floating
-            shapes: one proprietary motif grammar (nodes, links, grid) at low
-            opacity, cropped by the viewport, never competing with content. */}
-        <ProfileBackground variant="mixed" className="absolute inset-0 text-[var(--profile-powder)] opacity-40" />
+        <ProfileBackground onDark className="absolute inset-0" />
         <div className="relative mx-auto grid max-w-[1180px] grid-cols-[minmax(0,1fr)] items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
         <div className="flex min-w-0 flex-col items-center gap-4 text-center lg:items-start lg:text-left">
           <ProfileLogo variant="symbol" priority className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36" />
@@ -104,24 +99,19 @@ export function PublicHero() {
               {t('hero.cta.secondary')}
             </a>
           </div>
-          <ol aria-label="From identity to growth" className="mt-8 flex w-full max-w-[760px] items-start justify-start overflow-x-auto rounded-2xl bg-[var(--profile-off-white)] px-5 pb-3 pt-4 text-text-0 sm:justify-center lg:justify-start">
-            {JOURNEY.map((n, i) => (
-              <li key={n.label} className={`flex items-start ${i === 0 || i === JOURNEY.length - 1 ? '' : 'flex-1'}`}>
+          <ol aria-label="From identity to growth" className="profile-on-royal mt-8 flex w-full max-w-[760px] items-start justify-start overflow-x-auto rounded-2xl border border-white/15 bg-white/[0.04] px-5 pb-3 pt-4 sm:justify-center lg:justify-start">
+            {HEX_JOURNEY.map(({ label, Icon, tone }, i) => (
+              <li key={label} className={`flex items-start ${i === 0 || i === HEX_JOURNEY.length - 1 ? '' : 'flex-1'}`}>
                 <span className="flex flex-none flex-col items-center gap-2">
-                  <span className={`flex items-center justify-center rounded-full border-2 text-[13px] font-bold ${n.size} ${n.box}`}>
-                    {'seal' in n && n.seal ? (
-                      <ProfileSealMotif size={24} />
-                    ) : 'node' in n && n.node ? (
-                      <ProfileNode size={24} />
-                    ) : (
-                      (n as { glyph?: string }).glyph
-                    )}
+                  <span className="relative h-11 w-[38px] flex-none" aria-hidden>
+                    <span className="absolute inset-0" style={{ background: tone, clipPath: HEX }} />
+                    <span className="absolute inset-[1.5px] flex items-center justify-center bg-[color-mix(in_srgb,var(--profile-royal)_88%,#000)] text-white" style={{ clipPath: HEX }}>
+                      <Icon size={17} strokeWidth={1.75} style={{ color: tone }} />
+                    </span>
                   </span>
-                  <span className="whitespace-nowrap text-[10.5px] font-semibold text-text-1">{n.label}</span>
+                  <span className="whitespace-nowrap text-[10.5px] font-semibold text-[var(--profile-powder)]">{label}</span>
                 </span>
-                {i < JOURNEY.length - 1 && (
-                  <span aria-hidden className="mx-1.5 mt-[19px] h-0.5 min-w-[14px] flex-1" style={{ background: `linear-gradient(90deg, ${n.edge}, ${JOURNEY[i + 1].edge})` }} />
-                )}
+                {i < HEX_JOURNEY.length - 1 && <span aria-hidden className="mx-1.5 mt-[21px] h-px min-w-[14px] flex-1 bg-white/25" />}
               </li>
             ))}
           </ol>

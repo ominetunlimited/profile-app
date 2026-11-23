@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="skip-link">
         Skip to main content
       </a>
-      <header className="profile-on-royal sticky top-0 z-40 border-b border-white/10 bg-[var(--profile-royal)] dark:bg-[color-mix(in_srgb,var(--profile-royal)_86%,#02040b)]">
+      <header className="profile-on-royal sticky top-0 z-40 border-b border-white/10 bg-[var(--profile-royal)] dark:bg-[#161618]">
         <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
             <ProfileLogo variant="symbol" className="h-9 w-9 md:hidden" />
@@ -182,7 +182,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {tabs.length > 0 && (
-        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex profile-on-royal border-t border-white/10 bg-[var(--profile-royal)] pb-[env(safe-area-inset-bottom,0px)] dark:bg-[color-mix(in_srgb,var(--profile-royal)_86%,#02040b)] sm:hidden">
+        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex profile-on-royal border-t border-white/10 bg-[var(--profile-royal)] pb-[env(safe-area-inset-bottom,0px)] dark:bg-[#161618] sm:hidden">
           {tabs.map((tab) => {
             const TabIcon = TAB_ICON[tab.key]
             const active = tab.key !== 'create' && (location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))
