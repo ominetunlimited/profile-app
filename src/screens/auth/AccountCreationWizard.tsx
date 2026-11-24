@@ -1,3 +1,4 @@
+import { Building2, Check, User } from 'lucide-react'
 import { useState, type ChangeEvent } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link, useNavigate } from 'react-router-dom'
@@ -489,35 +490,64 @@ function AccountTypeStep({
   onContinue: () => void
 }) {
   const canContinue = (s.accountKind === 'individual' && !!s.pathway) || (s.accountKind === 'organisation' && !!s.orgType)
+  const kinds = [
+    { key: 'individual' as const, title: 'Individual', body: 'A person building a verified professional record: professionals, tradespeople, students, creatives.', Icon: User },
+    { key: 'organisation' as const, title: 'Organisation', body: 'A company, institution, school, agency or association that hires, verifies or collaborates.', Icon: Building2 },
+  ]
+  const check = (on: boolean) => (
+    <span aria-hidden className={`absolute end-3.5 top-3.5 flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-transparent'}`}>
+      <Check size={12} strokeWidth={3.2} />
+    </span>
+  )
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">What best describes you right now?</h1>
-      <p className="mb-5 text-sm text-text-1">This shapes what PROFILE shows you first. Nothing here is permanent.</p>
+      <h1 className="mb-2 text-2xl font-bold tracking-tight text-text-0">Who is this account for?</h1>
+      <p className="mb-5 text-sm text-text-1">Choose one. You will not need to create a second account to do something else later.</p>
 
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Individual</div>
-      <div className="mb-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {(Object.keys(INDIVIDUAL_CATEGORIES) as Pathway[]).map((p) => {
-          const on = s.accountKind === 'individual' && s.pathway === p
+      <div role="radiogroup" aria-label="Account type" className="mb-6 grid gap-3 sm:grid-cols-2">
+        {kinds.map(({ key, title, body, Icon }) => {
+          const on = s.accountKind === key
           return (
             <button
-              key={p}
+              key={key}
               type="button"
-              onClick={() => patch({ accountKind: 'individual', pathway: p, orgType: null })}
-              aria-pressed={on}
-              className={`relative min-h-[84px] rounded-xl border-[1.5px] p-4 pe-11 text-left transition-colors ${on ? 'border-accent bg-accent-soft' : 'border-border hover:border-border-strong'}`}
+              role="radio"
+              aria-checked={on}
+              onClick={() => patch(key === 'individual' ? { accountKind: 'individual', orgType: null } : { accountKind: 'organisation', pathway: null, careerStage: null })}
+              className={`relative flex min-h-[132px] flex-col gap-2 rounded-2xl border-[1.5px] p-5 pe-12 text-left transition-colors ${on ? 'border-accent bg-accent-soft' : 'border-border hover:border-border-strong'}`}
             >
-              <span aria-hidden className={`absolute end-3.5 top-3.5 flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-transparent'}`}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12l5 5 11-11" /></svg>
+              {check(on)}
+              <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${on ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-text-1'}`}>
+                <Icon size={22} strokeWidth={1.75} />
               </span>
-              <div className="mb-1 text-[15px] font-semibold capitalize text-text-0">{p}</div>
-              <div className="text-[12.5px] leading-snug text-text-1">{INDIVIDUAL_CATEGORIES[p].description}</div>
+              <span className="text-[16px] font-semibold text-text-0">{title}</span>
+              <span className="text-[12.5px] leading-snug text-text-1">{body}</span>
             </button>
           )
         })}
       </div>
 
       {s.accountKind === 'individual' && (
-        <div className="mb-6">
+        <section aria-labelledby="path-h" className="mb-6">
+          <h2 id="path-h" className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">What best describes your work?</h2>
+          <div className="mb-5 grid grid-cols-1 gap-2">
+            {(Object.keys(INDIVIDUAL_CATEGORIES) as Pathway[]).map((p) => {
+              const on = s.pathway === p
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => patch({ pathway: p })}
+                  aria-pressed={on}
+                  className={`relative min-h-[84px] rounded-xl border-[1.5px] p-4 pe-11 text-left transition-colors ${on ? 'border-accent bg-accent-soft' : 'border-border hover:border-border-strong'}`}
+                >
+                  {check(on)}
+                  <div className="mb-1 text-[15px] font-semibold capitalize text-text-0">{p}</div>
+                  <div className="text-[12.5px] leading-snug text-text-1">{INDIVIDUAL_CATEGORIES[p].description}</div>
+                </button>
+              )
+            })}
+          </div>
           <Field label="Where are you in your career right now? (optional)">
             <SelectInput value={s.careerStage ?? ''} onChange={(e) => patch({ careerStage: (e.target.value || null) as WizardState['careerStage'] })}>
               <option value="">Prefer not to say</option>
@@ -528,25 +558,32 @@ function AccountTypeStep({
               ))}
             </SelectInput>
           </Field>
-        </div>
+        </section>
       )}
 
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">Organisation, institution or government</div>
-      <div className="mb-5">
-        <SelectInput
-          value={s.orgType ?? ''}
-          onChange={(e) => patch({ accountKind: 'organisation', orgType: (e.target.value || null) as OrganisationType, pathway: null, careerStage: null })}
-        >
-          <option value="">Select organisation type…</option>
-          {ORGANISATION_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </SelectInput>
-      </div>
+      {s.accountKind === 'organisation' && (
+        <section aria-labelledby="org-h" className="mb-6">
+          <h2 id="org-h" className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-2">What kind of organisation?</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {ORGANISATION_TYPES.map((t) => {
+              const on = s.orgType === t
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => patch({ orgType: t as OrganisationType })}
+                  className={`min-h-[48px] rounded-xl border-[1.5px] px-3 py-2 text-left text-[13px] font-medium transition-colors ${on ? 'border-accent bg-accent-soft text-text-0' : 'border-border text-text-1 hover:border-border-strong'}`}
+                >
+                  {t}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
-      <Button disabled={!canContinue} onClick={onContinue}>
+      <Button className="w-full sm:w-auto" disabled={!canContinue} onClick={onContinue}>
         Continue
       </Button>
     </div>

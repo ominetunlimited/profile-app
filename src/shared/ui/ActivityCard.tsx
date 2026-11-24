@@ -64,7 +64,7 @@ export function ActivityCard({ activity, viewerAccount, viewerEmail }: { activit
             <span>{new Date(activity.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
-        <TrustScoreRing trust={authorTrust} size={28} />
+        {authorTrust.total > 0 && <TrustScoreRing trust={authorTrust} size={28} />}
       </div>
 
       <Link to={`/activity/${activity.id}`} className="mb-1 block font-semibold text-text-0 hover:text-accent">
@@ -177,30 +177,44 @@ function MediaGallery({ activityId }: { activityId: string }) {
   useMediaAssetsCacheVersion()
   const assets = listMediaFor('activity', activityId)
   if (assets.length === 0) return null
+  const visual = assets.filter((x) => x.fileCategory === 'image' || x.fileCategory === 'video')
+  const rest = assets.filter((x) => x.fileCategory !== 'image' && x.fileCategory !== 'video')
+  // Media takes the width of the card: one item fills it, two sit side by side,
+  // three or more lead with a wide item. Never a small thumbnail in a corner.
+  const cols = visual.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
   return (
-    <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {assets.map((asset) => (
+    <div className="mb-3 flex flex-col gap-2">
+      {visual.length > 0 && (
+        <div className={`grid gap-1.5 overflow-hidden rounded-xl ${cols}`}>
+          {visual.map((asset, i) => (
+            <MediaThumb key={asset.id} asset={asset} hero={visual.length === 1 || (visual.length >= 3 && i === 0)} wide={visual.length >= 3 && i === 0} />
+          ))}
+        </div>
+      )}
+      {rest.map((asset) => (
         <MediaThumb key={asset.id} asset={asset} />
       ))}
     </div>
   )
 }
 
-function MediaThumb({ asset }: { asset: MediaAsset }) {
+function MediaThumb({ asset, hero, wide }: { asset: MediaAsset; hero?: boolean; wide?: boolean }) {
   const [url, setUrl] = useState<string | null>(null)
   const [viewing, setViewing] = useState<string | null>(null)
   useEffect(() => {
     let cancelled = false
-    // Images show the small thumbnail variant in the feed; the larger preview only loads on open.
-    getSignedMediaUrl(asset, 3600, asset.fileCategory === 'image' ? 'thumb' : 'original').then((signed) => {
+    // Feed tiles use the small variant; a full-width item loads the larger preview.
+    getSignedMediaUrl(asset, 3600, asset.fileCategory === 'image' ? (hero ? 'preview' : 'thumb') : 'original').then((signed) => {
       if (!cancelled) setUrl(signed)
     })
     return () => {
       cancelled = true
     }
-  }, [asset.id])
+  }, [asset.id, hero])
 
-  const loadingBox = <div className="h-28 animate-pulse rounded-lg bg-surface-sunken" title={asset.fileName} />
+  const span = wide ? 'col-span-2' : ''
+  const box = hero ? 'aspect-[16/10] max-h-[560px]' : 'aspect-[4/3]'
+  const loadingBox = <div className={`${box} ${span} w-full animate-pulse bg-surface-sunken`} title={asset.fileName} />
 
   if (asset.fileCategory === 'image') {
     return url ? (
@@ -209,9 +223,9 @@ function MediaThumb({ asset }: { asset: MediaAsset }) {
           type="button"
           onClick={async () => setViewing(await getSignedMediaUrl(asset, 3600, 'preview'))}
           aria-label={`View ${asset.fileName}`}
-          className="block h-28 w-full overflow-hidden rounded-lg border border-border"
+          className={`${span} block w-full overflow-hidden bg-surface-sunken`}
         >
-          <img src={url} alt={asset.fileName} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+          <img src={url} alt={asset.fileName} loading="lazy" decoding="async" className={`${box} w-full object-cover`} />
         </button>
         {viewing && (
           <div role="dialog" aria-modal="true" aria-label={asset.fileName} onClick={() => setViewing(null)} className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4">
@@ -224,11 +238,16 @@ function MediaThumb({ asset }: { asset: MediaAsset }) {
     )
   }
   if (asset.fileCategory === 'video') {
-    return url ? <video src={url} controls className="h-28 w-full rounded-lg border border-border bg-black object-cover" /> : loadingBox
+    return url ? (
+      <video src={url} controls preload="metadata" className={`${box} ${span} w-full bg-black object-contain`} />
+    ) : (
+      loadingBox
+    )
   }
   if (asset.fileCategory === 'audio') {
     return (
-      <div className="col-span-2 rounded-lg border border-border bg-surface-sunken p-2 sm:col-span-3">
+      <div className="rounded-xl border border-border bg-surface-sunken p-3">
+        <div className="mb-1.5 truncate text-xs font-medium text-text-1">{asset.fileName}</div>
         <audio src={url ?? undefined} controls className="w-full" />
       </div>
     )
@@ -239,10 +258,11 @@ function MediaThumb({ asset }: { asset: MediaAsset }) {
       target="_blank"
       rel="noreferrer"
       title={asset.copyrightId}
-      className="flex h-28 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-sunken p-2 text-center text-xs hover:border-accent"
+      className="flex items-center gap-3 rounded-xl border border-border bg-surface-sunken px-4 py-3 hover:border-accent"
     >
-      <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-2">{FILE_CATEGORY_LABEL[asset.fileCategory]}</span>
-      <span className="line-clamp-2 break-all text-text-0">{asset.fileName}</span>
+      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-surface text-[10px] font-bold uppercase tracking-wide text-text-1">{FILE_CATEGORY_LABEL[asset.fileCategory]}</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-0">{asset.fileName}</span>
+      <span className="flex-none text-xs font-semibold text-accent">Open</span>
     </a>
   )
 }

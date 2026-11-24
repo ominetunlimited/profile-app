@@ -80,17 +80,22 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="profile-on-royal sticky top-0 z-40 border-b border-white/10 bg-[var(--profile-royal)] dark:bg-[#161618]">
         <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
-            <ProfileLogo variant="symbol" className="h-9 w-9 md:hidden" />
-            <ProfileLogo variant="horizontal" className="hidden h-9 w-auto md:block" />
+            <span className="block md:hidden">
+              <ProfileLogo variant="symbol" className="h-9 w-9" />
+            </span>
+            <span className="hidden md:block">
+              <ProfileLogo variant="horizontal" className="h-9 w-auto" />
+            </span>
           </Link>
 
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event('open-global-search'))}
-            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border-strong bg-surface-sunken px-3 text-sm text-text-2 sm:max-w-[520px]"
+            aria-label={t('nav.search')}
+            className="flex h-9 w-9 flex-none items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent text-text-1 hover:text-text-0 sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-[520px] sm:justify-start sm:border-border-strong sm:bg-surface-sunken sm:px-3 sm:text-sm sm:text-text-2"
           >
-            <IconSearch size={16} />
-            <span className="truncate">{t('nav.search')}</span>
+            <IconSearch size={19} />
+            <span className="hidden truncate sm:inline">{t('nav.search')}</span>
             <span className="ms-auto hidden rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px] text-text-2 sm:inline">{isMac ? '⌘K' : 'Ctrl K'}</span>
           </button>
 
