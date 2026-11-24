@@ -264,3 +264,21 @@ export function listFeedFor(ownerEmail: string): ActivityRecord[] {
     })
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
+
+/**
+ * "From the community": recent PUBLIC activity from people the viewer is not
+ * connected to or following, so a brand-new account sees real work from other
+ * users straight after onboarding instead of an empty feed. Recency only,
+ * capped, never ranked by popularity (§17.1). Private and connections-only
+ * activity is never included.
+ */
+export function listCommunityFeedFor(ownerEmail: string, limit = 20): ActivityRecord[] {
+  if (!ownerEmail) return []
+  const own = ownerEmail.toLowerCase()
+  const inFeed = new Set(listFeedFor(ownerEmail).map((a) => a.id))
+  return cache
+    .map(rowToRecord)
+    .filter((a) => a.visibility === 'public' && a.ownerEmail.toLowerCase() !== own && !inFeed.has(a.id))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit)
+}

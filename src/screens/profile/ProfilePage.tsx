@@ -169,7 +169,7 @@ export function ProfilePage() {
               </p>
             </div>
             {/* §24.1 <TrustScoreRing /> in the header, compact */}
-            <TrustScoreRing trust={trustScore} size={56} />
+            {trustScore.total > 0 && <TrustScoreRing trust={trustScore} size={56} />}
             {isSelf ? (
               <Link to="/settings" className="mb-1 flex-none rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
                 Edit profile

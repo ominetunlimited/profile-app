@@ -10,7 +10,7 @@ import { CameraCapture } from '@/shared/ui/CameraCapture'
 import { listBookmarks, listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { useAccount } from '@/app/AccountContext'
-import { activitiesStatus, listActivities, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
+import { activitiesStatus, listActivities, listCommunityFeedFor, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
 import { listVerificationRequests, useVerificationVersion } from '@/app/verificationRequestStore'
@@ -80,8 +80,10 @@ export function HomePage() {
 
   const myActivities = listActivities(owner)
   const feed = listFeedFor(owner)
+  const community = listCommunityFeedFor(owner)
   const allItems = [
-    ...feed.map((activity) => ({ kind: 'activity' as const, activity, at: activity.createdAt })),
+    ...feed.map((activity) => ({ kind: 'activity' as const, activity, at: activity.createdAt, community: false })),
+    ...community.map((activity) => ({ kind: 'activity' as const, activity, at: activity.createdAt, community: true })),
     ...listFeedRepostsFor(owner).map((repost) => ({ kind: 'repost' as const, repost, at: repost.createdAt })),
   ].sort((a, b) => b.at.localeCompare(a.at))
   const savedIds = new Set(listBookmarks(owner).filter((b) => b.type === 'activity').map((b) => b.id))
@@ -154,7 +156,7 @@ export function HomePage() {
               type="button"
               onClick={() => setComposerOpen((v) => !v)}
               aria-expanded={composerOpen}
-              className="h-10 flex-none rounded-[9px] bg-accent-solid px-4 text-[13.5px] font-semibold text-white transition-colors hover:opacity-90"
+              className="hidden h-10 flex-none rounded-[9px] bg-accent-solid px-4 sm:block text-[13.5px] font-semibold text-white transition-colors hover:opacity-90"
             >
               Record work
             </button>
@@ -355,6 +357,9 @@ export function HomePage() {
                   <div className="flex flex-col gap-3.5 p-4">
                     {shownItems.map((item, i) => (
                       <div key={item.kind === 'repost' ? `r-${item.repost.id}` : item.activity.id} className="flex flex-col gap-3.5">
+                        {item.kind === 'activity' && item.community && (
+                          <div className="-mb-1.5 text-[11.5px] font-semibold uppercase tracking-wide text-text-2">From the community</div>
+                        )}
                         {item.kind === 'repost' ? (
                           <RepostCard repost={item.repost} viewerAccount={account} viewerEmail={owner} />
                         ) : (
