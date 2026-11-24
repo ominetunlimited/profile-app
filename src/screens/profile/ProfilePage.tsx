@@ -21,6 +21,8 @@ import { PORTFOLIO_TEMPLATES } from '@/screens/career/portfolio/portfolioTemplat
 import { createRequest, findRequest, listRequestsForOwner, respondToRequest, useCvRequestsVersion } from '@/app/cvRequestStore'
 import { computeEarnedBadges, BADGE_CATALOGUE } from '@/app/badgeStore'
 import { BADGE_ICON } from './badgeIcons'
+import { ProfileBackground } from '@/shared/ui/profile'
+import { getSignedMediaUrl, listMediaFor, useMediaAssetsCacheVersion } from '@/app/mediaAssetStore'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { followOrg, followerCount, isFollowing, unfollowOrg, useFollowsCacheVersion } from '@/app/followStore'
 import { acceptConnectionRequest, connectionCount, connectionsInCommon, relationshipState, sendConnectionRequest, useConnectionsCacheVersion, type RelationshipState } from '@/app/connectionStore'
@@ -116,15 +118,14 @@ export function ProfilePage() {
     <AppShell>
       <div className="border-b border-border bg-surface">
         {media.coverDataUrl ? (
-          <img src={media.coverDataUrl} alt="" className="h-36 w-full object-cover sm:h-44" />
+          <img src={media.coverDataUrl} alt="" className="h-40 w-full object-cover sm:h-56" />
         ) : (
-          <div aria-hidden className="relative h-36 overflow-hidden sm:h-44" style={{ background: 'var(--profile-royal)' }}>
-            <span className="absolute -right-10 -top-16 h-64 w-64 rounded-full opacity-50" style={{ background: 'var(--profile-blue)' }} />
-            <span className="absolute bottom-[-30px] right-40 h-28 w-28 rounded-3xl opacity-70" style={{ background: 'var(--profile-gold)' }} />
+          <div aria-hidden className="relative h-40 overflow-hidden sm:h-56" style={{ background: 'linear-gradient(160deg, var(--profile-royal), color-mix(in srgb, var(--profile-royal) 80%, var(--profile-blue)))' }}>
+            <ProfileBackground onDark className="absolute inset-0" />
           </div>
         )}
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
-          <div className="-mt-10 flex flex-wrap items-end gap-4">
+          <div className="-mt-12 flex flex-wrap items-end justify-between gap-3 sm:-mt-16">
             {/* §13 PROFILE frame — the signature identity surface uses the
                 geometric frame, with the verification seal only when the
                 organisation is actually verified (restrained, never influencer-
@@ -133,42 +134,13 @@ export function ProfilePage() {
               <UserAvatar
                 ownerEmail={targetKey}
                 name={name}
-                size={76}
+                size={112}
                 shape="geometric"
                 verified={viewed.accountType === 'organisation' && viewed.registryLevel === 'verified'}
                 sealTone={viewed.accountType === 'organisation' ? 'gold' : 'green'}
               />
             </div>
-            <div className="min-w-0 flex-1 pb-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-bold text-text-0">{name}</h1>
-                {viewed.accountType === 'organisation' && viewed.registryLevel === 'verified' ? (
-                  <VerifiedTag text={ORG_TRUST_STATUS_LABEL[viewed.registryLevel]} tone="gold" />
-                ) : (
-                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-1">
-                    {viewed.accountType === 'individual' ? 'Not yet verified' : ORG_TRUST_STATUS_LABEL[viewed.registryLevel]}
-                  </span>
-                )}
-                {/* §24.1 <PathwayBadge type="academic | competency" /> */}
-                {viewed.accountType === 'individual' && (
-                  <span className="rounded-full border border-trust px-2 py-0.5 text-[11px] font-medium capitalize text-trust">{viewed.pathway}</span>
-                )}
-                {/* §24.2 <OrgType /> — real, from accountTypes.ts's own OrganisationType, no new field. */}
-                {viewed.accountType === 'organisation' && (
-                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium capitalize text-text-1">
-                    {viewed.orgType.replace(/_/g, ' ')}
-                  </span>
-                )}
-              </div>
-              {viewed.accountType === 'individual' && viewed.headline && <p className="text-sm text-text-1">{viewed.headline}</p>}
-              {/* §9.4 Name Collision Resolution — never display a bare name; always
-                  alongside headline/country/trustStatus/username together. */}
-              <p className="font-mono text-xs text-text-2">
-                {viewed.country}
-                {viewed.username ? ` · @${viewed.username}` : ''}
-              </p>
-            </div>
-            {/* §24.1 <TrustScoreRing /> in the header, compact */}
+                        {/* §24.1 <TrustScoreRing /> in the header, compact */}
             {trustScore.total > 0 && <TrustScoreRing trust={trustScore} size={56} />}
             {isSelf ? (
               <Link to="/settings" className="mb-1 flex-none rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
@@ -196,11 +168,40 @@ export function ProfilePage() {
             )}
           </div>
 
+          <div className="mt-4 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-heading text-[clamp(26px,4vw,38px)] font-extrabold leading-tight tracking-tight text-text-0">{name}</h1>
+                {viewed.accountType === 'organisation' && viewed.registryLevel === 'verified' ? (
+                  <VerifiedTag text={ORG_TRUST_STATUS_LABEL[viewed.registryLevel]} tone="gold" />
+                ) : (
+                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-1">
+                    {viewed.accountType === 'individual' ? 'Not yet verified' : ORG_TRUST_STATUS_LABEL[viewed.registryLevel]}
+                  </span>
+                )}
+                {/* §24.1 <PathwayBadge type="academic | competency" /> */}
+                {viewed.accountType === 'individual' && (
+                  <span className="rounded-full border border-trust px-2 py-0.5 text-[11px] font-medium capitalize text-trust">{viewed.pathway}</span>
+                )}
+                {/* §24.2 <OrgType /> — real, from accountTypes.ts's own OrganisationType, no new field. */}
+                {viewed.accountType === 'organisation' && (
+                  <span className="rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium capitalize text-text-1">
+                    {viewed.orgType.replace(/_/g, ' ')}
+                  </span>
+                )}
+              </div>
+              {viewed.accountType === 'individual' && viewed.headline && <p className="text-sm text-text-1">{viewed.headline}</p>}
+              {/* §9.4 Name Collision Resolution — never display a bare name; always
+                  alongside headline/country/trustStatus/username together. */}
+              <p className="font-mono text-xs text-text-2">
+                {viewed.country}
+                {viewed.username ? ` · @${viewed.username}` : ''}
+              </p>
+            </div>
           {/* §24.1 <BadgesRow badges={user.badges} /> — real, computed (badgeStore.ts);
               never rendered for organisations, which have no personal badge concept. */}
           {viewed.accountType === 'individual' && <BadgesRow ownerAccount={viewed} />}
 
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface sm:grid-cols-4 sm:divide-y-0">
             {(
               viewed.accountType === 'organisation'
                 ? [
@@ -223,9 +224,9 @@ export function ProfilePage() {
                     ['Connections', connectionCount(targetKey)],
                   ]
             ).map(([label, value]) => (
-              <div key={label as string} className="rounded-lg border border-border p-2.5 text-center">
-                <div className="font-mono text-lg font-semibold text-text-0">{value}</div>
-                <div className="text-[10.5px] text-text-1">{label}</div>
+              <div key={label as string} className="px-3 py-3.5 text-center">
+                <div className="font-mono text-xl font-semibold text-text-0">{value}</div>
+                <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-text-1">{label}</div>
               </div>
             ))}
           </div>
@@ -261,7 +262,8 @@ export function ProfilePage() {
 
         <div className="py-6">
           {tab === 'overview' && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
+              <FeaturedWork activities={activities} />
               <div>
                 <h2 className="mb-2 font-semibold text-text-0">Recent activities</h2>
                 {activityCount === 0 ? (
@@ -653,5 +655,44 @@ function SelfTagRequestsPanel({ ownerEmail }: { ownerEmail: string }) {
         ))}
       </div>
     </div>
+  )
+}
+
+
+/** Showcase strip: the person's strongest visual work first. Real media only,
+ * newest first, never ranked by popularity. Renders nothing without media. */
+function FeaturedWork({ activities }: { activities: ReturnType<typeof listActivities> }) {
+  useMediaAssetsCacheVersion()
+  const items = activities
+    .map((a) => ({ a, asset: listMediaFor('activity', a.id).find((m) => m.fileCategory === 'image') }))
+    .filter((x): x is { a: (typeof activities)[number]; asset: NonNullable<typeof x.asset> } => !!x.asset)
+    .slice(0, 6)
+  if (items.length === 0) return null
+  return (
+    <section aria-labelledby="fw-h">
+      <h2 id="fw-h" className="mb-3 text-[17px] font-semibold tracking-tight text-text-0">Featured work</h2>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        {items.map(({ a, asset }, i) => (
+          <FeaturedTile key={a.id} title={a.title} asset={asset} lead={i === 0 && items.length > 2} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function FeaturedTile({ title, asset, lead }: { title: string; asset: Parameters<typeof getSignedMediaUrl>[0]; lead?: boolean }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let off = false
+    getSignedMediaUrl(asset, 3600, lead ? 'preview' : 'thumb').then((u) => !off && setUrl(u))
+    return () => {
+      off = true
+    }
+  }, [asset.id, lead])
+  return (
+    <figure className={`group relative overflow-hidden rounded-2xl bg-surface-sunken ${lead ? 'col-span-2 row-span-2 aspect-[4/3]' : 'aspect-[4/3]'}`}>
+      {url ? <img src={url} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" /> : <div className="h-full w-full animate-pulse" />}
+      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 text-[13px] font-semibold text-white">{title}</figcaption>
+    </figure>
   )
 }

@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="skip-link">
         Skip to main content
       </a>
-      <header className="profile-on-royal sticky top-0 z-40 border-b border-white/10 bg-[var(--profile-royal)] dark:bg-[#161618]">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
         <div className={`mx-auto flex items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 ${showRail ? '' : 'max-w-[1200px]'}`}>
           <Link to="/home" className="flex-none" aria-label="PROFILE home">
             <span className="block md:hidden">
@@ -187,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {tabs.length > 0 && (
-        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex profile-on-royal border-t border-white/10 bg-[var(--profile-royal)] pb-[env(safe-area-inset-bottom,0px)] dark:bg-[#161618] sm:hidden">
+        <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur sm:hidden">
           {tabs.map((tab) => {
             const TabIcon = TAB_ICON[tab.key]
             const active = tab.key !== 'create' && (location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))
