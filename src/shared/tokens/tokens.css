@@ -22,30 +22,34 @@
 :root {
   /* ── Raw official palette (§1) — never used directly for text on light
      surfaces except where noted; semantic tokens below derive from these. ── */
-  --profile-royal: #162660;
-  --profile-beige: #f1e4d1;
-  --profile-powder: #d0e6fd;
-  --profile-blue: #2171b5;
-  --profile-bright-blue: #1e63d6;
-  --profile-gold: #d4af37;
-  --profile-off-white: #f8f7ef;
-  --profile-green: #2bc48a;
+  /* PROFILE Design System palette (Figma reference repo). The names are kept so
+     every screen re-colours at once; the values are the design's. */
+  --profile-royal: #0a2e8a;       /* deep brand blue: headings, brand panels */
+  --profile-beige: #f8fafc;       /* page surface */
+  --profile-powder: #dbeafe;      /* quiet blue tints, geometry */
+  --profile-blue: #1255c0;        /* link / hover blue */
+  --profile-bright-blue: #1565d8; /* primary interactive */
+  --profile-gold: #f4b400;        /* achievement, premium */
+  --profile-off-white: #ffffff;   /* cards */
+  --profile-green: #00c853;       /* success, verified */
+  --profile-cyan: #00e5ff;        /* trust accent */
+  --profile-coral: #ff6f59;       /* warmth, milestones */
 
   /* ── Surfaces (light mode: pure white page; Warm Beige / Off-White stay in the
      palette for accents and illustrations but no longer tint the page) ── */
-  --bg: color-mix(in srgb, var(--profile-beige) 62%, var(--profile-off-white));
-  --surface: var(--profile-off-white);
-  --surface-sunken: color-mix(in srgb, var(--profile-royal) 6%, var(--profile-beige));
-  --surface-secondary: color-mix(in srgb, var(--profile-powder) 45%, var(--profile-off-white));
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-sunken: #f1f5f9;
+  --surface-secondary: #eef4ff;
 
   /* ── Structure ── */
-  --border: color-mix(in srgb, var(--profile-royal) 14%, #ffffff);
-  --border-strong: color-mix(in srgb, var(--profile-royal) 30%, #ffffff);
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
 
   /* ── Text (Royal Blue for strong text; derivations clear 4.5:1 on white) ── */
-  --text-0: var(--profile-royal);
-  --text-1: color-mix(in srgb, var(--profile-royal) 70%, #ffffff);
-  --text-2: color-mix(in srgb, var(--profile-royal) 68%, #ffffff);
+  --text-0: #1e293b;
+  --text-1: #475569;
+  --text-2: #64748b;
 
   /* ── Interaction (§11) ── */
   --accent: var(--profile-bright-blue);
@@ -58,9 +62,9 @@
   /* ── Verification / trust (§7 semantic hierarchy) ──
      Light mode: verified/confirmed = a Green deep enough to read as text;
      premium/distinguished = Gold derivation. Both clear 4.5:1. */
-  --trust: color-mix(in srgb, var(--profile-green) 48%, var(--profile-royal));
-  --success: color-mix(in srgb, var(--profile-green) 52%, var(--profile-royal));
-  --gold: color-mix(in srgb, var(--profile-gold) 52%, var(--profile-royal));
+  --trust: #0e7490;
+  --success: #15803d;
+  --gold: #946b00;
   --trust-soft: color-mix(in srgb, var(--profile-green) 14%, transparent);
   --success-soft: color-mix(in srgb, var(--profile-green) 15%, transparent);
   --gold-soft: color-mix(in srgb, var(--profile-gold) 18%, transparent);
@@ -68,9 +72,9 @@
   /* ── Functional status (kept, non-brand — §23 needs distinct error/warning
      states with icon + text + colour; these already exist and are not
      "new brand colours"). Retuned warm to sit on the beige. ── */
-  --warning: #8a5200;
-  --danger: #c2181d;
-  --coral: #c0421f;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --coral: #c2410c;
   --warning-soft: color-mix(in srgb, var(--warning) 15%, transparent);
   --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
   --coral-soft: color-mix(in srgb, var(--coral) 12%, transparent);
@@ -109,7 +113,7 @@
   --border-strong: rgba(255, 255, 255, 0.17);
 
   /* §9: primary text off-white, secondary powder blue. */
-  --text-0: var(--profile-off-white);
+  --text-0: #eceef1;
   --text-1: #bcc0c8;
   --text-2: #8f949e;
 
@@ -122,7 +126,7 @@
   --link: color-mix(in srgb, var(--profile-bright-blue) 55%, var(--profile-powder));
 
   /* §9: verification = Gold / Green, used at full strength on the deep navy. */
-  --trust: var(--profile-green);
+  --trust: var(--profile-cyan);
   --success: var(--profile-green);
   --gold: var(--profile-gold);
   --trust-soft: color-mix(in srgb, var(--profile-green) 16%, transparent);
