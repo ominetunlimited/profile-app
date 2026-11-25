@@ -1,4 +1,4 @@
-import { Building2, Check, User } from 'lucide-react'
+import { IconBuilding, IconCheck, IconPerson } from '@/shared/ui/icons'
 import { useState, type ChangeEvent } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
 import { Link, useNavigate } from 'react-router-dom'
@@ -491,12 +491,12 @@ function AccountTypeStep({
 }) {
   const canContinue = (s.accountKind === 'individual' && !!s.pathway) || (s.accountKind === 'organisation' && !!s.orgType)
   const kinds = [
-    { key: 'individual' as const, title: 'Individual', body: 'A person building a verified professional record: professionals, tradespeople, students, creatives.', Icon: User },
-    { key: 'organisation' as const, title: 'Organisation', body: 'A company, institution, school, agency or association that hires, verifies or collaborates.', Icon: Building2 },
+    { key: 'individual' as const, title: 'Individual', body: 'A person building a verified professional record: professionals, tradespeople, students, creatives.', Icon: IconPerson },
+    { key: 'organisation' as const, title: 'Organisation', body: 'A company, institution, school, agency or association that hires, verifies or collaborates.', Icon: IconBuilding },
   ]
   const check = (on: boolean) => (
     <span aria-hidden className={`absolute end-3.5 top-3.5 flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-accent bg-accent-solid text-white' : 'border-border-strong text-transparent'}`}>
-      <Check size={12} strokeWidth={3.2} />
+      <IconCheck size={12} />
     </span>
   )
   return (
@@ -518,7 +518,7 @@ function AccountTypeStep({
             >
               {check(on)}
               <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${on ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-text-1'}`}>
-                <Icon size={22} strokeWidth={1.75} />
+                <Icon size={22} />
               </span>
               <span className="text-[16px] font-semibold text-text-0">{title}</span>
               <span className="text-[12.5px] leading-snug text-text-1">{body}</span>
