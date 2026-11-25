@@ -1,173 +1,212 @@
 /**
- * PROFILE ICON SYSTEM, extended semantic families (§4, §5).
- *
- * Lucide SVG only (Master Prompt §10.7): one family, 1.75 stroke, 24px grid,
- * colour from currentColor. Names and props are unchanged, so every consumer
- * (badges, profile sections, navigation) picks up the Lucide glyphs untouched.
+ * PROFILE ICON SYSTEM: Hugeicons (the design system's icon family), one stroke,
+ * one sizing rule, colour inherited via currentColor. Exported names and props
+ * are unchanged, so every screen picks the new glyphs up without other edits.
  */
-import { Activity,AlignLeft,AtSign,Award,BadgeCheck,BookUser,Bookmark,Briefcase,ChartColumn,Compass,Copy,FileCheck,FileUser,Flag,FolderOpen,GraduationCap,HandHeart,HeartHandshake,History,Hourglass,IdCard,Landmark,LayoutDashboard,Link2,Lock,Network,Paperclip,Quote,Route,School,ScrollText,ShieldAlert,Stamp,TrendingUp,UserCheck,UserRound,Users } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Activity01Icon,
+  AlertCircleIcon,
+  Analytics01Icon,
+  Archive01Icon,
+  AtIcon,
+  Attachment01Icon,
+  Award01Icon,
+  BankIcon,
+  BookmarkIcon,
+  BriefcaseIcon,
+  CharityIcon,
+  ChartUpIcon,
+  CheckmarkBadge01Icon,
+  Clock01Icon,
+  Compass01Icon,
+  Copy01Icon,
+  DashboardCircleIcon,
+  FileUserIcon,
+  FileValidationIcon,
+  Flag01Icon,
+  FlowConnectionIcon,
+  Folder01Icon,
+  GraduationCapIcon,
+  HeartCheckIcon,
+  HourglassIcon,
+  IdCardIcon,
+  Link02Icon,
+  LockIcon,
+  QuoteDownIcon,
+  Route01Icon,
+  SchoolIcon,
+  Stamp01Icon,
+  TextAlignLeftIcon,
+  UserCheck01Icon,
+  UserGroupIcon,
+  UserIcon,
+  UserStarIcon,
+} from '@hugeicons/core-free-icons'
 
 export interface PIconProps {
   size?: number
   className?: string
 }
 
+const STROKE = 1.6
+
 export function IconIdentity({ size = 20, className }: PIconProps) {
-  return <IdCard size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={IdCardIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconUsername({ size = 20, className }: PIconProps) {
-  return <AtSign size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={AtIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconBio({ size = 20, className }: PIconProps) {
-  return <AlignLeft size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={TextAlignLeftIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconVerify({ size = 20, className }: PIconProps) {
-  return <BadgeCheck size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={CheckmarkBadge01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconVerificationPending({ size = 20, className }: PIconProps) {
-  return <Hourglass size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={HourglassIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconVerificationFailed({ size = 20, className }: PIconProps) {
-  return <ShieldAlert size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={AlertCircleIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconVerificationRequest({ size = 20, className }: PIconProps) {
-  return <FileCheck size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={FileValidationIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconVerificationSource({ size = 20, className }: PIconProps) {
-  return <Stamp size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Stamp01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconAttribution({ size = 20, className }: PIconProps) {
-  return <UserCheck size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserCheck01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCitation({ size = 20, className }: PIconProps) {
-  return <Quote size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={QuoteDownIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconContribution({ size = 20, className }: PIconProps) {
-  return <HeartHandshake size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={HeartCheckIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconInstitution({ size = 20, className }: PIconProps) {
-  return <Landmark size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={BankIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconSchool({ size = 20, className }: PIconProps) {
-  return <School size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={SchoolIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconNgo({ size = 20, className }: PIconProps) {
-  return <HandHeart size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={CharityIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconDepartment({ size = 20, className }: PIconProps) {
-  return <Network size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={FlowConnectionIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconTeam({ size = 20, className }: PIconProps) {
-  return <Users size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserGroupIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconDegree({ size = 20, className }: PIconProps) {
-  return <GraduationCap size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={GraduationCapIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCertificate({ size = 20, className }: PIconProps) {
-  return <Award size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Award01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconAlumni({ size = 20, className }: PIconProps) {
-  return <BookUser size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserStarIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCareerPath({ size = 20, className }: PIconProps) {
-  return <Route size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Route01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconPromotion({ size = 20, className }: PIconProps) {
-  return <TrendingUp size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={ChartUpIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCurrentPosition({ size = 20, className }: PIconProps) {
-  return <Briefcase size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={BriefcaseIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconFormerPosition({ size = 20, className }: PIconProps) {
-  return <History size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Clock01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconId({ size = 20, className }: PIconProps) {
-  return <IdCard size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={IdCardIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCv({ size = 20, className }: PIconProps) {
-  return <FileUser size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={FileUserIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconPortfolio({ size = 20, className }: PIconProps) {
-  return <FolderOpen size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Folder01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconRecord({ size = 20, className }: PIconProps) {
-  return <ScrollText size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Archive01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconAttachment({ size = 20, className }: PIconProps) {
-  return <Paperclip size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Attachment01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconAffiliation({ size = 20, className }: PIconProps) {
-  return <Link2 size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Link02Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconColleague({ size = 20, className }: PIconProps) {
-  return <UserRound size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCommunity({ size = 20, className }: PIconProps) {
-  return <Users size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserGroupIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconExplore({ size = 20, className }: PIconProps) {
-  return <Compass size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Compass01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconDashboard({ size = 20, className }: PIconProps) {
-  return <LayoutDashboard size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={DashboardCircleIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconAnalytics({ size = 20, className }: PIconProps) {
-  return <ChartColumn size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Analytics01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconActivity({ size = 20, className }: PIconProps) {
-  return <Activity size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Activity01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconHistory({ size = 20, className }: PIconProps) {
-  return <History size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Clock01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconCopy({ size = 20, className }: PIconProps) {
-  return <Copy size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Copy01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconReport({ size = 20, className }: PIconProps) {
-  return <Flag size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={Flag01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconPrivacy({ size = 20, className }: PIconProps) {
-  return <Lock size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={LockIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }
 
 export function IconSaved({ size = 20, className }: PIconProps) {
-  return <Bookmark size={size} strokeWidth={1.75} className={className} aria-hidden="true" />
+  return <HugeiconsIcon icon={BookmarkIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} aria-hidden="true" />
 }

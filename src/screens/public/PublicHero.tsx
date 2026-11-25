@@ -4,7 +4,7 @@ import { PublicFooter } from '@/shared/ui/PublicFooter'
 import { useLanguage } from '@/app/LanguageContext'
 import { TrustScoreRing } from '@/shared/ui/TrustScoreRing'
 import { ProfileBackground } from '@/shared/ui/profile/ProfileBackground'
-import { ArrowRight, BadgeCheck, Check, ShieldCheck, TrendingUp, Zap } from 'lucide-react'
+import { IconArrowRight, IconBadgeCheck, IconCheck, IconShieldCheck, IconTrendingUp, IconZap } from '@/shared/ui/icons'
 import { ProfileLogo } from '@/shared/ui/ProfileLogo'
 import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
 import { TRUST_TIERS, type TrustScoreResult } from '@/app/trustScore'
@@ -71,7 +71,7 @@ export function PublicHero() {
         <div className="relative mx-auto grid w-full max-w-[1180px] grid-cols-[minmax(0,1fr)] items-center gap-14 lg:grid-cols-[minmax(0,1fr)_460px]">
           <div className="min-w-0">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-surface-secondary px-3 py-1.5">
-              <Zap size={12} className="text-accent" aria-hidden />
+              <IconZap size={12} className="text-accent" aria-hidden />
               <span className="text-xs font-bold uppercase tracking-wide text-accent">{t('hero.tag')}</span>
             </div>
             <div className="mb-6">
@@ -98,7 +98,7 @@ export function PublicHero() {
                 className="inline-flex min-h-[52px] items-center gap-2 rounded-2xl bg-accent-solid px-6 text-base font-bold text-white shadow-md transition hover:shadow-xl"
               >
                 {t('hero.cta.primary')}
-                <ArrowRight size={18} aria-hidden />
+                <IconArrowRight size={18} aria-hidden />
               </Link>
               <a
                 href="#story"
@@ -114,7 +114,7 @@ export function PublicHero() {
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[10.5px] font-bold uppercase tracking-widest text-text-2">Illustrative profile</span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent-solid px-2.5 py-0.5 text-[11px] font-semibold text-white">
-                  <BadgeCheck size={12} aria-hidden /> Verified
+                  <IconBadgeCheck size={12} aria-hidden /> Verified
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export function PublicHero() {
               <ul className="mt-4 space-y-2">
                 {['Degree confirmed by the institution', 'Role confirmed by the employer', 'Project evidence attached'].map((row) => (
                   <li key={row} className="flex items-center gap-2.5 rounded-xl bg-surface-sunken px-3 py-2.5 text-[13px] font-medium text-text-0">
-                    <Check size={15} className="flex-none text-accent" aria-hidden />
+                    <IconCheck size={15} className="flex-none text-accent" aria-hidden />
                     {row}
                   </li>
                 ))}
@@ -141,13 +141,13 @@ export function PublicHero() {
             </div>
             <div className="absolute -right-3 top-0 w-[250px] rounded-2xl border border-border bg-surface p-3.5 shadow-lg">
               <div className="flex items-center gap-2 text-[11px] font-bold text-text-0">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-surface-secondary text-accent"><TrendingUp size={13} aria-hidden /></span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-surface-secondary text-accent"><IconTrendingUp size={13} aria-hidden /></span>
                 Recruiter alert
               </div>
               <p className="mt-1.5 text-[11.5px] leading-snug text-text-1">A recruiter viewed your profile and matched it to an open role.</p>
             </div>
             <div className="absolute -left-4 bottom-4 rounded-2xl bg-[var(--profile-royal)] px-4 py-3 text-white shadow-lg">
-              <div className="flex items-center gap-2 text-[12px] font-bold"><ShieldCheck size={15} aria-hidden /> Credential verified</div>
+              <div className="flex items-center gap-2 text-[12px] font-bold"><IconShieldCheck size={15} aria-hidden /> Credential verified</div>
               <div className="mt-0.5 text-[11px] text-white/75">Confirmed by the issuing institution</div>
             </div>
           </aside>

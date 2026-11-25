@@ -1,11 +1,50 @@
 /**
- * PROFILE ICON SYSTEM (Master Prompt §10.7): Lucide SVG only, one family, one
- * stroke weight, one sizing rule, colour inherited via currentColor.
- *
- * The exported names and props are unchanged, so every screen that imports an
- * `IconX` from here picks up the Lucide glyphs without any other edit.
+ * PROFILE ICON SYSTEM: Hugeicons (the design system's icon family), one stroke,
+ * one sizing rule, colour inherited via currentColor. Exported names and props
+ * are unchanged, so every screen picks the new glyphs up without other edits.
  */
-import { Bell,MessageSquare,Menu,Search,User,Building2,GraduationCap,Landmark,House,Handshake,Plus,Briefcase,FileText,Tag,Link2,Wrench,Hammer,TriangleAlert,ThumbsUp,Medal,Lightbulb,Sprout,Megaphone,Factory,Check,X,ChevronRight,ChevronLeft,LogIn,Settings,Repeat2,Bookmark,Share2,Star } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Alert02Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  BankIcon,
+  BellIcon,
+  BookmarkIcon,
+  BriefcaseIcon,
+  Building02Icon,
+  Cancel01Icon,
+  FactoryIcon,
+  FileTextIcon,
+  GraduationCapIcon,
+  HammerIcon,
+  HandshakeIcon,
+  HomeIcon,
+  LightbulbIcon,
+  Link02Icon,
+  Login01Icon,
+  Medal01Icon,
+  Megaphone01Icon,
+  Menu01Icon,
+  MessageSquareIcon,
+  Plant01Icon,
+  PlusSignIcon,
+  RepeatIcon,
+  Search01Icon,
+  Settings01Icon,
+  Share08Icon,
+  StarIcon,
+  Tag01Icon,
+  ThumbsUpIcon,
+  Tick02Icon,
+  UserIcon,
+  Wrench01Icon,
+  ArrowRightIcon,
+  CheckmarkBadge01Icon,
+  ShieldCheckIcon,
+  TrendingUpIcon,
+  ZapIcon,
+} from '@hugeicons/core-free-icons'
 
 export interface IconProps {
   size?: number
@@ -13,140 +52,160 @@ export interface IconProps {
   filled?: boolean
 }
 
-const STROKE = 1.75
+const STROKE = 1.6
 
 export function IconBell({ size = 20, className, filled }: IconProps) {
-  return <Bell size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={BellIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconMessage({ size = 20, className, filled }: IconProps) {
-  return <MessageSquare size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={MessageSquareIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconMenu({ size = 20, className, filled }: IconProps) {
-  return <Menu size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Menu01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconSearch({ size = 20, className, filled }: IconProps) {
-  return <Search size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Search01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconPerson({ size = 20, className, filled }: IconProps) {
-  return <User size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={UserIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconBuilding({ size = 20, className, filled }: IconProps) {
-  return <Building2 size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Building02Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconGraduationCap({ size = 20, className, filled }: IconProps) {
-  return <GraduationCap size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={GraduationCapIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconGovernment({ size = 20, className, filled }: IconProps) {
-  return <Landmark size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={BankIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconHome({ size = 20, className, filled }: IconProps) {
-  return <House size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={HomeIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconHandshake({ size = 20, className, filled }: IconProps) {
-  return <Handshake size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={HandshakeIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconPlus({ size = 20, className, filled }: IconProps) {
-  return <Plus size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={PlusSignIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconBriefcase({ size = 20, className, filled }: IconProps) {
-  return <Briefcase size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={BriefcaseIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconDocument({ size = 20, className, filled }: IconProps) {
-  return <FileText size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={FileTextIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconTag({ size = 20, className, filled }: IconProps) {
-  return <Tag size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Tag01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconLink({ size = 20, className, filled }: IconProps) {
-  return <Link2 size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Link02Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconTool({ size = 20, className, filled }: IconProps) {
-  return <Wrench size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Wrench01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconHammer({ size = 20, className, filled }: IconProps) {
-  return <Hammer size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={HammerIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconWarning({ size = 20, className, filled }: IconProps) {
-  return <TriangleAlert size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Alert02Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconThumbsUp({ size = 20, className, filled }: IconProps) {
-  return <ThumbsUp size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={ThumbsUpIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconMedal({ size = 20, className, filled }: IconProps) {
-  return <Medal size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Medal01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconLightbulb({ size = 20, className, filled }: IconProps) {
-  return <Lightbulb size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={LightbulbIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconSeedling({ size = 20, className, filled }: IconProps) {
-  return <Sprout size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Plant01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconMegaphone({ size = 20, className, filled }: IconProps) {
-  return <Megaphone size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Megaphone01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconFactory({ size = 20, className, filled }: IconProps) {
-  return <Factory size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={FactoryIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconCheck({ size = 20, className, filled }: IconProps) {
-  return <Check size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Tick02Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconClose({ size = 20, className, filled }: IconProps) {
-  return <X size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Cancel01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconChevronRight({ size = 20, className, filled }: IconProps) {
-  return <ChevronRight size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={ArrowRight01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconChevronLeft({ size = 20, className, filled }: IconProps) {
-  return <ChevronLeft size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={ArrowLeft01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconEnter({ size = 20, className, filled }: IconProps) {
-  return <LogIn size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Login01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconGear({ size = 20, className, filled }: IconProps) {
-  return <Settings size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Settings01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconRepost({ size = 20, className, filled }: IconProps) {
-  return <Repeat2 size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={RepeatIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconBookmark({ size = 20, className, filled }: IconProps) {
-  return <Bookmark size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={BookmarkIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconShare({ size = 20, className, filled }: IconProps) {
-  return <Share2 size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={Share08Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
 
 export function IconStar({ size = 20, className, filled }: IconProps) {
-  return <Star size={size} strokeWidth={STROKE} className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+  return <HugeiconsIcon icon={StarIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+}
+
+export function IconArrowRight({ size = 20, className, filled }: IconProps) {
+  return <HugeiconsIcon icon={ArrowRightIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+}
+
+export function IconBadgeCheck({ size = 20, className, filled }: IconProps) {
+  return <HugeiconsIcon icon={CheckmarkBadge01Icon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+}
+
+export function IconShieldCheck({ size = 20, className, filled }: IconProps) {
+  return <HugeiconsIcon icon={ShieldCheckIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+}
+
+export function IconTrendingUp({ size = 20, className, filled }: IconProps) {
+  return <HugeiconsIcon icon={TrendingUpIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
+}
+
+export function IconZap({ size = 20, className, filled }: IconProps) {
+  return <HugeiconsIcon icon={ZapIcon} size={size} strokeWidth={STROKE} color="currentColor" className={className} fill={filled ? 'currentColor' : 'none'} aria-hidden="true" />
 }
