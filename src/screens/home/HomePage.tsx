@@ -10,6 +10,7 @@ import { CameraCapture } from '@/shared/ui/CameraCapture'
 import { listBookmarks, listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { useAccount } from '@/app/AccountContext'
+import { IconBadgeCheck, IconSearch, IconTrendingUp } from '@/shared/ui/icons'
 import { activitiesStatus, listActivities, listCommunityFeedFor, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
@@ -18,7 +19,6 @@ import { listOpenJobs, orgDisplayName, useJobsCacheVersion } from '@/app/jobStor
 import { ACCEPTED_FILE_TYPES, categorizeFile, MAX_FILE_SIZE_BYTES, uploadMediaAsset } from '@/app/mediaAssetStore'
 import { useAccountsCacheVersion } from '@/app/demoAccountStore'
 import { useLearningVersion } from '@/app/learningStore'
-import { ProfileSeal } from '@/shared/ui/profile/ProfileSeal'
 import { ProfileLoader } from '@/shared/ui/profile/ProfileLoader'
 import { useCvDetailsVersion } from '@/app/cvDetailsStore'
 import { useConnectionsCacheVersion } from '@/app/connectionStore'
@@ -52,17 +52,11 @@ const FEED_TABS: { key: FeedTab; label: string }[] = [
   { key: 'saved', label: 'Saved' },
 ]
 
-const KIND_TONE: Record<string, { glyph: string; bg: string; ink: string }> = {
-  verification: { glyph: '◷', bg: 'bg-warning-soft', ink: 'text-warning border-warning' },
-  profile: { glyph: '1', bg: 'bg-accent-soft', ink: 'text-accent border-accent' },
-  evidence: { glyph: '✓', bg: 'bg-trust-soft', ink: 'text-trust border-trust' },
-  opportunity: { glyph: '→', bg: 'bg-trust-soft', ink: 'text-trust border-trust' },
-}
-const DEFAULT_TONE = { glyph: '•', bg: 'bg-surface-sunken', ink: 'text-text-1 border-border-strong' }
-
 function greetingFor(hour: number): string {
   return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 }
+
+const KPI_TONES = ['bg-surface-secondary text-accent', 'bg-trust-soft text-trust', 'bg-gold-soft text-gold']
 
 /** Home: a professional command centre — where am I, how am I doing, what matters, what next. */
 export function HomePage() {
@@ -115,7 +109,6 @@ export function HomePage() {
   const healthPct = Math.round(health.reduce((s, h) => s + h.pct, 0) / health.length)
 
   const actions = useMemo(() => recommend(account, 4), [account, versions]) // eslint-disable-line react-hooks/exhaustive-deps
-  const actionsSummary = actions.length === 0 ? '' : `${actions.length} suggestion${actions.length === 1 ? '' : 's'}`
 
   // A real, simple match%: overlap between this account's recorded skills and a job's required skills.
   const matchedOpportunities = listOpenJobs()
@@ -147,20 +140,52 @@ export function HomePage() {
     <AppShell>
       <div className="flex flex-wrap lg:flex-nowrap">
         <div className="flex min-w-0 flex-1 basis-[420px] flex-col gap-4 p-[18px]">
-          <div className="flex flex-wrap items-start justify-between gap-3.5">
-            <div className="min-w-0">
-              <h1 className="font-sans text-[clamp(22px,3vw,30px)] font-semibold leading-tight tracking-tight text-text-0">{greeting}</h1>
-              <p className="mt-1.5 max-w-[56ch] text-[13px] leading-relaxed text-text-1">{greetingSub}</p>
+          <section
+            aria-labelledby="focus-h"
+            className="rounded-2xl p-5 text-white shadow-md sm:p-6"
+            style={{ background: 'linear-gradient(135deg, var(--profile-royal), var(--profile-bright-blue))' }}
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="mb-1 text-xs font-bold uppercase tracking-wider text-white/60">Today's focus</div>
+                <h1 id="focus-h" className="font-heading text-[clamp(22px,3vw,28px)] font-extrabold leading-tight tracking-tight">{greeting}</h1>
+                <p className="mt-1 max-w-[56ch] text-sm leading-relaxed text-white/75">{greetingSub}</p>
+              </div>
+              <div className="flex-none text-right">
+                <div className="font-heading text-[clamp(28px,4vw,38px)] font-black leading-none">{trust.total > 0 ? trust.total : '—'}</div>
+                <div className="mt-1 text-[11px] text-white/60">Trust Score</div>
+              </div>
             </div>
+            {actions.length > 0 && (
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                {actions.slice(0, 4).map((a) => (
+                  <li key={a.key} className="relative rounded-xl border border-white/10 bg-white/10 p-3 transition hover:border-white/25 hover:bg-white/15">
+                    <Link to={a.to} onClick={() => void recordFeedback(owner, a.key, a.kind, 'acted')} className="block no-underline">
+                      <span className="mb-2 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">{KIND_LABEL[a.kind]}</span>
+                      <span className="block text-[13px] font-semibold leading-snug text-white">{a.title}</span>
+                      <span className="mt-2 block text-xs font-bold text-[var(--profile-gold)]">{a.cta} →</span>
+                    </Link>
+                    <button
+                      type="button"
+                      aria-label={`Dismiss: ${a.title}`}
+                      onClick={() => void recordFeedback(owner, a.key, a.kind, 'dismissed')}
+                      className="absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[10.5px] font-medium text-white/60 hover:bg-white/10 hover:text-white"
+                    >
+                      Later
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <button
               type="button"
               onClick={() => setComposerOpen((v) => !v)}
               aria-expanded={composerOpen}
-              className="hidden h-10 flex-none rounded-[9px] bg-accent-solid px-4 sm:block text-[13.5px] font-semibold text-white transition-colors hover:opacity-90"
+              className="mt-4 hidden h-10 items-center rounded-xl bg-white px-4 text-[13.5px] font-bold text-[var(--profile-royal)] hover:bg-white/90 sm:inline-flex"
             >
               Record work
             </button>
-          </div>
+          </section>
 
           {composerOpen && (
             <div className="rounded-[14px] border border-border bg-surface p-4 shadow-sm">
@@ -208,67 +233,19 @@ export function HomePage() {
           </div>
 
           <div className="hidden grid-cols-[repeat(auto-fit,minmax(min(100%,230px),1fr))] gap-3 md:grid">
-            {metrics.map((m) => (
-              <div key={m.label} className="flex flex-col gap-[7px] rounded-[13px] border border-border bg-surface px-4 py-3.5 shadow-sm">
-                <span className="font-mono text-[10px] uppercase tracking-[.08em] text-text-2">{m.label}</span>
-                <span className="font-mono text-[26px] font-semibold tabular-nums tracking-tight text-text-0">{m.value}</span>
+            {metrics.map((m, i) => (
+              <div key={m.label} className="flex flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <span className={`mb-1 flex h-10 w-10 items-center justify-center rounded-xl ${KPI_TONES[i % 3]}`} aria-hidden>
+                  {i === 0 ? <IconBadgeCheck size={20} /> : i === 1 ? <IconTrendingUp size={20} /> : <IconSearch size={20} />}
+                </span>
+                <span className="font-heading text-[28px] font-extrabold leading-none tracking-tight text-text-0">{m.value}</span>
+                <span className="text-[13px] font-semibold text-text-1">{m.label}</span>
                 <span className="text-[11.5px] leading-normal text-text-1">{m.note}</span>
                 <Link to={m.to} className="mt-auto text-[11.5px] font-medium text-accent">{m.link}</Link>
               </div>
             ))}
           </div>
 
-          <section className="overflow-hidden rounded-[14px] border border-border bg-surface shadow-sm" aria-labelledby="matters-today">
-            <div className="flex flex-wrap items-center gap-2.5 border-b border-border px-4 py-3.5">
-              <h2 id="matters-today" className="text-[14.5px] font-semibold text-text-0">What matters today</h2>
-              <span className="text-xs text-text-1">{actionsSummary}</span>
-            </div>
-            {actions.length > 0 ? (
-              actions.map((a) => {
-                const tone = KIND_TONE[a.kind] ?? DEFAULT_TONE
-                return (
-                  <div key={a.key} className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0">
-                    <span aria-hidden className={`flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] border text-[13px] font-semibold ${tone.bg} ${tone.ink}`}>
-                      {a.kind === 'evidence' ? <ProfileSeal size={17} tone="green" /> : tone.glyph}
-                    </span>
-                    <span className="min-w-0 flex-[1_1_240px]">
-                      <span className="mb-1 flex flex-wrap items-center gap-[7px]">
-                        <span className="text-[13px] font-semibold text-text-0">{a.title}</span>
-                        <span className={`rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${tone.bg} ${tone.ink}`}>{KIND_LABEL[a.kind]}</span>
-                      </span>
-                      <span className="block max-w-[62ch] text-[12.5px] leading-relaxed text-text-1">{a.reason}</span>
-                    </span>
-                    <span className="flex flex-none flex-wrap gap-[7px]">
-                      <Link
-                        to={a.to}
-                        onClick={() => void recordFeedback(owner, a.key, a.kind, 'acted')}
-                        className="inline-flex h-[34px] items-center rounded-lg bg-accent-solid px-[13px] text-[12.5px] font-semibold text-white no-underline"
-                      >
-                        {a.cta}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => void recordFeedback(owner, a.key, a.kind, 'dismissed')}
-                        className="h-[34px] rounded-lg border border-border-strong bg-surface px-[11px] text-[12.5px] font-medium text-text-1"
-                      >
-                        Later
-                      </button>
-                    </span>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="px-5 py-[26px] text-center">
-                <div aria-hidden className="mx-auto mb-3 h-9 w-9 rounded-[10px] border-2 border-border-strong" />
-                <div className="mb-[5px] text-[13.5px] font-semibold text-text-0">Nothing needs you right now</div>
-                <div className="mx-auto max-w-[44ch] text-[12.5px] leading-relaxed text-text-1">
-                  {inProgressVerifications.length > 0
-                    ? `${inProgressVerifications.length} verification request${inProgressVerifications.length === 1 ? ' is' : 's are'} in progress. We will tell you the moment ${inProgressVerifications.length === 1 ? 'it responds' : 'either responds'}.`
-                    : 'New suggestions appear as your profile and the platform change.'}
-                </div>
-              </div>
-            )}
-          </section>
 
           <div className="rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5 lg:hidden">
             <div className="mb-1.5 font-mono text-[9.5px] font-semibold tracking-[.09em] text-trust">COPILOT</div>

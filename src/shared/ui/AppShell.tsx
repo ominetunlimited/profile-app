@@ -103,6 +103,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="hidden sm:block">
               <LanguagePicker />
             </span>
+            <Link to="/record" className="mr-1 hidden h-9 items-center gap-1.5 rounded-xl bg-accent-solid px-3.5 text-[13px] font-semibold text-white shadow-sm hover:opacity-90 lg:inline-flex">
+              <IconPlus size={16} />
+              Add activity
+            </Link>
             <Link to="/notifications" aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-1 hover:text-text-0">
               <IconBell size={18} />
               {unread > 0 && (
