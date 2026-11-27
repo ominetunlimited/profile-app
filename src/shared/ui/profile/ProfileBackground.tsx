@@ -53,7 +53,9 @@ function Lattice({ onDark }: { onDark?: boolean }) {
         <circle cx="86%" cy="62%" r="3" />
         <circle cx="92%" cy="72%" r="2.2" />
         <circle cx="80%" cy="78%" r="2.2" />
-        <path d="M86% 62% L92% 72% M86% 62% L80% 78% M92% 72% L80% 78%" fill="none" strokeWidth="0.8" />
+        <line x1="86%" y1="62%" x2="92%" y2="72%" strokeWidth="0.8" />
+        <line x1="86%" y1="62%" x2="80%" y2="78%" strokeWidth="0.8" />
+        <line x1="92%" y1="72%" x2="80%" y2="78%" strokeWidth="0.8" />
       </g>
     </svg>
   )
