@@ -117,20 +117,34 @@ export function ProfilePage() {
   return (
     <AppShell>
       <div className="border-b border-border bg-surface">
-        {media.coverDataUrl ? (
-          <img src={media.coverDataUrl} alt="" className="h-40 w-full object-cover sm:h-56" />
-        ) : (
-          <div aria-hidden className="relative h-40 overflow-hidden sm:h-56" style={{ background: 'linear-gradient(160deg, var(--profile-royal), color-mix(in srgb, var(--profile-royal) 80%, var(--profile-blue)))' }}>
-            <ProfileBackground onDark className="absolute inset-0" />
-          </div>
-        )}
+        <div className="relative">
+          {media.coverDataUrl ? (
+            <img src={media.coverDataUrl} alt="" className="h-44 w-full object-cover sm:h-60" />
+          ) : (
+            <div aria-hidden className="relative h-44 overflow-hidden sm:h-60" style={{ background: 'linear-gradient(135deg, var(--profile-royal), var(--profile-bright-blue))' }}>
+              <ProfileBackground onDark className="absolute inset-0" />
+            </div>
+          )}
+          {isSelf && (
+            <div className="absolute bottom-4 right-4 flex gap-2">
+              <Link to="/settings" className="rounded-xl border border-white/25 bg-white/15 px-3.5 py-2 text-[13px] font-semibold text-white backdrop-blur-sm hover:bg-white/25">
+                Edit profile
+              </Link>
+              {canCv && (
+                <Link to="/career/cv/executive" className="hidden rounded-xl border border-white/25 bg-white/15 px-3.5 py-2 text-[13px] font-semibold text-white backdrop-blur-sm hover:bg-white/25 sm:inline-block">
+                  View CV
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
         <div className="mx-auto max-w-[900px] px-4 pb-5 sm:px-6">
           <div className="-mt-12 flex flex-wrap items-end justify-between gap-3 sm:-mt-16">
             {/* §13 PROFILE frame — the signature identity surface uses the
                 geometric frame, with the verification seal only when the
                 organisation is actually verified (restrained, never influencer-
                 styled). */}
-            <div className="flex-none">
+            <div className="flex-none rounded-[30px] ring-4 ring-surface">
               <UserAvatar
                 ownerEmail={targetKey}
                 name={name}
@@ -142,11 +156,7 @@ export function ProfilePage() {
             </div>
                         {/* §24.1 <TrustScoreRing /> in the header, compact */}
             {trustScore.total > 0 && <TrustScoreRing trust={trustScore} size={56} />}
-            {isSelf ? (
-              <Link to="/settings" className="mb-1 flex-none rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold text-text-0">
-                Edit profile
-              </Link>
-            ) : (
+            {isSelf ? null : (
               account && (
                 <div className="mb-1 flex flex-none gap-2">
                   {/* §24.1 ActionButtons names 'Connect' for individuals; §4.2's
@@ -248,12 +258,13 @@ export function ProfilePage() {
             </Link>
           </div>
         )}
-        <nav className="flex gap-1 border-b border-border py-2">
+        <nav className="my-4 flex gap-1 overflow-x-auto rounded-2xl bg-surface-sunken p-1" aria-label="Profile sections">
           {TABS.filter((t) => t !== 'cv-portfolio' || canCv || canPortfolio).map((t) => (
             <button
               key={t}
               onClick={() => selectTab(t)}
-              className={`rounded-lg px-3 py-2 text-sm font-medium ${tab === t ? 'bg-surface-sunken text-text-0' : 'text-text-1'}`}
+              aria-current={tab === t ? 'page' : undefined}
+              className={`shrink-0 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${tab === t ? 'bg-surface text-accent shadow-sm' : 'text-text-1 hover:text-text-0'}`}
             >
               {TAB_LABEL[t]}
             </button>
