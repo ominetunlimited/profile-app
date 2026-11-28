@@ -4,6 +4,8 @@ import { REACTIONS } from '@/app/reactionStore'
 import { REACTION_ICON } from '@/shared/ui/reactionIcons'
 import { RichText } from './richText'
 import { AttachmentView } from './AttachmentView'
+import { CClock, CCopy, CForward, CMore, CReply, CSelect, CSmile, CTicks, CTrash, CFlag } from './chatIcons'
+import { ChatMenu, MenuItem } from './ChatMenu'
 
 function timeLabel(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
@@ -51,11 +53,11 @@ export function MessageBubble({
 
   function status() {
     if (!mine) return null
-    if (message.status === 'sending') return <span aria-label="Sending">🕓</span>
-    if (message.status === 'failed') return <span aria-label="Failed" className="text-danger">!</span>
-    if (read) return <span aria-label="Read" className="text-[var(--profile-powder)]">✓✓</span>
-    if (otherOnline) return <span aria-label="Delivered">✓✓</span>
-    return <span aria-label="Sent">✓</span>
+    if (message.status === 'sending') return <span aria-label="Sending" className="inline-flex"><CClock size={12} /></span>
+    if (message.status === 'failed') return <span aria-label="Failed" className="inline-flex font-bold text-[#FFB4AB]">!</span>
+    if (read) return <span aria-label="Read" className="inline-flex text-[#7DF3FF]"><CTicks double size={15} /></span>
+    if (otherOnline) return <span aria-label="Delivered" className="inline-flex"><CTicks double size={15} /></span>
+    return <span aria-label="Sent" className="inline-flex"><CTicks size={15} /></span>
   }
 
   async function copy() {
@@ -75,7 +77,7 @@ export function MessageBubble({
         <input type="checkbox" checked={selected} onChange={onToggleSelect} aria-label="Select message" className="mb-3 flex-none" />
       )}
       <div className={`relative max-w-[78%] md:max-w-[72%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>
-        <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${mine ? 'rounded-ee-sm bg-accent-solid text-white' : 'rounded-es-sm bg-surface-sunken text-text-0'} ${selected ? 'ring-2 ring-accent' : ''}`}>
+        <div className={`rounded-[20px] px-3.5 py-2 text-[14px] leading-relaxed shadow-sm ${mine ? 'rounded-ee-md bg-gradient-to-br from-[#1565D8] to-[#0A2E8A] text-white' : 'rounded-es-md border border-border bg-surface text-text-0'} ${selected ? 'ring-2 ring-accent' : ''}`}>
           {showSender && !mine && <div className="mb-0.5 text-[11px] font-semibold text-accent">{displayName(message.senderEmail)}</div>}
           {quoted && (
             <div className="mb-1.5 rounded-lg border-s-2 border-current/50 bg-black/10 px-2 py-1 text-xs opacity-90">
@@ -98,7 +100,7 @@ export function MessageBubble({
               {message.text && <RichText text={message.text} />}
             </>
           )}
-          <div className="mt-0.5 flex items-center justify-end gap-1 text-[10px] opacity-70">
+          <div className={`mt-0.5 flex items-center justify-end gap-1 text-[10.5px] ${mine ? 'text-white/75' : 'text-text-2'}`}>
             <span>{timeLabel(message.sentAt)}</span>
             {status()}
           </div>
@@ -137,56 +139,27 @@ export function MessageBubble({
       </div>
 
       {!deleted && message.status === 'sent' && !selectMode && (
-        <div className="relative flex-none opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 max-sm:opacity-100">
-          <button onClick={() => setMenuOpen((v) => !v)} aria-label="Message actions" aria-haspopup="menu" aria-expanded={menuOpen} className="rounded-md px-1.5 py-1 text-text-2 hover:text-text-0">
-            ⋯
-          </button>
-          {menuOpen && (
-            <div role="menu" className={`absolute bottom-full z-20 mb-1 w-44 rounded-xl border border-border bg-surface p-1 text-xs shadow-lg ${mine ? 'right-0' : 'left-0'}`}>
-              <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { setPickerOpen(true); setMenuOpen(false) }}>
-                React
-              </button>
-              <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { onReply(); setMenuOpen(false) }}>
-                Reply
-              </button>
-              {message.text && (
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={copy}>
-                  {copied ? 'Copied' : 'Copy'}
-                </button>
-              )}
-              <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { onForward(); setMenuOpen(false) }}>
-                Forward
-              </button>
-              <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { onToggleSelect(); setMenuOpen(false) }}>
-                Select
-              </button>
-              {mine ? (
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left text-danger hover:bg-surface-sunken" onClick={() => { deleteMessage(message); setMenuOpen(false) }}>
-                  Delete
-                </button>
-              ) : (
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left text-danger hover:bg-surface-sunken" onClick={() => { onReport(); setMenuOpen(false) }}>
-                  Report
-                </button>
-              )}
-            </div>
-          )}
+        <div className="relative flex flex-none items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 max-sm:opacity-100">
+          <button onClick={() => setPickerOpen((v) => !v)} aria-label="React" title="React" className="flex h-7 w-7 items-center justify-center rounded-full text-text-2 hover:bg-surface-sunken hover:text-text-0"><CSmile size={16} /></button>
+          <button onClick={onReply} aria-label="Reply" title="Reply" className="flex h-7 w-7 items-center justify-center rounded-full text-text-2 hover:bg-surface-sunken hover:text-text-0"><CReply size={16} /></button>
+          <button onClick={() => setMenuOpen((v) => !v)} aria-label="Message actions" aria-haspopup="menu" aria-expanded={menuOpen} title="More" className="flex h-7 w-7 items-center justify-center rounded-full text-text-2 hover:bg-surface-sunken hover:text-text-0"><CMore size={16} /></button>
+          <ChatMenu open={menuOpen} onClose={() => setMenuOpen(false)} align={mine ? 'right' : 'left'} up label="Message actions">
+            {message.text && <MenuItem icon={<CCopy size={17} />} onClick={copy}>{copied ? 'Copied' : 'Copy'}</MenuItem>}
+            <MenuItem icon={<CForward size={17} />} onClick={() => { onForward(); setMenuOpen(false) }}>Forward</MenuItem>
+            <MenuItem icon={<CSelect size={17} />} onClick={() => { onToggleSelect(); setMenuOpen(false) }}>Select</MenuItem>
+            {mine ? (
+              <MenuItem danger icon={<CTrash size={17} />} onClick={() => { deleteMessage(message); setMenuOpen(false) }}>Delete</MenuItem>
+            ) : (
+              <MenuItem danger icon={<CFlag size={17} />} onClick={() => { onReport(); setMenuOpen(false) }}>Report</MenuItem>
+            )}
+          </ChatMenu>
           {pickerOpen && (
-            <div className={`absolute bottom-full z-20 mb-1 flex gap-1 rounded-full border border-border bg-surface p-1 shadow-lg ${mine ? 'right-0' : 'left-0'}`}>
+            <div className={`absolute bottom-full z-20 mb-2 flex gap-0.5 rounded-full border border-border bg-surface p-1.5 shadow-xl ${mine ? 'right-0' : 'left-0'}`}>
               {REACTIONS.map((r) => {
                 const Icon = REACTION_ICON[r.type]
                 return (
-                  <button
-                    key={r.type}
-                    aria-label={r.label}
-                    title={r.label}
-                    onClick={() => {
-                      toggleMessageReaction(message.id, ownerEmail, r.type)
-                      setPickerOpen(false)
-                    }}
-                    className={`rounded-full p-1.5 hover:bg-surface-sunken ${myReaction === r.type ? 'text-accent' : 'text-text-1'}`}
-                  >
-                    <Icon size={18} />
+                  <button key={r.type} aria-label={r.label} title={r.label} onClick={() => { toggleMessageReaction(message.id, ownerEmail, r.type); setPickerOpen(false) }} className={`flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 hover:bg-surface-sunken ${myReaction === r.type ? 'bg-accent-soft text-accent' : 'text-text-1'}`}>
+                    <Icon size={19} />
                   </button>
                 )
               })}

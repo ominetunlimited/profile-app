@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getAttachmentUrl, type MessageAttachment } from '@/app/messageStore'
+import { useRef } from 'react'
 import { ImageViewer } from './ImageViewer'
+import { CAudio, CDownload, CFile, CPause, CPdf, CPlay, CZip } from './chatIcons'
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`
@@ -38,7 +40,7 @@ function ImageAttachment({ attachment }: { attachment: MessageAttachment }) {
   const ratio = attachment.width && attachment.height ? `${attachment.width} / ${attachment.height}` : '4 / 3'
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="block overflow-hidden rounded-lg bg-black/10" style={{ aspectRatio: ratio, width: 240, maxWidth: '100%' }} aria-label={`Open image ${attachment.fileName}`}>
+      <button type="button" onClick={() => setOpen(true)} className="block overflow-hidden rounded-2xl bg-black/10" style={{ aspectRatio: ratio, width: 240, maxWidth: '100%' }} aria-label={`Open image ${attachment.fileName}`}>
         {failed ? (
           <span className="flex h-full items-center justify-center text-xs">Image unavailable</span>
         ) : url ? (
@@ -52,21 +54,37 @@ function ImageAttachment({ attachment }: { attachment: MessageAttachment }) {
   )
 }
 
+function fmtTime(n: number): string {
+  return `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, '0')}`
+}
+
 function AudioAttachment({ attachment }: { attachment: MessageAttachment }) {
   const { url, failed } = useSignedUrl(attachment, 'original')
-  const mins = attachment.durationSeconds ? `${Math.floor(attachment.durationSeconds / 60)}:${String(Math.round(attachment.durationSeconds % 60)).padStart(2, '0')}` : null
+  const ref = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+  const [pos, setPos] = useState(0)
+  const [dur, setDur] = useState(attachment.durationSeconds ?? 0)
+  if (failed) return <span className="flex w-[240px] max-w-full items-center gap-2 text-xs"><CAudio size={16} /> Audio unavailable</span>
   return (
-    <div className="w-[240px] max-w-full">
-      {failed ? (
-        <span className="text-xs">Audio unavailable</span>
-      ) : url ? (
-        <audio controls preload="none" src={url} className="h-10 w-full" />
-      ) : (
-        <span className="text-xs">Loading audio…</span>
-      )}
-      <div className="mt-0.5 text-[10.5px] opacity-70">
-        {attachment.fileName}
-        {mins ? ` · ${mins}` : ''}
+    <div className="flex w-[250px] max-w-full items-center gap-3 py-0.5">
+      <audio
+        ref={ref}
+        src={url ?? undefined}
+        preload="metadata"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => { setPlaying(false); setPos(0) }}
+        onTimeUpdate={(e) => setPos(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => Number.isFinite(e.currentTarget.duration) && setDur(e.currentTarget.duration)}
+      />
+      <button type="button" disabled={!url} onClick={() => (playing ? ref.current?.pause() : void ref.current?.play())} aria-label={playing ? 'Pause voice message' : 'Play voice message'} className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[color-mix(in_srgb,currentColor_15%,transparent)] disabled:opacity-50">
+        {playing ? <CPause size={18} /> : <CPlay size={18} />}
+      </button>
+      <div className="min-w-0 flex-1">
+        <div className="relative h-1.5 rounded-full bg-[color-mix(in_srgb,currentColor_20%,transparent)]">
+          <div className="absolute inset-y-0 start-0 rounded-full bg-current" style={{ width: dur ? `${Math.min(100, (pos / dur) * 100)}%` : '0%' }} />
+        </div>
+        <div className="mt-1 text-[10.5px] opacity-75">{fmtTime(playing || pos > 0 ? pos : dur)}{!url && ' · loading'}</div>
       </div>
     </div>
   )
@@ -74,21 +92,15 @@ function AudioAttachment({ attachment }: { attachment: MessageAttachment }) {
 
 function FileAttachment({ attachment }: { attachment: MessageAttachment }) {
   const { url, failed } = useSignedUrl(attachment, 'original')
-  const label = attachment.category === 'pdf' ? 'PDF' : attachment.category === 'zip' ? 'ZIP' : 'FILE'
+  const Icon = attachment.category === 'pdf' ? CPdf : attachment.category === 'zip' ? CZip : CFile
   return (
-    <a
-      href={url ?? undefined}
-      download={attachment.fileName}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-disabled={!url}
-      className="flex w-[240px] max-w-full items-center gap-2.5 rounded-lg bg-black/10 p-2.5 no-underline"
-    >
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-black/15 text-[10px] font-bold">{label}</span>
+    <a href={url ?? undefined} download={attachment.fileName} target="_blank" rel="noopener noreferrer" aria-disabled={!url} className="flex w-[250px] max-w-full items-center gap-3 rounded-2xl bg-[color-mix(in_srgb,currentColor_10%,transparent)] p-2.5 text-inherit no-underline">
+      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-[color-mix(in_srgb,currentColor_15%,transparent)]"><Icon size={22} /></span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-semibold">{attachment.fileName}</span>
-        <span className="block text-[10.5px] opacity-70">{failed ? 'Unavailable' : `${formatBytes(attachment.sizeBytes)} · tap to download`}</span>
+        <span className="block truncate text-[13px] font-semibold">{attachment.fileName}</span>
+        <span className="block text-[11px] opacity-75">{failed ? 'Unavailable' : formatBytes(attachment.sizeBytes)}</span>
       </span>
+      <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[color-mix(in_srgb,currentColor_15%,transparent)]"><CDownload size={16} /></span>
     </a>
   )
 }

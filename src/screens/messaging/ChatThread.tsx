@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
+import { CArchive, CBlock, CClose, CCopy, CFlag, CForward, CMore, CMute, CSearch, CTrash, CUnmute } from './chatIcons'
 import { IconChevronLeft } from '@/shared/ui/icons'
+import { ChatMenu, MenuItem } from './ChatMenu'
 import {
   blockUser,
   deleteMessage,
@@ -129,57 +131,49 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, emb
 
   return (
     <div className={embedded ? 'flex h-full min-h-0 flex-col bg-surface' : 'flex h-[70vh] flex-col rounded-xl border border-border bg-surface'}>
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-border bg-surface px-3 py-2.5 md:px-4">
         {onBack && (
-          <button onClick={onBack} className="text-sm font-semibold text-accent" aria-label="Back to conversations">
-            <IconChevronLeft size={18} />
+          <button onClick={onBack} aria-label="Back to conversations" className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-text-1 hover:bg-surface-sunken md:hidden">
+            <IconChevronLeft size={20} />
           </button>
         )}
-        {!isGroup && <UserAvatar ownerEmail={otherEmail} name={displayNameFor(otherEmail)} size={36} />}
+        {!isGroup && (
+          <div className="relative flex-none">
+            <UserAvatar ownerEmail={otherEmail} name={displayNameFor(otherEmail)} size={40} />
+            {otherOnline && <span aria-hidden="true" className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[var(--profile-green)] ring-2 ring-[var(--surface)]" />}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-text-0">{isGroup ? groupTitle : displayNameFor(otherEmail)}</div>
-          <div className="h-4 text-[11px] text-text-2" aria-live="polite">
-            {typingNow ? <span className="text-accent">{typingLabel}</span> : otherOnline ? (isGroup ? `${online.length} online` : 'Online') : ''}
+          <div className="truncate text-[15px] font-bold leading-tight text-text-0">{isGroup ? groupTitle : displayNameFor(otherEmail)}</div>
+          <div className="h-4 text-[11.5px] leading-4" aria-live="polite">
+            {typingNow ? <span className="font-medium text-accent">{typingLabel}</span> : otherOnline ? <span className="text-[var(--success)]">{isGroup ? `${online.length} online` : 'Online'}</span> : <span className="text-text-2">{isGroup ? '' : 'Offline'}</span>}
           </div>
         </div>
         {selectMode ? (
-          <div className="flex items-center gap-2 text-xs font-semibold">
-            <span className="text-text-1">{selected.size} selected</span>
-            <button onClick={() => navigator.clipboard?.writeText(selectedMessages.map((m) => m.text).filter(Boolean).join('\n'))} className="text-accent">Copy</button>
-            <button onClick={() => setForwarding(selectedMessages)} className="text-accent">Forward</button>
+          <div className="flex items-center gap-1 text-xs font-semibold">
+            <span className="me-1 text-text-1">{selected.size} selected</span>
+            <button onClick={() => navigator.clipboard?.writeText(selectedMessages.map((m) => m.text).filter(Boolean).join('\n'))} aria-label="Copy selected" title="Copy" className="flex h-9 w-9 items-center justify-center rounded-full text-text-1 hover:bg-surface-sunken"><CCopy size={18} /></button>
+            <button onClick={() => setForwarding(selectedMessages)} aria-label="Forward selected" title="Forward" className="flex h-9 w-9 items-center justify-center rounded-full text-text-1 hover:bg-surface-sunken"><CForward size={18} /></button>
             {selectedMessages.every((m) => m.senderEmail.toLowerCase() === ownerEmail.toLowerCase()) && (
-              <button onClick={async () => { for (const m of selectedMessages) await deleteMessage(m); setSelectMode(false); setSelected(new Set()) }} className="text-danger">Delete</button>
+              <button onClick={async () => { for (const m of selectedMessages) await deleteMessage(m); setSelectMode(false); setSelected(new Set()) }} aria-label="Delete selected" title="Delete" className="flex h-9 w-9 items-center justify-center rounded-full text-danger hover:bg-danger-soft"><CTrash size={18} /></button>
             )}
-            <button onClick={() => { setSelectMode(false); setSelected(new Set()) }} className="text-text-1">Cancel</button>
+            <button onClick={() => { setSelectMode(false); setSelected(new Set()) }} aria-label="Cancel selection" title="Cancel" className="flex h-9 w-9 items-center justify-center rounded-full text-text-1 hover:bg-surface-sunken"><CClose size={18} /></button>
           </div>
         ) : (
-          <div className="relative">
-            <button onClick={() => setMenuOpen((v) => !v)} aria-label="Conversation options" aria-haspopup="menu" aria-expanded={menuOpen} className="rounded-md px-2 py-1 text-text-1 hover:text-text-0">
-              ⋯
-            </button>
-            {menuOpen && (
-              <div role="menu" className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-border bg-surface p-1 text-xs shadow-lg">
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { setSearchOpen((v) => !v); setMenuOpen(false) }}>
-                  Search in conversation
-                </button>
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void setMuted(conversationId, !summary?.muted); setMenuOpen(false) }}>
-                  {summary?.muted ? 'Unmute notifications' : 'Mute notifications'}
-                </button>
-                <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void setArchived(conversationId, !summary?.archived); setMenuOpen(false); onBack?.() }}>
-                  {summary?.archived ? 'Unarchive' : 'Archive'}
-                </button>
-                {!isGroup && (
-                  <>
-                    <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-sunken" onClick={() => { void (blocked ? unblockUser(otherEmail) : blockUser(otherEmail)); setMenuOpen(false) }}>
-                      {blocked ? 'Unblock' : 'Block'}
-                    </button>
-                    <button role="menuitem" className="block w-full rounded-lg px-2.5 py-1.5 text-left text-danger hover:bg-surface-sunken" onClick={() => { setReporting({ type: 'user', id: otherEmail }); setMenuOpen(false) }}>
-                      Report user
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+          <div className="relative flex items-center gap-0.5">
+            <button onClick={() => setSearchOpen((v) => !v)} aria-label="Search in conversation" title="Search" className={`flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-sunken ${searchOpen ? 'bg-accent-soft text-accent' : 'text-text-1'}`}><CSearch size={19} /></button>
+            <button onClick={() => setMenuOpen((v) => !v)} aria-label="Conversation options" aria-haspopup="menu" aria-expanded={menuOpen} title="More" className="flex h-9 w-9 items-center justify-center rounded-full text-text-1 hover:bg-surface-sunken"><CMore size={19} /></button>
+            <ChatMenu open={menuOpen} onClose={() => setMenuOpen(false)} label="Conversation options">
+              <MenuItem icon={<CSearch size={17} />} onClick={() => { setSearchOpen((v) => !v); setMenuOpen(false) }}>Search in conversation</MenuItem>
+              <MenuItem icon={summary?.muted ? <CUnmute size={17} /> : <CMute size={17} />} onClick={() => { void setMuted(conversationId, !summary?.muted); setMenuOpen(false) }}>{summary?.muted ? 'Unmute notifications' : 'Mute notifications'}</MenuItem>
+              <MenuItem icon={<CArchive size={17} />} onClick={() => { void setArchived(conversationId, !summary?.archived); setMenuOpen(false); onBack?.() }}>{summary?.archived ? 'Unarchive' : 'Archive'}</MenuItem>
+              {!isGroup && (
+                <>
+                  <MenuItem icon={<CBlock size={17} />} onClick={() => { void (blocked ? unblockUser(otherEmail) : blockUser(otherEmail)); setMenuOpen(false) }}>{blocked ? 'Unblock' : 'Block'}</MenuItem>
+                  <MenuItem danger icon={<CFlag size={17} />} onClick={() => { setReporting({ type: 'user', id: otherEmail }); setMenuOpen(false) }}>Report user</MenuItem>
+                </>
+              )}
+            </ChatMenu>
           </div>
         )}
       </div>
@@ -207,7 +201,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, emb
         </div>
       )}
 
-      <div ref={scroller} onScroll={onScroll} className="flex-1 overflow-y-auto bg-surface px-4 py-5 md:px-5">
+      <div ref={scroller} onScroll={onScroll} className="flex-1 overflow-y-auto bg-surface-sunken px-3 py-5 md:px-6">
         {hasEarlier(conversationId) && (
           <div className="mb-3 text-center">
             <button
@@ -215,14 +209,14 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, emb
                 prevHeight.current = scroller.current?.scrollHeight ?? null
                 void loadEarlier(conversationId)
               }}
-              className="rounded-full border border-border-strong px-3 py-1 text-xs font-semibold text-text-1"
+              className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-text-1 shadow-sm hover:text-text-0"
             >
               Load earlier messages
             </button>
           </div>
         )}
         {messages.length === 0 ? (
-          <p className="text-center text-sm text-text-1">{isGroup ? 'No messages yet — start the conversation with the group.' : 'Say hello — this is a real, private thread between you two.'}</p>
+          <p className="mx-auto mt-10 max-w-xs rounded-2xl border border-border bg-surface px-4 py-3 text-center text-sm text-text-1 shadow-sm">{isGroup ? 'No messages yet — start the conversation with the group.' : 'Say hello — this is a real, private thread between you two.'}</p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {messages.map((m) => {
@@ -231,7 +225,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, emb
               lastDay = label
               return (
                 <div key={m.id} className="flex flex-col gap-2.5">
-                  {showDay && <div className="self-center rounded-full bg-surface-sunken px-3 py-0.5 text-[11px] font-medium text-text-2">{label}</div>}
+                  {showDay && <div className="self-center rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-semibold text-text-2 shadow-sm">{label}</div>}
                   <MessageBubble
                     message={m}
                     ownerEmail={ownerEmail}
@@ -268,7 +262,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, emb
 
       {forwarding && (
         <div role="dialog" aria-modal="true" aria-label="Forward to" className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4" onClick={() => setForwarding(null)}>
-          <div className="max-h-[70vh] w-[min(420px,100%)] overflow-y-auto rounded-2xl border border-border bg-surface p-4" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[70vh] w-[min(420px,100%)] overflow-y-auto rounded-3xl border border-border bg-surface p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-2 font-semibold text-text-0">Forward to…</div>
             {listConversations().filter((c) => c.conversationId !== conversationId).length === 0 ? (
               <p className="text-sm text-text-1">No other conversations to forward to.</p>
@@ -294,7 +288,7 @@ function ReportDialog({ target, onClose, onDone }: { target: { type: 'message' |
   const [error, setError] = useState<string | null>(null)
   return (
     <div role="dialog" aria-modal="true" aria-label="Report" className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-[min(380px,100%)] rounded-2xl border border-border bg-surface p-4" onClick={(e) => e.stopPropagation()}>
+      <div className="w-[min(380px,100%)] rounded-3xl border border-border bg-surface p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-2 font-semibold text-text-0">Report {target.type === 'message' ? 'message' : 'user'}</div>
         <select value={reason} onChange={(e) => setReason(e.target.value)} aria-label="Reason" className="mb-3 min-h-[40px] w-full rounded-lg border border-border-strong bg-surface px-2 text-sm">
           {['Spam or scam', 'Harassment or abuse', 'Impersonation', 'Inappropriate content', 'Other'].map((r) => <option key={r}>{r}</option>)}
