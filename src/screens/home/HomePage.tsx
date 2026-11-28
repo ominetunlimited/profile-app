@@ -10,7 +10,7 @@ import { CameraCapture } from '@/shared/ui/CameraCapture'
 import { listBookmarks, listFeedRepostsFor, useSocialCacheVersion } from '@/app/socialStore'
 import { EntityAutocomplete } from '@/shared/ui/EntityAutocomplete'
 import { useAccount } from '@/app/AccountContext'
-import { IconBadgeCheck, IconSearch, IconTrendingUp } from '@/shared/ui/icons'
+import { IconBadgeCheck, IconBriefcase, IconCheck, IconChevronRight, IconMedal, IconSearch, IconTrendingUp, IconWarning } from '@/shared/ui/icons'
 import { activitiesStatus, listActivities, listCommunityFeedFor, listFeedFor, ownerKey, postActivity, retryActivities, useActivitiesCacheVersion } from '@/app/activityStore'
 import { listActiveCampaignsForPlacement, useCampaignsCacheVersion } from '@/app/adStore'
 import { computeTrustScore } from '@/app/trustScore'
@@ -55,8 +55,6 @@ const FEED_TABS: { key: FeedTab; label: string }[] = [
 function greetingFor(hour: number): string {
   return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 }
-
-const KPI_TONES = ['bg-surface-secondary text-accent', 'bg-trust-soft text-trust', 'bg-gold-soft text-gold']
 
 /** Home: a professional command centre — where am I, how am I doing, what matters, what next. */
 export function HomePage() {
@@ -106,7 +104,6 @@ export function HomePage() {
     { label: 'Verification coverage', value: `${verificationCoveragePct}%`, pct: Math.max(2, verificationCoveragePct), tone: 'bg-trust' },
     { label: 'Skills mapped', value: `${distinctSkills.length}`, pct: Math.max(2, Math.min(100, distinctSkills.length * 5)), tone: 'bg-accent' },
   ]
-  const healthPct = Math.round(health.reduce((s, h) => s + h.pct, 0) / health.length)
 
   const actions = useMemo(() => recommend(account, 4), [account, versions]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -119,7 +116,7 @@ export function HomePage() {
     })
     .filter((m) => m.matchPct > 0)
     .sort((a, b) => b.matchPct - a.matchPct)
-    .slice(0, 2)
+  const matchedTop = matchedOpportunities.slice(0, 3)
 
   const greeting = isFirstRun ? `Welcome, ${firstName}.` : `${greetingFor(new Date().getHours())}, ${firstName}.`
   const greetingSub = isFirstRun
@@ -130,141 +127,121 @@ export function HomePage() {
         ? `Nothing needs your attention today. ${inProgressVerifications.length} verification request${inProgressVerifications.length === 1 ? ' is' : 's are'} in progress.`
         : 'Nothing needs your attention today.'
 
-  const metrics = [
-    { label: 'Verified records', value: String(verifiedCount), note: 'Records confirmed by an institution or employer.', to: '/trust-passport', link: 'View all records' },
-    { label: 'Career readiness', value: '—', note: isFirstRun ? 'Calculated once you have recorded work.' : 'Not calculated yet — it needs a role to measure against.', to: '/career-growth', link: "See what's missing" },
-    { label: 'Profile views by verifiers', value: '—', note: 'Recruiters and institutions only. Not a vanity count.', to: '/notifications', link: 'Who viewed' },
-  ]
 
   return (
     <AppShell>
-      <div className="flex flex-wrap lg:flex-nowrap">
-        <div className="flex min-w-0 flex-1 basis-[420px] flex-col gap-4 p-[18px]">
-          <section
-            aria-labelledby="focus-h"
-            className="rounded-2xl p-5 text-white shadow-md sm:p-6"
-            style={{ background: 'linear-gradient(135deg, var(--profile-royal), var(--profile-bright-blue))' }}
-          >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="mb-1 text-xs font-bold uppercase tracking-wider text-white/60">Today's focus</div>
-                <h1 id="focus-h" className="font-heading text-[clamp(22px,3vw,28px)] font-extrabold leading-tight tracking-tight">{greeting}</h1>
-                <p className="mt-1 max-w-[56ch] text-sm leading-relaxed text-white/75">{greetingSub}</p>
-              </div>
-              <div className="flex-none text-right">
-                <div className="font-heading text-[clamp(28px,4vw,38px)] font-black leading-none">{trust.total > 0 ? trust.total : '—'}</div>
-                <div className="mt-1 text-[11px] text-white/60">Trust Score</div>
-              </div>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 pb-24 lg:px-6 lg:pb-6">
+        <section
+          aria-labelledby="focus-h"
+          className="rounded-2xl p-5 text-white shadow-md sm:p-6"
+          style={{ background: 'linear-gradient(135deg, var(--profile-royal), var(--profile-bright-blue))' }}
+        >
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-white/60">Today's focus</div>
+              <h1 id="focus-h" className="font-heading text-[clamp(22px,3vw,28px)] font-extrabold leading-tight tracking-tight">{greeting}</h1>
+              <p className="mt-1 max-w-[56ch] text-sm leading-relaxed text-white/75">{greetingSub}</p>
             </div>
-            {actions.length > 0 && (
-              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                {actions.slice(0, 4).map((a) => (
-                  <li key={a.key} className="relative rounded-xl border border-white/10 bg-white/10 p-3 transition hover:border-white/25 hover:bg-white/15">
-                    <Link to={a.to} onClick={() => void recordFeedback(owner, a.key, a.kind, 'acted')} className="block no-underline">
-                      <span className="mb-2 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">{KIND_LABEL[a.kind]}</span>
-                      <span className="block text-[13px] font-semibold leading-snug text-white">{a.title}</span>
-                      <span className="mt-2 block text-xs font-bold text-[var(--profile-gold)]">{a.cta} →</span>
-                    </Link>
-                    <button
-                      type="button"
-                      aria-label={`Dismiss: ${a.title}`}
-                      onClick={() => void recordFeedback(owner, a.key, a.kind, 'dismissed')}
-                      className="absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[10.5px] font-medium text-white/60 hover:bg-white/10 hover:text-white"
-                    >
-                      Later
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button
-              type="button"
-              onClick={() => setComposerOpen((v) => !v)}
-              aria-expanded={composerOpen}
-              className="mt-4 hidden h-10 items-center rounded-xl bg-white px-4 text-[13.5px] font-bold text-[var(--profile-royal)] hover:bg-white/90 sm:inline-flex"
-            >
-              Record work
-            </button>
-          </section>
-
-          {composerOpen && (
-            <div className="rounded-[14px] border border-border bg-surface p-4 shadow-sm">
-              <Composer owner={owner} onClose={() => setComposerOpen(false)} onPosted={() => setComposerOpen(false)} />
-            </div>
-          )}
-
-          {isFirstRun && (
-            <div className="rounded-[14px] border border-accent bg-accent-soft px-5 py-[18px]">
-              <div className="mb-1.5 text-[14.5px] font-semibold text-text-0">Your first five minutes</div>
-              <p className="mb-3.5 max-w-[60ch] text-[13px] leading-relaxed text-text-1">
-                Nothing here is filled in yet, and that is the point — PROFILE is built from your actual work. Three steps put something real on your profile today.
-              </p>
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,190px),1fr))] gap-2.5">
-                {[
-                  { step: 'STEP 1 · 2 MIN', title: 'Confirm who you are', body: 'Name, field of work, location. Nothing public until you say so.' },
-                  { step: 'STEP 2 · 3 MIN', title: 'Record one piece of work', body: 'Something you finished recently. Attach whatever evidence you have.' },
-                  { step: 'STEP 3', title: 'Send it for verification', body: 'We show you who can confirm it and what they will see.' },
-                ].map((s) => (
-                  <div key={s.step} className="rounded-[11px] border border-border bg-surface px-3.5 py-[13px]">
-                    <div className="mb-[7px] font-mono text-[10px] tracking-[.08em] text-accent">{s.step}</div>
-                    <div className="mb-[5px] text-[12.5px] font-semibold text-text-0">{s.title}</div>
-                    <div className="text-[11.5px] leading-relaxed text-text-1">{s.body}</div>
-                  </div>
-                ))}
-              </div>
-              <Link to="/onboarding" className="mt-3.5 inline-flex h-[38px] items-center rounded-lg bg-accent-solid px-[15px] text-[13px] font-semibold text-white no-underline">
-                Start step 1
-              </Link>
-            </div>
-          )}
-
-          {/* Mobile leads with the two numbers that change, then actions, then activity. */}
-          <div className="flex gap-2.5 lg:hidden">
-            <div className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-[13px] py-3">
-              <div className="mb-1.5 font-mono text-[9.5px] tracking-[.08em] text-text-2">TRUST SCORE</div>
-              <div className="font-mono text-[21px] font-semibold tabular-nums text-text-0">{trust.total > 0 ? trust.total : '—'}</div>
-              <Link to="/trust-passport" className="mt-1.5 block text-[11px] font-medium text-trust">How it's calculated</Link>
-            </div>
-            <div className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-[13px] py-3">
-              <div className="mb-1.5 font-mono text-[9.5px] tracking-[.08em] text-text-2">PROFILE HEALTH</div>
-              <div className="font-mono text-[21px] font-semibold tabular-nums text-text-0">{healthPct}%</div>
-              <div className="mt-2 h-[5px] overflow-hidden rounded-[3px] bg-surface-sunken"><div className="h-full rounded-[3px] bg-accent" style={{ width: `${healthPct}%` }} /></div>
+            <div className="flex-none text-right">
+              <div className="font-heading text-[clamp(28px,4vw,38px)] font-black leading-none">{trust.total > 0 ? trust.total : '—'}</div>
+              <div className="mt-1 text-[11px] text-white/60">Trust Score</div>
             </div>
           </div>
+          {actions.length > 0 && (
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {actions.slice(0, 4).map((a) => (
+                <li key={a.key} className="relative rounded-xl border border-white/10 bg-white/10 p-3 transition hover:border-white/25 hover:bg-white/15">
+                  <Link to={a.to} onClick={() => void recordFeedback(owner, a.key, a.kind, 'acted')} className="block no-underline">
+                    <span className="mb-2 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/85">{KIND_LABEL[a.kind]}</span>
+                    <span className="block text-[13px] font-semibold leading-snug text-white">{a.title}</span>
+                    <span className="mt-2 block text-xs font-bold text-[var(--profile-gold)]">{a.cta} →</span>
+                  </Link>
+                  <button
+                    type="button"
+                    aria-label={`Dismiss: ${a.title}`}
+                    onClick={() => void recordFeedback(owner, a.key, a.kind, 'dismissed')}
+                    className="absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[10.5px] font-medium text-white/60 hover:bg-white/10 hover:text-white"
+                  >
+                    Later
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <button
+            type="button"
+            onClick={() => setComposerOpen((v) => !v)}
+            aria-expanded={composerOpen}
+            className="mt-4 hidden h-10 items-center rounded-xl bg-white px-4 text-[13.5px] font-bold text-[var(--profile-royal)] hover:bg-white/90 sm:inline-flex"
+          >
+            Record work
+          </button>
+        </section>
 
-          <div className="hidden grid-cols-[repeat(auto-fit,minmax(min(100%,230px),1fr))] gap-3 md:grid">
-            {metrics.map((m, i) => (
-              <div key={m.label} className="flex flex-col gap-1.5 rounded-2xl border border-border bg-surface p-4 shadow-sm">
-                <span className={`mb-1 flex h-10 w-10 items-center justify-center rounded-xl ${KPI_TONES[i % 3]}`} aria-hidden>
-                  {i === 0 ? <IconBadgeCheck size={20} /> : i === 1 ? <IconTrendingUp size={20} /> : <IconSearch size={20} />}
+        {composerOpen && (
+          <div className="rounded-[14px] border border-border bg-surface p-4 shadow-sm">
+            <Composer owner={owner} onClose={() => setComposerOpen(false)} onPosted={() => setComposerOpen(false)} />
+          </div>
+        )}
+
+        {isFirstRun && (
+          <div className="rounded-[14px] border border-accent bg-accent-soft px-5 py-[18px]">
+            <div className="mb-1.5 text-[14.5px] font-semibold text-text-0">Your first five minutes</div>
+            <p className="mb-3.5 max-w-[60ch] text-[13px] leading-relaxed text-text-1">
+              Nothing here is filled in yet, and that is the point — PROFILE is built from your actual work. Three steps put something real on your profile today.
+            </p>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,190px),1fr))] gap-2.5">
+              {[
+                { step: 'STEP 1 · 2 MIN', title: 'Confirm who you are', body: 'Name, field of work, location. Nothing public until you say so.' },
+                { step: 'STEP 2 · 3 MIN', title: 'Record one piece of work', body: 'Something you finished recently. Attach whatever evidence you have.' },
+                { step: 'STEP 3', title: 'Send it for verification', body: 'We show you who can confirm it and what they will see.' },
+              ].map((s) => (
+                <div key={s.step} className="rounded-[11px] border border-border bg-surface px-3.5 py-[13px]">
+                  <div className="mb-[7px] font-mono text-[10px] tracking-[.08em] text-accent">{s.step}</div>
+                  <div className="mb-[5px] text-[12.5px] font-semibold text-text-0">{s.title}</div>
+                  <div className="text-[11.5px] leading-relaxed text-text-1">{s.body}</div>
+                </div>
+              ))}
+            </div>
+            <Link to="/onboarding" className="mt-3.5 inline-flex h-[38px] items-center rounded-lg bg-accent-solid px-[15px] text-[13px] font-semibold text-white no-underline">
+              Start step 1
+            </Link>
+          </div>
+        )}
+
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              { label: 'Profile views', value: '—', note: 'By verifiers only', Icon: IconSearch, tone: 'bg-surface-secondary text-accent' },
+              { label: 'Verified records', value: String(verifiedCount), note: 'Confirmed by an issuer', Icon: IconBadgeCheck, tone: 'bg-trust-soft text-trust' },
+              { label: 'Opportunities', value: String(matchedOpportunities.length), note: 'Matched to your skills', Icon: IconBriefcase, tone: 'bg-gold-soft text-gold' },
+              { label: 'Trust Score', value: trust.total > 0 ? String(trust.total) : '—', note: trust.total > 0 ? `${trust.tier.label} tier` : 'Starts at your first verified record', Icon: IconMedal, tone: 'bg-surface-secondary text-accent' },
+            ].map(({ label, value, note, Icon, tone }) => (
+              <div key={label} className="rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:shadow-md">
+                <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tone}`} aria-hidden>
+                  <Icon size={20} />
                 </span>
-                <span className="font-heading text-[28px] font-extrabold leading-none tracking-tight text-text-0">{m.value}</span>
-                <span className="text-[13px] font-semibold text-text-1">{m.label}</span>
-                <span className="text-[11.5px] leading-normal text-text-1">{m.note}</span>
-                <Link to={m.to} className="mt-auto text-[11.5px] font-medium text-accent">{m.link}</Link>
+                <div className="mt-3 font-heading text-2xl font-extrabold leading-none tracking-tight text-text-0">{value}</div>
+                <div className="mt-1 text-xs font-semibold text-text-1">{label}</div>
+                <div className="mt-0.5 text-[11px] text-text-2">{note}</div>
               </div>
             ))}
           </div>
 
-
-          <div className="rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5 lg:hidden">
-            <div className="mb-1.5 font-mono text-[9.5px] font-semibold tracking-[.09em] text-trust">COPILOT</div>
-            <p className="text-xs leading-relaxed text-text-0">Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting.</p>
-          </div>
-
-          <section className="overflow-hidden rounded-[14px] border border-border bg-surface shadow-sm" aria-labelledby="pro-activity">
-            <div className="flex flex-wrap items-center gap-3 px-4 pt-[13px]">
-              <h2 id="pro-activity" className="flex-1 text-[14.5px] font-semibold text-text-0">Professional activity</h2>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0">
+          <section className="min-w-0" aria-labelledby="pro-activity">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <h2 id="pro-activity" className="flex-1 font-heading text-base font-extrabold text-text-0">Activity Feed</h2>
               <button type="button" onClick={() => setExplainOpen((v) => !v)} aria-expanded={explainOpen} className="flex-none text-xs font-medium text-accent">
                 Why this order?
               </button>
             </div>
             {explainOpen && (
-              <p className="mx-4 mt-2.5 rounded-lg bg-surface-sunken px-3 py-2 text-xs leading-relaxed text-text-1">
+              <p className="mb-3 rounded-lg bg-surface-sunken px-3 py-2 text-xs leading-relaxed text-text-1">
                 Newest first: your own records, plus records and reposts from the people and organisations you follow or are connected with. Nothing is boosted or hidden by engagement.
               </p>
             )}
-            <div role="tablist" className="flex gap-4 overflow-auto border-b border-border px-4 pt-2.5">
+            <div role="tablist" className="mb-4 flex gap-1 overflow-auto">
               {FEED_TABS.map((t) => (
                 <button
                   key={t.key}
@@ -272,7 +249,7 @@ export function HomePage() {
                   role="tab"
                   aria-selected={tab === t.key}
                   onClick={() => setTab(t.key)}
-                  className={`-mb-px flex-none whitespace-nowrap border-b-2 pb-2.5 text-[12.5px] ${tab === t.key ? 'border-accent font-semibold text-text-0' : 'border-transparent text-text-1'}`}
+                  className={`flex-none whitespace-nowrap rounded-lg px-3 py-1 text-xs font-medium transition-colors ${tab === t.key ? 'bg-accent-solid text-white shadow-sm' : 'text-text-1 hover:bg-surface-sunken'}`}
                 >
                   {t.label}
                 </button>
@@ -280,7 +257,7 @@ export function HomePage() {
             </div>
 
             {status === 'loading' && allItems.length === 0 ? (
-              <div className="flex flex-col gap-3.5 p-4" role="status" aria-live="polite">
+              <div className="flex flex-col gap-3.5" role="status" aria-live="polite">
                 {[1, 2].map((n) => (
                   <div key={n} className="rounded-xl border border-border p-[15px]">
                     <div className="mb-3 flex items-center gap-2.5">
@@ -302,7 +279,7 @@ export function HomePage() {
             ) : (
               <>
                 {status === 'degraded' && (
-                  <div role="alert" className="m-4 rounded-xl border border-warning bg-warning-soft px-[18px] py-4">
+                  <div role="alert" className="mb-4 rounded-xl border border-warning bg-warning-soft px-[18px] py-4">
                     <div className="mb-1.5 text-[13.5px] font-semibold text-text-0">⚠ Showing your last synced activity</div>
                     <p className="mb-3 max-w-[60ch] text-[12.5px] leading-relaxed text-text-0">
                       The activity service is not responding.{' '}
@@ -314,7 +291,7 @@ export function HomePage() {
                   </div>
                 )}
                 {shownItems.length === 0 ? (
-                  <div className="px-5 py-[34px] text-center">
+                  <div className="rounded-2xl border border-border bg-surface px-5 py-[34px] text-center">
                     <div aria-hidden className="mx-auto mb-3.5 h-10 w-10 rounded-[11px] border-2 border-dashed border-border-strong" />
                     <div className="mb-1.5 text-sm font-semibold text-text-0">{tab === 'saved' ? 'Nothing saved yet' : tab === 'verified' ? 'No verified records yet' : 'No activity here yet'}</div>
                     <p className="mx-auto mb-3.5 max-w-[46ch] text-[12.5px] leading-relaxed text-text-1">
@@ -331,7 +308,7 @@ export function HomePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3.5 p-4">
+                  <div className="flex flex-col gap-4">
                     {shownItems.map((item, i) => (
                       <div key={item.kind === 'repost' ? `r-${item.repost.id}` : item.activity.id} className="flex flex-col gap-3.5">
                         {item.kind === 'activity' && item.community && (
@@ -353,87 +330,100 @@ export function HomePage() {
               </>
             )}
           </section>
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-heading text-sm font-extrabold text-text-0">Trust Profile</h3>
+                <Link to="/trust-passport" className="text-xs font-semibold text-accent">View Report</Link>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative h-[84px] w-[84px] flex-none">
+                  <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(var(--accent) 0turn ${trust.total / 1000}turn, var(--surface-sunken) ${trust.total / 1000}turn 1turn)` }} />
+                  <div className="absolute inset-[8px] flex flex-col items-center justify-center rounded-full bg-surface">
+                    <span className="font-heading text-[22px] font-extrabold tabular-nums text-text-0">{trust.total > 0 ? trust.total : '—'}</span>
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                  {health.map((h) => (
+                    <div key={h.label}>
+                      <div className="mb-0.5 flex justify-between gap-2 text-xs text-text-1">
+                        <span>{h.label}</span>
+                        <span className="font-mono">{h.value}</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-surface-sunken"><div className={`h-1.5 rounded-full ${h.tone}`} style={{ width: `${h.pct}%` }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-3 text-[11px] leading-relaxed text-text-2">Measures evidence and verification depth. It is not a popularity score.</p>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="font-heading text-sm font-extrabold text-text-0">Verification Status</h3>
+                <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-[11px] font-semibold text-accent">{verifiedCount} of {verifications.length}</span>
+              </div>
+              {verifications.length === 0 ? (
+                <p className="text-xs text-text-1">No verification requests yet. Verified records are what raise your Trust Score.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {verifications.slice(0, 5).map((v) => {
+                    const done = v.status === 'verified'
+                    const rejected = v.status === 'rejected'
+                    return (
+                      <div key={v.id} className="flex items-center gap-2.5">
+                        <span className={`flex h-5 w-5 flex-none items-center justify-center rounded-full ${done ? 'bg-accent-solid text-white' : rejected ? 'bg-surface-sunken text-text-2' : 'bg-warning-soft text-warning'}`}>
+                          {done ? <IconCheck size={12} /> : <IconWarning size={11} />}
+                        </span>
+                        <span className="min-w-0 flex-1 text-xs leading-tight text-text-0">{v.moduleName}</span>
+                        {!done && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rejected ? 'bg-surface-sunken text-text-1' : 'bg-warning-soft text-warning'}`}>{rejected ? 'Action' : 'Pending'}</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              <Link to="/trust-passport" className="mt-3 flex min-h-[38px] w-full items-center justify-center rounded-xl border border-border-strong text-[13px] font-semibold text-text-0 hover:bg-surface-sunken">
+                {verifications.length === 0 ? 'Start verification' : 'Complete Verification'}
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="font-heading text-sm font-extrabold text-text-0">Top Matches</h3>
+                <Link to="/opportunities" className="flex items-center gap-0.5 text-xs font-semibold text-accent">View all <IconChevronRight size={12} /></Link>
+              </div>
+              {matchedTop.length === 0 ? (
+                <p className="text-xs text-text-1">No open listing overlaps your recorded skills yet. Tag skills on your records to see matches.</p>
+              ) : (
+                <div className="space-y-1">
+                  {matchedTop.map(({ job, matchPct }) => (
+                    <Link key={job.id} to={`/job/${job.id}`} className="group flex items-start gap-3 rounded-xl p-3 no-underline transition-colors hover:bg-surface-sunken">
+                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-surface-secondary text-accent" aria-hidden><IconBriefcase size={17} /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-xs font-semibold leading-tight text-text-0">{job.title}</span>
+                        <span className="mt-0.5 block text-xs text-text-1">{orgDisplayName(job.orgEmail)}</span>
+                        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-[10.5px] font-semibold text-accent"><IconTrendingUp size={9} /> {matchPct}% match</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl p-5 text-white" style={{ background: 'linear-gradient(135deg, var(--profile-royal), var(--profile-bright-blue))' }}>
+              <div className="mb-1 flex items-center gap-2 text-sm font-extrabold font-heading"><IconSearch size={16} /> Who viewed your profile</div>
+              <p className="text-xs leading-relaxed text-white/75">Recruiters and institutions that opened your profile appear here. Never a vanity count.</p>
+              <Link to="/notifications" className="mt-3 flex w-full items-center justify-center rounded-xl bg-[var(--profile-gold)] py-2 text-xs font-bold text-[#111111] hover:opacity-90">See who viewed</Link>
+            </div>
+
+            <Link to="/career/advisor" className="block rounded-2xl border border-border bg-trust-soft p-5 no-underline">
+              <div className="mb-1.5 font-mono text-[10px] font-semibold tracking-widest text-trust">COPILOT</div>
+              <p className="mb-3 text-[12.5px] leading-relaxed text-text-0">Ask PROFILE Advisor where your recorded evidence stands against a role you are targeting, grounded in your real records.</p>
+              <span className="inline-flex h-8 items-center rounded-lg bg-accent-solid px-3 text-xs font-semibold text-white">Ask Advisor</span>
+            </Link>
+          </div>
         </div>
-
-        <aside className="flex min-w-[250px] flex-[1_1_100%] flex-col gap-3.5 border-t border-border bg-surface-sunken px-3.5 py-[18px] lg:w-[292px] lg:flex-[0_0_292px] lg:border-s lg:border-t-0">
-          <div className="hidden flex-wrap items-center gap-3.5 rounded-[13px] border border-border bg-surface p-[15px] lg:flex">
-            <div className="relative h-[78px] w-[78px] flex-none">
-              <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(var(--trust) 0turn ${trust.total / 1000}turn, var(--surface-sunken) ${trust.total / 1000}turn 1turn)` }} />
-              <div className="absolute inset-[9px] flex flex-col items-center justify-center rounded-full bg-surface">
-                <span className="font-mono text-[21px] font-semibold tabular-nums tracking-tight text-text-0">{trust.total > 0 ? trust.total : '—'}</span>
-              </div>
-            </div>
-            <div className="min-w-[112px] flex-1">
-              <div className="mb-[3px] text-[12.5px] font-semibold text-text-0">Trust Score</div>
-              <p className="mb-2 text-[11.5px] leading-relaxed text-text-1">
-                {trust.total > 0 ? `${trust.tier.label} tier.` : 'Your score starts once your first record is verified.'}
-              </p>
-              <Link to="/trust-passport" className="text-[11.5px] font-medium text-trust">How this is calculated</Link>
-            </div>
-          </div>
-
-          <div className="hidden rounded-[13px] border border-border bg-surface p-[15px] lg:block">
-            <div className="mb-[11px] flex items-baseline justify-between gap-2">
-              <span className="text-[12.5px] font-semibold text-text-0">Profile health</span>
-              <span className="font-mono text-[11.5px] tabular-nums text-text-1">{healthPct}%</span>
-            </div>
-            {health.map((h) => (
-              <div key={h.label} className="mb-2.5">
-                <div className="mb-1 flex justify-between gap-2">
-                  <span className="text-[11.5px] text-text-1">{h.label}</span>
-                  <span className="font-mono text-[10.5px] text-text-2">{h.value}</span>
-                </div>
-                <div className="h-[5px] overflow-hidden rounded-[3px] bg-surface-sunken"><div className={`h-full rounded-[3px] ${h.tone}`} style={{ width: `${h.pct}%` }} /></div>
-              </div>
-            ))}
-            <p className="border-t border-border pt-1 text-[11px] leading-relaxed text-text-1">Health measures evidence and verification depth. It is not a popularity score.</p>
-          </div>
-
-          <Link to="/career/advisor" className="hidden rounded-r-xl border-l-[3px] border-trust bg-trust-soft p-3.5 no-underline lg:block">
-            <div className="mb-2 font-mono text-[9.5px] font-semibold tracking-[.09em] text-trust">COPILOT</div>
-            <p className="mb-2.5 text-[12.5px] leading-relaxed text-text-0">
-              Ask PROFILE Advisor where your recorded evidence stands against a role you're targeting — grounded in your real records.
-            </p>
-            <span className="inline-flex h-[31px] items-center rounded-[7px] bg-accent-solid px-[11px] text-[11.5px] font-semibold text-white">Ask Advisor</span>
-          </Link>
-
-          <div className="rounded-[13px] border border-border bg-surface p-[15px]">
-            <div className="mb-[11px] text-[12.5px] font-semibold text-text-0">Matched opportunities</div>
-            {matchedOpportunities.length === 0 ? (
-              <p className="mb-2.5 text-[11.5px] text-text-1">No open listing overlaps your recorded skills yet.</p>
-            ) : (
-              matchedOpportunities.map(({ job, matchPct }) => (
-                <Link key={job.id} to={`/job/${job.id}`} className="mb-[11px] block border-b border-border pb-[11px] no-underline">
-                  <span className="mb-1 flex items-baseline justify-between gap-2">
-                    <span className="text-[12.5px] font-semibold text-text-0">{job.title}</span>
-                    <span className="flex-none font-mono text-[10.5px] tabular-nums text-trust">{matchPct}%</span>
-                  </span>
-                  <span className="mb-1.5 block text-[11.5px] text-text-1">{orgDisplayName(job.orgEmail)}</span>
-                  <span className="block text-[11px] leading-normal text-text-1">Based on skills you've recorded that this listing asks for.</span>
-                </Link>
-              ))
-            )}
-            <Link to="/opportunities" className="text-[11.5px] font-medium text-accent">All opportunities</Link>
-          </div>
-
-          <div className="rounded-[13px] border border-border bg-surface p-[15px]">
-            <div className="mb-2.5 text-[12.5px] font-semibold text-text-0">Verification in progress</div>
-            {inProgressVerifications.length === 0 ? (
-              <p className="mb-2.5 text-[11.5px] text-text-1">Nothing in progress right now.</p>
-            ) : (
-              inProgressVerifications.map((v) => (
-                <div key={v.id} className="mb-2.5 flex items-start gap-[9px]">
-                  <span className="mt-[5px] h-2 w-2 flex-none rounded-full bg-trust" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[11.5px] font-medium text-text-0">{v.moduleName}</span>
-                    <span className="block text-[11px] leading-normal text-text-1">{v.status.replace(/_/g, ' ')} · {v.issuerName}</span>
-                  </span>
-                </div>
-              ))
-            )}
-            <Link to="/trust-passport" className="text-[11.5px] font-medium text-accent">Trust Center</Link>
-          </div>
-        </aside>
       </div>
     </AppShell>
   )
