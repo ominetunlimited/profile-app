@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { UserAvatar } from '@/shared/ui/UserAvatar'
+import { IconChevronLeft } from '@/shared/ui/icons'
 import {
   blockUser,
   deleteMessage,
@@ -41,7 +42,7 @@ function dayLabel(iso: string): string {
   return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle }: { ownerEmail: string; conversationId: string; onBack?: () => void; groupTitle?: string }) {
+export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle, embedded = false }: { ownerEmail: string; conversationId: string; onBack?: () => void; groupTitle?: string; embedded?: boolean }) {
   const isGroup = !!groupTitle
   useChatVersion()
   const otherEmail = isGroup ? '' : otherParticipant(conversationId, ownerEmail)
@@ -127,11 +128,11 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle }: {
   let lastDay = ''
 
   return (
-    <div className="flex h-[70vh] flex-col rounded-xl border border-border bg-surface">
-      <div className="flex items-center gap-2 border-b border-border p-3">
+    <div className={embedded ? 'flex h-full min-h-0 flex-col bg-surface' : 'flex h-[70vh] flex-col rounded-xl border border-border bg-surface'}>
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
         {onBack && (
           <button onClick={onBack} className="text-sm font-semibold text-accent" aria-label="Back to conversations">
-            ←
+            <IconChevronLeft size={18} />
           </button>
         )}
         {!isGroup && <UserAvatar ownerEmail={otherEmail} name={displayNameFor(otherEmail)} size={36} />}
@@ -206,7 +207,7 @@ export function ChatThread({ ownerEmail, conversationId, onBack, groupTitle }: {
         </div>
       )}
 
-      <div ref={scroller} onScroll={onScroll} className="flex-1 overflow-y-auto p-4">
+      <div ref={scroller} onScroll={onScroll} className="flex-1 overflow-y-auto bg-surface px-4 py-5 md:px-5">
         {hasEarlier(conversationId) && (
           <div className="mb-3 text-center">
             <button

@@ -4,6 +4,7 @@ import { AppShell } from '@/shared/ui/AppShell'
 import { useAccount } from '@/app/AccountContext'
 import { ownerKey } from '@/app/activityStore'
 import { conversationIdFor, setChatUser, startConversationWith } from '@/app/messageStore'
+import { IconMessage } from '@/shared/ui/icons'
 import { ChatThread } from './ChatThread'
 import { ConversationList } from './ConversationList'
 import { CommunityDirectory } from '@/screens/communities/CommunityDirectory'
@@ -56,16 +57,18 @@ export function MessagingCommunities({ initialTab }: { initialTab?: (typeof TABS
         </div>
 
         {tab === 'messages' && (
-          <div className="md:grid md:min-h-[max(480px,70dvh)] md:grid-cols-[300px_minmax(0,1fr)] md:gap-4">
-            <div className={openConversationId ? 'hidden md:block' : ''}>
-              <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} />
+          <div className="flex h-[calc(100dvh-15rem)] min-h-[480px] overflow-hidden rounded-2xl border border-border bg-surface">
+            <div className={`${openConversationId ? 'hidden md:flex' : 'flex'} w-full flex-none flex-col border-border md:w-[320px] md:border-r`}>
+              <ConversationList ownerEmail={owner} onOpen={setOpenConversationId} activeId={openConversationId} />
             </div>
-            <div className={openConversationId ? '' : 'hidden md:block'}>
+            <div className={`${openConversationId ? 'flex' : 'hidden md:flex'} min-w-0 flex-1 flex-col`}>
               {openConversationId ? (
-                <ChatThread ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
+                <ChatThread embedded ownerEmail={owner} conversationId={openConversationId} onBack={() => setOpenConversationId(null)} />
               ) : (
-                <div className="flex h-full min-h-[320px] items-center justify-center rounded-[13px] border border-dashed border-border-strong bg-surface-sunken p-8 text-center text-sm text-text-1">
-                  Select a conversation to read it, or message someone from their profile.
+                <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent"><IconMessage size={22} /></span>
+                  <p className="text-sm font-semibold text-text-0">Select a conversation</p>
+                  <p className="max-w-xs text-xs text-text-1">Open a thread to read it, or message someone from their profile to start a private conversation.</p>
                 </div>
               )}
             </div>
