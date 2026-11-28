@@ -74,8 +74,8 @@ export function MessageBubble({
       {selectMode && (
         <input type="checkbox" checked={selected} onChange={onToggleSelect} aria-label="Select message" className="mb-3 flex-none" />
       )}
-      <div className={`relative max-w-[78%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>
-        <div className={`rounded-2xl px-3 py-2 text-sm ${mine ? 'rounded-br-md bg-accent-solid text-white' : 'rounded-bl-md bg-surface-sunken text-text-0'} ${selected ? 'ring-2 ring-accent' : ''}`}>
+      <div className={`relative max-w-[78%] md:max-w-[72%] ${mine ? 'items-end' : 'items-start'} flex flex-col`}>
+        <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${mine ? 'rounded-ee-sm bg-accent-solid text-white' : 'rounded-es-sm bg-surface-sunken text-text-0'} ${selected ? 'ring-2 ring-accent' : ''}`}>
           {showSender && !mine && <div className="mb-0.5 text-[11px] font-semibold text-accent">{displayName(message.senderEmail)}</div>}
           {quoted && (
             <div className="mb-1.5 rounded-lg border-s-2 border-current/50 bg-black/10 px-2 py-1 text-xs opacity-90">

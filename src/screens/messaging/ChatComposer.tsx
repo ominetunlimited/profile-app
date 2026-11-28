@@ -168,7 +168,7 @@ export function ChatComposer({
   }
 
   return (
-    <div className="border-t border-border p-2.5">
+    <div className="border-t border-border px-4 py-3">
       {replyTo && (
         <div className="mb-2 flex items-start justify-between gap-2 rounded-lg border-s-2 border-accent bg-surface-sunken px-2.5 py-1.5 text-xs">
           <div className="min-w-0">
@@ -217,7 +217,7 @@ export function ChatComposer({
             <button type="button" onClick={() => prefixLines('> ')} aria-label="Quote" className="rounded px-2 py-1 hover:bg-surface-sunken">❝ Quote</button>
           </div>
           <div className="flex items-end gap-2">
-            <label className="flex h-[42px] w-[42px] flex-none cursor-pointer items-center justify-center rounded-lg border border-border-strong text-lg text-text-1 hover:border-accent" aria-label="Attach files" title="Attach files (images, PDF, ZIP, audio)">
+            <label className="flex h-[42px] w-[42px] flex-none cursor-pointer items-center justify-center rounded-xl border border-border text-lg text-text-1 hover:bg-surface-sunken" aria-label="Attach files" title="Attach files (images, PDF, ZIP, audio)">
               📎
               <input
                 type="file"
@@ -230,10 +230,10 @@ export function ChatComposer({
                 }}
               />
             </label>
-            <button type="button" onClick={() => setCameraOpen(true)} aria-label="Take a photo" title="Take a photo" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg border border-border-strong text-lg text-text-1 hover:border-accent">
+            <button type="button" onClick={() => setCameraOpen(true)} aria-label="Take a photo" title="Take a photo" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-xl border border-border text-lg text-text-1 hover:bg-surface-sunken">
               📷
             </button>
-            <button type="button" onClick={startRecording} aria-label="Record a voice message" title="Record a voice message" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg border border-border-strong text-lg text-text-1 hover:border-accent">
+            <button type="button" onClick={startRecording} aria-label="Record a voice message" title="Record a voice message" className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-xl border border-border text-lg text-text-1 hover:bg-surface-sunken">
               🎤
             </button>
             <textarea
@@ -261,9 +261,9 @@ export function ChatComposer({
               }}
               placeholder="Type a message…"
               aria-label="Type a message…"
-              className="max-h-40 min-h-[42px] flex-1 resize-none rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-sm outline-none focus-visible:border-accent"
+              className="max-h-40 min-h-[42px] flex-1 resize-none rounded-xl border border-border bg-surface-sunken px-4 py-2.5 text-sm outline-none focus-visible:border-accent"
             />
-            <button onClick={() => send()} disabled={busy || (!draft.trim() && staged.length === 0)} className="h-[42px] flex-none rounded-lg bg-accent-solid px-4 text-sm font-semibold text-white disabled:opacity-50">
+            <button onClick={() => send()} disabled={busy || (!draft.trim() && staged.length === 0)} className="h-[42px] flex-none rounded-xl bg-accent-solid px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40">
               Send
             </button>
           </div>
